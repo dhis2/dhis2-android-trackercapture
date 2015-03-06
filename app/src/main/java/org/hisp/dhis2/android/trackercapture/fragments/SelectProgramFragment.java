@@ -31,23 +31,43 @@ package org.hisp.dhis2.android.trackercapture.fragments;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Spinner;
 
+import com.raizlabs.android.dbflow.sql.builder.Condition;
+import com.raizlabs.android.dbflow.sql.language.Select;
+
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
+import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
+import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis2.android.sdk.events.BaseEvent;
 import org.hisp.dhis2.android.sdk.events.MessageEvent;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
+import org.hisp.dhis2.android.sdk.persistence.models.Enrollment;
+import org.hisp.dhis2.android.sdk.persistence.models.Enrollment$Table;
+import org.hisp.dhis2.android.sdk.persistence.models.Event;
+import org.hisp.dhis2.android.sdk.persistence.models.Event$Table;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
+import org.hisp.dhis2.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
+import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttribute;
+import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttribute$Table;
+import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttributeValue;
+import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttributeValue$Table;
+import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityInstance;
+import org.hisp.dhis2.android.sdk.utils.AttributeListAdapter;
 import org.hisp.dhis2.android.trackercapture.R;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 
 /**
@@ -55,13 +75,17 @@ import java.util.List;
  */
 public class SelectProgramFragment extends Fragment {
 
+    private static final String CLASS_TAG = "SelectProgramFragment";
+
     private List<OrganisationUnit> assignedOrganisationUnits;
     private OrganisationUnit selectedOrganisationUnit;
     private List<Program> programsForSelectedOrganisationUnit;
+    private List<String> trackedEntityIds;
 
     private Spinner organisationUnitSpinner;
     private Spinner programSpinner;
     private Button registerButton;
+    private ListView trackedEntityInstancesListView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -77,6 +101,7 @@ public class SelectProgramFragment extends Fragment {
         organisationUnitSpinner = (Spinner) rootView.findViewById(R.id.selectprogram_orgunit_spinner);
         programSpinner = (Spinner) rootView.findViewById(R.id.selectprogram_program_spinner);
         registerButton = (Button) rootView.findViewById(R.id.selectprogram_register_button);
+        trackedEntityInstancesListView = (ListView) rootView.findViewById(R.id.selectprogram_resultslistview);
         assignedOrganisationUnits = Dhis2.getInstance().
                 getMetaDataController().getAssignedOrganisationUnits();
         if( assignedOrganisationUnits==null || assignedOrganisationUnits.size() <= 0 ) return;
@@ -109,12 +134,79 @@ public class SelectProgramFragment extends Fragment {
             }
         });
 
+        programSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                onProgramSelected(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showRegisterEventFragment();
             }
         });
+    }
+
+    public void onProgramSelected(int position) {
+        Log.d(CLASS_TAG, "onprogramselected");
+        if(programsForSelectedOrganisationUnit!=null) {
+            Program program = programsForSelectedOrganisationUnit.get(position);
+
+            //get all unique TEI that have enrollment in the selected program/orgunit
+            List<Event> events = DataValueController.getEvents(selectedOrganisationUnit.id, program.id);
+            trackedEntityIds = new ArrayList<>();
+            for(Event event: events) {
+                if(event.trackedEntityInstance != null) {
+                    if(!trackedEntityIds.contains(event.trackedEntityInstance))
+                        trackedEntityIds.add(event.trackedEntityInstance);
+                }
+            }
+
+            //get attributevalues to show in list:
+            List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes
+                    = program.getProgramTrackedEntityAttributes();
+            List<TrackedEntityAttribute> trackedEntityAttributes = new ArrayList<>();
+            for(ProgramTrackedEntityAttribute programTrackedEntityAttribute: programTrackedEntityAttributes) {
+                if(programTrackedEntityAttribute.displayInList)
+                    trackedEntityAttributes.add(programTrackedEntityAttribute.getTrackedEntityAttribute());
+            }
+
+            //get values and show in list
+            HashMap<String, String[]> rows = new HashMap<>();
+            for(String trackedEntityInstance: trackedEntityIds) {
+                String[] row = new String[trackedEntityAttributes.size()];
+                for(int i=0; i<trackedEntityAttributes.size(); i++) {
+                    TrackedEntityAttribute trackedEntityAttribute = trackedEntityAttributes.get(i);
+                    List<TrackedEntityAttributeValue> result = Select.all(TrackedEntityAttributeValue.class,
+                            Condition.column(TrackedEntityAttributeValue$Table.
+                                    TRACKEDENTITYATTRIBUTEID).is(trackedEntityAttribute.id),
+                            Condition.column(TrackedEntityAttributeValue$Table.
+                                    TRACKEDENTITYINSTANCEID).is(trackedEntityInstance));
+                    if(result!=null && !result.isEmpty()) {
+                        row[i] = result.get(0).value;
+                    }
+                    else row[i] = " ";
+                }
+                rows.put(trackedEntityInstance, row);
+            }
+
+            ArrayList<String[]> values = new ArrayList<>();
+            for(String s: trackedEntityIds) {
+                values.add(rows.get(s));
+
+
+            }
+
+            trackedEntityInstancesListView.setAdapter(new AttributeListAdapter(getActivity(), values));
+
+        }
     }
 
     public void populateSpinner( Spinner spinner, List<String> list )

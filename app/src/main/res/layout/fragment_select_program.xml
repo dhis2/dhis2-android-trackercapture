@@ -63,4 +63,9 @@
         android:id="@+id/selectprogram_register_button"
         android:layout_gravity="center_horizontal"
         style="@style/buttonStyle" />
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/selectprogram_resultslistview" />
 </LinearLayout>

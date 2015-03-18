@@ -37,37 +37,36 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.Spinner;
+import android.widget.TableLayout;
+import android.widget.TextView;
 
 import com.raizlabs.android.dbflow.sql.builder.Condition;
 import com.raizlabs.android.dbflow.sql.language.Select;
+import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
-import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis2.android.sdk.events.BaseEvent;
+import org.hisp.dhis2.android.sdk.events.InvalidateEvent;
 import org.hisp.dhis2.android.sdk.events.MessageEvent;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
-import org.hisp.dhis2.android.sdk.persistence.models.Enrollment;
-import org.hisp.dhis2.android.sdk.persistence.models.Enrollment$Table;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
-import org.hisp.dhis2.android.sdk.persistence.models.Event$Table;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttribute;
-import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttribute$Table;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttributeValue$Table;
-import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis2.android.sdk.utils.AttributeListAdapter;
+import org.hisp.dhis2.android.sdk.utils.Utils;
+import org.hisp.dhis2.android.sdk.utils.ui.views.CardSpinner;
 import org.hisp.dhis2.android.trackercapture.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 
 /**
@@ -80,12 +79,15 @@ public class SelectProgramFragment extends Fragment {
     private List<OrganisationUnit> assignedOrganisationUnits;
     private OrganisationUnit selectedOrganisationUnit;
     private List<Program> programsForSelectedOrganisationUnit;
-    private List<String> trackedEntityIds;
 
-    private Spinner organisationUnitSpinner;
-    private Spinner programSpinner;
-    private Button registerButton;
-    private ListView trackedEntityInstancesListView;
+    private CardSpinner organisationUnitSpinner;
+    private CardSpinner programSpinner;
+    //private Button registerButton;
+    private ListView existingEventsListView;
+    private LinearLayout attributeNameContainer;
+    private LinearLayout rowContainer;
+    private int programSelection;
+    private int orgunitSelection;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -98,13 +100,18 @@ public class SelectProgramFragment extends Fragment {
     }
 
     public void setupUi(View rootView) {
-        organisationUnitSpinner = (Spinner) rootView.findViewById(R.id.selectprogram_orgunit_spinner);
-        programSpinner = (Spinner) rootView.findViewById(R.id.selectprogram_program_spinner);
-        registerButton = (Button) rootView.findViewById(R.id.selectprogram_register_button);
-        trackedEntityInstancesListView = (ListView) rootView.findViewById(R.id.selectprogram_resultslistview);
+        organisationUnitSpinner = (CardSpinner) rootView.findViewById(R.id.org_unit_spinner);
+        programSpinner = (CardSpinner) rootView.findViewById(R.id.program_spinner);
+        //registerButton = (Button) rootView.findViewById(R.id.selectprogram_register_button);
+        existingEventsListView = (ListView) rootView.findViewById(R.id.selectprogram_resultslistview);
+        attributeNameContainer = (LinearLayout) rootView.findViewById(R.id.attributenameslayout);
+        rowContainer = (LinearLayout) rootView.findViewById(R.id.eventrowcontainer);
         assignedOrganisationUnits = Dhis2.getInstance().
                 getMetaDataController().getAssignedOrganisationUnits();
-        if( assignedOrganisationUnits==null || assignedOrganisationUnits.size() <= 0 ) return;
+        if( assignedOrganisationUnits==null || assignedOrganisationUnits.size() <= 0 ) {
+            existingEventsListView.setAdapter(new AttributeListAdapter(getActivity(), new ArrayList<String[]>()));
+            return;
+        }
 
         List<String> organisationUnitNames = new ArrayList<String>();
         for( OrganisationUnit ou: assignedOrganisationUnits )
@@ -121,6 +128,7 @@ public class SelectProgramFragment extends Fragment {
                 if(programsForSelectedOrganisationUnit == null ||
                         programsForSelectedOrganisationUnit.size() <= 0) {
                     populateSpinner(programSpinner, new ArrayList<String>());
+                    existingEventsListView.setAdapter(new AttributeListAdapter(getActivity(), new ArrayList<String[]>()));
                 } else {
                     List<String> programNames = new ArrayList<String>();
                     for( Program p: programsForSelectedOrganisationUnit )
@@ -146,21 +154,38 @@ public class SelectProgramFragment extends Fragment {
             }
         });
 
-        registerButton.setOnClickListener(new View.OnClickListener() {
+        existingEventsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onClick(View v) {
-                showRegisterEventFragment();
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //editEvent(position);
             }
         });
+
+        Log.e(CLASS_TAG, "setting orgunit " + orgunitSelection);
+        if(assignedOrganisationUnits != null && assignedOrganisationUnits.size()>orgunitSelection)
+            organisationUnitSpinner.setSelection(orgunitSelection);
+        Log.e(CLASS_TAG, "sat orgunit " + orgunitSelection);
+        if(programsForSelectedOrganisationUnit != null && programsForSelectedOrganisationUnit.size()>programSelection)
+            programSpinner.setSelection(programSelection);
+        Log.e(CLASS_TAG, "sat program " + programSelection);
     }
 
+    /*public void editEvent(int position) {
+        Event event = displayedExistingEvents.get(position);
+        MessageEvent message = new MessageEvent(BaseEvent.EventType.showEditEventFragment);
+        message.item = displayedExistingEvents.get(position).event;
+        Dhis2Application.bus.post(message);
+    }*/
+
     public void onProgramSelected(int position) {
+        if(position < 0) return;
         Log.d(CLASS_TAG, "onprogramselected");
         if(programsForSelectedOrganisationUnit!=null) {
             Program program = programsForSelectedOrganisationUnit.get(position);
 
             //get all unique TEI that have enrollment in the selected program/orgunit
             List<Event> events = DataValueController.getEvents(selectedOrganisationUnit.id, program.id);
+            List<String> trackedEntityIds;
             trackedEntityIds = new ArrayList<>();
             for(Event event: events) {
                 if(event.trackedEntityInstance != null) {
@@ -178,10 +203,32 @@ public class SelectProgramFragment extends Fragment {
                     trackedEntityAttributes.add(programTrackedEntityAttribute.getTrackedEntityAttribute());
             }
 
+            attributeNameContainer.removeAllViews();
+            for(TrackedEntityAttribute s: trackedEntityAttributes) {
+                TextView tv = new TextView(getActivity());
+                tv.setWidth(0);
+                tv.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT, 1f));
+                tv.setText(s.getName());
+                attributeNameContainer.addView(tv);
+            }
+
+            //adding invisible imageview to get the same layout width as rows under with status indicator image
+            ImageView dummy = new ImageView(getActivity());
+            int pxWidth = Utils.getDpPx(20, getResources().getDisplayMetrics());
+            dummy.setLayoutParams(new LinearLayout.LayoutParams(pxWidth, pxWidth));
+            dummy.setBackgroundResource(R.drawable.ic_server);
+            dummy.requestLayout();
+            attributeNameContainer.addView(dummy);
+            dummy.setVisibility(View.INVISIBLE);
+
+
             //get values and show in list
             HashMap<String, String[]> rows = new HashMap<>();
-            for(String trackedEntityInstance: trackedEntityIds) {
+            rowContainer.removeAllViews();
+            for(int j = 0; j<trackedEntityIds.size(); j++) {
+                String trackedEntityInstance = trackedEntityIds.get(j);
                 String[] row = new String[trackedEntityAttributes.size()];
+                LinearLayout v = (LinearLayout) getActivity().getLayoutInflater().inflate(org.hisp.dhis2.android.sdk.R.layout.eventlistlinearlayoutitem, rowContainer, false);
                 for(int i=0; i<trackedEntityAttributes.size(); i++) {
                     TrackedEntityAttribute trackedEntityAttribute = trackedEntityAttributes.get(i);
                     List<TrackedEntityAttributeValue> result = Select.all(TrackedEntityAttributeValue.class,
@@ -193,27 +240,65 @@ public class SelectProgramFragment extends Fragment {
                         row[i] = result.get(0).value;
                     }
                     else row[i] = " ";
+
+                    TextView tv = new TextView(getActivity());
+                    tv.setWidth(0);
+                    tv.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT, 1f));
+                    tv.setMaxLines(2);
+                    tv.setMinLines(2);
+
+                    tv.setText(row[i]);
+                    v.addView(tv);
                 }
                 rows.put(trackedEntityInstance, row);
+
+                ImageView iv = new ImageView(getActivity());
+                iv.setLayoutParams(new LinearLayout.LayoutParams(pxWidth, pxWidth));
+                iv.setBackgroundResource(R.drawable.perm_group_display);
+                iv.requestLayout();
+                iv.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Dhis2.getInstance().showErrorDialog(getActivity(), getString(R.string.information_message), getString(R.string.offline_item));
+                    }
+                });
+                v.addView(iv);
+
+                /*if(event.fromServer) {
+                    iv.setVisibility(View.INVISIBLE);
+                }
+                rows.put(event.event, row);*/
+
+                v.setContentDescription(""+j);
+                v.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        int position = Integer.parseInt(v.getContentDescription().toString());
+                        //editEvent(position);
+                    }
+                });
+                rowContainer.addView(getActivity().getLayoutInflater().inflate(R.layout.divider_view, rowContainer, false));
+                rowContainer.addView(v);
             }
 
             ArrayList<String[]> values = new ArrayList<>();
             for(String s: trackedEntityIds) {
                 values.add(rows.get(s));
-
-
             }
 
-            trackedEntityInstancesListView.setAdapter(new AttributeListAdapter(getActivity(), values));
-
+        } else {
         }
     }
 
-    public void populateSpinner( Spinner spinner, List<String> list )
+    public void populateSpinner( CardSpinner spinner, List<String> list )
     {
         ArrayAdapter<String> adapter = new ArrayAdapter<String>( getActivity(),
-                android.R.layout.simple_spinner_dropdown_item, list );
+                R.layout.spinner_item, list );
         spinner.setAdapter( adapter );
+    }
+
+    public void invalidate() {
+        onProgramSelected(programSpinner.getSelectedItemPosition());
     }
 
     public void showRegisterEventFragment() {
@@ -228,8 +313,57 @@ public class SelectProgramFragment extends Fragment {
     }
 
     public Program getSelectedProgram() {
+        if(programSpinner.getSelectedItemPosition()<0) return null;
         Program selectedProgram = programsForSelectedOrganisationUnit.
                 get(programSpinner.getSelectedItemPosition());
         return selectedProgram;
+    }
+
+    @Subscribe
+    public void onReceiveInvalidateMessage(InvalidateEvent event) {
+        if(event.eventType == InvalidateEvent.EventType.event) {
+            getActivity().runOnUiThread(new Thread() {
+                @Override
+                public void run() {
+                    invalidate();
+                }
+            });
+        }
+    }
+
+    public int getSelectedOrganisationUnitIndex() {
+        if(organisationUnitSpinner!=null) {
+            return organisationUnitSpinner.getSelectedItemPosition();
+        }
+        else {
+            return 0;
+        }
+    }
+
+    public int getSelectedProgramIndex() {
+        if(programSpinner!=null) {
+            return programSpinner.getSelectedItemPosition();
+        }
+        else {
+            return 0;
+        }
+    }
+
+    public void setSelection(int orgunit, int program) {
+        Log.d(CLASS_TAG, "¤¤¤ settings selection: " + orgunit +", " + program);
+        orgunitSelection = orgunit;
+        programSelection = program;
+    }
+
+    @Override
+    public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        Dhis2Application.bus.register(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Dhis2Application.bus.unregister(this);
     }
 }

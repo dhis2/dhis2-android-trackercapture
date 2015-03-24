@@ -60,6 +60,7 @@ import org.hisp.dhis2.android.sdk.persistence.models.ProgramTrackedEntityAttribu
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttributeValue$Table;
+import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis2.android.sdk.utils.AttributeListAdapter;
 import org.hisp.dhis2.android.sdk.utils.Utils;
 import org.hisp.dhis2.android.sdk.utils.ui.views.CardSpinner;
@@ -79,11 +80,13 @@ public class SelectProgramFragment extends Fragment {
     private List<OrganisationUnit> assignedOrganisationUnits;
     private OrganisationUnit selectedOrganisationUnit;
     private List<Program> programsForSelectedOrganisationUnit;
+    private TrackedEntityInstance selectedTrackedEntityInstance;
+    private List<String> trackedEntityInstanceIds;
 
     private CardSpinner organisationUnitSpinner;
     private CardSpinner programSpinner;
     //private Button registerButton;
-    private ListView existingEventsListView;
+    //private ListView existingEventsListView;
     private LinearLayout attributeNameContainer;
     private LinearLayout rowContainer;
     private int programSelection;
@@ -103,13 +106,13 @@ public class SelectProgramFragment extends Fragment {
         organisationUnitSpinner = (CardSpinner) rootView.findViewById(R.id.org_unit_spinner);
         programSpinner = (CardSpinner) rootView.findViewById(R.id.program_spinner);
         //registerButton = (Button) rootView.findViewById(R.id.selectprogram_register_button);
-        existingEventsListView = (ListView) rootView.findViewById(R.id.selectprogram_resultslistview);
+        //existingEventsListView = (ListView) rootView.findViewById(R.id.selectprogram_resultslistview);
         attributeNameContainer = (LinearLayout) rootView.findViewById(R.id.attributenameslayout);
         rowContainer = (LinearLayout) rootView.findViewById(R.id.eventrowcontainer);
         assignedOrganisationUnits = Dhis2.getInstance().
                 getMetaDataController().getAssignedOrganisationUnits();
         if( assignedOrganisationUnits==null || assignedOrganisationUnits.size() <= 0 ) {
-            existingEventsListView.setAdapter(new AttributeListAdapter(getActivity(), new ArrayList<String[]>()));
+            //existingEventsListView.setAdapter(new AttributeListAdapter(getActivity(), new ArrayList<String[]>()));
             return;
         }
 
@@ -124,11 +127,11 @@ public class SelectProgramFragment extends Fragment {
                 selectedOrganisationUnit = assignedOrganisationUnits.get(position); //displaying first as default
                 programsForSelectedOrganisationUnit = Dhis2.getInstance().getMetaDataController().
                         getProgramsForOrganisationUnit(selectedOrganisationUnit.getId(),
-                                Program.MULTIPLE_EVENTS_WITH_REGISTRATION);
+                                Program.MULTIPLE_EVENTS_WITH_REGISTRATION, Program.SINGLE_EVENT_WITH_REGISTRATION);
                 if(programsForSelectedOrganisationUnit == null ||
                         programsForSelectedOrganisationUnit.size() <= 0) {
                     populateSpinner(programSpinner, new ArrayList<String>());
-                    existingEventsListView.setAdapter(new AttributeListAdapter(getActivity(), new ArrayList<String[]>()));
+                    //existingEventsListView.setAdapter(new AttributeListAdapter(getActivity(), new ArrayList<String[]>()));
                 } else {
                     List<String> programNames = new ArrayList<String>();
                     for( Program p: programsForSelectedOrganisationUnit )
@@ -154,13 +157,6 @@ public class SelectProgramFragment extends Fragment {
             }
         });
 
-        existingEventsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //editEvent(position);
-            }
-        });
-
         Log.e(CLASS_TAG, "setting orgunit " + orgunitSelection);
         if(assignedOrganisationUnits != null && assignedOrganisationUnits.size()>orgunitSelection)
             organisationUnitSpinner.setSelection(orgunitSelection);
@@ -170,12 +166,11 @@ public class SelectProgramFragment extends Fragment {
         Log.e(CLASS_TAG, "sat program " + programSelection);
     }
 
-    /*public void editEvent(int position) {
-        Event event = displayedExistingEvents.get(position);
-        MessageEvent message = new MessageEvent(BaseEvent.EventType.showEditEventFragment);
-        message.item = displayedExistingEvents.get(position).event;
+    public void openProgramOverview(int position) {
+        selectedTrackedEntityInstance = DataValueController.getTrackedEntityInstance(trackedEntityInstanceIds.get(position));
+        MessageEvent message = new MessageEvent(BaseEvent.EventType.showProgramOverviewFragment);
         Dhis2Application.bus.post(message);
-    }*/
+    }
 
     public void onProgramSelected(int position) {
         if(position < 0) return;
@@ -185,12 +180,11 @@ public class SelectProgramFragment extends Fragment {
 
             //get all unique TEI that have enrollment in the selected program/orgunit
             List<Event> events = DataValueController.getEvents(selectedOrganisationUnit.id, program.id);
-            List<String> trackedEntityIds;
-            trackedEntityIds = new ArrayList<>();
+            trackedEntityInstanceIds = new ArrayList<>();
             for(Event event: events) {
                 if(event.trackedEntityInstance != null) {
-                    if(!trackedEntityIds.contains(event.trackedEntityInstance))
-                        trackedEntityIds.add(event.trackedEntityInstance);
+                    if(!trackedEntityInstanceIds.contains(event.trackedEntityInstance))
+                        trackedEntityInstanceIds.add(event.trackedEntityInstance);
                 }
             }
 
@@ -225,19 +219,15 @@ public class SelectProgramFragment extends Fragment {
             //get values and show in list
             HashMap<String, String[]> rows = new HashMap<>();
             rowContainer.removeAllViews();
-            for(int j = 0; j<trackedEntityIds.size(); j++) {
-                String trackedEntityInstance = trackedEntityIds.get(j);
+            for(int j = 0; j<trackedEntityInstanceIds.size(); j++) {
+                String trackedEntityInstance = trackedEntityInstanceIds.get(j);
                 String[] row = new String[trackedEntityAttributes.size()];
                 LinearLayout v = (LinearLayout) getActivity().getLayoutInflater().inflate(org.hisp.dhis2.android.sdk.R.layout.eventlistlinearlayoutitem, rowContainer, false);
                 for(int i=0; i<trackedEntityAttributes.size(); i++) {
                     TrackedEntityAttribute trackedEntityAttribute = trackedEntityAttributes.get(i);
-                    List<TrackedEntityAttributeValue> result = Select.all(TrackedEntityAttributeValue.class,
-                            Condition.column(TrackedEntityAttributeValue$Table.
-                                    TRACKEDENTITYATTRIBUTEID).is(trackedEntityAttribute.id),
-                            Condition.column(TrackedEntityAttributeValue$Table.
-                                    TRACKEDENTITYINSTANCEID).is(trackedEntityInstance));
-                    if(result!=null && !result.isEmpty()) {
-                        row[i] = result.get(0).value;
+                    TrackedEntityAttributeValue teav = DataValueController.getTrackedEntityAttributeValue(trackedEntityAttribute.id, trackedEntityInstance);
+                    if(teav!=null) {
+                        row[i] = teav.value;
                     }
                     else row[i] = " ";
 
@@ -262,6 +252,7 @@ public class SelectProgramFragment extends Fragment {
                         Dhis2.getInstance().showErrorDialog(getActivity(), getString(R.string.information_message), getString(R.string.offline_item));
                     }
                 });
+                iv.setVisibility(View.INVISIBLE);
                 v.addView(iv);
 
                 /*if(event.fromServer) {
@@ -274,16 +265,11 @@ public class SelectProgramFragment extends Fragment {
                     @Override
                     public void onClick(View v) {
                         int position = Integer.parseInt(v.getContentDescription().toString());
-                        //editEvent(position);
+                        openProgramOverview(position);
                     }
                 });
                 rowContainer.addView(getActivity().getLayoutInflater().inflate(R.layout.divider_view, rowContainer, false));
                 rowContainer.addView(v);
-            }
-
-            ArrayList<String[]> values = new ArrayList<>();
-            for(String s: trackedEntityIds) {
-                values.add(rows.get(s));
             }
 
         } else {
@@ -317,6 +303,10 @@ public class SelectProgramFragment extends Fragment {
         Program selectedProgram = programsForSelectedOrganisationUnit.
                 get(programSpinner.getSelectedItemPosition());
         return selectedProgram;
+    }
+
+    public TrackedEntityInstance getSelectedTrackedEntityInstance() {
+        return selectedTrackedEntityInstance;
     }
 
     @Subscribe

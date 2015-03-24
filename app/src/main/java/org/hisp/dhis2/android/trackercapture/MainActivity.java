@@ -53,6 +53,14 @@ import org.hisp.dhis2.android.sdk.fragments.LoadingFragment;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.network.managers.NetworkManager;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
+import org.hisp.dhis2.android.sdk.persistence.models.Enrollment;
+import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
+import org.hisp.dhis2.android.sdk.persistence.models.Program;
+import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
+import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityInstance;
+import org.hisp.dhis2.android.trackercapture.fragments.DataEntryFragment;
+import org.hisp.dhis2.android.trackercapture.fragments.EnrollmentFragment;
+import org.hisp.dhis2.android.trackercapture.fragments.ProgramOverviewFragment;
 import org.hisp.dhis2.android.trackercapture.fragments.SelectProgramFragment;
 
 
@@ -64,13 +72,21 @@ public class MainActivity extends ActionBarActivity {
 
     private Fragment currentFragment = null;
     private SelectProgramFragment selectProgramFragment;
-    //private DataEntryFragment dataEntryFragment;
+    private ProgramOverviewFragment programOverviewFragment;
+    private DataEntryFragment dataEntryFragment;
     private FailedItemsFragment failedItemsFragment;
     private SettingsFragment settingsFragment;
     private LoadingFragment loadingFragment;
+    private EnrollmentFragment enrollmentFragment;
     private Fragment previousFragment; //workaround for back button since the backstack sucks
     private int lastSelectedOrgUnit = 0;
     private int lastSelectedProgram = 0;
+
+    private OrganisationUnit currentlySelectedOrganisationUnit;
+    private Program currentlySelectedProgram;
+    private ProgramStage currentlySelectedProgramStage;
+    private Enrollment currentlySelectedEnrollment;
+    private TrackedEntityInstance currentlySelectedTrackedEntityInstance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,9 +130,13 @@ public class MainActivity extends ActionBarActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             showSettingsFragment();
-        } /*else if(id == R.id.action_new_event) {
-            registerEvent();
-        }*/
+        } else if(id == R.id.action_save_event) {
+            if (currentFragment == dataEntryFragment ) {
+                dataEntryFragment.submit();
+            } else if(currentFragment == enrollmentFragment) {
+                enrollmentFragment.submit();
+            }
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -144,10 +164,19 @@ public class MainActivity extends ActionBarActivity {
 
     @Subscribe
     public void onReceiveMessage(MessageEvent event) {
-        Log.d(CLASS_TAG, "onreceivemessage");
+        Log.d(CLASS_TAG, "onreceivemessage" + event.eventType);
 
-         if(event.eventType == BaseEvent.EventType.showSelectProgramFragment) {
+        if(event.eventType == BaseEvent.EventType.showSelectProgramFragment) {
             showSelectProgramFragment();
+        } else if(event.eventType == BaseEvent.EventType.showProgramOverviewFragment) {
+            showProgramOverviewFragment();
+        } else if(event.eventType == BaseEvent.EventType.showDataEntryFragment) {
+            showDataEntryFragment();
+        } else if(event.eventType == BaseEvent.EventType.showEnrollmentFragment) {
+            showEnrollmentFragment();
+        }
+        else if(event.eventType == BaseEvent.EventType.showPreviousFragment) {
+            showPreviousFragment();
         } else if(event.eventType == BaseEvent.EventType.logout) {
             logout();
         } else if(event.eventType == BaseEvent.EventType.onLoadingInitialDataFinished) {
@@ -178,12 +207,6 @@ public class MainActivity extends ActionBarActivity {
         showFragment(loadingFragment);
     }
 
-    public void showFailedItemsFragment() {
-        setTitle("Failed Items");
-        if(failedItemsFragment == null) failedItemsFragment = new FailedItemsFragment();
-        showFragment(failedItemsFragment);
-    }
-
     public void showSelectProgramFragment() {
         setTitle("Tracker Capture");
         if(selectProgramFragment == null) selectProgramFragment = new SelectProgramFragment();
@@ -191,10 +214,50 @@ public class MainActivity extends ActionBarActivity {
         selectProgramFragment.setSelection(lastSelectedOrgUnit, lastSelectedProgram);
     }
 
+    public void showProgramOverviewFragment() {
+        setTitle(getString(R.string.program));
+        if(programOverviewFragment == null) programOverviewFragment = new ProgramOverviewFragment();
+        currentlySelectedOrganisationUnit = selectProgramFragment.getSelectedOrganisationUnit();
+        currentlySelectedProgram = selectProgramFragment.getSelectedProgram();
+        currentlySelectedTrackedEntityInstance = selectProgramFragment.getSelectedTrackedEntityInstance();
+        programOverviewFragment.setSelectedOrganisationUnit(currentlySelectedOrganisationUnit);
+        programOverviewFragment.setSelectedProgram(currentlySelectedProgram);
+        programOverviewFragment.setSelectedTrackedEntityInstance(currentlySelectedTrackedEntityInstance);
+        showFragment(programOverviewFragment);
+    }
+
     public void showSettingsFragment() {
         setTitle("Settings");
         if( settingsFragment == null ) settingsFragment = new SettingsFragment();
         showFragment(settingsFragment);
+    }
+
+    public void showDataEntryFragment() {
+        dataEntryFragment = new DataEntryFragment();
+        setTitle(programOverviewFragment.getSelectedProgramStage().name);
+        dataEntryFragment.setSelectedOrganisationUnit(programOverviewFragment.getSelectedOrganisationUnit());
+        if(programOverviewFragment.getSelectedEvent() != null)
+            dataEntryFragment.setEditingEvent(programOverviewFragment.getSelectedEvent().event);
+        dataEntryFragment.setCurrentTrackedEntityInstance(programOverviewFragment.getSelectedTrackedEntityInstance());
+        dataEntryFragment.setSelectedProgramStage(programOverviewFragment.getSelectedProgramStage());
+        dataEntryFragment.setCurrentEnrollment(programOverviewFragment.getCurrentEnrollment());
+        showFragment(dataEntryFragment);
+    }
+
+    public void showEnrollmentFragment() {
+        enrollmentFragment = new EnrollmentFragment();
+        enrollmentFragment.setSelectedOrganisationUnit(programOverviewFragment.getSelectedOrganisationUnit());
+        enrollmentFragment.setSelectedProgram(programOverviewFragment.getSelectedProgram());
+        enrollmentFragment.setCurrentTrackedEntityInstance(programOverviewFragment.getSelectedTrackedEntityInstance());
+        showFragment(enrollmentFragment);
+    }
+
+    public void showPreviousFragment() {
+        if(previousFragment == null) {
+            showSelectProgramFragment();
+        } else {
+            showFragment(previousFragment);
+        }
     }
 
     public void showFragment(Fragment fragment) {
@@ -211,15 +274,19 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        /*MenuItem item = menu.findItem(R.id.action_new_event);
+        MenuItem item = menu.findItem(R.id.action_save_event);
         item.setVisible(true);
         if(currentFragment == settingsFragment)
             item.setVisible(false);
         else if(currentFragment == selectProgramFragment)
-            item.setIcon(getResources().getDrawable(R.drawable.ic_new));
+            item.setVisible(false);
+        else if(currentFragment == programOverviewFragment)
+            item.setVisible(false);
+        else if(currentFragment == dataEntryFragment)
+            item.setIcon(getResources().getDrawable(R.drawable.ic_save));
         else if(currentFragment == loadingFragment)
             item.setVisible(false);
-*/
+
         return true;
     }
 
@@ -242,9 +309,16 @@ public class MainActivity extends ActionBarActivity {
                         System.exit( 0 );
                     }
                 } );
-            } else if ( currentFragment == settingsFragment ) {
+            } else if (currentFragment == dataEntryFragment ) {
+                showProgramOverviewFragment();
+            }
+            else if ( currentFragment == settingsFragment ) {
                 if(previousFragment == null) showSelectProgramFragment();
                 else showFragment(previousFragment);
+            } else if ( currentFragment == programOverviewFragment ) {
+                showSelectProgramFragment();
+            } else if(currentFragment == enrollmentFragment) {
+                showProgramOverviewFragment();
             }
             return true;
         }

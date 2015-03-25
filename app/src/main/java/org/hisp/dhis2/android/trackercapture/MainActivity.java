@@ -42,18 +42,19 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.raizlabs.android.dbflow.runtime.FlowContentObserver;
 import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis2.android.sdk.activities.LoginActivity;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.events.BaseEvent;
 import org.hisp.dhis2.android.sdk.events.MessageEvent;
-import org.hisp.dhis2.android.sdk.fragments.FailedItemsFragment;
 import org.hisp.dhis2.android.sdk.fragments.LoadingFragment;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.network.managers.NetworkManager;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis2.android.sdk.persistence.models.Enrollment;
+import org.hisp.dhis2.android.sdk.persistence.models.Event;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
@@ -74,7 +75,6 @@ public class MainActivity extends ActionBarActivity {
     private SelectProgramFragment selectProgramFragment;
     private ProgramOverviewFragment programOverviewFragment;
     private DataEntryFragment dataEntryFragment;
-    private FailedItemsFragment failedItemsFragment;
     private SettingsFragment settingsFragment;
     private LoadingFragment loadingFragment;
     private EnrollmentFragment enrollmentFragment;
@@ -109,7 +109,6 @@ public class MainActivity extends ActionBarActivity {
         }
         else
             loadInitialData();
-
     }
 
 
@@ -237,7 +236,7 @@ public class MainActivity extends ActionBarActivity {
         setTitle(programOverviewFragment.getSelectedProgramStage().name);
         dataEntryFragment.setSelectedOrganisationUnit(programOverviewFragment.getSelectedOrganisationUnit());
         if(programOverviewFragment.getSelectedEvent() != null)
-            dataEntryFragment.setEditingEvent(programOverviewFragment.getSelectedEvent().event);
+            dataEntryFragment.setEditingEvent(programOverviewFragment.getSelectedEvent().localId);
         dataEntryFragment.setCurrentTrackedEntityInstance(programOverviewFragment.getSelectedTrackedEntityInstance());
         dataEntryFragment.setSelectedProgramStage(programOverviewFragment.getSelectedProgramStage());
         dataEntryFragment.setCurrentEnrollment(programOverviewFragment.getCurrentEnrollment());

@@ -45,6 +45,7 @@ import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
+import com.raizlabs.android.dbflow.runtime.FlowContentObserver;
 import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
@@ -97,6 +98,7 @@ public class ProgramOverviewFragment extends Fragment{
     private LinearLayout programStageContainer;
     private Activity activity; /*need this because invalidate is sometimes called from service*/
     List<Program> programs;
+    private FlowContentObserver flowContentObserver;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -107,11 +109,49 @@ public class ProgramOverviewFragment extends Fragment{
                 container, false);
 
 
+        flowContentObserver = new FlowContentObserver();
+        flowContentObserver.registerForContentChanges(activity, Enrollment.class);
+        flowContentObserver.registerForContentChanges(activity, Event.class);
+        FlowContentObserver.ModelChangeListener modelChangeListener = new FlowContentObserver.ModelChangeListener() {
+            @Override
+            public void onModelChanged() {
+                // called in SDK<14
+                checkForUpdatedData();
+            }
 
+            @Override
+            public void onModelSaved() {
+                checkForUpdatedData();
+            }
+
+            @Override
+            public void onModelDeleted() {
+                checkForUpdatedData();
+            }
+
+            @Override
+            public void onModelInserted() {
+                checkForUpdatedData();
+            }
+
+            @Override
+            public void onModelUpdated() {
+                checkForUpdatedData();
+            }
+        };
+        flowContentObserver.addModelChangeListener(modelChangeListener);
 
         setSpinner();
         setupUi(rootView);
         return rootView;
+    }
+
+    /**
+     * checks if the data currently loaded in the UI needs to be updated because of changes in
+     * the database.
+     */
+    public void checkForUpdatedData() {
+        //todo: do it
     }
 
     @Override
@@ -347,10 +387,13 @@ public class ProgramOverviewFragment extends Fragment{
                         LinearLayout eventLayout = (LinearLayout) activity.getLayoutInflater().
                                 inflate(org.hisp.dhis2.android.sdk.R.layout.eventlayout,
                                         programStageLayout, false);
-                        eventLayout.setContentDescription(event.event);
+                        eventLayout.setContentDescription(event.localId+"");
                         TextView organisationUnit = (TextView) eventLayout.findViewById(R.id.organisationunit);
                         TextView date = (TextView) eventLayout.findViewById(R.id.date);
-                        organisationUnit.setText(MetaDataController.getOrganisationUnit(event.organisationUnitId).getLabel());
+                        String organisationUnitLabel = getString(R.string.remote);
+                        OrganisationUnit eventOrgUnit = MetaDataController.getOrganisationUnit(event.organisationUnitId);
+                        if(eventOrgUnit!=null) organisationUnitLabel = eventOrgUnit.label;
+                        organisationUnit.setText(organisationUnitLabel);
                         if(event.eventDate!=null)
                             date.setText(event.eventDate);
                         else if(event.dueDate!=null)
@@ -376,8 +419,9 @@ public class ProgramOverviewFragment extends Fragment{
                         eventLayout.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                String eventId = v.getContentDescription().toString();
-                                editEvent(eventId);
+                                String localIdString = v.getContentDescription().toString();
+                                long localId = Long.parseLong(localIdString);
+                                editEvent(localId);
                             }
                         });
                     }
@@ -395,7 +439,8 @@ public class ProgramOverviewFragment extends Fragment{
         if(currentEnrollment!=null && !currentEnrollment.status.equals(Enrollment.COMPLETED)) {
             currentEnrollment.status = Enrollment.COMPLETED;
             currentEnrollment.fromServer = false;
-            currentEnrollment.save(false);
+            //currentEnrollment.save(false);
+            //todo: server gives duplicate error - figure out how to update an enrollment rather than create new..
             invalidate();
         }
     }
@@ -410,8 +455,8 @@ public class ProgramOverviewFragment extends Fragment{
         Dhis2.showErrorDialog(activity, "not implemented", "not implemented");
     }
 
-    public void editEvent(String eventId) {
-        selectedEvent = DataValueController.getEvent(eventId);
+    public void editEvent(long localId) {
+        selectedEvent = DataValueController.getEvent(localId);
         selectedProgramStage = MetaDataController.getProgramStage(selectedEvent.programStageId);
         MessageEvent event = new MessageEvent(BaseEvent.EventType.showDataEntryFragment);
         Dhis2Application.bus.post(event);
@@ -447,14 +492,19 @@ public class ProgramOverviewFragment extends Fragment{
      * Reloads enrollment data and repopulates
      */
     public void invalidate() {
+        if(activity==null)return;
         Log.d(CLASS_TAG, "invalidate !");
-        if(rootView != null) {
-            Log.d(CLASS_TAG, "not null!");
-            enrollmentContainer.removeAllViews();
-            profileContainer.removeAllViews();
-            programStageContainer.removeAllViews();
-            setupUi(rootView);
-        }
+        activity.runOnUiThread(new Thread() {
+            public void run() {
+                if(rootView != null) {
+                    Log.d(CLASS_TAG, "not null!");
+                    enrollmentContainer.removeAllViews();
+                    profileContainer.removeAllViews();
+                    programStageContainer.removeAllViews();
+                    setupUi(rootView);
+                }
+            }
+        });
     }
 
     public void setSelectedProgram(Program program) {

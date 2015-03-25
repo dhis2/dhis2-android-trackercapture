@@ -188,6 +188,8 @@ public class SelectProgramFragment extends Fragment {
                 }
             }
 
+            Log.d(CLASS_TAG, "got events: " + events.size());
+
             //get attributevalues to show in list:
             List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes
                     = program.getProgramTrackedEntityAttributes();

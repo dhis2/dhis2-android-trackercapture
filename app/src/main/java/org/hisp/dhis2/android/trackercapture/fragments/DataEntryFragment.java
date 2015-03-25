@@ -100,7 +100,7 @@ public class DataEntryFragment extends Fragment {
     private EditText longitudeEditText;
 
     private Event event;
-    private String editingEvent;
+    private long editingEvent = -1;
     private List<DataValue> dataValues;
     private List<ProgramStageDataElement> programStageDataElements;
     private boolean editing;
@@ -166,7 +166,7 @@ public class DataEntryFragment extends Fragment {
     public void setupDataEntryForm(final LinearLayout dataElementContainer) {
         programStageDataElements = selectedProgramStage.getProgramStageDataElements();
 
-        if(editingEvent == null) {
+        if(editingEvent < 0) {
             editing = false;
             event = new Event(selectedOrganisationUnit.getId(), Event.STATUS_ACTIVE,
                     selectedProgramStage.program, selectedProgramStage.id,
@@ -266,7 +266,7 @@ public class DataEntryFragment extends Fragment {
         }
 
         //the datavalue didnt exist for some reason. Create a new one.
-        DataValue dataValue = new DataValue(event.event, "",
+        DataValue dataValue = new DataValue(event.localId, event.event, "",
                 dataElement, false,
                 Dhis2.getInstance().getUsername(getActivity()));
         dataValues.add(dataValue);
@@ -398,8 +398,8 @@ public class DataEntryFragment extends Fragment {
         this.currentEnrollment = enrollment;
     }
 
-    public void setEditingEvent(String event) {
-        this.editingEvent = event;
+    public void setEditingEvent(long localEventId) {
+        this.editingEvent = localEventId;
     }
 
     @Override

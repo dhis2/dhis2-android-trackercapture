@@ -202,9 +202,6 @@ public class DataEntryFragment extends Fragment {
         }
 
         final List<Row> rows = new ArrayList<>();
-
-        Log.d(CLASS_TAG, "programstagedataelements: " + programStageDataElements.size());
-
         for(int i = 0; i<programStageDataElements.size(); i++) {
             Row row = createDataEntryView(programStageDataElements.get(i),
                     getDataValue(programStageDataElements.get(i).dataElement, dataValues));
@@ -266,7 +263,7 @@ public class DataEntryFragment extends Fragment {
         }
 
         //the datavalue didnt exist for some reason. Create a new one.
-        DataValue dataValue = new DataValue(event.localId, event.event, "",
+        DataValue dataValue = new DataValue(event.event, "",
                 dataElement, false,
                 Dhis2.getInstance().getUsername(getActivity()));
         dataValues.add(dataValue);

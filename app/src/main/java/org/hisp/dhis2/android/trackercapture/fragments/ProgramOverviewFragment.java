@@ -497,7 +497,6 @@ public class ProgramOverviewFragment extends Fragment{
         activity.runOnUiThread(new Thread() {
             public void run() {
                 if(rootView != null) {
-                    Log.d(CLASS_TAG, "not null!");
                     enrollmentContainer.removeAllViews();
                     profileContainer.removeAllViews();
                     programStageContainer.removeAllViews();

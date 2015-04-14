@@ -29,11 +29,11 @@
 
 package org.hisp.dhis2.android.trackercapture.fragments;
 
-import android.app.Fragment;
 import android.content.Context;
 import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -59,6 +59,7 @@ import org.hisp.dhis2.android.sdk.persistence.models.DataElement;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis2.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
+import org.hisp.dhis2.android.sdk.persistence.models.Option;
 import org.hisp.dhis2.android.sdk.persistence.models.OptionSet;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
@@ -136,6 +137,10 @@ public class EnrollmentFragment extends Fragment {
     }
 
     public void setupDataEntryForm(final LinearLayout dataElementContainer) {
+        if(currentTrackedEntityInstance == null) {
+            currentTrackedEntityInstance =
+                    createTrackedEntityInstance(selectedProgram, selectedOrganisationUnit.getId());
+        }
         currentEnrollment = createEnrollment(selectedOrganisationUnit.id, currentTrackedEntityInstance.trackedEntityInstance, selectedProgram);
         programTrackedEntityAttributes = selectedProgram.getProgramTrackedEntityAttributes();
         trackedEntityAttributeValues = new ArrayList<>();
@@ -189,8 +194,20 @@ public class EnrollmentFragment extends Fragment {
         });
     }
 
+    public TrackedEntityInstance createTrackedEntityInstance(Program program, String organisationUnit) {
+        TrackedEntityInstance trackedEntityInstance = new TrackedEntityInstance();
+        trackedEntityInstance.fromServer = false;
+        trackedEntityInstance.trackedEntityInstance = Dhis2.QUEUED + UUID.randomUUID().toString();
+        trackedEntityInstance.trackedEntity = program.getTrackedEntity().getId();
+        trackedEntityInstance.created = Utils.getCurrentTime();
+        trackedEntityInstance.lastUpdated = Utils.getCurrentTime();
+        trackedEntityInstance.orgUnit = organisationUnit;
+        return trackedEntityInstance;
+    }
+
     public Enrollment createEnrollment(String organisationUnit, String trackedEntityInstance, Program program) {
         Enrollment enrollment = new Enrollment();
+        enrollment.orgUnit = organisationUnit;
         enrollment.dateOfEnrollment = Utils.getCurrentTime();
         enrollment.dateOfIncident = Utils.getCurrentTime();
         enrollment.status = Enrollment.ACTIVE;
@@ -198,6 +215,7 @@ public class EnrollmentFragment extends Fragment {
         enrollment.followup = false;
         enrollment.fromServer = false;
         enrollment.program = program.getId();
+        enrollment.localTrackedEntityInstanceId = currentTrackedEntityInstance.localId;
         enrollment.trackedEntityInstance = trackedEntityInstance;
         List<Event> events = new ArrayList<>();
         for(ProgramStage programStage: program.getProgramStages()) {
@@ -272,7 +290,7 @@ public class EnrollmentFragment extends Fragment {
     }
 
     /**
-     * saves the current data values as a registered event.
+     * saves the current enrollment with corresponding data
      */
     public void submit() {
         boolean valid = true;
@@ -296,11 +314,17 @@ public class EnrollmentFragment extends Fragment {
             Dhis2.getInstance().showErrorDialog(getActivity(), "Validation error",
                     "Some compulsory fields are empty, please fill them in");
         } else {
+            saveTrackedEntityInstance();
             saveEnrollment();
             showPreviousFragment();
             InvalidateEvent event = new InvalidateEvent(InvalidateEvent.EventType.enrollment);
             Dhis2Application.bus.post(event);
         }
+    }
+
+    public void saveTrackedEntityInstance() {
+        if(!currentTrackedEntityInstance.fromServer)
+        currentTrackedEntityInstance.save(true);
     }
 
     public void saveEnrollment() {

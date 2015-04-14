@@ -29,12 +29,12 @@
 
 package org.hisp.dhis2.android.trackercapture;
 
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -130,9 +130,9 @@ public class MainActivity extends ActionBarActivity {
         if (id == R.id.action_settings) {
             showSettingsFragment();
         } else if(id == R.id.action_save_event) {
-            if (currentFragment == dataEntryFragment ) {
+            if (currentFragment.equals(dataEntryFragment )) {
                 dataEntryFragment.submit();
-            } else if(currentFragment == enrollmentFragment) {
+            } else if(currentFragment.equals(enrollmentFragment)) {
                 enrollmentFragment.submit();
             }
         }
@@ -245,9 +245,15 @@ public class MainActivity extends ActionBarActivity {
 
     public void showEnrollmentFragment() {
         enrollmentFragment = new EnrollmentFragment();
-        enrollmentFragment.setSelectedOrganisationUnit(programOverviewFragment.getSelectedOrganisationUnit());
-        enrollmentFragment.setSelectedProgram(programOverviewFragment.getSelectedProgram());
-        enrollmentFragment.setCurrentTrackedEntityInstance(programOverviewFragment.getSelectedTrackedEntityInstance());
+        if(currentFragment.equals(selectProgramFragment)) {
+            enrollmentFragment.setCurrentTrackedEntityInstance(null);
+            enrollmentFragment.setSelectedOrganisationUnit(selectProgramFragment.getSelectedOrganisationUnit());
+            enrollmentFragment.setSelectedProgram(selectProgramFragment.getSelectedProgram());
+        } else if(currentFragment.equals(programOverviewFragment)) {
+            enrollmentFragment.setSelectedOrganisationUnit(programOverviewFragment.getSelectedOrganisationUnit());
+            enrollmentFragment.setSelectedProgram(programOverviewFragment.getSelectedProgram());
+            enrollmentFragment.setCurrentTrackedEntityInstance(programOverviewFragment.getSelectedTrackedEntityInstance());
+        }
         showFragment(enrollmentFragment);
     }
 
@@ -262,9 +268,14 @@ public class MainActivity extends ActionBarActivity {
     public void showFragment(Fragment fragment) {
         if(MainActivity.this.isFinishing()) return;
         FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, fragment);
-        fragmentTransaction.commitAllowingStateLoss();
+        //FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        //fragmentTransaction.replace(R.id.fragment_container, fragment);
+        //fragmentTransaction.commitAllowingStateLoss();
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack(fragment.getTag())
+                .commit();
         previousFragment = currentFragment;
         currentFragment = fragment;
         invalidateOptionsMenu();

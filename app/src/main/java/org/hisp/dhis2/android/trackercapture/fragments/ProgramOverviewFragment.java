@@ -30,9 +30,9 @@
 package org.hisp.dhis2.android.trackercapture.fragments;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -73,7 +73,7 @@ import java.util.List;
 /**
  * @author Simen Skogly Russnes on 18.03.15.
  */
-public class ProgramOverviewFragment extends Fragment{
+public class ProgramOverviewFragment extends Fragment {
 
     private static final String CLASS_TAG = "ProgramOverviewFragment";
 
@@ -166,6 +166,9 @@ public class ProgramOverviewFragment extends Fragment{
         super.onStop();
     }
 
+    /**
+     * Populates the program selection spinner
+     */
     public void setSpinner() {
         programSpinner = (CardSpinner) rootView.findViewById(R.id.program_spinner);
         programs = MetaDataController.getProgramsForOrganisationUnit(selectedOrganisationUnit.getId(),

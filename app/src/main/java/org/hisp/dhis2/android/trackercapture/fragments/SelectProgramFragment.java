@@ -29,14 +29,15 @@
 
 package org.hisp.dhis2.android.trackercapture.fragments;
 
-import android.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -85,7 +86,7 @@ public class SelectProgramFragment extends Fragment {
 
     private CardSpinner organisationUnitSpinner;
     private CardSpinner programSpinner;
-    //private Button registerButton;
+    private Button registerButton;
     //private ListView existingEventsListView;
     private LinearLayout attributeNameContainer;
     private LinearLayout rowContainer;
@@ -105,7 +106,7 @@ public class SelectProgramFragment extends Fragment {
     public void setupUi(View rootView) {
         organisationUnitSpinner = (CardSpinner) rootView.findViewById(R.id.org_unit_spinner);
         programSpinner = (CardSpinner) rootView.findViewById(R.id.program_spinner);
-        //registerButton = (Button) rootView.findViewById(R.id.selectprogram_register_button);
+        registerButton = (Button) rootView.findViewById(R.id.register_tei_button);
         //existingEventsListView = (ListView) rootView.findViewById(R.id.selectprogram_resultslistview);
         attributeNameContainer = (LinearLayout) rootView.findViewById(R.id.attributenameslayout);
         rowContainer = (LinearLayout) rootView.findViewById(R.id.eventrowcontainer);
@@ -120,6 +121,13 @@ public class SelectProgramFragment extends Fragment {
         for( OrganisationUnit ou: assignedOrganisationUnits )
             organisationUnitNames.add(ou.getLabel());
         populateSpinner(organisationUnitSpinner, organisationUnitNames);
+
+        registerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                registerTrackedEntityInstance();
+            }
+        });
 
         organisationUnitSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -201,6 +209,10 @@ public class SelectProgramFragment extends Fragment {
 
             attributeNameContainer.removeAllViews();
             for(TrackedEntityAttribute s: trackedEntityAttributes) {
+                if(s==null) {
+                    Log.d(CLASS_TAG, "tea is null");
+                    return;
+                }
                 TextView tv = new TextView(getActivity());
                 tv.setWidth(0);
                 tv.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT, 1f));
@@ -276,6 +288,12 @@ public class SelectProgramFragment extends Fragment {
 
         } else {
         }
+    }
+
+    public void registerTrackedEntityInstance() {
+        if(selectedOrganisationUnit == null || getSelectedProgram() == null) return;
+        MessageEvent messageEvent = new MessageEvent(BaseEvent.EventType.showEnrollmentFragment);
+        Dhis2Application.bus.post(messageEvent);
     }
 
     public void populateSpinner( CardSpinner spinner, List<String> list )

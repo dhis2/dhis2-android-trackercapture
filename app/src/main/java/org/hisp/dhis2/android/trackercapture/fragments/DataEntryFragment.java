@@ -224,8 +224,6 @@ public class DataEntryFragment extends Fragment {
                     Row row = rows.get(i);
                     View view = row.getView(null);
 
-
-
                     CardView cardView = new CardView(context);
 
                     Resources r = getActivity().getResources();
@@ -263,7 +261,7 @@ public class DataEntryFragment extends Fragment {
         }
 
         //the datavalue didnt exist for some reason. Create a new one.
-        DataValue dataValue = new DataValue(event.event, "",
+        DataValue dataValue = new DataValue(event, "",
                 dataElement, false,
                 Dhis2.getInstance().getUsername(getActivity()));
         dataValues.add(dataValue);
@@ -365,7 +363,9 @@ public class DataEntryFragment extends Fragment {
         event.status = Event.STATUS_ACTIVE;
         event.lastUpdated = Utils.getCurrentTime();
         if(event.eventDate == null) event.eventDate = Utils.getCurrentTime();
-        event.save(true);
+        Log.d(CLASS_TAG, "dataEntrySave1");
+        event.save(false);
+        Log.d(CLASS_TAG, "dataEntrySave2");
         Dhis2.sendLocalData(getActivity().getApplicationContext());
     }
 

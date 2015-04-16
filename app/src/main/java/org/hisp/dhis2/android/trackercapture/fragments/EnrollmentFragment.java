@@ -55,6 +55,7 @@ import org.hisp.dhis2.android.sdk.events.BaseEvent;
 import org.hisp.dhis2.android.sdk.events.InvalidateEvent;
 import org.hisp.dhis2.android.sdk.events.MessageEvent;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
+import org.hisp.dhis2.android.sdk.persistence.models.BaseValue;
 import org.hisp.dhis2.android.sdk.persistence.models.DataElement;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis2.android.sdk.persistence.models.Enrollment;
@@ -103,6 +104,9 @@ public class EnrollmentFragment extends Fragment {
     private List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes;
     private List<TrackedEntityAttributeValue> trackedEntityAttributeValues;
 
+    private TrackedEntityAttributeValue dateOfEnrollmentValue;
+    private TrackedEntityAttributeValue dateOfIncidentValue;
+
     private ProgressBar progressBar;
     private LayoutInflater inflater;
     private Context context;
@@ -111,7 +115,7 @@ public class EnrollmentFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
     {
-        final View rootView = inflater.inflate(R.layout.fragment_register_event,
+        final View rootView = inflater.inflate(R.layout.fragment_enrollment,
                 container, false);
         this.inflater = inflater;
         this.context = getActivity();
@@ -125,8 +129,10 @@ public class EnrollmentFragment extends Fragment {
 
         if(selectedOrganisationUnit == null || selectedProgram == null) return;
 
+        LinearLayout dateContainer = (LinearLayout) rootView.findViewById(R.id.enrollment_dateContainer);
+        setupEnrollmentDatesForm(dateContainer);
         final LinearLayout dataElementContainer = (LinearLayout) rootView.
-                findViewById(R.id.dataentry_dataElementContainer);
+                findViewById(R.id.enrollment_dataElementContainer);
         new Thread() {
             @Override
             public void run() {
@@ -136,12 +142,42 @@ public class EnrollmentFragment extends Fragment {
 
     }
 
+    public void setupEnrollmentDatesForm(LinearLayout container) {
+        String dateOfEnrollmentDescription = selectedProgram.dateOfEnrollmentDescription;
+        String dateOfIncidentDescription = selectedProgram.dateOfIncidentDescription;
+        dateOfEnrollmentValue = new TrackedEntityAttributeValue();
+        dateOfIncidentValue = new TrackedEntityAttributeValue();
+        Row dateOfEnrollmentRow = new DatePickerRow(inflater, dateOfEnrollmentDescription, context, dateOfEnrollmentValue);
+        Row dateOfIncidentRow = new DatePickerRow(inflater, dateOfIncidentDescription, context, dateOfIncidentValue);
+
+
+
+        Resources r = getActivity().getResources();
+        int px = Utils.getDpPx(6, r.getDisplayMetrics());
+
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(px, px, px, 0);
+        CardView cardViewDateOfEnrollment = new CardView(context);
+        cardViewDateOfEnrollment.setLayoutParams(params);
+        cardViewDateOfEnrollment.addView(dateOfEnrollmentRow.getView(null));
+
+        CardView cardViewDateOfIncident = new CardView(context);
+        cardViewDateOfIncident.setLayoutParams(params);
+        cardViewDateOfIncident.addView(dateOfIncidentRow.getView(null));
+
+        container.addView(cardViewDateOfEnrollment);
+        container.addView(cardViewDateOfIncident);
+    }
+
     public void setupDataEntryForm(final LinearLayout dataElementContainer) {
         if(currentTrackedEntityInstance == null) {
             currentTrackedEntityInstance =
-                    createTrackedEntityInstance(selectedProgram, selectedOrganisationUnit.getId());
+                    new TrackedEntityInstance(selectedProgram, selectedOrganisationUnit.getId());
         }
-        currentEnrollment = createEnrollment(selectedOrganisationUnit.id, currentTrackedEntityInstance.trackedEntityInstance, selectedProgram);
+        currentEnrollment = new Enrollment(selectedOrganisationUnit.id, currentTrackedEntityInstance.trackedEntityInstance, selectedProgram);
         programTrackedEntityAttributes = selectedProgram.getProgramTrackedEntityAttributes();
         trackedEntityAttributeValues = new ArrayList<>();
         for(ProgramTrackedEntityAttribute ptea: programTrackedEntityAttributes) {
@@ -194,42 +230,9 @@ public class EnrollmentFragment extends Fragment {
         });
     }
 
-    public TrackedEntityInstance createTrackedEntityInstance(Program program, String organisationUnit) {
-        TrackedEntityInstance trackedEntityInstance = new TrackedEntityInstance();
-        trackedEntityInstance.fromServer = false;
-        trackedEntityInstance.trackedEntityInstance = Dhis2.QUEUED + UUID.randomUUID().toString();
-        trackedEntityInstance.trackedEntity = program.getTrackedEntity().getId();
-        trackedEntityInstance.created = Utils.getCurrentTime();
-        trackedEntityInstance.lastUpdated = Utils.getCurrentTime();
-        trackedEntityInstance.orgUnit = organisationUnit;
-        return trackedEntityInstance;
-    }
 
-    public Enrollment createEnrollment(String organisationUnit, String trackedEntityInstance, Program program) {
-        Enrollment enrollment = new Enrollment();
-        enrollment.orgUnit = organisationUnit;
-        enrollment.dateOfEnrollment = Utils.getCurrentTime();
-        enrollment.dateOfIncident = Utils.getCurrentTime();
-        enrollment.status = Enrollment.ACTIVE;
-        enrollment.enrollment = Dhis2.QUEUED + UUID.randomUUID().toString();
-        enrollment.followup = false;
-        enrollment.fromServer = false;
-        enrollment.program = program.getId();
-        enrollment.localTrackedEntityInstanceId = currentTrackedEntityInstance.localId;
-        enrollment.trackedEntityInstance = trackedEntityInstance;
-        List<Event> events = new ArrayList<>();
-        for(ProgramStage programStage: program.getProgramStages()) {
-            if(programStage.autoGenerateEvent) {
-                String status = Event.STATUS_FUTURE_VISIT;
-                Event event = new Event(organisationUnit, status,
-                        program.id, programStage.id,
-                        trackedEntityInstance, enrollment.enrollment);
-                events.add(event);
-            }
-        }
-        if(!events.isEmpty()) enrollment.setEvents(events);
-        return enrollment;
-    }
+
+
 
     /**
      * Returns the DataValue associated with the given programStageDataElement from a list of DataValues
@@ -296,6 +299,15 @@ public class EnrollmentFragment extends Fragment {
         boolean valid = true;
         //go through each data element and check that they are valid
         //i.e. all compulsory are not empty
+        currentEnrollment.dateOfEnrollment = dateOfEnrollmentValue.value;
+        currentEnrollment.dateOfIncident = dateOfIncidentValue.value;
+        if(currentEnrollment.dateOfEnrollment == null
+                || currentEnrollment.dateOfEnrollment.isEmpty()
+                || currentEnrollment.dateOfIncident == null
+                || currentEnrollment.dateOfIncident.isEmpty()) {
+            valid = false;
+        }
+
         for(int i = 0; i<trackedEntityAttributeValues.size(); i++) {
             ProgramTrackedEntityAttribute programTrackedEntityAttribute =
                     MetaDataController.getProgramTrackedEntityAttribute
@@ -314,29 +326,33 @@ public class EnrollmentFragment extends Fragment {
             Dhis2.getInstance().showErrorDialog(getActivity(), "Validation error",
                     "Some compulsory fields are empty, please fill them in");
         } else {
-            saveTrackedEntityInstance();
-            saveEnrollment();
+            saveData();
             showPreviousFragment();
             InvalidateEvent event = new InvalidateEvent(InvalidateEvent.EventType.enrollment);
             Dhis2Application.bus.post(event);
         }
     }
 
+    public void saveData() {
+        saveTrackedEntityInstance();
+        saveEnrollment();
+    }
+
     public void saveTrackedEntityInstance() {
         if(!currentTrackedEntityInstance.fromServer)
-        currentTrackedEntityInstance.save(true);
+        currentTrackedEntityInstance.save(false); //saving with async = false because the localId is needed
     }
 
     public void saveEnrollment() {
         currentEnrollment.fromServer = false;
-        //currentEnrollment.lastUpdated = Utils.getCurrentTime();
-        if(currentEnrollment.dateOfEnrollment == null) currentEnrollment.dateOfEnrollment =
-                Utils.getCurrentTime();
-        currentEnrollment.save(true);
+        currentEnrollment.localTrackedEntityInstanceId = currentTrackedEntityInstance.localId;
+        Log.d(CLASS_TAG, "currentenrollmentlocalteiID: " + currentEnrollment.localTrackedEntityInstanceId);
+        currentEnrollment.save(false);
         for(TrackedEntityAttributeValue trackedEntityAttributeValue: trackedEntityAttributeValues) {
             Log.e(CLASS_TAG, "saving enrollment " + trackedEntityAttributeValue.
                     trackedEntityInstanceId + ": " + trackedEntityAttributeValue.
                     trackedEntityAttributeId + ": " + trackedEntityAttributeValue.value);
+            trackedEntityAttributeValue.localTrackedEntityInstanceId = currentTrackedEntityInstance.localId;
             trackedEntityAttributeValue.save(true);
         }
         Dhis2.sendLocalData(getActivity().getApplicationContext());

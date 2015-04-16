@@ -177,8 +177,6 @@ public class ProgramOverviewFragment extends Fragment {
         List<String> programNames = new ArrayList<String>();
         for( Program program: programs )
             programNames.add(program.getName());
-        if(programSpinner==null) Log.d(CLASS_TAG, "programspinner null");
-        if(programNames==null) Log.d(CLASS_TAG, "programnames null");
         populateSpinner(programSpinner, programNames);
 
         for(int i = 0; i<programs.size(); i++) {
@@ -217,7 +215,7 @@ public class ProgramOverviewFragment extends Fragment {
      */
     public void populateProgramData(Program program) {
         if(program == null) return;
-        List<Enrollment> enrollments = DataValueController.getEnrollments(program.id, selectedTrackedEntityInstance.trackedEntityInstance);
+        List<Enrollment> enrollments = DataValueController.getEnrollments(program.id, selectedTrackedEntityInstance);
         if(enrollments==null || enrollments.isEmpty()) {
             currentEnrollment = null;
         } else {

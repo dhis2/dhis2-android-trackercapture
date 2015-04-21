@@ -54,6 +54,7 @@ import org.hisp.dhis2.android.sdk.events.BaseEvent;
 import org.hisp.dhis2.android.sdk.events.InvalidateEvent;
 import org.hisp.dhis2.android.sdk.events.MessageEvent;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
+import org.hisp.dhis2.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
@@ -82,7 +83,7 @@ public class SelectProgramFragment extends Fragment {
     private OrganisationUnit selectedOrganisationUnit;
     private List<Program> programsForSelectedOrganisationUnit;
     private TrackedEntityInstance selectedTrackedEntityInstance;
-    private List<String> trackedEntityInstanceIds;
+    private List<Long> trackedEntityInstanceIds;
 
     private CardSpinner organisationUnitSpinner;
     private CardSpinner programSpinner;
@@ -107,13 +108,11 @@ public class SelectProgramFragment extends Fragment {
         organisationUnitSpinner = (CardSpinner) rootView.findViewById(R.id.org_unit_spinner);
         programSpinner = (CardSpinner) rootView.findViewById(R.id.program_spinner);
         registerButton = (Button) rootView.findViewById(R.id.register_tei_button);
-        //existingEventsListView = (ListView) rootView.findViewById(R.id.selectprogram_resultslistview);
         attributeNameContainer = (LinearLayout) rootView.findViewById(R.id.attributenameslayout);
         rowContainer = (LinearLayout) rootView.findViewById(R.id.eventrowcontainer);
         assignedOrganisationUnits = Dhis2.getInstance().
                 getMetaDataController().getAssignedOrganisationUnits();
         if( assignedOrganisationUnits==null || assignedOrganisationUnits.size() <= 0 ) {
-            //existingEventsListView.setAdapter(new AttributeListAdapter(getActivity(), new ArrayList<String[]>()));
             return;
         }
 
@@ -139,7 +138,6 @@ public class SelectProgramFragment extends Fragment {
                 if(programsForSelectedOrganisationUnit == null ||
                         programsForSelectedOrganisationUnit.size() <= 0) {
                     populateSpinner(programSpinner, new ArrayList<String>());
-                    //existingEventsListView.setAdapter(new AttributeListAdapter(getActivity(), new ArrayList<String[]>()));
                 } else {
                     List<String> programNames = new ArrayList<String>();
                     for( Program p: programsForSelectedOrganisationUnit )
@@ -187,16 +185,18 @@ public class SelectProgramFragment extends Fragment {
             Program program = programsForSelectedOrganisationUnit.get(position);
 
             //get all unique TEI that have enrollment in the selected program/orgunit
-            List<Event> events = DataValueController.getEvents(selectedOrganisationUnit.id, program.id);
+            //List<Event> events = DataValueController.getEvents(selectedOrganisationUnit.id, program.id);
+            List<Enrollment> enrollments = DataValueController.getEnrollments(program.id,
+                    selectedOrganisationUnit.id);
             trackedEntityInstanceIds = new ArrayList<>();
-            for(Event event: events) {
-                if(event.trackedEntityInstance != null) {
-                    if(!trackedEntityInstanceIds.contains(event.trackedEntityInstance))
-                        trackedEntityInstanceIds.add(event.trackedEntityInstance);
+            for(Enrollment enrollment: enrollments) {
+                if(enrollment.localTrackedEntityInstanceId > 0) {
+                    if(!trackedEntityInstanceIds.contains(enrollment.localTrackedEntityInstanceId))
+                        trackedEntityInstanceIds.add(enrollment.localTrackedEntityInstanceId);
                 }
             }
 
-            Log.d(CLASS_TAG, "got events: " + events.size());
+            Log.d(CLASS_TAG, "got enrollments: " + enrollments.size());
 
             //get attributevalues to show in list:
             List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes
@@ -231,10 +231,10 @@ public class SelectProgramFragment extends Fragment {
 
 
             //get values and show in list
-            HashMap<String, String[]> rows = new HashMap<>();
+            HashMap<Long, String[]> rows = new HashMap<>();
             rowContainer.removeAllViews();
             for(int j = 0; j<trackedEntityInstanceIds.size(); j++) {
-                String trackedEntityInstance = trackedEntityInstanceIds.get(j);
+                long trackedEntityInstance = trackedEntityInstanceIds.get(j);
                 String[] row = new String[trackedEntityAttributes.size()];
                 LinearLayout v = (LinearLayout) getActivity().getLayoutInflater().inflate(org.hisp.dhis2.android.sdk.R.layout.eventlistlinearlayoutitem, rowContainer, false);
                 for(int i=0; i<trackedEntityAttributes.size(); i++) {
@@ -268,11 +268,6 @@ public class SelectProgramFragment extends Fragment {
                 });
                 iv.setVisibility(View.INVISIBLE);
                 v.addView(iv);
-
-                /*if(event.fromServer) {
-                    iv.setVisibility(View.INVISIBLE);
-                }
-                rows.put(event.event, row);*/
 
                 v.setContentDescription(""+j);
                 v.setOnClickListener(new View.OnClickListener() {

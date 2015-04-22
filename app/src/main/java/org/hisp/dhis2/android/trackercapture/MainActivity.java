@@ -100,8 +100,6 @@ public class MainActivity extends ActionBarActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        Dhis2.activatePeriodicSynchronizer(this);
-
         if(Dhis2.isInitialDataLoaded(this))
             showSelectProgramFragment();
         else if(Dhis2.isLoadingInitial()) {
@@ -109,6 +107,8 @@ public class MainActivity extends ActionBarActivity {
         }
         else
             loadInitialData();
+
+        Dhis2.activatePeriodicSynchronizer(this);
     }
 
 

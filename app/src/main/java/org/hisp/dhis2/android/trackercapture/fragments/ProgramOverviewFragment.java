@@ -437,25 +437,30 @@ public class ProgramOverviewFragment extends Fragment {
     }
 
     public void completeEnrollment() {
-        Dhis2.showErrorDialog(activity, "not implemented", "not implemented");
-        //needs update in API
-        /*if(currentEnrollment!=null && !currentEnrollment.status.equals(Enrollment.COMPLETED)) {
+        if(currentEnrollment!=null && !currentEnrollment.status.equals(Enrollment.COMPLETED)) {
             currentEnrollment.status = Enrollment.COMPLETED;
             currentEnrollment.fromServer = false;
-            //currentEnrollment.save(false);
-            //todo: server gives duplicate error - figure out how to update an enrollment rather than create new..
+            currentEnrollment.save(false);
             invalidate();
-        }*/
+        }
     }
 
     public void terminateEnrollment() {
-        //todo: implement
-        Dhis2.showErrorDialog(activity, "not implemented", "not implemented");
+        if(currentEnrollment!=null && !currentEnrollment.status.equals(Enrollment.CANCELLED)) {
+            currentEnrollment.status = Enrollment.CANCELLED;
+            currentEnrollment.fromServer = false;
+            currentEnrollment.save(false);
+            invalidate();
+        }
     }
 
     public void flagForFollowup() {
-        //todo: implement
-        Dhis2.showErrorDialog(activity, "not implemented", "not implemented");
+        if(currentEnrollment!=null && !currentEnrollment.followup) {
+            currentEnrollment.followup = true;
+            currentEnrollment.fromServer = false;
+            currentEnrollment.save(false);
+            invalidate();
+        }
     }
 
     public void editEvent(long localId) {

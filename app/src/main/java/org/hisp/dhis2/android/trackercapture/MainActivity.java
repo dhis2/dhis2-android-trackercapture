@@ -30,7 +30,6 @@
 package org.hisp.dhis2.android.trackercapture;
 
 import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -42,7 +41,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.raizlabs.android.dbflow.runtime.FlowContentObserver;
 import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis2.android.sdk.activities.LoginActivity;
@@ -54,7 +52,6 @@ import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.network.managers.NetworkManager;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis2.android.sdk.persistence.models.Enrollment;
-import org.hisp.dhis2.android.sdk.persistence.models.Event;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
@@ -63,9 +60,10 @@ import org.hisp.dhis2.android.trackercapture.fragments.DataEntryFragment;
 import org.hisp.dhis2.android.trackercapture.fragments.EnrollmentFragment;
 import org.hisp.dhis2.android.trackercapture.fragments.ProgramOverviewFragment;
 import org.hisp.dhis2.android.trackercapture.fragments.SelectProgramFragment;
+import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.UpcomingEventsFragment;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements INavigationHandler {
 
     public final static String CLASS_TAG = "MainActivity";
 
@@ -173,6 +171,8 @@ public class MainActivity extends ActionBarActivity {
             showDataEntryFragment();
         } else if(event.eventType == BaseEvent.EventType.showEnrollmentFragment) {
             showEnrollmentFragment();
+        } else if(event.eventType == BaseEvent.EventType.showUpcomingEventsFragment) {
+            showUpcomingEventsFragment();
         }
         else if(event.eventType == BaseEvent.EventType.showPreviousFragment) {
             showPreviousFragment();
@@ -257,6 +257,11 @@ public class MainActivity extends ActionBarActivity {
         showFragment(enrollmentFragment);
     }
 
+    public void showUpcomingEventsFragment() {
+        UpcomingEventsFragment fragment = new UpcomingEventsFragment();
+        showFragment(fragment);
+    }
+
     public void showPreviousFragment() {
         if(previousFragment == null) {
             showSelectProgramFragment();
@@ -286,15 +291,18 @@ public class MainActivity extends ActionBarActivity {
         super.onPrepareOptionsMenu(menu);
         MenuItem item = menu.findItem(R.id.action_save_event);
         item.setVisible(true);
-        if(currentFragment == settingsFragment)
+        if(currentFragment == null) return true;
+        if(currentFragment instanceof SettingsFragment)
             item.setVisible(false);
-        else if(currentFragment == selectProgramFragment)
+        else if(currentFragment instanceof SelectProgramFragment)
             item.setVisible(false);
-        else if(currentFragment == programOverviewFragment)
+        else if(currentFragment instanceof ProgramOverviewFragment)
             item.setVisible(false);
-        else if(currentFragment == dataEntryFragment)
+        else if(currentFragment instanceof DataEntryFragment)
             item.setIcon(getResources().getDrawable(R.drawable.ic_save));
         else if(currentFragment == loadingFragment)
+            item.setVisible(false);
+        else if(currentFragment instanceof UpcomingEventsFragment)
             item.setVisible(false);
 
         return true;
@@ -322,14 +330,15 @@ public class MainActivity extends ActionBarActivity {
             } else if (currentFragment == dataEntryFragment ) {
                 showProgramOverviewFragment();
             }
-            else if ( currentFragment == settingsFragment ) {
+            else if ( currentFragment instanceof SettingsFragment ) {
                 if(previousFragment == null) showSelectProgramFragment();
                 else showFragment(previousFragment);
-            } else if ( currentFragment == programOverviewFragment ) {
+            } else if ( currentFragment instanceof ProgramOverviewFragment ) {
                 showSelectProgramFragment();
             } else if(currentFragment == enrollmentFragment) {
                 showProgramOverviewFragment();
-            }
+            } else if(currentFragment instanceof UpcomingEventsFragment)
+                showSelectProgramFragment();
             return true;
         }
 
@@ -340,5 +349,17 @@ public class MainActivity extends ActionBarActivity {
     protected void onDestroy() {
         super.onDestroy();
         Dhis2Application.bus.unregister(this);
+    }
+
+    @Override
+    public void switchFragment(Fragment fragment, String tag) {
+        currentFragment = fragment;
+        if (fragment != null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, fragment)
+                    .addToBackStack(tag)
+                    .commit();
+        }
     }
 }

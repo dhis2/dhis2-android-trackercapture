@@ -88,6 +88,7 @@ public class SelectProgramFragment extends Fragment {
     private CardSpinner organisationUnitSpinner;
     private CardSpinner programSpinner;
     private Button registerButton;
+    private Button upcomingEventsButton;
     //private ListView existingEventsListView;
     private LinearLayout attributeNameContainer;
     private LinearLayout rowContainer;
@@ -108,6 +109,7 @@ public class SelectProgramFragment extends Fragment {
         organisationUnitSpinner = (CardSpinner) rootView.findViewById(R.id.org_unit_spinner);
         programSpinner = (CardSpinner) rootView.findViewById(R.id.program_spinner);
         registerButton = (Button) rootView.findViewById(R.id.register_tei_button);
+        upcomingEventsButton = (Button) rootView.findViewById(R.id.upcoming_events_button);
         attributeNameContainer = (LinearLayout) rootView.findViewById(R.id.attributenameslayout);
         rowContainer = (LinearLayout) rootView.findViewById(R.id.eventrowcontainer);
         assignedOrganisationUnits = Dhis2.getInstance().
@@ -125,6 +127,13 @@ public class SelectProgramFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 registerTrackedEntityInstance();
+            }
+        });
+
+        upcomingEventsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showUpcomingEventsFragment();
             }
         });
 
@@ -288,6 +297,11 @@ public class SelectProgramFragment extends Fragment {
     public void registerTrackedEntityInstance() {
         if(selectedOrganisationUnit == null || getSelectedProgram() == null) return;
         MessageEvent messageEvent = new MessageEvent(BaseEvent.EventType.showEnrollmentFragment);
+        Dhis2Application.bus.post(messageEvent);
+    }
+
+    public void showUpcomingEventsFragment() {
+        MessageEvent messageEvent = new MessageEvent(BaseEvent.EventType.showUpcomingEventsFragment);
         Dhis2Application.bus.post(messageEvent);
     }
 

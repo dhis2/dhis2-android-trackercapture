@@ -75,7 +75,7 @@ import java.util.List;
  */
 public class ProgramOverviewFragment extends Fragment {
 
-    private static final String CLASS_TAG = "ProgramOverviewFragment";
+    public static final String CLASS_TAG = "ProgramOverviewFragment";
 
     private CardSpinner programSpinner;
     private Program selectedProgram;

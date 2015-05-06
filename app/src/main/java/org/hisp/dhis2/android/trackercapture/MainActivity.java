@@ -34,7 +34,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -63,7 +63,7 @@ import org.hisp.dhis2.android.trackercapture.fragments.SelectProgramFragment;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.UpcomingEventsFragment;
 
 
-public class MainActivity extends ActionBarActivity implements INavigationHandler {
+public class MainActivity extends AppCompatActivity implements INavigationHandler {
 
     public final static String CLASS_TAG = "MainActivity";
 
@@ -88,8 +88,9 @@ public class MainActivity extends ActionBarActivity implements INavigationHandle
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setContentView(R.layout.activity_main_sdk);
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main_sdk);
+
         Dhis2.getInstance().enableLoading(this, Dhis2.LOAD_TRACKER);
         NetworkManager.getInstance().setCredentials(Dhis2.getCredentials(this));
         NetworkManager.getInstance().setServerUrl(Dhis2.getServer(this));
@@ -98,14 +99,13 @@ public class MainActivity extends ActionBarActivity implements INavigationHandle
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        if(Dhis2.isInitialDataLoaded(this))
+        if (Dhis2.isInitialDataLoaded(this)) {
             showSelectProgramFragment();
-        else if(Dhis2.isLoadingInitial()) {
+        } else if (Dhis2.isLoadingInitial()) {
             showLoadingFragment();
-        }
-        else
+        } else {
             loadInitialData();
-
+        }
         Dhis2.activatePeriodicSynchronizer(this);
     }
 

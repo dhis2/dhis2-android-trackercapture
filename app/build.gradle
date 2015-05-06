@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "org.hisp.dhis2.android.trackercapture"
-        minSdkVersion 11
+        minSdkVersion 15
         targetSdkVersion 21
         versionCode 1
         versionName "1.0"
@@ -17,11 +17,14 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    lintOptions {
+        disable 'RtlSymmetry', 'RtlHardcoded'
+    }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:21.0.3'
     compile project(':..:dhis2-android-sdk:app')
 }
 

@@ -1,3 +1,5 @@
+package org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.adapters;
+
 /*
  * Copyright (c) 2014, Araz Abishov
  * All rights reserved.
@@ -27,19 +29,24 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.adapters;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.upcomingevents.EventRowType;
+import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.upcomingevents.UpcomingEventRow;
+
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.Events.EventRow;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.upcomingevents.UpcomingEventRow;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.upcomingevents.EventRowType;
 
-public class EventAdapter extends AbsAdapter<EventRow> {
+public class UpcomingEventAdapter extends AbsAdapter<UpcomingEventRow> {
 
-    public EventAdapter(LayoutInflater inflater) {
+    public UpcomingEventAdapter(LayoutInflater inflater) {
         super(inflater);
     }
 
@@ -85,3 +92,4 @@ public class EventAdapter extends AbsAdapter<EventRow> {
         }
     }
 }
+

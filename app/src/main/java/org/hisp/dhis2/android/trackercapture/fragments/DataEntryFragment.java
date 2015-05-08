@@ -87,7 +87,7 @@ import java.util.UUID;
  */
 public class DataEntryFragment extends Fragment {
 
-    private static final String CLASS_TAG = "DataEntryFragment";
+    public static final String CLASS_TAG = "DataEntryFragment";
 
     private OrganisationUnit selectedOrganisationUnit;
     private ProgramStage selectedProgramStage;
@@ -109,6 +109,10 @@ public class DataEntryFragment extends Fragment {
     private ProgressBar progressBar;
     private LayoutInflater inflater;
     private Context context;
+
+    private static final String ORG_UNIT_ID = "extra:orgUnitId";
+    private static final String PROGRAM_ID = "extra:ProgramId";
+    private static final String EVENT_ID = "extra:EventId";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -161,6 +165,26 @@ public class DataEntryFragment extends Fragment {
             if(!originalDataValues.get(i).value.equals(dataValues.get(i).value)) return true;
         }
         return false;
+    }
+
+    public static DataEntryFragment newInstance(String unitId, String programId) {
+        DataEntryFragment fragment = new DataEntryFragment();
+        Bundle args = new Bundle();
+        args.putString(ORG_UNIT_ID, unitId);
+        args.putString(PROGRAM_ID, programId);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static DataEntryFragment newInstance(String unitId, String programId,
+                                                long eventId) {
+        DataEntryFragment fragment = new DataEntryFragment();
+        Bundle args = new Bundle();
+        args.putString(ORG_UNIT_ID, unitId);
+        args.putString(PROGRAM_ID, programId);
+        args.putLong(EVENT_ID, eventId);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     public void setupDataEntryForm(final LinearLayout dataElementContainer) {

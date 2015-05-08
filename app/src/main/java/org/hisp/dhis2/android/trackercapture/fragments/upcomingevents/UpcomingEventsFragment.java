@@ -66,6 +66,7 @@ import org.hisp.dhis2.android.trackercapture.R;
 import org.hisp.dhis2.android.trackercapture.fragments.ProgramOverviewFragment;
 import org.hisp.dhis2.android.trackercapture.fragments.loaders.DbLoader;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.adapters.EventAdapter;
+import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.adapters.UpcomingEventAdapter;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.upcomingevents.UpcomingEventRow;
 import org.joda.time.LocalDate;
 
@@ -94,7 +95,7 @@ public class UpcomingEventsFragment extends Fragment implements View.OnClickList
 
     private ListView mListView;
     private ProgressBar mProgressBar;
-    private EventAdapter mAdapter;
+    private UpcomingEventAdapter mAdapter;
 
     private DataValue startDate;
     private DataValue endDate;
@@ -137,7 +138,7 @@ public class UpcomingEventsFragment extends Fragment implements View.OnClickList
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
         mListView = (ListView) view.findViewById(R.id.event_listview);
-        mAdapter = new EventAdapter(getLayoutInflater(savedInstanceState));
+        mAdapter = new UpcomingEventAdapter(getLayoutInflater(savedInstanceState));
         View header = getLayoutInflater(savedInstanceState).inflate(
                 R.layout.fragment_upcomingevents_header, mListView, false
         );
@@ -203,7 +204,7 @@ public class UpcomingEventsFragment extends Fragment implements View.OnClickList
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             mNavigationHandler.switchFragment(
-                    new SettingsFragment(), SettingsFragment.TAG);
+                    new SettingsFragment(), SettingsFragment.TAG, true);
         }
 
         return super.onOptionsItemSelected(item);
@@ -290,7 +291,7 @@ public class UpcomingEventsFragment extends Fragment implements View.OnClickList
         Event event = DataValueController.getEvent(id);
         TrackedEntityInstance tei = DataValueController.getTrackedEntityInstance(event.trackedEntityInstance);
         fragment2.setSelectedTrackedEntityInstance(tei);
-        mNavigationHandler.switchFragment(fragment2, ProgramOverviewFragment.CLASS_TAG);
+        mNavigationHandler.switchFragment(fragment2, ProgramOverviewFragment.CLASS_TAG, true);
     }
 
     @Override

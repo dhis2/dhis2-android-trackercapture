@@ -34,6 +34,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -43,12 +44,15 @@ import android.view.MenuItem;
 
 import com.squareup.otto.Subscribe;
 
+import org.hisp.dhis2.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis2.android.sdk.activities.LoginActivity;
+import org.hisp.dhis2.android.sdk.activities.OnBackPressedListener;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.events.BaseEvent;
 import org.hisp.dhis2.android.sdk.events.MessageEvent;
 import org.hisp.dhis2.android.sdk.fragments.LoadingFragment;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
+import org.hisp.dhis2.android.sdk.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis2.android.sdk.network.managers.NetworkManager;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis2.android.sdk.persistence.models.Enrollment;
@@ -56,7 +60,6 @@ import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityInstance;
-import org.hisp.dhis2.android.trackercapture.fragments.DataEntryFragment;
 import org.hisp.dhis2.android.trackercapture.fragments.EnrollmentFragment;
 import org.hisp.dhis2.android.trackercapture.fragments.ProgramOverviewFragment;
 import org.hisp.dhis2.android.trackercapture.fragments.SelectProgramFragment;
@@ -85,6 +88,8 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
     private ProgramStage currentlySelectedProgramStage;
     private Enrollment currentlySelectedEnrollment;
     private TrackedEntityInstance currentlySelectedTrackedEntityInstance;
+
+    private OnBackPressedListener mBackPressedListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
             showSettingsFragment();
         } else if(id == R.id.action_save_event) {
             if (currentFragment.equals(dataEntryFragment )) {
-                dataEntryFragment.submit();
+                dataEntryFragment.submitEvent();
             } else if(currentFragment.equals(enrollmentFragment)) {
                 enrollmentFragment.submit();
             }
@@ -144,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
         this.title = title;
         runOnUiThread(new Runnable() {
             public void run() {
-                getSupportActionBar().setTitle( MainActivity.this.title );
+                getSupportActionBar().setTitle(MainActivity.this.title);
             }
         });
     }
@@ -200,12 +205,18 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
         finish();
     }
 
+    /**
+     * @deprecated
+     */
     public void showLoadingFragment() {
         setTitle("Loading initial data");
         if(loadingFragment == null) loadingFragment = new LoadingFragment();
         showFragment(loadingFragment);
     }
 
+    /**
+     * @deprecated
+     */
     public void showSelectProgramFragment() {
         setTitle("Tracker Capture");
         if(selectProgramFragment == null) selectProgramFragment = new SelectProgramFragment();
@@ -213,6 +224,9 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
         selectProgramFragment.setSelection(lastSelectedOrgUnit, lastSelectedProgram);
     }
 
+    /**
+     * @deprecated
+     */
     public void showProgramOverviewFragment() {
         setTitle(getString(R.string.program));
         if(programOverviewFragment == null) programOverviewFragment = new ProgramOverviewFragment();
@@ -225,24 +239,50 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
         showFragment(programOverviewFragment);
     }
 
+    /**
+     * @deprecated
+     */
     public void showSettingsFragment() {
         setTitle("Settings");
         if( settingsFragment == null ) settingsFragment = new SettingsFragment();
         showFragment(settingsFragment);
     }
 
+    /**
+     * @deprecated
+     */
     public void showDataEntryFragment() {
         dataEntryFragment = new DataEntryFragment();
         setTitle(programOverviewFragment.getSelectedProgramStage().name);
-        dataEntryFragment.setSelectedOrganisationUnit(programOverviewFragment.getSelectedOrganisationUnit());
-        if(programOverviewFragment.getSelectedEvent() != null)
-            dataEntryFragment.setEditingEvent(programOverviewFragment.getSelectedEvent().localId);
-        dataEntryFragment.setCurrentTrackedEntityInstance(programOverviewFragment.getSelectedTrackedEntityInstance());
-        dataEntryFragment.setSelectedProgramStage(programOverviewFragment.getSelectedProgramStage());
-        dataEntryFragment.setCurrentEnrollment(programOverviewFragment.getCurrentEnrollment());
-        showFragment(dataEntryFragment);
+
+        long eventId = -1;
+        if(programOverviewFragment.getSelectedEvent() != null) {
+            eventId = programOverviewFragment.getSelectedEvent().getLocalId();
+        }
+        DataEntryFragment fragment;
+        if(eventId >= 0) {
+            fragment = DataEntryFragment.newInstanceWithEnrollment(
+                    programOverviewFragment.getSelectedOrganisationUnit().getId(),
+                    programOverviewFragment.getSelectedProgram().getId(),
+                    programOverviewFragment.getSelectedProgramStage().getId(),
+                    programOverviewFragment.getCurrentEnrollment().localId,
+                    eventId
+            );
+        } else {
+            fragment = DataEntryFragment.newInstanceWithEnrollment(
+                    programOverviewFragment.getSelectedOrganisationUnit().getId(),
+                    programOverviewFragment.getSelectedProgram().getId(),
+                    programOverviewFragment.getSelectedProgramStage().getId(),
+                    programOverviewFragment.getCurrentEnrollment().localId
+            );
+        }
+
+        switchFragment(fragment, DataEntryFragment.TAG, true);
     }
 
+    /**
+     * @deprecated
+     */
     public void showEnrollmentFragment() {
         enrollmentFragment = new EnrollmentFragment();
         if(currentFragment.equals(selectProgramFragment)) {
@@ -257,6 +297,9 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
         showFragment(enrollmentFragment);
     }
 
+    /**
+     * @deprecated
+     */
     public void showUpcomingEventsFragment() {
         UpcomingEventsFragment fragment = new UpcomingEventsFragment();
         showFragment(fragment);
@@ -270,12 +313,14 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
         }
     }
 
+    /**
+     * deprecated. Moving to use switchFragment
+     * @deprecated
+     * @param fragment
+     */
     public void showFragment(Fragment fragment) {
         if(MainActivity.this.isFinishing()) return;
         FragmentManager fragmentManager = getFragmentManager();
-        //FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        //fragmentTransaction.replace(R.id.fragment_container, fragment);
-        //fragmentTransaction.commitAllowingStateLoss();
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragment_container, fragment)
@@ -352,14 +397,23 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
     }
 
     @Override
-    public void switchFragment(Fragment fragment, String tag) {
-        currentFragment = fragment;
+    public void switchFragment(Fragment fragment, String fragmentTag, boolean addToBackStack) {
         if (fragment != null) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, fragment)
-                    .addToBackStack(tag)
-                    .commit();
+            FragmentTransaction transaction =
+                    getSupportFragmentManager().beginTransaction();
+            transaction.setCustomAnimations(R.anim.open_enter, R.anim.open_exit)
+                    .replace(R.id.fragment_container, fragment);
+            if (addToBackStack) {
+                transaction = transaction
+                    .addToBackStack(fragmentTag);
+            }
+
+            transaction.commit();
         }
+    }
+
+    @Override
+    public void setBackPressedListener(OnBackPressedListener backPressedListener) {
+        mBackPressedListener = backPressedListener;
     }
 }

@@ -48,12 +48,14 @@ import android.widget.TextView;
 import com.raizlabs.android.dbflow.runtime.FlowContentObserver;
 import com.squareup.otto.Subscribe;
 
+import org.hisp.dhis2.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis2.android.sdk.events.BaseEvent;
 import org.hisp.dhis2.android.sdk.events.InvalidateEvent;
 import org.hisp.dhis2.android.sdk.events.MessageEvent;
+import org.hisp.dhis2.android.sdk.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis2.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
@@ -99,6 +101,7 @@ public class ProgramOverviewFragment extends Fragment {
     private Activity activity; /*need this because invalidate is sometimes called from service*/
     List<Program> programs;
     private FlowContentObserver flowContentObserver;
+    private INavigationHandler mNavigationHandler;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -152,6 +155,24 @@ public class ProgramOverviewFragment extends Fragment {
      */
     public void checkForUpdatedData() {
         //todo: do it
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        if (activity instanceof INavigationHandler) {
+            mNavigationHandler = (INavigationHandler) activity;
+        } else {
+            throw new IllegalArgumentException("Activity must " +
+                    "implement INavigationHandler interface");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mNavigationHandler = null;
     }
 
     @Override
@@ -215,6 +236,7 @@ public class ProgramOverviewFragment extends Fragment {
      */
     public void populateProgramData(Program program) {
         if(program == null) return;
+
         List<Enrollment> enrollments = DataValueController.getEnrollments(program.id, selectedTrackedEntityInstance);
         if(enrollments==null || enrollments.isEmpty()) {
             currentEnrollment = null;
@@ -464,18 +486,20 @@ public class ProgramOverviewFragment extends Fragment {
     }
 
     public void editEvent(long localId) {
+
+
         selectedEvent = DataValueController.getEvent(localId);
         selectedProgramStage = MetaDataController.getProgramStage(selectedEvent.programStageId);
-        MessageEvent event = new MessageEvent(BaseEvent.EventType.showDataEntryFragment);
-        Dhis2Application.bus.post(event);
+        DataEntryFragment fragment = DataEntryFragment.newInstance(getSelectedOrganisationUnit().getId(), getSelectedProgram().getId(), selectedProgramStage.id, localId);
+        mNavigationHandler.switchFragment(fragment, DataEntryFragment.TAG, true);
     }
 
     public void createNewEvent(String programStageId) {
         if(currentEnrollment.status.equals(Enrollment.COMPLETED)) return;
         selectedEvent = null;
         selectedProgramStage = MetaDataController.getProgramStage(programStageId);
-        MessageEvent event = new MessageEvent(BaseEvent.EventType.showDataEntryFragment);
-        Dhis2Application.bus.post(event);
+        DataEntryFragment fragment = DataEntryFragment.newInstance(getSelectedOrganisationUnit().getId(), getSelectedProgram().getId(), selectedProgramStage.getId());
+        mNavigationHandler.switchFragment(fragment, DataEntryFragment.TAG, true);
     }
 
     public void showEnrollmentHistory() {
@@ -484,8 +508,10 @@ public class ProgramOverviewFragment extends Fragment {
     }
 
     public void enroll() {
-        MessageEvent messageEvent = new MessageEvent(BaseEvent.EventType.showEnrollmentFragment);
-        Dhis2Application.bus.post(messageEvent);
+        EnrollmentFragment fragment = new EnrollmentFragment();
+        fragment.setSelectedProgram(getSelectedProgram());
+        fragment.setSelectedOrganisationUnit(getSelectedOrganisationUnit());
+        mNavigationHandler.switchFragment(fragment,EnrollmentFragment.class.getName(), true);
     }
 
     public void populateSpinner( CardSpinner spinner, List<String> list )

@@ -71,23 +71,21 @@ import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis2.android.sdk.utils.Utils;
-import org.hisp.dhis2.android.sdk.utils.ui.rows.AutoCompleteRow;
-import org.hisp.dhis2.android.sdk.utils.ui.rows.BooleanRow;
-import org.hisp.dhis2.android.sdk.utils.ui.rows.CheckBoxRow;
-import org.hisp.dhis2.android.sdk.utils.ui.rows.DatePickerRow;
-import org.hisp.dhis2.android.sdk.utils.ui.rows.IntegerRow;
-import org.hisp.dhis2.android.sdk.utils.ui.rows.LongTextRow;
-import org.hisp.dhis2.android.sdk.utils.ui.rows.NegativeIntegerRow;
-import org.hisp.dhis2.android.sdk.utils.ui.rows.NumberRow;
-import org.hisp.dhis2.android.sdk.utils.ui.rows.PosIntegerRow;
-import org.hisp.dhis2.android.sdk.utils.ui.rows.PosOrZeroIntegerRow;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.dataentry.AutoCompleteRow;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.dataentry.CheckBoxRow;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.dataentry.DataEntryRow;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.dataentry.DataEntryRowTypes;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.dataentry.DatePickerRow;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.dataentry.EditTextRow;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.dataentry.RadioButtonsRow;
 import org.hisp.dhis2.android.sdk.utils.ui.rows.Row;
-import org.hisp.dhis2.android.sdk.utils.ui.rows.TextRow;
 import org.hisp.dhis2.android.trackercapture.R;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static android.text.TextUtils.isEmpty;
 
 /**
  * @author Simen Skogly Russnes on 20.02.15.
@@ -147,8 +145,8 @@ public class EnrollmentFragment extends Fragment {
         String dateOfIncidentDescription = selectedProgram.dateOfIncidentDescription;
         dateOfEnrollmentValue = new TrackedEntityAttributeValue();
         dateOfIncidentValue = new TrackedEntityAttributeValue();
-        Row dateOfEnrollmentRow = new DatePickerRow(inflater, dateOfEnrollmentDescription, context, dateOfEnrollmentValue);
-        Row dateOfIncidentRow = new DatePickerRow(inflater, dateOfIncidentDescription, context, dateOfIncidentValue);
+        DataEntryRow dateOfEnrollmentRow = new DatePickerRow(dateOfEnrollmentDescription, dateOfEnrollmentValue);
+        DataEntryRow dateOfIncidentRow = new DatePickerRow(dateOfIncidentDescription, dateOfIncidentValue);
 
 
 
@@ -162,11 +160,11 @@ public class EnrollmentFragment extends Fragment {
         params.setMargins(px, px, px, 0);
         CardView cardViewDateOfEnrollment = new CardView(context);
         cardViewDateOfEnrollment.setLayoutParams(params);
-        cardViewDateOfEnrollment.addView(dateOfEnrollmentRow.getView(null));
+        //cardViewDateOfEnrollment.addView(dateOfEnrollmentRow.getView(getFragmentManager(), getActivity().getLayoutInflater(), null, container));
 
         CardView cardViewDateOfIncident = new CardView(context);
         cardViewDateOfIncident.setLayoutParams(params);
-        cardViewDateOfIncident.addView(dateOfIncidentRow.getView(null));
+        //cardViewDateOfIncident.addView(dateOfIncidentRow.getView(getFragmentManager(), getActivity().getLayoutInflater(), null, container));
 
         container.addView(cardViewDateOfEnrollment);
         container.addView(cardViewDateOfIncident);
@@ -185,13 +183,15 @@ public class EnrollmentFragment extends Fragment {
             if(value!=null) trackedEntityAttributeValues.add(value);
         }
 
-        final List<Row> rows = new ArrayList<>();
+        final List<DataEntryRow> rows = new ArrayList<>();
 
         for(int i = 0; i<programTrackedEntityAttributes.size(); i++) {
-            Row row = createDataEntryView(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute(),
+            DataEntryRow row = createDataEntryView(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute(),
                     getTrackedEntityDataValue(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().id, trackedEntityAttributeValues));
-            if(currentEnrollment!=null && currentEnrollment.status.equals(Enrollment.COMPLETED))
-                row.setEditable(false);
+            if(currentEnrollment!=null && currentEnrollment.status.equals(Enrollment.COMPLETED)) {
+                //row.setEditable(false);
+                //todo: fix
+            }
             rows.add(row);
         }
 
@@ -203,8 +203,8 @@ public class EnrollmentFragment extends Fragment {
                 if(context == null) return;
                 progressBar.setVisibility(View.GONE);
                 for(int i = 0; i<rows.size(); i++) {
-                    Row row = rows.get(i);
-                    View view = row.getView(null);
+                    DataEntryRow row = rows.get(i);
+                    View view = row.getView(getFragmentManager(), getActivity().getLayoutInflater(), null, dataElementContainer);
 
                     CardView cardView = new CardView(context);
 
@@ -222,8 +222,8 @@ public class EnrollmentFragment extends Fragment {
 
                     //set done button for last element to hide keyboard
                     if(i==programTrackedEntityAttributes.size()-1) {
-                        TextView textView = row.getEntryView();
-                        if(textView!=null) textView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+                        //TextView textView = row.getEntryView();
+                        //if(textView!=null) textView.setImeOptions(EditorInfo.IME_ACTION_DONE);
                     }
                 }
             }
@@ -255,39 +255,41 @@ public class EnrollmentFragment extends Fragment {
         return trackedEntityAttributeValue;
     }
 
-    public Row createDataEntryView(TrackedEntityAttribute trackedEntityAttribute, TrackedEntityAttributeValue dataValue) {
-        Row row;
+    public DataEntryRow createDataEntryView(TrackedEntityAttribute trackedEntityAttribute, TrackedEntityAttributeValue dataValue) {
+        DataEntryRow row;
+        String trackedEntityAttributeName = trackedEntityAttribute.getName();
+
         if (trackedEntityAttribute.getOptionSet() != null) {
             OptionSet optionSet = MetaDataController.getOptionSet(trackedEntityAttribute.optionSet);
-            if(optionSet == null)
-                row = new TextRow(inflater, trackedEntityAttribute.name, dataValue);
-            else
-                row = new AutoCompleteRow(inflater, trackedEntityAttribute.name, optionSet, dataValue, context);
+            if (optionSet == null) {
+                row = new EditTextRow(trackedEntityAttributeName, dataValue, DataEntryRowTypes.TEXT);
+            } else {
+                row = new AutoCompleteRow(trackedEntityAttributeName, dataValue, optionSet);
+            }
         } else if (trackedEntityAttribute.valueType.equalsIgnoreCase(DataElement.VALUE_TYPE_TEXT)) {
-            row = new TextRow(inflater, trackedEntityAttribute.name, dataValue);
+            row = new EditTextRow(trackedEntityAttributeName, dataValue, DataEntryRowTypes.TEXT);
         } else if (trackedEntityAttribute.valueType.equalsIgnoreCase(DataElement.VALUE_TYPE_LONG_TEXT)) {
-            row = new LongTextRow(inflater, trackedEntityAttribute.name, dataValue);
+            row = new EditTextRow(trackedEntityAttributeName, dataValue, DataEntryRowTypes.LONG_TEXT);
         } else if (trackedEntityAttribute.valueType.equalsIgnoreCase(DataElement.VALUE_TYPE_NUMBER)) {
-            row = new NumberRow(inflater, trackedEntityAttribute.name, dataValue);
+            row = new EditTextRow(trackedEntityAttributeName, dataValue, DataEntryRowTypes.NUMBER);
         } else if (trackedEntityAttribute.valueType.equalsIgnoreCase(DataElement.VALUE_TYPE_INT)) {
-            row = new IntegerRow(inflater, trackedEntityAttribute.name, dataValue);
+            row = new EditTextRow(trackedEntityAttributeName, dataValue, DataEntryRowTypes.INTEGER);
         } else if (trackedEntityAttribute.valueType.equalsIgnoreCase(DataElement.VALUE_TYPE_ZERO_OR_POSITIVE_INT)) {
-            row = new PosOrZeroIntegerRow(inflater, trackedEntityAttribute.name, dataValue);
+            row = new EditTextRow(trackedEntityAttributeName, dataValue, DataEntryRowTypes.INTEGER_ZERO_OR_POSITIVE);
         } else if (trackedEntityAttribute.valueType.equalsIgnoreCase(DataElement.VALUE_TYPE_POSITIVE_INT)) {
-            row = new PosIntegerRow(inflater, trackedEntityAttribute.name, dataValue);
+            row = new EditTextRow(trackedEntityAttributeName, dataValue, DataEntryRowTypes.INTEGER_POSITIVE);
         } else if (trackedEntityAttribute.valueType.equalsIgnoreCase(DataElement.VALUE_TYPE_NEGATIVE_INT)) {
-            row = new NegativeIntegerRow(inflater, trackedEntityAttribute.name, dataValue);
+            row = new EditTextRow(trackedEntityAttributeName, dataValue, DataEntryRowTypes.INTEGER_NEGATIVE);
         } else if (trackedEntityAttribute.valueType.equalsIgnoreCase(DataElement.VALUE_TYPE_BOOL)) {
-            row = new BooleanRow(inflater, trackedEntityAttribute.name, dataValue);
+            row = new RadioButtonsRow(trackedEntityAttributeName, dataValue, DataEntryRowTypes.BOOLEAN);
         } else if (trackedEntityAttribute.valueType.equalsIgnoreCase(DataElement.VALUE_TYPE_TRUE_ONLY)) {
-            row = new CheckBoxRow(inflater, trackedEntityAttribute.name, dataValue);
+            row = new CheckBoxRow(trackedEntityAttributeName, dataValue);
         } else if (trackedEntityAttribute.valueType.equalsIgnoreCase(DataElement.VALUE_TYPE_DATE)) {
-            row = new DatePickerRow(inflater, trackedEntityAttribute.name, context, dataValue);
+            row = new DatePickerRow(trackedEntityAttributeName, dataValue);
         } else if (trackedEntityAttribute.valueType.equalsIgnoreCase(DataElement.VALUE_TYPE_STRING)) {
-            row = new LongTextRow(inflater, trackedEntityAttribute.name, dataValue);
+            row = new EditTextRow(trackedEntityAttributeName, dataValue, DataEntryRowTypes.LONG_TEXT);
         } else {
-            Log.d(CLASS_TAG, "type is: " + trackedEntityAttribute.valueType);
-            row = new LongTextRow(inflater, trackedEntityAttribute.name, dataValue);
+            row = new EditTextRow(trackedEntityAttributeName, dataValue, DataEntryRowTypes.LONG_TEXT);
         }
         return row;
     }
@@ -340,14 +342,15 @@ public class EnrollmentFragment extends Fragment {
 
     public void saveTrackedEntityInstance() {
         if(!currentTrackedEntityInstance.fromServer)
-        currentTrackedEntityInstance.save(false); //saving with async = false because the localId is needed
+        currentTrackedEntityInstance.save(true);
     }
 
     public void saveEnrollment() {
         currentEnrollment.fromServer = false;
         currentEnrollment.localTrackedEntityInstanceId = currentTrackedEntityInstance.localId;
         Log.d(CLASS_TAG, "currentenrollmentlocalteiID: " + currentEnrollment.localTrackedEntityInstanceId);
-        currentEnrollment.save(false);
+        currentEnrollment.fromServer = true;
+        currentEnrollment.save(true);
         for(TrackedEntityAttributeValue trackedEntityAttributeValue: trackedEntityAttributeValues) {
             Log.e(CLASS_TAG, "saving enrollment " + trackedEntityAttributeValue.
                     trackedEntityInstanceId + ": " + trackedEntityAttributeValue.
@@ -355,6 +358,8 @@ public class EnrollmentFragment extends Fragment {
             trackedEntityAttributeValue.localTrackedEntityInstanceId = currentTrackedEntityInstance.localId;
             trackedEntityAttributeValue.save(true);
         }
+        currentEnrollment.fromServer = false;
+        currentEnrollment.save(true); //workaround to make sure event isnt triggered to be sent to server before its datavalues are stored.
         Dhis2.sendLocalData(getActivity().getApplicationContext());
     }
 

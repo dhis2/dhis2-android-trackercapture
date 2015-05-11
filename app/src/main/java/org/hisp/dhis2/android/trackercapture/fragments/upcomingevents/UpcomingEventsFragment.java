@@ -48,6 +48,7 @@ import android.widget.TableLayout;
 
 import com.raizlabs.android.dbflow.structure.Model;
 
+import org.hisp.dhis2.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
@@ -58,10 +59,9 @@ import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis2.android.sdk.utils.Utils;
-import org.hisp.dhis2.android.sdk.utils.ui.rows.DatePickerRow;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.dataentry.DatePickerRow;
 import org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton;
 import org.hisp.dhis2.android.sdk.utils.ui.views.FloatingActionButton;
-import org.hisp.dhis2.android.trackercapture.INavigationHandler;
 import org.hisp.dhis2.android.trackercapture.R;
 import org.hisp.dhis2.android.trackercapture.fragments.ProgramOverviewFragment;
 import org.hisp.dhis2.android.trackercapture.fragments.loaders.DbLoader;
@@ -171,12 +171,12 @@ public class UpcomingEventsFragment extends Fragment implements View.OnClickList
         startDate.value = Utils.getCurrentDate();
         endDate = new DataValue();
         endDate.value = new LocalDate(Utils.getCurrentDate()).plusYears(1).toString();
-        DatePickerRow startDatePicker = new DatePickerRow(getActivity().getLayoutInflater(), getString(R.string.startdate), getActivity(), startDate);
-        DatePickerRow endDatePicker = new DatePickerRow(getActivity().getLayoutInflater(), getString(R.string.enddate), getActivity(), endDate);
+        DatePickerRow startDatePicker = new DatePickerRow(getString(R.string.startdate), startDate);
+        DatePickerRow endDatePicker = new DatePickerRow(getString(R.string.enddate), endDate);
         LinearLayout dateFilterContainer = (LinearLayout) header.findViewById(R.id.datefilterlayout);
-        View view1 = startDatePicker.getView(null);
+        View view1 = startDatePicker.getView(getFragmentManager(), getActivity().getLayoutInflater(), null, dateFilterContainer);
         view1.setLayoutParams(new TableLayout.LayoutParams(0, TableLayout.LayoutParams.WRAP_CONTENT, 1f));
-        View view2 = endDatePicker.getView(null);
+        View view2 = endDatePicker.getView(getFragmentManager(), getActivity().getLayoutInflater(), null, dateFilterContainer);
         view2.setLayoutParams(new TableLayout.LayoutParams(0, TableLayout.LayoutParams.WRAP_CONTENT, 1f));
         dateFilterContainer.addView(view1);
         dateFilterContainer.addView(view2);

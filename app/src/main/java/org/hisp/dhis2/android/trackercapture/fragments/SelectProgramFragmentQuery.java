@@ -1,6 +1,7 @@
 package org.hisp.dhis2.android.trackercapture.fragments;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.raizlabs.android.dbflow.sql.builder.Condition;
 import com.raizlabs.android.dbflow.sql.language.Select;
@@ -17,14 +18,18 @@ import org.hisp.dhis2.android.sdk.persistence.models.Program;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageDataElement;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
-import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntity;
+import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttribute;
+import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityInstance;
+import org.hisp.dhis2.android.trackercapture.fragments.events.TrackedEntityInstanceColumnNamesRow;
+import org.hisp.dhis2.android.trackercapture.fragments.events.TrackedEntityInstanceItemRow;
+import org.hisp.dhis2.android.trackercapture.fragments.events.TrackedEntityInstanceItemStatus;
 import org.hisp.dhis2.android.trackercapture.fragments.loaders.Query;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.Events.ColumnNamesRow;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.Events.EventItemRow;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.Events.EventItemStatus;
-import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.Events.EventRow;
 
+import org.hisp.dhis2.android.trackercapture.fragments.events.TrackedEntityInstanceRow;
 import org.joda.time.DateTime;
 
 import java.util.ArrayList;
@@ -36,7 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-class SelectProgramFragmentQuery implements Query<List<EventRow>> {
+class SelectProgramFragmentQuery implements Query<List<TrackedEntityInstanceRow>> {
     private final String mOrgUnitId;
     private final String mProgramId;
 
@@ -46,51 +51,66 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
     }
 
     @Override
-    public List<EventRow> query(Context context) {
-        List<EventRow> eventEventRows = new ArrayList<>();
+    public List<TrackedEntityInstanceRow> query(Context context) {
+        List<TrackedEntityInstanceRow> teiRows = new ArrayList<>();
 
         // create a list of EventItems
         Program selectedProgram = Select.byId(Program.class, mProgramId);
         if (selectedProgram == null || isListEmpty(selectedProgram.getProgramStages())) {
-            return eventEventRows;
+            return teiRows;
         }
 
         // since this is single event its only 1 stage
         ProgramStage programStage = selectedProgram.getProgramStages().get(0);
         if (programStage == null || isListEmpty(programStage.getProgramStageDataElements())) {
-            return eventEventRows;
+            return teiRows;
         }
 
-        List<ProgramStageDataElement> stageElements = programStage
-                .getProgramStageDataElements();
-        if (isListEmpty(stageElements)) {
-            return eventEventRows;
+        List<ProgramTrackedEntityAttribute> attributes = selectedProgram.getProgramTrackedEntityAttributes();
+        if (isListEmpty(attributes)) {
+            return teiRows;
         }
 
-        List<String> elementsToShow = new ArrayList<>();
-        ColumnNamesRow columnNames = new ColumnNamesRow();
-        for (ProgramStageDataElement stageElement : stageElements) {
-            if (stageElement.displayInReports && elementsToShow.size() < 3) {
-                elementsToShow.add(stageElement.dataElement);
-                if (stageElement.getDataElement() != null) {
-                    String name = stageElement.getDataElement().getName();
-                    if (elementsToShow.size() == 1) {
+        List<String> attributesToShow = new ArrayList<>();
+        TrackedEntityInstanceColumnNamesRow columnNames = new TrackedEntityInstanceColumnNamesRow();
+        for (ProgramTrackedEntityAttribute attribute : attributes) {
+            if (attribute.displayInList && attributesToShow.size() < 3) {
+                attributesToShow.add(attribute.trackedEntityAttribute);
+                if (attribute.getTrackedEntityAttribute() != null) {
+                    String name = attribute.getTrackedEntityAttribute().getName();
+                    if (attributesToShow.size() == 1) {
                         columnNames.setFirstItem(name);
-                    } else if (elementsToShow.size() == 2) {
+                    } else if (attributesToShow.size() == 2) {
                         columnNames.setSecondItem(name);
-                    } else if (elementsToShow.size() == 3) {
-                        columnNames.setThirdItem(name);
                     }
+
                 }
             }
         }
-        eventEventRows.add(columnNames);
+        teiRows.add(columnNames);
 
-        List<Event> events = DataValueController.getEvents(
-                mOrgUnitId, mProgramId
-        );
-        if (isListEmpty(events)) {
-            return eventEventRows;
+        List<Enrollment> enrollments = DataValueController.getEnrollments(
+                 mProgramId, mOrgUnitId);
+        List<Long> trackedEntityInstanceIds = new ArrayList<>();
+        if (isListEmpty(enrollments)) {return teiRows;}
+        else{
+            for(Enrollment enrollment : enrollments)
+            {
+                if(enrollment.localTrackedEntityInstanceId > 0)
+                {
+                    if(!trackedEntityInstanceIds.contains(enrollment.localTrackedEntityInstanceId))
+                        trackedEntityInstanceIds.add(enrollment.localTrackedEntityInstanceId);
+                }
+            }
+        }
+        List<TrackedEntityInstance> trackedEntityInstanceList = new ArrayList<>();
+        if(!isListEmpty(trackedEntityInstanceIds))
+        {
+            for(long localId : trackedEntityInstanceIds)
+            {
+                TrackedEntityInstance tei = DataValueController.getTrackedEntityInstance(localId);
+                trackedEntityInstanceList.add(tei);
+            }
         }
 
         List<Option> options = Select.all(Option.class);
@@ -102,75 +122,78 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
         List<FailedItem> failedEvents = Select.all(
                 FailedItem.class, Condition
                         .column(FailedItem$Table.ITEMTYPE)
-                        .is(FailedItem.EVENT)
+                        .is(FailedItem.TRACKEDENTITYINSTANCE)
         );
 
         Set<String> failedEventIds = new HashSet<>();
         for (FailedItem failedItem : failedEvents) {
-            Event event = (Event) failedItem.getItem();
-            failedEventIds.add(event.getEvent());
+            TrackedEntityInstance tei = (TrackedEntityInstance) failedItem.getItem();
+            failedEventIds.add(tei.getTrackedEntityInstance());
         }
 
-        Collections.sort(events, new EventComparator());
-        for (Event event : events) {
-            eventEventRows.add(createEventItem(context,
-                    event, elementsToShow,
+//        Collections.sort(trackedEntityInstanceList, new EventComparator()); //not necessary to sort
+        for (TrackedEntityInstance trackedEntityInstance : trackedEntityInstanceList) {
+            teiRows.add(createTrackedEntityInstanceItem(context,
+                    trackedEntityInstance, attributesToShow, attributes,
                     codeToName, failedEventIds));
         }
 
-        return eventEventRows;
+        return teiRows;
     }
 
-    private EventItemRow createEventItem(Context context, Event event, List<String> elementsToShow,
+    private TrackedEntityInstanceItemRow createTrackedEntityInstanceItem(Context context, TrackedEntityInstance trackedEntityInstance,
+                                                                         List<String> attributesToShow, List<ProgramTrackedEntityAttribute> attributes,
                                          Map<String, String> codeToName,
                                          Set<String> failedEventIds) {
-        EventItemRow eventItem = new EventItemRow(context);
-        eventItem.setEvent(event);
+        TrackedEntityInstanceItemRow trackedEntityInstanceItemRow = new TrackedEntityInstanceItemRow(context);
+        trackedEntityInstanceItemRow.setTrackedEntityInstance(trackedEntityInstance);
 
-        if (event.isFromServer()) {
-            eventItem.setStatus(EventItemStatus.SENT);
-        } else if (failedEventIds.contains(event.getEvent())) {
-            eventItem.setStatus(EventItemStatus.ERROR);
+        if (trackedEntityInstance.fromServer) {
+            trackedEntityInstanceItemRow.setStatus(TrackedEntityInstanceItemStatus.SENT);
+        } else if (failedEventIds.contains(trackedEntityInstance.getTrackedEntityInstance())) {
+            trackedEntityInstanceItemRow.setStatus(TrackedEntityInstanceItemStatus.ERROR);
         } else {
-            eventItem.setStatus(EventItemStatus.OFFLINE);
+            trackedEntityInstanceItemRow.setStatus(TrackedEntityInstanceItemStatus.OFFLINE);
         }
 
-        for (int i = 0; i < 3; i++) {
-            if(i>=elementsToShow.size()) break;
-            String dataElement = elementsToShow.get(i);
-            if (dataElement != null) {
-                DataValue dataValue = getDataValue(event, dataElement);
-                if (dataValue == null) {
-                    continue;
-                }
+        for(int i=0; i<attributesToShow.size(); i++)
+        {
+            if(i>attributesToShow.size()) break;
 
-                String code = dataValue.getValue();
+            String attribute = attributesToShow.get(i);
+            if(attribute != null)
+            {
+                TrackedEntityAttributeValue teav = DataValueController.getTrackedEntityAttributeValue(attribute, trackedEntityInstance.localId);
+                String code = teav.getValue();
                 String name = codeToName.get(code) == null ? code : codeToName.get(code);
 
                 if (i == 0) {
-                    eventItem.setFirstItem(name);
+                    trackedEntityInstanceItemRow.setFirstItem(name);
                 } else if (i == 1) {
-                    eventItem.setSecondItem(name);
+                    trackedEntityInstanceItemRow.setSecondItem(name);
                 } else if (i == 2) {
-                    eventItem.setThirdItem(name);
+                    trackedEntityInstanceItemRow.setThirdItem(name);
                 }
             }
         }
-        return eventItem;
+
+
+        return trackedEntityInstanceItemRow;
     }
 
-    private DataValue getDataValue(Event event, String dataElement) {
-        List<DataValue> dataValues = Select.all(
-                DataValue.class,
-                Condition.column(DataValue$Table.EVENT).is(event.event),
-                Condition.column(DataValue$Table.DATAELEMENT).is(dataElement)
-        );
+    private DataValue getDataValue(TrackedEntityInstance event, String dataElement) {
+//        List<DataValue> dataValues = Select.all(
+//                DataValue.class,
+//                Condition.column(DataValue$Table.EVENT).is(event.event),
+//                Condition.column(DataValue$Table.DATAELEMENT).is(dataElement)
+//        );
 
-        if (dataValues != null && !dataValues.isEmpty()) {
-            return dataValues.get(0);
-        } else {
-            return null;
-        }
+//        if (dataValues != null && !dataValues.isEmpty()) {
+//            return dataValues.get(0);
+//        } else {
+//            return null;
+//        }
+        return null;
     }
 
     private static <T> boolean isListEmpty(List<T> items) {

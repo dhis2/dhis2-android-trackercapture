@@ -44,12 +44,15 @@ import android.view.MenuItem;
 
 import com.squareup.otto.Subscribe;
 
+import org.hisp.dhis2.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis2.android.sdk.activities.LoginActivity;
+import org.hisp.dhis2.android.sdk.activities.OnBackPressedListener;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.events.BaseEvent;
 import org.hisp.dhis2.android.sdk.events.MessageEvent;
 import org.hisp.dhis2.android.sdk.fragments.LoadingFragment;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
+import org.hisp.dhis2.android.sdk.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis2.android.sdk.network.managers.NetworkManager;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis2.android.sdk.persistence.models.Enrollment;
@@ -57,7 +60,6 @@ import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityInstance;
-import org.hisp.dhis2.android.trackercapture.fragments.DataEntryFragment;
 import org.hisp.dhis2.android.trackercapture.fragments.EnrollmentFragment;
 import org.hisp.dhis2.android.trackercapture.fragments.ProgramOverviewFragment;
 import org.hisp.dhis2.android.trackercapture.fragments.SelectProgramFragment;
@@ -169,6 +171,5 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
             transaction.commit();
         }
     }
-
-
 }
+

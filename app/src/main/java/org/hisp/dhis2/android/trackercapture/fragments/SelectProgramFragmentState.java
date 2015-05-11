@@ -25,6 +25,7 @@ class SelectProgramFragmentState implements Parcelable {
     private String programName;
     private String programId;
 
+
     public SelectProgramFragmentState() {
     }
 
@@ -60,6 +61,7 @@ class SelectProgramFragmentState implements Parcelable {
 
         parcel.writeString(programName);
         parcel.writeString(programId);
+
     }
 
     public boolean isSyncInProcess() {
@@ -113,5 +115,7 @@ class SelectProgramFragmentState implements Parcelable {
     public String getProgramId() {
         return programId;
     }
+
+
 }
 

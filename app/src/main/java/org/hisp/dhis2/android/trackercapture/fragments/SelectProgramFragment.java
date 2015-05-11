@@ -59,6 +59,7 @@ import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
+import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis2.android.sdk.events.BaseEvent;
 import org.hisp.dhis2.android.sdk.events.InvalidateEvent;
 import org.hisp.dhis2.android.sdk.events.MessageEvent;
@@ -69,6 +70,7 @@ import org.hisp.dhis2.android.sdk.persistence.models.Event;
 import org.hisp.dhis2.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
+import org.hisp.dhis2.android.sdk.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttributeValue;
@@ -76,15 +78,19 @@ import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis2.android.sdk.utils.Utils;
 import org.hisp.dhis2.android.sdk.utils.ui.views.CardSpinner;
 import org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton;
-import org.hisp.dhis2.android.trackercapture.INavigationHandler;
+import org.hisp.dhis2.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis2.android.trackercapture.R;
+import org.hisp.dhis2.android.trackercapture.fragments.events.OnTrackedEntityInstanceClick;
+import org.hisp.dhis2.android.trackercapture.fragments.events.TrackedEntityInstanceRow;
 import org.hisp.dhis2.android.trackercapture.fragments.loaders.DbLoader;
 import org.hisp.dhis2.android.trackercapture.fragments.loaders.Query;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.Events.EventRow;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.Events.OnEventClick;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.OrgUnitDialogFragment;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.ProgramDialogFragment;
+import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.UpcomingEventsFragment;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.adapters.EventAdapter;
+import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.adapters.TrackedEntityInstanceAdapter;
 import org.hisp.dhis2.android.trackercapture.views.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -93,18 +99,20 @@ import java.util.List;
 public class SelectProgramFragment extends Fragment
         implements View.OnClickListener, OrgUnitDialogFragment.OnOrgUnitSetListener,
         ProgramDialogFragment.OnProgramSetListener,
-        LoaderManager.LoaderCallbacks<List<EventRow>> {
+        LoaderManager.LoaderCallbacks<List<TrackedEntityInstanceRow>> {
     public static final String TAG = SelectProgramFragment.class.getSimpleName();
     private static final String STATE = "state:SelectProgramFragment";
     private static final int LOADER_ID = 1;
 
     private ListView mListView;
     private ProgressBar mProgressBar;
-    private EventAdapter mAdapter;
+//    private EventAdapter mAdapter;
+    private TrackedEntityInstanceAdapter mAdapter;
 
     private CardTextViewButton mOrgUnitButton;
     private CardTextViewButton mProgramButton;
     private FloatingActionButton mRegisterEventButton;
+    private FloatingActionButton mUpcomingEventsButton;
 
     private SelectProgramFragmentState mState;
     private SelectProgramFragmentPreferences mPrefs;
@@ -149,7 +157,7 @@ public class SelectProgramFragment extends Fragment
                 getActivity().getApplicationContext());
 
         mListView = (ListView) view.findViewById(R.id.event_listview);
-        mAdapter = new EventAdapter(getLayoutInflater(savedInstanceState));
+        mAdapter = new TrackedEntityInstanceAdapter(getLayoutInflater(savedInstanceState));
         View header = getLayoutInflater(savedInstanceState).inflate(
                 R.layout.fragment_select_program_header, mListView, false
         );
@@ -162,14 +170,16 @@ public class SelectProgramFragment extends Fragment
         mOrgUnitButton = (CardTextViewButton) header.findViewById(R.id.select_organisation_unit);
         mProgramButton = (CardTextViewButton) header.findViewById(R.id.select_program);
         mRegisterEventButton = (FloatingActionButton) header.findViewById(R.id.register_new_event);
-
+        mUpcomingEventsButton = (FloatingActionButton) header.findViewById(R.id.upcoming_events_button);
         mOrgUnitButton.setOnClickListener(this);
         mProgramButton.setOnClickListener(this);
         mRegisterEventButton.setOnClickListener(this);
+        mUpcomingEventsButton.setOnClickListener(this);
 
         mOrgUnitButton.setEnabled(true);
         mProgramButton.setEnabled(false);
         mRegisterEventButton.hide();
+        mUpcomingEventsButton.hide();
 
         if (savedInstanceState != null &&
                 savedInstanceState.getParcelable(STATE) != null) {
@@ -186,6 +196,7 @@ public class SelectProgramFragment extends Fragment
                 if (program != null) {
                     mState.setProgram(program.first, program.second);
                 }
+
             }
         }
 
@@ -277,7 +288,7 @@ public class SelectProgramFragment extends Fragment
     }
 
     @Override
-    public Loader<List<EventRow>> onCreateLoader(int id, Bundle args) {
+    public Loader<List<TrackedEntityInstanceRow>> onCreateLoader(int id, Bundle args) {
         if (LOADER_ID == id && isAdded()) {
             List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
             modelsToTrack.add(Event.class);
@@ -290,7 +301,7 @@ public class SelectProgramFragment extends Fragment
     }
 
     @Override
-    public void onLoadFinished(Loader<List<EventRow>> loader, List<EventRow> data) {
+    public void onLoadFinished(Loader<List<TrackedEntityInstanceRow>> loader, List<TrackedEntityInstanceRow> data) {
         if (LOADER_ID == loader.getId()) {
             mProgressBar.setVisibility(View.GONE);
             mAdapter.swapData(data);
@@ -298,18 +309,23 @@ public class SelectProgramFragment extends Fragment
     }
 
     @Override
-    public void onLoaderReset(Loader<List<EventRow>> loader) {
+    public void onLoaderReset(Loader<List<TrackedEntityInstanceRow>> loader) {
         mAdapter.swapData(null);
     }
 
     @Subscribe
-    public void onItemClick(OnEventClick eventClick) {
+    public void onItemClick(OnTrackedEntityInstanceClick eventClick) {
         if (eventClick.isOnDescriptionClick()) {
-            DataEntryFragment fragment = DataEntryFragment.newInstance(
-                    mState.getOrgUnitId(), mState.getProgramId(),
-                    eventClick.getEvent().getLocalId()
-            );
-            mNavigationHandler.switchFragment(fragment, DataEntryFragment.CLASS_TAG, true);
+
+            TrackedEntityInstance tei = eventClick.getTrackedEntityInstance();
+            OrganisationUnit mOrgUnit = MetaDataController.getOrganisationUnit(mState.getOrgUnitId());
+            Program mProgram = MetaDataController.getProgram(mState.getProgramId());
+            ProgramOverviewFragment fragment = new ProgramOverviewFragment();
+            fragment.setSelectedOrganisationUnit(mOrgUnit);
+            fragment.setSelectedProgram(mProgram);
+            fragment.setSelectedTrackedEntityInstance(tei);
+
+            mNavigationHandler.switchFragment(fragment, ProgramOverviewFragment.CLASS_TAG, true);
         } else {
             switch (eventClick.getStatus()) {
                 case SENT:
@@ -327,7 +343,7 @@ public class SelectProgramFragment extends Fragment
                     );
                     break;
                 case ERROR: {
-                    String message = getErrorDescription(eventClick.getEvent());
+                    String message = getErrorDescription(eventClick.getTrackedEntityInstance());
                     Dhis2.getInstance().showErrorDialog(getActivity(),
                             getString(R.string.event_error),
                             message, R.drawable.ic_event_error
@@ -338,9 +354,9 @@ public class SelectProgramFragment extends Fragment
         }
     }
 
-    private String getErrorDescription(Event event) {
+    private String getErrorDescription(TrackedEntityInstance trackedEntityInstance) {
         FailedItem failedItem =
-                Select.byId(FailedItem.class, event.getLocalId());
+                Select.byId(FailedItem.class, trackedEntityInstance.localId);
 
         if (failedItem != null) {
             if (failedItem.httpStatusCode == 401) {
@@ -381,13 +397,17 @@ public class SelectProgramFragment extends Fragment
                 break;
             }
             case R.id.register_new_event: {
-                DataEntryFragment fragment2 = DataEntryFragment.newInstance(
-                        mState.getOrgUnitId(), mState.getProgramId()
-                );
-                mNavigationHandler.switchFragment(
-                        fragment2, DataEntryFragment.CLASS_TAG, true
-                );
+                EnrollmentFragment enrollmentFragment = new EnrollmentFragment();
+                enrollmentFragment.setCurrentTrackedEntityInstance(null);
+                enrollmentFragment.setSelectedOrganisationUnit(MetaDataController.getOrganisationUnit(mState.getOrgUnitId()));
+                enrollmentFragment.setSelectedProgram(MetaDataController.getProgram(mState.getProgramId()));
+                mNavigationHandler.switchFragment(enrollmentFragment, EnrollmentFragment.class.getName(), true);
+
                 break;
+            }
+            case R.id.upcoming_events_button: {
+                UpcomingEventsFragment fragment = new UpcomingEventsFragment();
+                mNavigationHandler.switchFragment(fragment, UpcomingEventsFragment.class.getName(), true);
             }
         }
     }
@@ -397,9 +417,11 @@ public class SelectProgramFragment extends Fragment
         switch (level) {
             case 0:
                 mRegisterEventButton.hide();
+                mUpcomingEventsButton.hide();
                 break;
             case 1:
                 mRegisterEventButton.show();
+                mUpcomingEventsButton.show();
         }
     }
 }

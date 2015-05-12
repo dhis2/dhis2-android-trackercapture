@@ -8,13 +8,7 @@
     <string name="registered_events">Registered events</string>
     <string name="new_event">New event</string>
 
-    <string name="report_date">Report date</string>
-    <string name="event_sent">Sent</string>
-    <string name="event_offline">Offline</string>
-    <string name="event_error">Error</string>
-    <string name="status_sent_description">This item has been successfully synchronized with the server.</string>
-    <string name="status_offline_description">This item has not yet been synchronized with the server.</string>
-    <string name="status_error_description">Something went wrong. Please, try to re-upload event or contact administrator.</string>
+    
 
     <string name="error_401_description">Username or password has changed. Please log out and sign in again. \nNote! Event will be lost</string>
     <string name="error_408_description">Slow connection. Please, try to synchronize later</string>

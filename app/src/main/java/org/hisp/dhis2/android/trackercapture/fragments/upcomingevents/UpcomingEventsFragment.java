@@ -64,7 +64,7 @@ import org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton;
 import org.hisp.dhis2.android.sdk.utils.ui.views.FloatingActionButton;
 import org.hisp.dhis2.android.trackercapture.R;
 import org.hisp.dhis2.android.trackercapture.fragments.ProgramOverviewFragment;
-import org.hisp.dhis2.android.trackercapture.fragments.loaders.DbLoader;
+import org.hisp.dhis2.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.adapters.EventAdapter;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.adapters.UpcomingEventAdapter;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.upcomingevents.UpcomingEventRow;

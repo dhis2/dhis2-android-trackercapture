@@ -30,7 +30,6 @@
 package org.hisp.dhis2.android.trackercapture.fragments;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
@@ -52,9 +51,7 @@ import org.hisp.dhis2.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
-import org.hisp.dhis2.android.sdk.events.BaseEvent;
 import org.hisp.dhis2.android.sdk.events.InvalidateEvent;
-import org.hisp.dhis2.android.sdk.events.MessageEvent;
 import org.hisp.dhis2.android.sdk.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis2.android.sdk.persistence.models.Enrollment;
@@ -68,6 +65,7 @@ import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttributeValue
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis2.android.sdk.utils.ui.views.CardSpinner;
 import org.hisp.dhis2.android.trackercapture.R;
+import org.hisp.dhis2.android.trackercapture.fragments.enrollment.EnrollmentFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -508,9 +506,11 @@ public class ProgramOverviewFragment extends Fragment {
     }
 
     public void enroll() {
-        EnrollmentFragment fragment = new EnrollmentFragment();
-        fragment.setSelectedProgram(getSelectedProgram());
-        fragment.setSelectedOrganisationUnit(getSelectedOrganisationUnit());
+//        EnrollmentFragment fragment = new EnrollmentFragment();
+        EnrollmentFragment fragment = EnrollmentFragment.newInstance(getSelectedOrganisationUnit().getId(), getSelectedProgram().getId());
+
+//        fragment.setSelectedProgram(getSelectedProgram());
+//        fragment.setSelectedOrganisationUnit(getSelectedOrganisationUnit());
         mNavigationHandler.switchFragment(fragment,EnrollmentFragment.class.getName(), true);
     }
 

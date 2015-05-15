@@ -4,7 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.hisp.dhis2.android.trackercapture.fragments.events.TrackedEntityInstanceRow;
+import org.hisp.dhis2.android.trackercapture.fragments.selectprogram.TrackedEntityInstanceRow;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.upcomingevents.EventRowType;
 
 /**

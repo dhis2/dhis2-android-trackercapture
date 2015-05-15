@@ -30,12 +30,10 @@
 package org.hisp.dhis2.android.trackercapture.fragments;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -43,58 +41,36 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.TableLayout;
-import android.widget.TextView;
 
 import com.raizlabs.android.dbflow.sql.language.Select;
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
-import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
-import org.hisp.dhis2.android.sdk.events.BaseEvent;
-import org.hisp.dhis2.android.sdk.events.InvalidateEvent;
-import org.hisp.dhis2.android.sdk.events.MessageEvent;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
-import org.hisp.dhis2.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
 import org.hisp.dhis2.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
-import org.hisp.dhis2.android.sdk.fragments.dataentry.DataEntryFragment;
-import org.hisp.dhis2.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
-import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttribute;
-import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityInstance;
-import org.hisp.dhis2.android.sdk.utils.Utils;
-import org.hisp.dhis2.android.sdk.utils.ui.views.CardSpinner;
 import org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton;
 import org.hisp.dhis2.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis2.android.trackercapture.R;
-import org.hisp.dhis2.android.trackercapture.fragments.events.OnTrackedEntityInstanceClick;
-import org.hisp.dhis2.android.trackercapture.fragments.events.TrackedEntityInstanceRow;
-import org.hisp.dhis2.android.trackercapture.fragments.loaders.DbLoader;
-import org.hisp.dhis2.android.trackercapture.fragments.loaders.Query;
-import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.Events.EventRow;
-import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.Events.OnEventClick;
+import org.hisp.dhis2.android.trackercapture.fragments.enrollment.EnrollmentFragment;
+import org.hisp.dhis2.android.trackercapture.fragments.selectprogram.OnTrackedEntityInstanceClick;
+import org.hisp.dhis2.android.trackercapture.fragments.selectprogram.TrackedEntityInstanceRow;
+import org.hisp.dhis2.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.OrgUnitDialogFragment;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.ProgramDialogFragment;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.UpcomingEventsFragment;
-import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.adapters.EventAdapter;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.adapters.TrackedEntityInstanceAdapter;
 import org.hisp.dhis2.android.trackercapture.views.FloatingActionButton;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 public class SelectProgramFragment extends Fragment
         implements View.OnClickListener, OrgUnitDialogFragment.OnOrgUnitSetListener,
@@ -397,10 +373,10 @@ public class SelectProgramFragment extends Fragment
                 break;
             }
             case R.id.register_new_event: {
-                EnrollmentFragment enrollmentFragment = new EnrollmentFragment();
-                enrollmentFragment.setCurrentTrackedEntityInstance(null);
-                enrollmentFragment.setSelectedOrganisationUnit(MetaDataController.getOrganisationUnit(mState.getOrgUnitId()));
-                enrollmentFragment.setSelectedProgram(MetaDataController.getProgram(mState.getProgramId()));
+                EnrollmentFragment enrollmentFragment = EnrollmentFragment.newInstance(mState.getOrgUnitId(),mState.getProgramId());
+//                enrollmentFragment.setCurrentTrackedEntityInstance(null);
+//                enrollmentFragment.setSelectedOrganisationUnit(MetaDataController.getOrganisationUnit(mState.getOrgUnitId()));
+//                enrollmentFragment.setSelectedProgram(MetaDataController.getProgram(mState.getProgramId()));
                 mNavigationHandler.switchFragment(enrollmentFragment, EnrollmentFragment.class.getName(), true);
 
                 break;

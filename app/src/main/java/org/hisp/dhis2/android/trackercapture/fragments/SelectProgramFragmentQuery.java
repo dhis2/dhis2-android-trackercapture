@@ -1,14 +1,12 @@
 package org.hisp.dhis2.android.trackercapture.fragments;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.raizlabs.android.dbflow.sql.builder.Condition;
 import com.raizlabs.android.dbflow.sql.language.Select;
 
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
-import org.hisp.dhis2.android.sdk.persistence.models.DataValue$Table;
 import org.hisp.dhis2.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
 import org.hisp.dhis2.android.sdk.persistence.models.FailedItem;
@@ -16,24 +14,18 @@ import org.hisp.dhis2.android.sdk.persistence.models.FailedItem$Table;
 import org.hisp.dhis2.android.sdk.persistence.models.Option;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
-import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageDataElement;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
-import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityInstance;
-import org.hisp.dhis2.android.trackercapture.fragments.events.TrackedEntityInstanceColumnNamesRow;
-import org.hisp.dhis2.android.trackercapture.fragments.events.TrackedEntityInstanceItemRow;
-import org.hisp.dhis2.android.trackercapture.fragments.events.TrackedEntityInstanceItemStatus;
-import org.hisp.dhis2.android.trackercapture.fragments.loaders.Query;
-import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.Events.ColumnNamesRow;
-import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.Events.EventItemRow;
-import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.Events.EventItemStatus;
+import org.hisp.dhis2.android.trackercapture.fragments.selectprogram.TrackedEntityInstanceColumnNamesRow;
+import org.hisp.dhis2.android.trackercapture.fragments.selectprogram.TrackedEntityInstanceItemRow;
+import org.hisp.dhis2.android.trackercapture.fragments.selectprogram.TrackedEntityInstanceItemStatus;
+import org.hisp.dhis2.android.sdk.persistence.loaders.Query;
 
-import org.hisp.dhis2.android.trackercapture.fragments.events.TrackedEntityInstanceRow;
+import org.hisp.dhis2.android.trackercapture.fragments.selectprogram.TrackedEntityInstanceRow;
 import org.joda.time.DateTime;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;

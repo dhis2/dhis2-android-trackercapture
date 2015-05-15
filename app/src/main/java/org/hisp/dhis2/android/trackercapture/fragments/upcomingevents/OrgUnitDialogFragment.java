@@ -47,8 +47,8 @@ import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
 import org.hisp.dhis2.android.trackercapture.R;
-import org.hisp.dhis2.android.trackercapture.fragments.loaders.DbLoader;
-import org.hisp.dhis2.android.trackercapture.fragments.loaders.Query;
+import org.hisp.dhis2.android.sdk.persistence.loaders.DbLoader;
+import org.hisp.dhis2.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.adapters.SimpleAdapter;
 
 import java.util.ArrayList;

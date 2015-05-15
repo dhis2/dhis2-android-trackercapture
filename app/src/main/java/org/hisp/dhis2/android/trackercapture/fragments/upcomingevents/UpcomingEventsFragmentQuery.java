@@ -44,7 +44,7 @@ import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageDataElement;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttributeValue;
-import org.hisp.dhis2.android.trackercapture.fragments.loaders.Query;
+import org.hisp.dhis2.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.upcomingevents.UpcomingEventsColumnNamesRow;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.upcomingevents.UpcomingEventItemRow;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.upcomingevents.EventItemStatus;

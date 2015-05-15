@@ -54,7 +54,6 @@ import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
 import org.hisp.dhis2.android.sdk.persistence.models.FailedItem;
-import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton;
@@ -64,6 +63,7 @@ import org.hisp.dhis2.android.trackercapture.fragments.enrollment.EnrollmentFrag
 import org.hisp.dhis2.android.trackercapture.fragments.selectprogram.OnTrackedEntityInstanceClick;
 import org.hisp.dhis2.android.trackercapture.fragments.selectprogram.TrackedEntityInstanceRow;
 import org.hisp.dhis2.android.sdk.persistence.loaders.DbLoader;
+import org.hisp.dhis2.android.trackercapture.fragments.programoverview.ProgramOverviewFragment;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.OrgUnitDialogFragment;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.ProgramDialogFragment;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.UpcomingEventsFragment;
@@ -293,13 +293,9 @@ public class SelectProgramFragment extends Fragment
     public void onItemClick(OnTrackedEntityInstanceClick eventClick) {
         if (eventClick.isOnDescriptionClick()) {
 
-            TrackedEntityInstance tei = eventClick.getTrackedEntityInstance();
-            OrganisationUnit mOrgUnit = MetaDataController.getOrganisationUnit(mState.getOrgUnitId());
-            Program mProgram = MetaDataController.getProgram(mState.getProgramId());
-            ProgramOverviewFragment fragment = new ProgramOverviewFragment();
-            fragment.setSelectedOrganisationUnit(mOrgUnit);
-            fragment.setSelectedProgram(mProgram);
-            fragment.setSelectedTrackedEntityInstance(tei);
+            ProgramOverviewFragment fragment = ProgramOverviewFragment.
+                    newInstance(mState.getOrgUnitId(), mState.getProgramId(),
+                            eventClick.getTrackedEntityInstance().localId);
 
             mNavigationHandler.switchFragment(fragment, ProgramOverviewFragment.CLASS_TAG, true);
         } else {

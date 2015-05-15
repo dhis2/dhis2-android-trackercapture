@@ -1,0 +1,364 @@
+/*
+ *  Copyright (c) 2015, University of Oslo
+ *  * All rights reserved.
+ *  *
+ *  * Redistribution and use in source and binary forms, with or without
+ *  * modification, are permitted provided that the following conditions are met:
+ *  * Redistributions of source code must retain the above copyright notice, this
+ *  * list of conditions and the following disclaimer.
+ *  *
+ *  * Redistributions in binary form must reproduce the above copyright notice,
+ *  * this list of conditions and the following disclaimer in the documentation
+ *  * and/or other materials provided with the distribution.
+ *  * Neither the name of the HISP project nor the names of its contributors may
+ *  * be used to endorse or promote products derived from this software without
+ *  * specific prior written permission.
+ *  *
+ *  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ *  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ *  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ *  * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ *  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
+package org.hisp.dhis2.android.trackercapture.fragments.programoverview;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+
+import com.raizlabs.android.dbflow.structure.Model;
+
+import org.hisp.dhis2.android.sdk.activities.INavigationHandler;
+import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
+import org.hisp.dhis2.android.sdk.fragments.dataentry.DataEntryFragment;
+import org.hisp.dhis2.android.sdk.persistence.models.Enrollment;
+import org.hisp.dhis2.android.sdk.persistence.models.Event;
+import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
+import org.hisp.dhis2.android.sdk.persistence.models.Program;
+import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
+import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttributeValue;
+import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityInstance;
+import org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton;
+import org.hisp.dhis2.android.trackercapture.R;
+import org.hisp.dhis2.android.trackercapture.fragments.loaders.DbLoader;
+import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.ProgramDialogFragment;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @author Simen Skogly Russnes on 20.02.15.
+ */
+public class ProgramOverviewFragment extends Fragment implements View.OnClickListener,
+        AdapterView.OnItemClickListener,
+        ProgramDialogFragment.OnProgramSetListener,
+        LoaderManager.LoaderCallbacks<ProgramOverviewFragmentForm>{
+
+    public static final String CLASS_TAG = ProgramOverviewFragment.class.getSimpleName();
+    private static final String STATE = "state:UpcomingEventsFragment";
+    private static final int LOADER_ID = 578922;
+
+    private CardTextViewButton mProgramButton;
+
+    private static final String EXTRA_ARGUMENTS = "extra:Arguments";
+    private static final String EXTRA_SAVED_INSTANCE_STATE = "extra:savedInstanceState";
+
+    private static final String ORG_UNIT_ID = "extra:orgUnitId";
+    private static final String PROGRAM_ID = "extra:ProgramId";
+    private static final String TRACKEDENTITYINSTANCE_ID = "extra:TrackedEntityInstanceId";
+
+    private ListView listView;
+    private ProgressBar mProgressBar;
+    private ProgramStageAdapter adapter;
+
+    private TextView enrollmentDateLabel;
+    private TextView enrollmentDateValue;
+    private TextView incidentDateLabel;
+    private TextView incidentDateValue;
+
+    private TextView attribute1Label;
+    private TextView attribute1Value;
+    private TextView attribute2Label;
+    private TextView attribute2Value;
+
+    private ProgramOverviewFragmentState mState;
+    private ProgramOverviewFragmentForm mForm;
+
+    private INavigationHandler mNavigationHandler;
+
+    public static ProgramOverviewFragment newInstance(String orgUnitId, String programId, long trackedEntityInstanceId) {
+        ProgramOverviewFragment fragment = new ProgramOverviewFragment();
+        Bundle args = new Bundle();
+        args.putString(ORG_UNIT_ID, orgUnitId);
+        args.putString(PROGRAM_ID, programId);
+        args.putLong(TRACKEDENTITYINSTANCE_ID, trackedEntityInstanceId);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        Bundle argumentsBundle = new Bundle();
+        argumentsBundle.putBundle(EXTRA_ARGUMENTS, getArguments());
+        argumentsBundle.putBundle(EXTRA_SAVED_INSTANCE_STATE, savedInstanceState);
+        getLoaderManager().initLoader(LOADER_ID, argumentsBundle, this);
+
+        mProgressBar.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        if (activity instanceof INavigationHandler) {
+            mNavigationHandler = (INavigationHandler) activity;
+        } else {
+            throw new IllegalArgumentException("Activity must implement INavigationHandler interface");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        // we need to nullify reference
+        // to parent activity in order not to leak it
+        mNavigationHandler = null;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_programoverview, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState)
+    {
+        listView = (ListView) view.findViewById(R.id.listview);
+        View header = getLayoutInflater(savedInstanceState).inflate(
+                R.layout.fragment_programoverview_header, listView, false
+        );
+        mProgressBar = (ProgressBar) header.findViewById(R.id.progress_bar);
+        mProgressBar.setVisibility(View.GONE);
+
+        adapter = new ProgramStageAdapter(getLayoutInflater(savedInstanceState));
+        listView.addHeaderView(header, CLASS_TAG, false);
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(this);
+
+        enrollmentDateLabel = (TextView) header.findViewById(R.id.dateOfEnrollmentLabel);
+        enrollmentDateValue = (TextView) header.findViewById(R.id.dateOfEnrollmentValue);
+        incidentDateLabel = (TextView) header.findViewById(R.id.dateOfIncidentLabel);
+        incidentDateValue = (TextView) header.findViewById(R.id.dateOfEnrollmentValue);
+
+        attribute1Label = (TextView) header.findViewById(R.id.headerItem1label);
+        attribute1Value = (TextView) header.findViewById(R.id.headerItem1value);
+        attribute2Label = (TextView) header.findViewById(R.id.headerItem2label);
+        attribute2Value = (TextView) header.findViewById(R.id.headerItem2value);
+
+
+
+        Bundle fragmentArguments = getArguments();//savedInstanceState.getBundle(EXTRA_ARGUMENTS);
+        mProgramButton = (CardTextViewButton) header.findViewById(R.id.select_program);
+        mProgramButton.setText(fragmentArguments.getString(PROGRAM_ID));
+        mProgramButton.setOnClickListener(this);
+        mProgramButton.setEnabled(true);
+        Log.d(CLASS_TAG, "program: " + fragmentArguments.getString(PROGRAM_ID));
+
+        if (savedInstanceState != null &&
+                savedInstanceState.getParcelable(STATE) != null) {
+            mState = savedInstanceState.getParcelable(STATE);
+        }
+
+        if (mState == null) {
+            mState = new ProgramOverviewFragmentState();
+            OrganisationUnit ou = MetaDataController.getOrganisationUnit(fragmentArguments.getString(ORG_UNIT_ID));
+            Program program = MetaDataController.getProgram(fragmentArguments.getString(PROGRAM_ID));
+            mState.setOrgUnit(ou.getId(), ou.getLabel());
+            mState.setProgram(program.getId(), program.getName());
+            mState.setTrackedEntityInstance(fragmentArguments.getLong(TRACKEDENTITYINSTANCE_ID, -1));
+        }
+
+        onRestoreState(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_upcoming_events, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            mNavigationHandler.switchFragment(
+                    new SettingsFragment(), SettingsFragment.TAG, true);
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
+    public void onRestoreState(boolean hasPrograms) {
+
+        ProgramOverviewFragmentState backedUpState = new ProgramOverviewFragmentState(mState);
+        if (!backedUpState.isProgramEmpty()) {
+            onProgramSelected(
+                    backedUpState.getProgramId(),
+                    backedUpState.getProgramName()
+            );
+        } else {
+            //todo
+        }
+    }
+
+    @Override
+    public void onProgramSelected(String programId, String programName) {
+        mProgramButton.setText(programName);
+
+        mState.setProgram(programId, programName);
+        clearViews();
+        getLoaderManager().restartLoader(LOADER_ID, getArguments(), this);
+    }
+
+    @Override
+    public Loader<ProgramOverviewFragmentForm> onCreateLoader(int id, Bundle args) {
+        if (LOADER_ID == id && isAdded()) {
+            List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
+            modelsToTrack.add(Event.class);
+            modelsToTrack.add(Enrollment.class);
+            modelsToTrack.add(TrackedEntityInstance.class);
+            modelsToTrack.add(TrackedEntityAttributeValue.class);
+            // modelsToTrack.add(FailedItem.class);
+            return new DbLoader<>(
+                    getActivity().getBaseContext(), modelsToTrack,
+                    new ProgramOverviewFragmentQuery(args.getString(ORG_UNIT_ID),
+                            args.getString(PROGRAM_ID),
+                            args.getLong(TRACKEDENTITYINSTANCE_ID, -1)));
+        }
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<ProgramOverviewFragmentForm> loader, ProgramOverviewFragmentForm data) {
+        if (LOADER_ID == loader.getId()) {
+            mForm = data;
+            mProgressBar.setVisibility(View.GONE);
+            enrollmentDateLabel.setText(data.getDateOfEnrollmentLabel());
+            enrollmentDateValue.setText(data.getDateOfEnrollmentValue());
+            incidentDateLabel.setText(data.getIncidentDateLabel());
+            incidentDateValue.setText(data.getIncidentDateValue());
+
+            if(data.getAttribute1Label() == null || data.getAttribute1Value() == null) {
+                attribute1Label.setVisibility(View.GONE);
+                attribute1Value.setVisibility(View.GONE);
+            } else {
+                attribute1Label.setText(data.getAttribute1Label());
+                attribute1Value.setText(data.getAttribute1Value());
+            }
+
+            if(data.getAttribute2Label() == null || data.getAttribute2Value() == null) {
+                attribute2Label.setVisibility(View.GONE);
+                attribute2Value.setVisibility(View.GONE);
+            } else {
+                attribute2Label.setText(data.getAttribute2Label());
+                attribute2Value.setText(data.getAttribute2Value());
+            }
+            for(ProgramStageRow row: data.getProgramStageRows()) {
+                if(row instanceof ProgramStageLabelRow) {
+                    ProgramStageLabelRow stageRow = (ProgramStageLabelRow) row;
+                    if(stageRow.getProgramStage().repeatable) {
+                        stageRow.setButtonListener(this);
+                    }
+                }
+            }
+            adapter.swapData(data.getProgramStageRows());
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<ProgramOverviewFragmentForm> loader) {
+        clearViews();
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        ProgramStageRow row = (ProgramStageRow) listView.getItemAtPosition(position);
+        if(row instanceof ProgramStageEventRow) {
+            ProgramStageEventRow eventRow = (ProgramStageEventRow) row;
+            Event event = eventRow.getEvent();
+            showDataEntryFragment(event, event.getProgramStageId());
+        }
+    }
+
+    public void showDataEntryFragment(Event event, String programStage) {
+        Bundle args = getArguments();
+        DataEntryFragment fragment;
+        if(event == null) {
+            fragment = DataEntryFragment.newInstanceWithEnrollment(args.getString(ORG_UNIT_ID), args.getString(PROGRAM_ID), programStage, mForm.getEnrollment().localId);
+        } else {
+            fragment = DataEntryFragment.newInstanceWithEnrollment(args.getString(ORG_UNIT_ID), args.getString(PROGRAM_ID), programStage,
+                    event.localEnrollmentId, event.localId);
+        }
+
+        mNavigationHandler.switchFragment(fragment, ProgramOverviewFragment.CLASS_TAG, true);
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.select_program: {
+                ProgramDialogFragment fragment = ProgramDialogFragment
+                        .newInstance(this, mState.getOrgUnitId(),
+                                Program.MULTIPLE_EVENTS_WITH_REGISTRATION,
+                                Program.SINGLE_EVENT_WITH_REGISTRATION);
+                fragment.show(getChildFragmentManager());
+                break;
+            }
+
+            case R.id.neweventbutton: {
+                ProgramStage programStage = (ProgramStage) view.getTag();
+                showDataEntryFragment(null, programStage.getId());
+            }
+        }
+    }
+
+    private void clearViews() {
+        adapter.swapData(null);
+    }
+
+
+}

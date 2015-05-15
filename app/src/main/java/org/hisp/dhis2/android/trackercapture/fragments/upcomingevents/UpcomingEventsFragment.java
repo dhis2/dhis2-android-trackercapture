@@ -63,15 +63,13 @@ import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.dataentry.DatePickerRow
 import org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton;
 import org.hisp.dhis2.android.sdk.utils.ui.views.FloatingActionButton;
 import org.hisp.dhis2.android.trackercapture.R;
-import org.hisp.dhis2.android.trackercapture.fragments.ProgramOverviewFragment;
 import org.hisp.dhis2.android.trackercapture.fragments.loaders.DbLoader;
-import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.adapters.EventAdapter;
+import org.hisp.dhis2.android.trackercapture.fragments.programoverview.ProgramOverviewFragment;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.adapters.UpcomingEventAdapter;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.upcomingevents.UpcomingEventRow;
 import org.joda.time.LocalDate;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -131,7 +129,7 @@ public class UpcomingEventsFragment extends Fragment implements View.OnClickList
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_upcomingevents2, container, false);
+        return inflater.inflate(R.layout.fragment_upcomingevents, container, false);
     }
 
     @Override
@@ -285,13 +283,13 @@ public class UpcomingEventsFragment extends Fragment implements View.OnClickList
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        ProgramOverviewFragment fragment2 = new ProgramOverviewFragment();
-        fragment2.setSelectedProgram(MetaDataController.getProgram(mState.getProgramId()));
-        fragment2.setSelectedOrganisationUnit(MetaDataController.getOrganisationUnit(mState.getOrgUnitId()));
         Event event = DataValueController.getEvent(id);
-        TrackedEntityInstance tei = DataValueController.getTrackedEntityInstance(event.trackedEntityInstance);
-        fragment2.setSelectedTrackedEntityInstance(tei);
-        mNavigationHandler.switchFragment(fragment2, ProgramOverviewFragment.CLASS_TAG, true);
+        ProgramOverviewFragment fragment = ProgramOverviewFragment.
+                newInstance(mState.getOrgUnitId(), mState.getProgramId(),
+                        DataValueController.getEnrollment
+                                (event.localEnrollmentId).localTrackedEntityInstanceId);
+
+        mNavigationHandler.switchFragment(fragment, ProgramOverviewFragment.CLASS_TAG, true);
     }
 
     @Override

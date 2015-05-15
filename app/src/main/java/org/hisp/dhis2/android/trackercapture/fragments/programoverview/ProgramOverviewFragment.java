@@ -52,6 +52,7 @@ import org.hisp.dhis2.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.fragments.dataentry.DataEntryFragment;
+import org.hisp.dhis2.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis2.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
@@ -61,7 +62,6 @@ import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttributeValue
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton;
 import org.hisp.dhis2.android.trackercapture.R;
-import org.hisp.dhis2.android.trackercapture.fragments.loaders.DbLoader;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.ProgramDialogFragment;
 
 import java.util.ArrayList;

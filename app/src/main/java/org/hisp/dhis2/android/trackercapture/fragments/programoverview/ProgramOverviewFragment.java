@@ -30,10 +30,14 @@
 package org.hisp.dhis2.android.trackercapture.fragments.programoverview;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -42,13 +46,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.raizlabs.android.dbflow.structure.Model;
 
 import org.hisp.dhis2.android.sdk.activities.INavigationHandler;
+import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.fragments.dataentry.DataEntryFragment;
@@ -60,8 +70,9 @@ import org.hisp.dhis2.android.sdk.persistence.models.Program;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityInstance;
-import org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton;
+import org.hisp.dhis2.android.sdk.utils.ui.views.FloatingActionButton;
 import org.hisp.dhis2.android.trackercapture.R;
+import org.hisp.dhis2.android.trackercapture.fragments.enrollment.EnrollmentFragment;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.ProgramDialogFragment;
 
 import java.util.ArrayList;
@@ -73,13 +84,11 @@ import java.util.List;
 public class ProgramOverviewFragment extends Fragment implements View.OnClickListener,
         AdapterView.OnItemClickListener,
         ProgramDialogFragment.OnProgramSetListener,
-        LoaderManager.LoaderCallbacks<ProgramOverviewFragmentForm>{
+        LoaderManager.LoaderCallbacks<ProgramOverviewFragmentForm>, AdapterView.OnItemSelectedListener {
 
     public static final String CLASS_TAG = ProgramOverviewFragment.class.getSimpleName();
     private static final String STATE = "state:UpcomingEventsFragment";
     private static final int LOADER_ID = 578922;
-
-    private CardTextViewButton mProgramButton;
 
     private static final String EXTRA_ARGUMENTS = "extra:Arguments";
     private static final String EXTRA_SAVED_INSTANCE_STATE = "extra:savedInstanceState";
@@ -92,10 +101,22 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     private ProgressBar mProgressBar;
     private ProgramStageAdapter adapter;
 
+    private View mSpinnerContainer;
+    private Spinner mSpinner;
+    private ProgramAdapter mSpinnerAdapter;
+
+    private LinearLayout enrollmentLayout;
     private TextView enrollmentDateLabel;
     private TextView enrollmentDateValue;
     private TextView incidentDateLabel;
     private TextView incidentDateValue;
+
+    private LinearLayout missingEnrollmentLayout;
+    private FloatingActionButton newEnrollmentButton;
+
+    private ImageButton followupButton;
+    private Button completeButton;
+    private Button terminateButton;
 
     private TextView attribute1Label;
     private TextView attribute1Value;
@@ -133,6 +154,12 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
+        if (activity instanceof AppCompatActivity) {
+            getActionBar().setDisplayShowTitleEnabled(false);
+            //getActionBar().setDisplayHomeAsUpEnabled(true);
+            //getActionBar().setHomeButtonEnabled(true);
+        }
+
         if (activity instanceof INavigationHandler) {
             mNavigationHandler = (INavigationHandler) activity;
         } else {
@@ -143,9 +170,29 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     @Override
     public void onDetach() {
         super.onDetach();
+
+        if (getActivity() != null &&
+                getActivity() instanceof AppCompatActivity) {
+            getActionBar().setDisplayShowTitleEnabled(true);
+            getActionBar().setDisplayHomeAsUpEnabled(false);
+            getActionBar().setHomeButtonEnabled(false);
+        }
+
+        // we need to nullify reference
+        // to parent activity in order not to leak it
+        if (getActivity() != null &&
+                getActivity() instanceof INavigationHandler) {
+            ((INavigationHandler) getActivity()).setBackPressedListener(null);
+        }
         // we need to nullify reference
         // to parent activity in order not to leak it
         mNavigationHandler = null;
+    }
+
+    @Override
+    public void onDestroyView() {
+        detachSpinner();
+        super.onDestroyView();
     }
 
     @Override
@@ -174,10 +221,22 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(this);
 
+        enrollmentLayout = (LinearLayout) header.findViewById(R.id.enrollmentLayout);
         enrollmentDateLabel = (TextView) header.findViewById(R.id.dateOfEnrollmentLabel);
         enrollmentDateValue = (TextView) header.findViewById(R.id.dateOfEnrollmentValue);
         incidentDateLabel = (TextView) header.findViewById(R.id.dateOfIncidentLabel);
-        incidentDateValue = (TextView) header.findViewById(R.id.dateOfEnrollmentValue);
+        incidentDateValue = (TextView) header.findViewById(R.id.dateOfIncidentValue);
+
+        completeButton = (Button) header.findViewById(R.id.complete);
+        terminateButton = (Button) header.findViewById(R.id.terminate);
+        followupButton = (ImageButton) header.findViewById(R.id.followupButton);
+        completeButton.setOnClickListener(this);
+        terminateButton.setOnClickListener(this);
+        followupButton.setOnClickListener(this);
+
+        missingEnrollmentLayout = (LinearLayout) header.findViewById(R.id.missingenrollmentlayout);
+        newEnrollmentButton = (FloatingActionButton) header.findViewById(R.id.newenrollmentbutton);
+        newEnrollmentButton.setOnClickListener(this);
 
         attribute1Label = (TextView) header.findViewById(R.id.headerItem1label);
         attribute1Value = (TextView) header.findViewById(R.id.headerItem1value);
@@ -186,12 +245,14 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
 
 
 
-        Bundle fragmentArguments = getArguments();//savedInstanceState.getBundle(EXTRA_ARGUMENTS);
-        mProgramButton = (CardTextViewButton) header.findViewById(R.id.select_program);
-        mProgramButton.setText(fragmentArguments.getString(PROGRAM_ID));
-        mProgramButton.setOnClickListener(this);
-        mProgramButton.setEnabled(true);
+        Bundle fragmentArguments = getArguments();
         Log.d(CLASS_TAG, "program: " + fragmentArguments.getString(PROGRAM_ID));
+
+        attachSpinner();
+        mSpinnerAdapter.swapData(MetaDataController.getProgramsForOrganisationUnit
+                (fragmentArguments.getString(ORG_UNIT_ID),
+                        Program.SINGLE_EVENT_WITH_REGISTRATION,
+                        Program.MULTIPLE_EVENTS_WITH_REGISTRATION));
 
         if (savedInstanceState != null &&
                 savedInstanceState.getParcelable(STATE) != null) {
@@ -245,9 +306,63 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         }
     }
 
+    private ActionBar getActionBar() {
+        if (getActivity() != null &&
+                getActivity() instanceof AppCompatActivity) {
+            return ((AppCompatActivity) getActivity()).getSupportActionBar();
+        } else {
+            throw new IllegalArgumentException("Fragment should be attached to ActionBarActivity");
+        }
+    }
+
+    private Toolbar getActionBarToolbar() {
+        if (isAdded() && getActivity() != null ) {
+            return (Toolbar) getActivity().findViewById(R.id.toolbar1);
+        } else {
+            throw new IllegalArgumentException("Fragment should be attached to MainActivity");
+        }
+    }
+
+    private void attachSpinner() {
+        if (!isSpinnerAttached()) {
+            Toolbar toolbar = getActionBarToolbar();
+
+            LayoutInflater inflater = LayoutInflater.from(getActivity());
+            mSpinnerContainer = inflater.inflate(
+                    org.hisp.dhis2.android.sdk.R.layout.toolbar_spinner_simple, toolbar, false);
+
+            ActionBar.LayoutParams lp = new ActionBar.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            toolbar.addView(mSpinnerContainer, lp);
+
+            mSpinnerAdapter = new ProgramAdapter(inflater);
+
+            mSpinner = (Spinner) mSpinnerContainer.findViewById(org.hisp.dhis2.android.sdk.R.id.toolbar_spinner);
+            mSpinner.setAdapter(mSpinnerAdapter);
+            mSpinner.setOnItemSelectedListener(this);
+        }
+    }
+
+    private void detachSpinner() {
+        if (isSpinnerAttached()) {
+            if (mSpinnerContainer != null) {
+                ((ViewGroup) mSpinnerContainer.getParent()).removeView(mSpinnerContainer);
+                mSpinnerContainer = null;
+                mSpinner = null;
+                if (mSpinnerAdapter != null) {
+                    mSpinnerAdapter.swapData(null);
+                    mSpinnerAdapter = null;
+                }
+            }
+        }
+    }
+
+    private boolean isSpinnerAttached() {
+        return mSpinnerContainer != null;
+    }
+
     @Override
     public void onProgramSelected(String programId, String programName) {
-        mProgramButton.setText(programName);
 
         mState.setProgram(programId, programName);
         clearViews();
@@ -277,10 +392,29 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         if (LOADER_ID == loader.getId()) {
             mForm = data;
             mProgressBar.setVisibility(View.GONE);
+            if(mForm == null || mForm.getEnrollment() == null) {
+                showNoActiveEnrollment();
+                return;
+            } else {
+                enrollmentLayout.setVisibility(View.VISIBLE);
+                missingEnrollmentLayout.setVisibility(View.GONE);
+            }
             enrollmentDateLabel.setText(data.getDateOfEnrollmentLabel());
             enrollmentDateValue.setText(data.getDateOfEnrollmentValue());
             incidentDateLabel.setText(data.getIncidentDateLabel());
             incidentDateValue.setText(data.getIncidentDateValue());
+
+            if(mForm.getEnrollment().status.equals(Enrollment.COMPLETED)) {
+                setCompleted();
+            }
+
+            if(mForm.getEnrollment().status.equals(Enrollment.CANCELLED)) {
+                setTerminated();
+            }
+
+            if(mForm.getEnrollment().followup) {
+                setFollowupButton(true);
+            }
 
             if(data.getAttribute1Label() == null || data.getAttribute1Value() == null) {
                 attribute1Label.setVisibility(View.GONE);
@@ -309,6 +443,11 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         }
     }
 
+    public void showNoActiveEnrollment() {
+        enrollmentLayout.setVisibility(View.GONE);
+        missingEnrollmentLayout.setVisibility(View.VISIBLE);
+    }
+
     @Override
     public void onLoaderReset(Loader<ProgramOverviewFragmentForm> loader) {
         clearViews();
@@ -324,6 +463,11 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         }
     }
 
+    public void enroll() {
+        EnrollmentFragment enrollmentFragment = EnrollmentFragment.newInstance(mState.getOrgUnitId(),mState.getProgramId(), mState.getTrackedEntityInstanceId());
+        mNavigationHandler.switchFragment(enrollmentFragment, EnrollmentFragment.class.getName(), true);
+    }
+
     public void showDataEntryFragment(Event event, String programStage) {
         Bundle args = getArguments();
         DataEntryFragment fragment;
@@ -335,6 +479,59 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         }
 
         mNavigationHandler.switchFragment(fragment, ProgramOverviewFragment.CLASS_TAG, true);
+    }
+
+    public void completeEnrollment() {
+        mForm.getEnrollment().status = Enrollment.COMPLETED;
+        mForm.getEnrollment().fromServer = false;
+        mForm.getEnrollment().save(true);
+        setCompleted();
+        clearViews();
+    }
+
+    /**
+     * Disables the ability to edit enrollment info
+     * Program stages can still be viewed but not changed.
+     */
+    public void setCompleted() {
+        completeButton.setEnabled(false);
+        completeButton.setAlpha(0x40);
+        terminateButton.setEnabled(false);
+        terminateButton.setAlpha(0x40);
+        followupButton.setEnabled(false);
+        followupButton.setImageAlpha(0x40);
+    }
+
+    public void terminateEnrollment() {
+        mForm.getEnrollment().status = Enrollment.CANCELLED;
+        mForm.getEnrollment().fromServer = false;
+        mForm.getEnrollment().save(true);
+        setTerminated();
+        clearViews();
+    }
+
+    /**
+     * Removes the currently selected enrollment from being currently selected
+     */
+    public void setTerminated() {
+        onProgramSelected(mForm.getProgram().getId(), mForm.getProgram().getName());
+    }
+
+    public void toggleFollowup() {
+        if(mForm==null || mForm.getEnrollment()==null) return;
+        mForm.getEnrollment().followup = !mForm.getEnrollment().followup;
+        mForm.getEnrollment().fromServer = false;
+        mForm.getEnrollment().save(true);
+        setFollowupButton(mForm.getEnrollment().followup);
+    }
+
+    public void setFollowupButton(boolean enabled) {
+        if(followupButton==null) return;
+        if(enabled) {
+            followupButton.setBackground(getResources().getDrawable(R.drawable.rounded_imagebutton_red));
+        } else {
+            followupButton.setBackground(getResources().getDrawable(R.drawable.rounded_imagebutton_gray));
+        }
     }
 
     @Override
@@ -350,8 +547,51 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
             }
 
             case R.id.neweventbutton: {
-                ProgramStage programStage = (ProgramStage) view.getTag();
-                showDataEntryFragment(null, programStage.getId());
+                if(mForm.getEnrollment().status.equals(Enrollment.ACTIVE)) {
+                    ProgramStage programStage = (ProgramStage) view.getTag();
+                    showDataEntryFragment(null, programStage.getId());
+                }
+                break;
+            }
+
+            case R.id.complete: {
+                Dhis2.showConfirmDialog(getActivity(),
+                        getString(R.string.complete),
+                        getString(R.string.confirm_complete_enrollment),
+                        getString(R.string.complete),
+                        getString(R.string.cancel),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                completeEnrollment();
+                            }
+                        });
+                break;
+            }
+
+            case R.id.terminate: {
+                Dhis2.showConfirmDialog(getActivity(),
+                        getString(R.string.terminate),
+                        getString(R.string.confirm_terminate_enrollment),
+                        getString(R.string.terminate),
+                        getString(R.string.cancel),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                terminateEnrollment();
+                            }
+                        });
+                break;
+            }
+
+            case R.id.followupButton: {
+                toggleFollowup();
+                break;
+            }
+
+            case R.id.newenrollmentbutton: {
+                enroll();
+                break;
             }
         }
     }
@@ -361,4 +601,14 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     }
 
 
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        Program program = (Program) mSpinnerAdapter.getItem(position);
+        onProgramSelected(program.getId(), program.getName());
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+    }
 }

@@ -44,6 +44,8 @@ import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityInstance;
+import org.hisp.dhis2.android.sdk.utils.DateUtils;
+import org.hisp.dhis2.android.sdk.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -86,9 +88,9 @@ class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm>
         programOverviewFragmentForm.setTrackedEntityInstance(trackedEntityInstance);
 
         programOverviewFragmentForm.setDateOfEnrollmentLabel(program.dateOfEnrollmentDescription);
-        programOverviewFragmentForm.setDateOfEnrollmentValue(activeEnrollment.dateOfEnrollment);
+        programOverviewFragmentForm.setDateOfEnrollmentValue(Utils.removeTimeFromDateString(activeEnrollment.dateOfEnrollment));
         programOverviewFragmentForm.setIncidentDateLabel(program.dateOfIncidentDescription);
-        programOverviewFragmentForm.setIncidentDateValue(activeEnrollment.dateOfIncident);
+        programOverviewFragmentForm.setIncidentDateValue(Utils.removeTimeFromDateString(activeEnrollment.dateOfIncident));
 
         List<TrackedEntityAttributeValue> attributeValues = activeEnrollment.getAttributes();
         if(attributeValues!=null) {

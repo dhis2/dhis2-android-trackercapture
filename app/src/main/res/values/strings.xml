@@ -22,6 +22,13 @@
     <string name="error_series_500_description">50x server error. Please, try to synchronize later.</string>
     <string name="unknown_error">Unknown error</string>
 
+    <string name="confirm_complete_enrollment">Are you sure you want to complete the current
+        enrollment? No more editing will be possible.</string>
+    <string name="confirm_terminate_enrollment">Are you sure you want to terminate the current
+        enrollment? This cannot be undone.</string>
+
+    <string name="no_active_enrollment">No active enrollment</string>
+
     
 
     <string name="search">Search</string>

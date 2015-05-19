@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
+import org.hisp.dhis2.android.sdk.utils.Utils;
 
 import static android.text.TextUtils.isEmpty;
 
@@ -42,7 +43,7 @@ public class ProgramStageEventRow implements ProgramStageRow {
         }
 
         holder.orgUnit.setText(MetaDataController.getOrganisationUnit(event.organisationUnitId).getLabel());
-        holder.date.setText(event.getEventDate());
+        holder.date.setText(Utils.removeTimeFromDateString(event.getEventDate()));
 
         int color = org.hisp.dhis2.android.sdk.R.color.stage_skipped;
         switch (event.status) {

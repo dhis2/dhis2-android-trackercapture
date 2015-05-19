@@ -370,9 +370,6 @@ public class SelectProgramFragment extends Fragment
             }
             case R.id.register_new_event: {
                 EnrollmentFragment enrollmentFragment = EnrollmentFragment.newInstance(mState.getOrgUnitId(),mState.getProgramId());
-//                enrollmentFragment.setCurrentTrackedEntityInstance(null);
-//                enrollmentFragment.setSelectedOrganisationUnit(MetaDataController.getOrganisationUnit(mState.getOrgUnitId()));
-//                enrollmentFragment.setSelectedProgram(MetaDataController.getProgram(mState.getProgramId()));
                 mNavigationHandler.switchFragment(enrollmentFragment, EnrollmentFragment.class.getName(), true);
 
                 break;

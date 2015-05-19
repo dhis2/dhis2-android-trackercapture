@@ -142,12 +142,12 @@ public class EnrollmentFragment extends Fragment
         return fragment;
     }
 
-    public static EnrollmentFragment newInstance(String unitId, String programId, String trackedEntityInstanceId) {
+    public static EnrollmentFragment newInstance(String unitId, String programId, long trackedEntityInstanceId) {
         EnrollmentFragment fragment = new EnrollmentFragment();
         Bundle args = new Bundle();
         args.putString(ORG_UNIT_ID, unitId);
         args.putString(PROGRAM_ID, programId);
-        args.putString(TRACKEDENTITYINSTANCE_ID, trackedEntityInstanceId);
+        args.putLong(TRACKEDENTITYINSTANCE_ID, trackedEntityInstanceId);
 
         fragment.setArguments(args);
         return fragment;
@@ -316,7 +316,7 @@ public class EnrollmentFragment extends Fragment
             Bundle fragmentArguments = args.getBundle(EXTRA_ARGUMENTS);
             String orgUnitId = fragmentArguments.getString(ORG_UNIT_ID);
             String programId = fragmentArguments.getString(PROGRAM_ID);
-            String trackedEntityInstance = fragmentArguments.getString(TRACKEDENTITYINSTANCE_ID);
+            long trackedEntityInstance = fragmentArguments.getLong(TRACKEDENTITYINSTANCE_ID, -1);
 
             return new DbLoader<>(
                     getActivity().getBaseContext(), modelsToTrack, new EnrollmentFragmentQuery(
@@ -513,6 +513,7 @@ public class EnrollmentFragment extends Fragment
                     String newValue = date.toString(DATE_FORMAT);
                     datePickerEditText.setText(newValue);
                     mForm.getEnrollment().dateOfEnrollment = newValue;
+                    onRowValueChanged(null);
                 }
             };
             clearDateButton.setOnClickListener(new View.OnClickListener() {
@@ -563,6 +564,7 @@ public class EnrollmentFragment extends Fragment
                     String newValue = date.toString(DATE_FORMAT);
                     datePickerEditText.setText(newValue);
                     mForm.getEnrollment().dateOfEnrollment = newValue;
+                    onRowValueChanged(null);
                 }
             };
             clearDateButton.setOnClickListener(new View.OnClickListener() {
@@ -679,30 +681,25 @@ public class EnrollmentFragment extends Fragment
                 if(mForm!=null && isAdded()) {
                     final Context context = getActivity().getBaseContext();
 
-
-                    mForm.getTrackedEntityInstance().fromServer = true;
                     if(mForm.getTrackedEntityInstance().localId < 0)
                     {
+                        mForm.getTrackedEntityInstance().fromServer = true;
                         mForm.getTrackedEntityInstance().save(true);
-                        mForm.getEnrollment().localTrackedEntityInstanceId = mForm.getTrackedEntityInstance().localId;
+
+                        mForm.getTrackedEntityInstance().fromServer = false;
+                        mForm.getTrackedEntityInstance().save(true);
                     }
 
-                    mForm.getTrackedEntityInstance().fromServer = false;
-                    mForm.getTrackedEntityInstance().save(true);
-//                    List<String> errors = isEnrollmentValid();
+                    mForm.getEnrollment().localTrackedEntityInstanceId = mForm.getTrackedEntityInstance().localId;
 
+                    mForm.getEnrollment().fromServer = true;
+                    mForm.getEnrollment().save(true);
 
-                        mForm.getEnrollment().fromServer = true;
-                        mForm.getEnrollment().save(true);
-
-                        /*workaround for dbflow concurrency bug. This ensures that datavalues are saved
-                        before Dhis2 sends data to server to avoid some data values not being sent in race
-                        conditions*/
-                        mForm.getEnrollment().fromServer = false;
-                        mForm.getEnrollment().save(true);
-
-
-
+                    /*workaround for dbflow concurrency bug. This ensures that datavalues are saved
+                    before Dhis2 sends data to server to avoid some data values not being sent in race
+                    conditions*/
+                    mForm.getEnrollment().fromServer = false;
+                    mForm.getEnrollment().save(true);
 
                     TimerTask timerTask = new TimerTask() {
                         @Override

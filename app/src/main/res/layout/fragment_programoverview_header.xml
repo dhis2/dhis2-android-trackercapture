@@ -33,13 +33,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton
-        android:id="@+id/select_program"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="4dp"
-        app:hint="@string/choose_program" />
-
     <ProgressBar
         android:id="@+id/progress_bar"
         style="?android:attr/progressBarStyle"
@@ -56,6 +49,30 @@
         android:layout_margin="4dp">
 
         <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/missingenrollmentlayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+                <TextView
+                    android:layout_margin="5dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/medium_text_size"
+                    android:text="@string/no_active_enrollment"
+                    android:layout_gravity="center_horizontal" />
+
+                <org.hisp.dhis2.android.sdk.utils.ui.views.FloatingActionButton
+                    android:id="@+id/newenrollmentbutton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:src="@drawable/ic_new"
+                    android:layout_gravity="center_horizontal" />
+            </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/enrollmentLayout"
             android:padding="6dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -115,6 +132,38 @@
                     android:textSize="@dimen/small_text_size"
                     android:text=""/>
             </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <Button
+                    android:layout_margin="5dp"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:id="@+id/complete"
+                    android:text="@string/complete"
+                    android:background="@drawable/rounded_imagebutton_orange"/>
+                <Button
+                    android:text="@string/terminate"
+                    android:layout_margin="5dp"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:id="@+id/terminate"
+                    android:background="@drawable/rounded_imagebutton_red"/>
+
+                <ImageButton
+                    android:layout_margin="5dp"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="0.4"
+                    android:id="@+id/followupButton"
+                    android:src="@drawable/ic_dialog_alert_holo_light"
+                    android:background="@drawable/rounded_imagebutton_gray" />
+            </LinearLayout>
+
 
         </LinearLayout>
 

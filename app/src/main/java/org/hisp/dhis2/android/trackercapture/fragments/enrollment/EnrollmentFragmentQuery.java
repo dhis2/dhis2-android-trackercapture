@@ -1,6 +1,7 @@
 package org.hisp.dhis2.android.trackercapture.fragments.enrollment;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.raizlabs.android.dbflow.sql.language.Select;
 
@@ -36,13 +37,15 @@ import java.util.List;
  */
 class EnrollmentFragmentQuery implements Query<EnrollmentFragmentForm>
 {
+    public static final String CLASS_TAG = EnrollmentFragmentQuery.class.getSimpleName();
+
     private String mOrgUnitId;
     private String mProgramId;
-    private String mTrackedEntityInstanceId;
+    private long mTrackedEntityInstanceId;
     private TrackedEntityInstance currentTrackedEntityInstance;
     private Enrollment currentEnrollment;
 
-    EnrollmentFragmentQuery(String mOrgUnitId, String mProgramId, String mTrackedEntityInstanceId)
+    EnrollmentFragmentQuery(String mOrgUnitId, String mProgramId, long mTrackedEntityInstanceId)
     {
         this.mOrgUnitId = mOrgUnitId;
         this.mProgramId = mProgramId;
@@ -64,7 +67,7 @@ class EnrollmentFragmentQuery implements Query<EnrollmentFragmentForm>
         }
 
 
-        if(currentTrackedEntityInstance == null || mTrackedEntityInstanceId.equals(""))
+        if( mTrackedEntityInstanceId < 0 )
         {
             currentTrackedEntityInstance = new TrackedEntityInstance(mProgram, mOrgUnitId);
         }
@@ -108,7 +111,6 @@ class EnrollmentFragmentQuery implements Query<EnrollmentFragmentForm>
 
         return mForm;
     }
-
 
     public TrackedEntityAttributeValue getTrackedEntityDataValue(String trackedEntityAttribute, List<TrackedEntityAttributeValue> trackedEntityAttributeValues) {
         for(TrackedEntityAttributeValue trackedEntityAttributeValue: trackedEntityAttributeValues) {

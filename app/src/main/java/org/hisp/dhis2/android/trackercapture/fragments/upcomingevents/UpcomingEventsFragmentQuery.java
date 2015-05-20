@@ -81,7 +81,7 @@ class UpcomingEventsFragmentQuery implements Query<List<UpcomingEventRow>> {
         List<UpcomingEventRow> eventUpcomingEventRows = new ArrayList<>();
 
         // create a list of EventItems
-        Program selectedProgram = Select.byId(Program.class, mProgramId);
+        Program selectedProgram = MetaDataController.getProgram(mProgramId);
         if (selectedProgram == null || isListEmpty(selectedProgram.getProgramStages())) {
             return eventUpcomingEventRows;
         }
@@ -113,7 +113,7 @@ class UpcomingEventsFragmentQuery implements Query<List<UpcomingEventRow>> {
             return eventUpcomingEventRows;
         }
 
-        List<Option> options = Select.all(Option.class);
+        List<Option> options = new Select().from(Option.class).queryList();
         Map<String, String> codeToName = new HashMap<>();
         for (Option option : options) {
             codeToName.put(option.getCode(), option.getName());

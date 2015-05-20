@@ -683,23 +683,23 @@ public class EnrollmentFragment extends Fragment
 
                     if(mForm.getTrackedEntityInstance().localId < 0)
                     {
-                        mForm.getTrackedEntityInstance().fromServer = true;
-                        mForm.getTrackedEntityInstance().save(true);
+                        //mForm.getTrackedEntityInstance().fromServer = true;
+                        //mForm.getTrackedEntityInstance().save(true);
 
                         mForm.getTrackedEntityInstance().fromServer = false;
-                        mForm.getTrackedEntityInstance().save(true);
+                        mForm.getTrackedEntityInstance().save();
                     }
 
                     mForm.getEnrollment().localTrackedEntityInstanceId = mForm.getTrackedEntityInstance().localId;
 
-                    mForm.getEnrollment().fromServer = true;
-                    mForm.getEnrollment().save(true);
+                    //mForm.getEnrollment().fromServer = true;
+                    //mForm.getEnrollment().save(true);
 
                     /*workaround for dbflow concurrency bug. This ensures that datavalues are saved
                     before Dhis2 sends data to server to avoid some data values not being sent in race
                     conditions*/
                     mForm.getEnrollment().fromServer = false;
-                    mForm.getEnrollment().save(true);
+                    mForm.getEnrollment().save();
 
                     TimerTask timerTask = new TimerTask() {
                         @Override

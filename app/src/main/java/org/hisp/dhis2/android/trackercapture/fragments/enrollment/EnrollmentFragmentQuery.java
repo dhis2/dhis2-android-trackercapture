@@ -56,8 +56,8 @@ class EnrollmentFragmentQuery implements Query<EnrollmentFragmentForm>
     @Override
     public EnrollmentFragmentForm query(Context context) {
         EnrollmentFragmentForm mForm = new EnrollmentFragmentForm();
-        final Program mProgram = Select.byId(Program.class, mProgramId);
-        final OrganisationUnit mOrgUnit = Select.byId(OrganisationUnit.class, mOrgUnitId);
+        final Program mProgram = MetaDataController.getProgram(mProgramId);
+        final OrganisationUnit mOrgUnit = MetaDataController.getOrganisationUnit(mOrgUnitId);//Select.byId(OrganisationUnit.class, mOrgUnitId);
 
         if (mProgram == null) {
             return mForm;

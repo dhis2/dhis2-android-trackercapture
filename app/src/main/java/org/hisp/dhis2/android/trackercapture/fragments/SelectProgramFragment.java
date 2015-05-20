@@ -49,6 +49,7 @@ import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
+import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
@@ -327,8 +328,8 @@ public class SelectProgramFragment extends Fragment
     }
 
     private String getErrorDescription(TrackedEntityInstance trackedEntityInstance) {
-        FailedItem failedItem =
-                Select.byId(FailedItem.class, trackedEntityInstance.localId);
+        FailedItem failedItem = DataValueController.getFailedItem(FailedItem.TRACKEDENTITYINSTANCE, trackedEntityInstance.localId);
+                //Select.byId(FailedItem.class, trackedEntityInstance.localId);
 
         if (failedItem != null) {
             if (failedItem.httpStatusCode == 401) {

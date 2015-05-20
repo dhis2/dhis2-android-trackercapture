@@ -484,7 +484,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     public void completeEnrollment() {
         mForm.getEnrollment().status = Enrollment.COMPLETED;
         mForm.getEnrollment().fromServer = false;
-        mForm.getEnrollment().save(true);
+        mForm.getEnrollment().async().save();
         setCompleted();
         clearViews();
     }
@@ -505,7 +505,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     public void terminateEnrollment() {
         mForm.getEnrollment().status = Enrollment.CANCELLED;
         mForm.getEnrollment().fromServer = false;
-        mForm.getEnrollment().save(true);
+        mForm.getEnrollment().async().save();
         setTerminated();
         clearViews();
     }
@@ -521,7 +521,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         if(mForm==null || mForm.getEnrollment()==null) return;
         mForm.getEnrollment().followup = !mForm.getEnrollment().followup;
         mForm.getEnrollment().fromServer = false;
-        mForm.getEnrollment().save(true);
+        mForm.getEnrollment().async().save();
         setFollowupButton(mForm.getEnrollment().followup);
     }
 

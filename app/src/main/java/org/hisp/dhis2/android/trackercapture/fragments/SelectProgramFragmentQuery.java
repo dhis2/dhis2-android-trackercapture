@@ -6,6 +6,7 @@ import com.raizlabs.android.dbflow.sql.builder.Condition;
 import com.raizlabs.android.dbflow.sql.language.Select;
 
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
+import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis2.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
@@ -47,7 +48,7 @@ class SelectProgramFragmentQuery implements Query<List<TrackedEntityInstanceRow>
         List<TrackedEntityInstanceRow> teiRows = new ArrayList<>();
 
         // create a list of EventItems
-        Program selectedProgram = Select.byId(Program.class, mProgramId);
+        Program selectedProgram = MetaDataController.getProgram(mProgramId);
         if (selectedProgram == null || isListEmpty(selectedProgram.getProgramStages())) {
             return teiRows;
         }
@@ -105,17 +106,13 @@ class SelectProgramFragmentQuery implements Query<List<TrackedEntityInstanceRow>
             }
         }
 
-        List<Option> options = Select.all(Option.class);
+        List<Option> options = new Select().from(Option.class).queryList();
         Map<String, String> codeToName = new HashMap<>();
         for (Option option : options) {
             codeToName.put(option.getCode(), option.getName());
         }
 
-        List<FailedItem> failedEvents = Select.all(
-                FailedItem.class, Condition
-                        .column(FailedItem$Table.ITEMTYPE)
-                        .is(FailedItem.TRACKEDENTITYINSTANCE)
-        );
+        List<FailedItem> failedEvents = DataValueController.getFailedItems(FailedItem.TRACKEDENTITYINSTANCE);
 
         Set<String> failedEventIds = new HashSet<>();
         for (FailedItem failedItem : failedEvents) {

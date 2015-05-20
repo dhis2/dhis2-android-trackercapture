@@ -7,6 +7,7 @@ import android.util.Pair;
 import com.raizlabs.android.dbflow.sql.builder.Condition;
 import com.raizlabs.android.dbflow.sql.language.Select;
 
+import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnitProgramRelationship;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnitProgramRelationship$Table;
@@ -49,8 +50,7 @@ final class SelectProgramFragmentPreferences {
 
         // we need to make sure that last selected
         // organisation unit still exists in database
-        OrganisationUnit unit = Select.byId(
-                OrganisationUnit.class, orgUnitId);
+        OrganisationUnit unit = MetaDataController.getOrganisationUnit(orgUnitId);
         if (unit != null) {
             return new Pair<>(orgUnitId, orgUnitLabel);
         } else {
@@ -77,9 +77,9 @@ final class SelectProgramFragmentPreferences {
 
         // we need to make sure that last selected program for particular
         // organisation unit is still in database and assigned to selected organisation unit
-        long count = Select.count(OrganisationUnitProgramRelationship.class,
+        long count = new Select().count().from(OrganisationUnitProgramRelationship.class).where(
                 Condition.column(OrganisationUnitProgramRelationship$Table.ORGANISATIONUNITID).is(orgUnitId),
-                Condition.column(OrganisationUnitProgramRelationship$Table.PROGRAMID).is(programId));
+                Condition.column(OrganisationUnitProgramRelationship$Table.PROGRAMID).is(programId)).count();
         if (count > 0) {
             return new Pair<>(programId, programLabel);
         } else {

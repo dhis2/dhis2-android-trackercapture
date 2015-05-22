@@ -56,15 +56,15 @@ public class ProgramStageEventRow implements ProgramStageRow {
             case Event.STATUS_FUTURE_VISIT:
                 color = org.hisp.dhis2.android.sdk.R.color.stage_ontime;
                 break;
-            case Event.STATUS_LATE_VISIT:
-                color = org.hisp.dhis2.android.sdk.R.color.stage_overdue;
-                break;
+            //case Event.STATUS_LATE_VISIT:
+            //    color = org.hisp.dhis2.android.sdk.R.color.stage_overdue;
+            //    break;
             case Event.STATUS_SKIPPED:
                 color = org.hisp.dhis2.android.sdk.R.color.stage_skipped;
                 break;
-            case Event.STATUS_VISITED:
-                color = org.hisp.dhis2.android.sdk.R.color.stage_executed;
-                break;
+            //case Event.STATUS_VISITED:
+            //    color = org.hisp.dhis2.android.sdk.R.color.stage_executed;
+            //    break;
         }
         view.setBackgroundColor(inflater.getContext().getResources().getColor(color));
 

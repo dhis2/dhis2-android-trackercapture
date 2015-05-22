@@ -120,7 +120,6 @@ class SelectProgramFragmentQuery implements Query<List<TrackedEntityInstanceRow>
             failedEventIds.add(tei.getTrackedEntityInstance());
         }
 
-//        Collections.sort(trackedEntityInstanceList, new EventComparator()); //not necessary to sort
         for (TrackedEntityInstance trackedEntityInstance : trackedEntityInstanceList) {
             teiRows.add(createTrackedEntityInstanceItem(context,
                     trackedEntityInstance, attributesToShow, attributes,

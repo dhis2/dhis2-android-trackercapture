@@ -37,6 +37,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -73,6 +74,7 @@ import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis2.android.sdk.utils.ui.views.FloatingActionButton;
 import org.hisp.dhis2.android.trackercapture.R;
 import org.hisp.dhis2.android.trackercapture.fragments.enrollment.EnrollmentFragment;
+import org.hisp.dhis2.android.trackercapture.fragments.trackedentityinstanceprofile.TrackedEntityInstanceProfileFragment;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.ProgramDialogFragment;
 
 import java.util.ArrayList;
@@ -114,7 +116,11 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     private LinearLayout missingEnrollmentLayout;
     private FloatingActionButton newEnrollmentButton;
 
+    private CardView profileCardView;
+    private CardView enrollmentCardview;
+
     private ImageButton followupButton;
+    private ImageButton profileButton;
     private Button completeButton;
     private Button terminateButton;
 
@@ -226,13 +232,19 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         enrollmentDateValue = (TextView) header.findViewById(R.id.dateOfEnrollmentValue);
         incidentDateLabel = (TextView) header.findViewById(R.id.dateOfIncidentLabel);
         incidentDateValue = (TextView) header.findViewById(R.id.dateOfIncidentValue);
+        profileCardView = (CardView) header.findViewById(R.id.profile_cardview);
+        enrollmentCardview = (CardView) header.findViewById(R.id.enrollment_cardview);
 
         completeButton = (Button) header.findViewById(R.id.complete);
         terminateButton = (Button) header.findViewById(R.id.terminate);
         followupButton = (ImageButton) header.findViewById(R.id.followupButton);
+        profileButton = (ImageButton) header.findViewById(R.id.profile_button);
         completeButton.setOnClickListener(this);
         terminateButton.setOnClickListener(this);
         followupButton.setOnClickListener(this);
+        profileButton.setOnClickListener(this);
+        profileCardView.setOnClickListener(this);
+
 
         missingEnrollmentLayout = (LinearLayout) header.findViewById(R.id.missingenrollmentlayout);
         newEnrollmentButton = (FloatingActionButton) header.findViewById(R.id.newenrollmentbutton);
@@ -593,6 +605,15 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
                 enroll();
                 break;
             }
+
+            case R.id.profile_cardview: {
+                editTrackedEntityInstanceProfile();
+                break;
+            }
+            case R.id.profile_button: {
+                editTrackedEntityInstanceProfile();
+                break;
+            }
         }
     }
 
@@ -600,7 +621,12 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         adapter.swapData(null);
     }
 
-
+    private void editTrackedEntityInstanceProfile()
+    {
+        TrackedEntityInstanceProfileFragment fragment = TrackedEntityInstanceProfileFragment.newInstance(getArguments().
+                getLong(TRACKEDENTITYINSTANCE_ID), getArguments().getString(PROGRAM_ID));
+        mNavigationHandler.switchFragment(fragment, TrackedEntityInstanceProfileFragment.TAG, false);
+    }
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         Program program = (Program) mSpinnerAdapter.getItem(position);

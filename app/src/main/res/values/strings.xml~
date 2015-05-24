@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">DHIS 2 Tracker Capture</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="register_new_event">Register new event</string>
+    <string name="registered_events">Registered events</string>
+    <string name="new_event">New event</string>
+
+    
+
+    <string name="error_401_description">Username or password has changed. Please log out and sign in again. \nNote! Event will be lost</string>
+    <string name="error_408_description">Slow connection. Please, try to synchronize later</string>
+    <string name="error_series_400_description">40x application level error.</string>
+    <string name="error_series_500_description">50x server error. Please, try to synchronize later.</string>
+    <string name="unknown_error">Unknown error</string>
+
+    
+
+    <string name="search">Search</string>
+
+
+
+</resources>

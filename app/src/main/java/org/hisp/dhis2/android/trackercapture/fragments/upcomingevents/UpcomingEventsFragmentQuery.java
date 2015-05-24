@@ -44,7 +44,7 @@ import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageDataElement;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttributeValue;
-import org.hisp.dhis2.android.trackercapture.fragments.loaders.Query;
+import org.hisp.dhis2.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.upcomingevents.UpcomingEventsColumnNamesRow;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.upcomingevents.UpcomingEventItemRow;
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.upcomingevents.EventItemStatus;
@@ -81,7 +81,7 @@ class UpcomingEventsFragmentQuery implements Query<List<UpcomingEventRow>> {
         List<UpcomingEventRow> eventUpcomingEventRows = new ArrayList<>();
 
         // create a list of EventItems
-        Program selectedProgram = Select.byId(Program.class, mProgramId);
+        Program selectedProgram = MetaDataController.getProgram(mProgramId);
         if (selectedProgram == null || isListEmpty(selectedProgram.getProgramStages())) {
             return eventUpcomingEventRows;
         }
@@ -113,7 +113,7 @@ class UpcomingEventsFragmentQuery implements Query<List<UpcomingEventRow>> {
             return eventUpcomingEventRows;
         }
 
-        List<Option> options = Select.all(Option.class);
+        List<Option> options = new Select().from(Option.class).queryList();
         Map<String, String> codeToName = new HashMap<>();
         for (Option option : options) {
             codeToName.put(option.getCode(), option.getName());

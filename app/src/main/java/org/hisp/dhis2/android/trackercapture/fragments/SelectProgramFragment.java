@@ -29,360 +29,369 @@
 
 package org.hisp.dhis2.android.trackercapture.fragments;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
+import android.util.Pair;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TableLayout;
-import android.widget.TextView;
+import android.widget.ProgressBar;
 
-import com.raizlabs.android.dbflow.sql.builder.Condition;
 import com.raizlabs.android.dbflow.sql.language.Select;
+import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
-import org.hisp.dhis2.android.sdk.events.BaseEvent;
-import org.hisp.dhis2.android.sdk.events.InvalidateEvent;
-import org.hisp.dhis2.android.sdk.events.MessageEvent;
+import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
-import org.hisp.dhis2.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
-import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
+import org.hisp.dhis2.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
-import org.hisp.dhis2.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
-import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttribute;
-import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttributeValue;
-import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttributeValue$Table;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityInstance;
-import org.hisp.dhis2.android.sdk.utils.AttributeListAdapter;
-import org.hisp.dhis2.android.sdk.utils.Utils;
-import org.hisp.dhis2.android.sdk.utils.ui.views.CardSpinner;
+import org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton;
+import org.hisp.dhis2.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis2.android.trackercapture.R;
+import org.hisp.dhis2.android.trackercapture.fragments.enrollment.EnrollmentFragment;
+import org.hisp.dhis2.android.trackercapture.fragments.selectprogram.OnTrackedEntityInstanceClick;
+import org.hisp.dhis2.android.trackercapture.fragments.selectprogram.TrackedEntityInstanceRow;
+import org.hisp.dhis2.android.sdk.persistence.loaders.DbLoader;
+import org.hisp.dhis2.android.trackercapture.fragments.programoverview.ProgramOverviewFragment;
+import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.OrgUnitDialogFragment;
+import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.ProgramDialogFragment;
+import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.UpcomingEventsFragment;
+import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.adapters.TrackedEntityInstanceAdapter;
+import org.hisp.dhis2.android.trackercapture.views.FloatingActionButton;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+public class SelectProgramFragment extends Fragment
+        implements View.OnClickListener, OrgUnitDialogFragment.OnOrgUnitSetListener,
+        ProgramDialogFragment.OnProgramSetListener,
+        LoaderManager.LoaderCallbacks<List<TrackedEntityInstanceRow>> {
+    public static final String TAG = SelectProgramFragment.class.getSimpleName();
+    private static final String STATE = "state:SelectProgramFragment";
+    private static final int LOADER_ID = 1;
 
-/**
- * @author Simen Skogly Russnes on 20.02.15.
- */
-public class SelectProgramFragment extends Fragment {
+    private ListView mListView;
+    private ProgressBar mProgressBar;
+//    private EventAdapter mAdapter;
+    private TrackedEntityInstanceAdapter mAdapter;
 
-    private static final String CLASS_TAG = "SelectProgramFragment";
+    private CardTextViewButton mOrgUnitButton;
+    private CardTextViewButton mProgramButton;
+    private FloatingActionButton mRegisterEventButton;
+    private FloatingActionButton mUpcomingEventsButton;
 
-    private List<OrganisationUnit> assignedOrganisationUnits;
-    private OrganisationUnit selectedOrganisationUnit;
-    private List<Program> programsForSelectedOrganisationUnit;
-    private TrackedEntityInstance selectedTrackedEntityInstance;
-    private List<Long> trackedEntityInstanceIds;
+    private SelectProgramFragmentState mState;
+    private SelectProgramFragmentPreferences mPrefs;
 
-    private CardSpinner organisationUnitSpinner;
-    private CardSpinner programSpinner;
-    private Button registerButton;
-    private Button upcomingEventsButton;
-    //private ListView existingEventsListView;
-    private LinearLayout attributeNameContainer;
-    private LinearLayout rowContainer;
-    private int programSelection;
-    private int orgunitSelection;
+    private INavigationHandler mNavigationHandler;
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        if (activity instanceof INavigationHandler) {
+            mNavigationHandler = (INavigationHandler) activity;
+        } else {
+            throw new IllegalArgumentException("Activity must " +
+                    "implement INavigationHandler interface");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        // we need to nullify reference
+        // to parent activity in order not to leak it
+        mNavigationHandler = null;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState)
-    {
-        View rootView = inflater.inflate(R.layout.fragment_select_program,
-                container, false);
-        setupUi(rootView);
-        return rootView;
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_select_program, container, false);
     }
 
-    public void setupUi(View rootView) {
-        organisationUnitSpinner = (CardSpinner) rootView.findViewById(R.id.org_unit_spinner);
-        programSpinner = (CardSpinner) rootView.findViewById(R.id.program_spinner);
-        registerButton = (Button) rootView.findViewById(R.id.register_tei_button);
-        upcomingEventsButton = (Button) rootView.findViewById(R.id.upcoming_events_button);
-        attributeNameContainer = (LinearLayout) rootView.findViewById(R.id.attributenameslayout);
-        rowContainer = (LinearLayout) rootView.findViewById(R.id.eventrowcontainer);
-        assignedOrganisationUnits = Dhis2.getInstance().
-                getMetaDataController().getAssignedOrganisationUnits();
-        if( assignedOrganisationUnits==null || assignedOrganisationUnits.size() <= 0 ) {
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        mPrefs = new SelectProgramFragmentPreferences(
+                getActivity().getApplicationContext());
+
+        mListView = (ListView) view.findViewById(R.id.event_listview);
+        mAdapter = new TrackedEntityInstanceAdapter(getLayoutInflater(savedInstanceState));
+        View header = getLayoutInflater(savedInstanceState).inflate(
+                R.layout.fragment_select_program_header, mListView, false
+        );
+        mProgressBar = (ProgressBar) header.findViewById(R.id.progress_bar);
+        mProgressBar.setVisibility(View.GONE);
+
+        mListView.addHeaderView(header, TAG, false);
+        mListView.setAdapter(mAdapter);
+
+        mOrgUnitButton = (CardTextViewButton) header.findViewById(R.id.select_organisation_unit);
+        mProgramButton = (CardTextViewButton) header.findViewById(R.id.select_program);
+        mRegisterEventButton = (FloatingActionButton) header.findViewById(R.id.register_new_event);
+        mUpcomingEventsButton = (FloatingActionButton) header.findViewById(R.id.upcoming_events_button);
+        mOrgUnitButton.setOnClickListener(this);
+        mProgramButton.setOnClickListener(this);
+        mRegisterEventButton.setOnClickListener(this);
+        mUpcomingEventsButton.setOnClickListener(this);
+
+        mOrgUnitButton.setEnabled(true);
+        mProgramButton.setEnabled(false);
+        mRegisterEventButton.hide();
+        mUpcomingEventsButton.hide();
+
+        if (savedInstanceState != null &&
+                savedInstanceState.getParcelable(STATE) != null) {
+            mState = savedInstanceState.getParcelable(STATE);
+        }
+
+        if (mState == null) {
+            // restoring last selection of program
+            Pair<String, String> orgUnit = mPrefs.getOrgUnit();
+            Pair<String, String> program = mPrefs.getProgram();
+            mState = new SelectProgramFragmentState();
+            if (orgUnit != null) {
+                mState.setOrgUnit(orgUnit.first, orgUnit.second);
+                if (program != null) {
+                    mState.setProgram(program.first, program.second);
+                }
+
+            }
+        }
+
+        onRestoreState(true);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Dhis2Application.getEventBus().unregister(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Dhis2Application.getEventBus().register(this);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_select_program, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            mNavigationHandler.switchFragment(
+                    new SettingsFragment(), SettingsFragment.TAG, true);
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle out) {
+        out.putParcelable(STATE, mState);
+        super.onSaveInstanceState(out);
+    }
+
+    public void onRestoreState(boolean hasUnits) {
+        mOrgUnitButton.setEnabled(hasUnits);
+        if (!hasUnits) {
             return;
         }
 
-        List<String> organisationUnitNames = new ArrayList<String>();
-        for( OrganisationUnit ou: assignedOrganisationUnits )
-            organisationUnitNames.add(ou.getLabel());
-        populateSpinner(organisationUnitSpinner, organisationUnitNames);
+        SelectProgramFragmentState backedUpState = new SelectProgramFragmentState(mState);
+        if (!backedUpState.isOrgUnitEmpty()) {
+            onUnitSelected(
+                    backedUpState.getOrgUnitId(),
+                    backedUpState.getOrgUnitLabel()
+            );
 
-        registerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                registerTrackedEntityInstance();
+            if (!backedUpState.isProgramEmpty()) {
+                onProgramSelected(
+                        backedUpState.getProgramId(),
+                        backedUpState.getProgramName()
+                );
             }
-        });
-
-        upcomingEventsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showUpcomingEventsFragment();
-            }
-        });
-
-        organisationUnitSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedOrganisationUnit = assignedOrganisationUnits.get(position); //displaying first as default
-                programsForSelectedOrganisationUnit = Dhis2.getInstance().getMetaDataController().
-                        getProgramsForOrganisationUnit(selectedOrganisationUnit.getId(),
-                                Program.MULTIPLE_EVENTS_WITH_REGISTRATION, Program.SINGLE_EVENT_WITH_REGISTRATION);
-                if(programsForSelectedOrganisationUnit == null ||
-                        programsForSelectedOrganisationUnit.size() <= 0) {
-                    populateSpinner(programSpinner, new ArrayList<String>());
-                } else {
-                    List<String> programNames = new ArrayList<String>();
-                    for( Program p: programsForSelectedOrganisationUnit )
-                        programNames.add(p.getName());
-                    populateSpinner(programSpinner, programNames);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
-
-        programSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                onProgramSelected(position);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-        Log.e(CLASS_TAG, "setting orgunit " + orgunitSelection);
-        if(assignedOrganisationUnits != null && assignedOrganisationUnits.size()>orgunitSelection)
-            organisationUnitSpinner.setSelection(orgunitSelection);
-        Log.e(CLASS_TAG, "sat orgunit " + orgunitSelection);
-        if(programsForSelectedOrganisationUnit != null && programsForSelectedOrganisationUnit.size()>programSelection)
-            programSpinner.setSelection(programSelection);
-        Log.e(CLASS_TAG, "sat program " + programSelection);
-    }
-
-    public void openProgramOverview(int position) {
-        selectedTrackedEntityInstance = DataValueController.getTrackedEntityInstance(trackedEntityInstanceIds.get(position));
-        MessageEvent message = new MessageEvent(BaseEvent.EventType.showProgramOverviewFragment);
-        Dhis2Application.bus.post(message);
-    }
-
-    public void onProgramSelected(int position) {
-        if(position < 0) return;
-        Log.d(CLASS_TAG, "onprogramselected");
-        if(programsForSelectedOrganisationUnit!=null) {
-            Program program = programsForSelectedOrganisationUnit.get(position);
-
-            //get all unique TEI that have enrollment in the selected program/orgunit
-            //List<Event> events = DataValueController.getEvents(selectedOrganisationUnit.id, program.id);
-            List<Enrollment> enrollments = DataValueController.getEnrollments(program.id,
-                    selectedOrganisationUnit.id);
-            trackedEntityInstanceIds = new ArrayList<>();
-            for(Enrollment enrollment: enrollments) {
-                if(enrollment.localTrackedEntityInstanceId > 0) {
-                    if(!trackedEntityInstanceIds.contains(enrollment.localTrackedEntityInstanceId))
-                        trackedEntityInstanceIds.add(enrollment.localTrackedEntityInstanceId);
-                }
-            }
-
-            Log.d(CLASS_TAG, "got enrollments: " + enrollments.size());
-
-            //get attributevalues to show in list:
-            List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes
-                    = program.getProgramTrackedEntityAttributes();
-            List<TrackedEntityAttribute> trackedEntityAttributes = new ArrayList<>();
-            for(ProgramTrackedEntityAttribute programTrackedEntityAttribute: programTrackedEntityAttributes) {
-                if(programTrackedEntityAttribute.displayInList)
-                    trackedEntityAttributes.add(programTrackedEntityAttribute.getTrackedEntityAttribute());
-            }
-
-            attributeNameContainer.removeAllViews();
-            for(TrackedEntityAttribute s: trackedEntityAttributes) {
-                if(s==null) {
-                    Log.d(CLASS_TAG, "tea is null");
-                    return;
-                }
-                TextView tv = new TextView(getActivity());
-                tv.setWidth(0);
-                tv.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT, 1f));
-                tv.setText(s.getName());
-                attributeNameContainer.addView(tv);
-            }
-
-            //adding invisible imageview to get the same layout width as rows under with status indicator image
-            ImageView dummy = new ImageView(getActivity());
-            int pxWidth = Utils.getDpPx(20, getResources().getDisplayMetrics());
-            dummy.setLayoutParams(new LinearLayout.LayoutParams(pxWidth, pxWidth));
-            dummy.setBackgroundResource(R.drawable.ic_server);
-            dummy.requestLayout();
-            attributeNameContainer.addView(dummy);
-            dummy.setVisibility(View.INVISIBLE);
-
-
-            //get values and show in list
-            HashMap<Long, String[]> rows = new HashMap<>();
-            rowContainer.removeAllViews();
-            for(int j = 0; j<trackedEntityInstanceIds.size(); j++) {
-                long trackedEntityInstance = trackedEntityInstanceIds.get(j);
-                String[] row = new String[trackedEntityAttributes.size()];
-                LinearLayout v = (LinearLayout) getActivity().getLayoutInflater().inflate(org.hisp.dhis2.android.sdk.R.layout.eventlistlinearlayoutitem, rowContainer, false);
-                for(int i=0; i<trackedEntityAttributes.size(); i++) {
-                    TrackedEntityAttribute trackedEntityAttribute = trackedEntityAttributes.get(i);
-                    TrackedEntityAttributeValue teav = DataValueController.getTrackedEntityAttributeValue(trackedEntityAttribute.id, trackedEntityInstance);
-                    if(teav!=null) {
-                        row[i] = teav.value;
-                    }
-                    else row[i] = " ";
-
-                    TextView tv = new TextView(getActivity());
-                    tv.setWidth(0);
-                    tv.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT, 1f));
-                    tv.setMaxLines(2);
-                    tv.setMinLines(2);
-
-                    tv.setText(row[i]);
-                    v.addView(tv);
-                }
-                rows.put(trackedEntityInstance, row);
-
-                ImageView iv = new ImageView(getActivity());
-                iv.setLayoutParams(new LinearLayout.LayoutParams(pxWidth, pxWidth));
-                iv.setBackgroundResource(R.drawable.perm_group_display);
-                iv.requestLayout();
-                iv.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Dhis2.getInstance().showErrorDialog(getActivity(), getString(R.string.information_message), getString(R.string.offline_item));
-                    }
-                });
-                iv.setVisibility(View.INVISIBLE);
-                v.addView(iv);
-
-                v.setContentDescription(""+j);
-                v.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        int position = Integer.parseInt(v.getContentDescription().toString());
-                        openProgramOverview(position);
-                    }
-                });
-                rowContainer.addView(getActivity().getLayoutInflater().inflate(R.layout.divider_view, rowContainer, false));
-                rowContainer.addView(v);
-            }
-
-        } else {
         }
     }
 
-    public void registerTrackedEntityInstance() {
-        if(selectedOrganisationUnit == null || getSelectedProgram() == null) return;
-        MessageEvent messageEvent = new MessageEvent(BaseEvent.EventType.showEnrollmentFragment);
-        Dhis2Application.bus.post(messageEvent);
+    @Override
+    public void onUnitSelected(String orgUnitId, String orgUnitLabel) {
+        mOrgUnitButton.setText(orgUnitLabel);
+        mProgramButton.setEnabled(true);
+
+        mState.setOrgUnit(orgUnitId, orgUnitLabel);
+        mState.resetProgram();
+
+        mPrefs.putOrgUnit(new Pair<>(orgUnitId, orgUnitLabel));
+        mPrefs.putProgram(null);
+
+        handleViews(0);
     }
 
-    public void showUpcomingEventsFragment() {
-        MessageEvent messageEvent = new MessageEvent(BaseEvent.EventType.showUpcomingEventsFragment);
-        Dhis2Application.bus.post(messageEvent);
+    @Override
+    public void onProgramSelected(String programId, String programName) {
+        mProgramButton.setText(programName);
+
+        mState.setProgram(programId, programName);
+        mPrefs.putProgram(new Pair<>(programId, programName));
+        handleViews(1);
+
+        mProgressBar.setVisibility(View.VISIBLE);
+        // this call will trigger onCreateLoader method
+        getLoaderManager().restartLoader(LOADER_ID, getArguments(), this);
     }
 
-    public void populateSpinner( CardSpinner spinner, List<String> list )
-    {
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>( getActivity(),
-                R.layout.spinner_item, list );
-        spinner.setAdapter( adapter );
+    @Override
+    public Loader<List<TrackedEntityInstanceRow>> onCreateLoader(int id, Bundle args) {
+        if (LOADER_ID == id && isAdded()) {
+            List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
+            modelsToTrack.add(Event.class);
+            modelsToTrack.add(FailedItem.class);
+            return new DbLoader<>(
+                    getActivity().getBaseContext(), modelsToTrack,
+                    new SelectProgramFragmentQuery(mState.getOrgUnitId(), mState.getProgramId()));
+        }
+        return null;
     }
 
-    public void invalidate() {
-        onProgramSelected(programSpinner.getSelectedItemPosition());
+    @Override
+    public void onLoadFinished(Loader<List<TrackedEntityInstanceRow>> loader, List<TrackedEntityInstanceRow> data) {
+        if (LOADER_ID == loader.getId()) {
+            mProgressBar.setVisibility(View.GONE);
+            mAdapter.swapData(data);
+        }
     }
 
-    public void showRegisterEventFragment() {
-        if( selectedOrganisationUnit == null || programSpinner.getSelectedItemPosition() < 0)
-            return;
-        MessageEvent event = new MessageEvent(BaseEvent.EventType.showRegisterEventFragment);
-        Dhis2Application.bus.post(event);
-    }
-
-    public OrganisationUnit getSelectedOrganisationUnit() {
-        return selectedOrganisationUnit;
-    }
-
-    public Program getSelectedProgram() {
-        if(programSpinner.getSelectedItemPosition()<0) return null;
-        Program selectedProgram = programsForSelectedOrganisationUnit.
-                get(programSpinner.getSelectedItemPosition());
-        return selectedProgram;
-    }
-
-    public TrackedEntityInstance getSelectedTrackedEntityInstance() {
-        return selectedTrackedEntityInstance;
+    @Override
+    public void onLoaderReset(Loader<List<TrackedEntityInstanceRow>> loader) {
+        mAdapter.swapData(null);
     }
 
     @Subscribe
-    public void onReceiveInvalidateMessage(InvalidateEvent event) {
-        if(event.eventType == InvalidateEvent.EventType.event) {
-            getActivity().runOnUiThread(new Thread() {
-                @Override
-                public void run() {
-                    invalidate();
+    public void onItemClick(OnTrackedEntityInstanceClick eventClick) {
+        if (eventClick.isOnDescriptionClick()) {
+
+            ProgramOverviewFragment fragment = ProgramOverviewFragment.
+                    newInstance(mState.getOrgUnitId(), mState.getProgramId(),
+                            eventClick.getTrackedEntityInstance().localId);
+
+            mNavigationHandler.switchFragment(fragment, ProgramOverviewFragment.CLASS_TAG, true);
+        } else {
+            switch (eventClick.getStatus()) {
+                case SENT:
+                    Dhis2.getInstance().showErrorDialog(getActivity(),
+                            getString(R.string.event_sent),
+                            getString(R.string.status_sent_description),
+                            R.drawable.ic_from_server
+                    );
+                    break;
+                case OFFLINE:
+                    Dhis2.getInstance().showErrorDialog(getActivity(),
+                            getString(R.string.event_offline),
+                            getString(R.string.status_offline_description),
+                            R.drawable.ic_offline
+                    );
+                    break;
+                case ERROR: {
+                    String message = getErrorDescription(eventClick.getTrackedEntityInstance());
+                    Dhis2.getInstance().showErrorDialog(getActivity(),
+                            getString(R.string.event_error),
+                            message, R.drawable.ic_event_error
+                    );
+                    break;
                 }
-            });
+            }
         }
     }
 
-    public int getSelectedOrganisationUnitIndex() {
-        if(organisationUnitSpinner!=null) {
-            return organisationUnitSpinner.getSelectedItemPosition();
-        }
-        else {
-            return 0;
-        }
-    }
+    private String getErrorDescription(TrackedEntityInstance trackedEntityInstance) {
+        FailedItem failedItem = DataValueController.getFailedItem(FailedItem.TRACKEDENTITYINSTANCE, trackedEntityInstance.localId);
+                //Select.byId(FailedItem.class, trackedEntityInstance.localId);
 
-    public int getSelectedProgramIndex() {
-        if(programSpinner!=null) {
-            return programSpinner.getSelectedItemPosition();
-        }
-        else {
-            return 0;
-        }
-    }
+        if (failedItem != null) {
+            if (failedItem.httpStatusCode == 401) {
+                return getString(R.string.error_401_description);
+            }
 
-    public void setSelection(int orgunit, int program) {
-        Log.d(CLASS_TAG, "¤¤¤ settings selection: " + orgunit +", " + program);
-        orgunitSelection = orgunit;
-        programSelection = program;
-    }
+            if (failedItem.httpStatusCode == 408) {
+                return getString(R.string.error_408_description);
+            }
 
-    @Override
-    public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        Dhis2Application.bus.register(this);
+            if (failedItem.httpStatusCode >= 400 && failedItem.httpStatusCode < 500) {
+                return getString(R.string.error_series_400_description);
+            }
+
+            if (failedItem.httpStatusCode >= 500) {
+                return getString(R.string.error_series_500_description);
+            }
+        }
+
+        return getString(R.string.unknown_error);
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Dhis2Application.bus.unregister(this);
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.select_organisation_unit: {
+                OrgUnitDialogFragment fragment = OrgUnitDialogFragment
+                        .newInstance(this);
+                fragment.show(getChildFragmentManager());
+                break;
+            }
+            case R.id.select_program: {
+                ProgramDialogFragment fragment = ProgramDialogFragment
+                        .newInstance(this, mState.getOrgUnitId(),
+                                Program.MULTIPLE_EVENTS_WITH_REGISTRATION,
+                                Program.SINGLE_EVENT_WITH_REGISTRATION);
+                fragment.show(getChildFragmentManager());
+                break;
+            }
+            case R.id.register_new_event: {
+                EnrollmentFragment enrollmentFragment = EnrollmentFragment.newInstance(mState.getOrgUnitId(),mState.getProgramId());
+                mNavigationHandler.switchFragment(enrollmentFragment, EnrollmentFragment.class.getName(), true);
+
+                break;
+            }
+            case R.id.upcoming_events_button: {
+                UpcomingEventsFragment fragment = new UpcomingEventsFragment();
+                mNavigationHandler.switchFragment(fragment, UpcomingEventsFragment.class.getName(), true);
+            }
+        }
+    }
+
+    private void handleViews(int level) {
+        mAdapter.swapData(null);
+        switch (level) {
+            case 0:
+                mRegisterEventButton.hide();
+                mUpcomingEventsButton.hide();
+                break;
+            case 1:
+                mRegisterEventButton.show();
+                mUpcomingEventsButton.show();
+        }
     }
 }

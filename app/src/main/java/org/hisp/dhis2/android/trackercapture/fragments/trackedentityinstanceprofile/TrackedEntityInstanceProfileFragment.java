@@ -150,6 +150,11 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
@@ -186,7 +191,9 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
             ((INavigationHandler) getActivity()).setBackPressedListener(null);
         }
 
+        mListView = null;
         mNavigationHandler = null;
+        Log.d(TAG, "FRAGMENT IS DETACHED");
         super.onDetach();
     }
 
@@ -202,14 +209,17 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            mNavigationHandler.onBackPressed();
+                            onDetach();
+                            getFragmentManager().popBackStack();
                         }
                     }, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
 
                             submitChanges();
-                            mNavigationHandler.onBackPressed();
+                            onDetach();
+                            getFragmentManager().popBackStack();
+
                         }
                     }, new DialogInterface.OnClickListener() {
                         @Override
@@ -219,7 +229,10 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
                     });
         }
         else
+        {
+            onDetach();
             getFragmentManager().popBackStack();
+        }
 
     }
 

@@ -625,7 +625,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     {
         TrackedEntityInstanceProfileFragment fragment = TrackedEntityInstanceProfileFragment.newInstance(getArguments().
                 getLong(TRACKEDENTITYINSTANCE_ID), getArguments().getString(PROGRAM_ID));
-        mNavigationHandler.switchFragment(fragment, TrackedEntityInstanceProfileFragment.TAG, false);
+        mNavigationHandler.switchFragment(fragment, TrackedEntityInstanceProfileFragment.TAG, true);
     }
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {

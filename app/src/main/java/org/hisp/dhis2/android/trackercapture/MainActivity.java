@@ -29,25 +29,23 @@
 
 package org.hisp.dhis2.android.trackercapture;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 
-import com.squareup.otto.Subscribe;
+import com.raizlabs.android.dbflow.runtime.FlowContentObserver;
 
 import org.hisp.dhis2.android.sdk.activities.INavigationHandler;
-import org.hisp.dhis2.android.sdk.activities.LoginActivity;
 import org.hisp.dhis2.android.sdk.activities.OnBackPressedListener;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
-import org.hisp.dhis2.android.sdk.events.BaseEvent;
-import org.hisp.dhis2.android.sdk.events.MessageEvent;
 import org.hisp.dhis2.android.sdk.fragments.LoadingFragment;
+import org.hisp.dhis2.android.sdk.network.http.ApiRequestCallback;
+import org.hisp.dhis2.android.sdk.network.http.Response;
 import org.hisp.dhis2.android.sdk.network.managers.NetworkManager;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
+import org.hisp.dhis2.android.sdk.utils.APIException;
 import org.hisp.dhis2.android.trackercapture.fragments.SelectProgramFragment;
 
 
@@ -71,8 +69,6 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
         Dhis2.activatePeriodicSynchronizer(this);
         if (Dhis2.isInitialDataLoaded(this)) {
             showSelectProgramFragment();
-        } else if (Dhis2.isLoadingInitial()) {
-            showLoadingFragment();
         } else {
             loadInitialData();
         }
@@ -85,24 +81,40 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
                 showLoadingFragment();
             }
         });
-        Dhis2.loadInitialData(this);
-    }
+        ApiRequestCallback callback = new ApiRequestCallback() {
+            @Override
+            public void onSuccess(Response response) {
+                FlowContentObserver observer = Dhis2.getFlowContentObserverForAllTables();
+                String message = getString(org.hisp.dhis2.android.sdk.R.string.finishing_up);
+                Dhis2.postProgressMessage(message);
+                ApiRequestCallback callback = new ApiRequestCallback() {
+                    @Override
+                    public void onSuccess(Response response) {
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                showSelectProgramFragment();
+                            }
+                        });
+                    }
 
-    @Subscribe
-    public void onReceiveMessage(MessageEvent event) {
-        Log.d(TAG, "onReceiveMessage");
-        if (event.eventType == BaseEvent.EventType.onLoadingInitialDataFinished) {
-            if (Dhis2.isInitialDataLoaded(this)) {
-                showSelectProgramFragment();
-            } else {
+                    @Override
+                    public void onFailure(APIException exception) {
+                        showSelectProgramFragment();
+                    }
+                };
+                Dhis2.BlockThread blockThread = new Dhis2.BlockThread(observer, callback);
+                Dhis2.BlockingModelChangeListener listener = new Dhis2.BlockingModelChangeListener(blockThread);
+                observer.addModelChangeListener(listener);
+                blockThread.start();
+            }
+
+            @Override
+            public void onFailure(APIException exception) {
                 //todo: notify the user that data is missing and request to try to re-load.
                 showSelectProgramFragment();
             }
-        } else if (event.eventType == BaseEvent.EventType.loadInitialDataFailed) {
-            startActivity(new Intent(MainActivity.this,
-                    LoginActivity.class));
-            finish();
-        }
+        };
+        Dhis2.loadInitialData(this, callback);
     }
 
     public void showLoadingFragment() {

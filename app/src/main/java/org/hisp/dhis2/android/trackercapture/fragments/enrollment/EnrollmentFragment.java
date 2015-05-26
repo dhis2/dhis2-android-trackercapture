@@ -64,9 +64,12 @@ import org.hisp.dhis2.android.sdk.fragments.ProgressDialogFragment;
 import org.hisp.dhis2.android.sdk.fragments.dataentry.EditTextValueChangedEvent;
 import org.hisp.dhis2.android.sdk.fragments.dataentry.ProgramRuleHelper;
 import org.hisp.dhis2.android.sdk.fragments.dataentry.ValidationErrorDialog;
+import org.hisp.dhis2.android.sdk.network.http.ApiRequestCallback;
+import org.hisp.dhis2.android.sdk.network.http.Response;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttributeValue;
+import org.hisp.dhis2.android.sdk.utils.APIException;
 import org.hisp.dhis2.android.sdk.utils.ui.adapters.DataValueAdapter;
 import org.hisp.dhis2.android.sdk.utils.ui.adapters.SectionAdapter;
 import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.dataentry.IndicatorRow;
@@ -701,10 +704,22 @@ public class EnrollmentFragment extends Fragment
                     mForm.getEnrollment().fromServer = false;
                     mForm.getEnrollment().save();
 
+                    final ApiRequestCallback callback = new ApiRequestCallback() {
+                        @Override
+                        public void onSuccess(Response response) {
+                            //do nothing
+                        }
+
+                        @Override
+                        public void onFailure(APIException exception) {
+                            //do nothing
+                        }
+                    };
+
                     TimerTask timerTask = new TimerTask() {
                         @Override
                         public void run() {
-                            Dhis2.sendLocalData(context);
+                            Dhis2.sendLocalData(context, callback);
                         }
                     };
                     Timer timer = new Timer();

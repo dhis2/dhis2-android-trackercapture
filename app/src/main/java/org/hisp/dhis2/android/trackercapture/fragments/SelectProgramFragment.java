@@ -51,8 +51,10 @@ import com.squareup.otto.Subscribe;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis2.android.sdk.events.InvalidateEvent;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
+import org.hisp.dhis2.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
 import org.hisp.dhis2.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
@@ -268,6 +270,8 @@ public class SelectProgramFragment extends Fragment
     public Loader<List<TrackedEntityInstanceRow>> onCreateLoader(int id, Bundle args) {
         if (LOADER_ID == id && isAdded()) {
             List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
+            modelsToTrack.add(TrackedEntityInstance.class);
+            modelsToTrack.add(Enrollment.class);
             modelsToTrack.add(Event.class);
             modelsToTrack.add(FailedItem.class);
             return new DbLoader<>(
@@ -288,6 +292,15 @@ public class SelectProgramFragment extends Fragment
     @Override
     public void onLoaderReset(Loader<List<TrackedEntityInstanceRow>> loader) {
         mAdapter.swapData(null);
+    }
+
+    @Subscribe
+    public void onInvalidate(InvalidateEvent event) {
+        if(event.eventType == InvalidateEvent.EventType.dataValuesSent ||
+                event.eventType == InvalidateEvent.EventType.dataValuesLoaded ||
+                event.eventType == InvalidateEvent.EventType.metaDataLoaded) {
+            getLoaderManager().restartLoader(LOADER_ID, getArguments(), this);
+        }
     }
 
     @Subscribe

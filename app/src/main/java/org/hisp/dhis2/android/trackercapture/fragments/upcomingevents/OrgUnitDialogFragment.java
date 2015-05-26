@@ -195,7 +195,7 @@ public class OrgUnitDialogFragment extends DialogFragment
             List<Program> programs = Dhis2.getInstance()
                     .getMetaDataController()
                     .getProgramsForOrganisationUnit(
-                            unitId, Program.SINGLE_EVENT_WITHOUT_REGISTRATION
+                            unitId, Program.MULTIPLE_EVENTS_WITH_REGISTRATION, Program.SINGLE_EVENT_WITH_REGISTRATION
                     );
             return (programs != null && !programs.isEmpty());
         }

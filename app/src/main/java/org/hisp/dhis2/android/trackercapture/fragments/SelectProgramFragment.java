@@ -332,6 +332,10 @@ public class SelectProgramFragment extends Fragment
                 //Select.byId(FailedItem.class, trackedEntityInstance.localId);
 
         if (failedItem != null) {
+            if (failedItem.httpStatusCode == 200) {
+                if(failedItem.getImportSummary()!=null)
+                    return failedItem.getImportSummary().description;
+            }
             if (failedItem.httpStatusCode == 401) {
                 return getString(R.string.error_401_description);
             }
@@ -345,7 +349,7 @@ public class SelectProgramFragment extends Fragment
             }
 
             if (failedItem.httpStatusCode >= 500) {
-                return getString(R.string.error_series_500_description);
+                return failedItem.errorMessage;
             }
         }
 

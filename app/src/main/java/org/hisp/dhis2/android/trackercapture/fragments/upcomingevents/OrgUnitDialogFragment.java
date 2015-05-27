@@ -49,7 +49,7 @@ import org.hisp.dhis2.android.sdk.persistence.models.Program;
 import org.hisp.dhis2.android.trackercapture.R;
 import org.hisp.dhis2.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis2.android.sdk.persistence.loaders.Query;
-import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.adapters.SimpleAdapter;
+import org.hisp.dhis2.android.trackercapture.ui.adapters.SimpleAdapter;
 
 import java.util.ArrayList;
 import java.util.List;

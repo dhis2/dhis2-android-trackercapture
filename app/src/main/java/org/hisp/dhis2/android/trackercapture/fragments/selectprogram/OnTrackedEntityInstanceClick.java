@@ -1,9 +1,7 @@
 package org.hisp.dhis2.android.trackercapture.fragments.selectprogram;
 
-import org.hisp.dhis2.android.sdk.persistence.models.Event;
-import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntity;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityInstance;
-import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.Events.EventItemStatus;
+import org.hisp.dhis2.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceItemStatus;
 
 /**
  * Created by erling on 5/11/15.

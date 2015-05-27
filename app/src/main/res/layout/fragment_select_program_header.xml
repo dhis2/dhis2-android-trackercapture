@@ -52,14 +52,14 @@
         android:orientation="horizontal"
         android:gravity="center">
 
-        <org.hisp.dhis2.android.trackercapture.views.FloatingActionButton
+        <org.hisp.dhis2.android.sdk.utils.ui.views.FloatingActionButton
             android:id="@+id/register_new_event"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:src="@drawable/ic_new"/>
 
-        <org.hisp.dhis2.android.trackercapture.views.FloatingActionButton
+        <org.hisp.dhis2.android.sdk.utils.ui.views.FloatingActionButton
             android:id="@+id/upcoming_events_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

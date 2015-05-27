@@ -27,25 +27,20 @@
 package org.hisp.dhis2.android.trackercapture.fragments.programoverview;
 
 import android.content.Context;
-import android.util.Log;
-
-import com.raizlabs.android.dbflow.sql.language.Select;
 
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis2.android.sdk.persistence.loaders.Query;
-import org.hisp.dhis2.android.sdk.persistence.models.BaseValue;
-import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis2.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
-import org.hisp.dhis2.android.sdk.persistence.models.Option;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
-import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityInstance;
-import org.hisp.dhis2.android.sdk.utils.DateUtils;
 import org.hisp.dhis2.android.sdk.utils.Utils;
+import org.hisp.dhis2.android.trackercapture.ui.rows.programoverview.ProgramStageEventRow;
+import org.hisp.dhis2.android.trackercapture.ui.rows.programoverview.ProgramStageLabelRow;
+import org.hisp.dhis2.android.trackercapture.ui.rows.programoverview.ProgramStageRow;
 
 import java.util.ArrayList;
 import java.util.HashMap;

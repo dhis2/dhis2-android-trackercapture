@@ -63,8 +63,8 @@ import org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton;
 import org.hisp.dhis2.android.sdk.utils.ui.views.FloatingActionButton;
 import org.hisp.dhis2.android.trackercapture.R;
 import org.hisp.dhis2.android.trackercapture.fragments.programoverview.ProgramOverviewFragment;
-import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.adapters.UpcomingEventAdapter;
-import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.upcomingevents.UpcomingEventRow;
+import org.hisp.dhis2.android.trackercapture.ui.adapters.UpcomingEventAdapter;
+import org.hisp.dhis2.android.trackercapture.ui.rows.upcomingevents.UpcomingEventRow;
 import org.joda.time.LocalDate;
 
 import java.util.ArrayList;

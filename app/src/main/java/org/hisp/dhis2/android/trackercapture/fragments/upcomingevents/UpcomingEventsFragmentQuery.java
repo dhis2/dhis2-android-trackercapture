@@ -28,37 +28,24 @@ package org.hisp.dhis2.android.trackercapture.fragments.upcomingevents;
 
 import android.content.Context;
 
-import com.raizlabs.android.dbflow.sql.builder.Condition;
 import com.raizlabs.android.dbflow.sql.language.Select;
 
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
-import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
-import org.hisp.dhis2.android.sdk.persistence.models.DataValue$Table;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
-import org.hisp.dhis2.android.sdk.persistence.models.FailedItem;
-import org.hisp.dhis2.android.sdk.persistence.models.FailedItem$Table;
 import org.hisp.dhis2.android.sdk.persistence.models.Option;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
-import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
-import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageDataElement;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis2.android.sdk.persistence.loaders.Query;
-import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.upcomingevents.UpcomingEventsColumnNamesRow;
-import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.upcomingevents.UpcomingEventItemRow;
-import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.upcomingevents.EventItemStatus;
-import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.upcomingevents.UpcomingEventRow;
-import org.joda.time.DateTime;
+import org.hisp.dhis2.android.trackercapture.ui.rows.upcomingevents.UpcomingEventsColumnNamesRow;
+import org.hisp.dhis2.android.trackercapture.ui.rows.upcomingevents.UpcomingEventItemRow;
+import org.hisp.dhis2.android.trackercapture.ui.rows.upcomingevents.UpcomingEventRow;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 class UpcomingEventsFragmentQuery implements Query<List<UpcomingEventRow>> {
     private final String mOrgUnitId;

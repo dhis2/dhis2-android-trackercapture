@@ -46,7 +46,7 @@ import org.hisp.dhis2.android.sdk.network.http.Response;
 import org.hisp.dhis2.android.sdk.network.managers.NetworkManager;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis2.android.sdk.utils.APIException;
-import org.hisp.dhis2.android.trackercapture.fragments.SelectProgramFragment;
+import org.hisp.dhis2.android.trackercapture.fragments.selectprogram.SelectProgramFragment;
 
 
 public class MainActivity extends AppCompatActivity implements INavigationHandler {

@@ -26,17 +26,12 @@
 
 package org.hisp.dhis2.android.trackercapture.fragments.programoverview;
 
-import org.hisp.dhis2.android.sdk.fragments.dataentry.DataEntryFragmentSection;
-import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis2.android.sdk.persistence.models.Enrollment;
-import org.hisp.dhis2.android.sdk.persistence.models.Event;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
-import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis2.android.sdk.persistence.models.TrackedEntityInstance;
-import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.dataentry.IndicatorRow;
+import org.hisp.dhis2.android.trackercapture.ui.rows.programoverview.ProgramStageRow;
 
 import java.util.List;
-import java.util.Map;
 
 class ProgramOverviewFragmentForm {
     private Enrollment enrollment;

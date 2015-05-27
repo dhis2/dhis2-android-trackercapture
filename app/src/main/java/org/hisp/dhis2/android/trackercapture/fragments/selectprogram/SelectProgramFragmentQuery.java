@@ -115,6 +115,7 @@ class SelectProgramFragmentQuery implements Query<List<TrackedEntityInstanceRow>
         }
 
         for (TrackedEntityInstance trackedEntityInstance : trackedEntityInstanceList) {
+            if(trackedEntityInstance==null) continue;
             teiRows.add(createTrackedEntityInstanceItem(context,
                     trackedEntityInstance, attributesToShow, attributes,
                     codeToName, failedEventIds));

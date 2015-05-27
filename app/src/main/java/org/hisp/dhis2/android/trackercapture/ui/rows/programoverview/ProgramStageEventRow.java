@@ -8,6 +8,8 @@ import android.widget.TextView;
 import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
 import org.hisp.dhis2.android.sdk.utils.Utils;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 /**
  * @author Simen Skogly Russnes on 13.05.15.
@@ -42,27 +44,25 @@ public class ProgramStageEventRow implements ProgramStageRow {
         holder.date.setText(Utils.removeTimeFromDateString(event.getEventDate()));
 
         int color = org.hisp.dhis2.android.sdk.R.color.stage_skipped;
-        switch (event.status) {
-            case Event.STATUS_ACTIVE:
+        if(event.status.equals(Event.STATUS_COMPLETED)) {
+            color = org.hisp.dhis2.android.sdk.R.color.stage_completed;
+        } else if (event.status.equals(Event.STATUS_SKIPPED)) {
+            color = org.hisp.dhis2.android.sdk.R.color.stage_skipped;
+        } else if (event.status.equals(Event.STATUS_ACTIVE)) {
+            if (new LocalDateTime(event.getDueDate()).isAfter(new LocalDateTime(Utils.getCurrentDate()))) {
                 color = org.hisp.dhis2.android.sdk.R.color.stage_executed;
-                break;
-            case Event.STATUS_COMPLETED:
-                color = org.hisp.dhis2.android.sdk.R.color.stage_completed;
-                break;
-            case Event.STATUS_FUTURE_VISIT:
+            } else {
+                color = org.hisp.dhis2.android.sdk.R.color.stage_overdue;
+            }
+        } else if (event.status.equals(Event.STATUS_FUTURE_VISIT)) {
+            if (new LocalDateTime(event.getDueDate()).isAfter(new LocalDateTime(Utils.getCurrentDate()))) {
                 color = org.hisp.dhis2.android.sdk.R.color.stage_ontime;
-                break;
-            //case Event.STATUS_LATE_VISIT:
-            //    color = org.hisp.dhis2.android.sdk.R.color.stage_overdue;
-            //    break;
-            case Event.STATUS_SKIPPED:
-                color = org.hisp.dhis2.android.sdk.R.color.stage_skipped;
-                break;
-            //case Event.STATUS_VISITED:
-            //    color = org.hisp.dhis2.android.sdk.R.color.stage_executed;
-            //    break;
+            } else {
+                color = org.hisp.dhis2.android.sdk.R.color.stage_overdue;
+            }
         }
-        view.setBackgroundColor(inflater.getContext().getResources().getColor(color));
+        view.findViewById(org.hisp.dhis2.android.sdk.R.id.eventbackground).
+                setBackgroundColor(inflater.getContext().getResources().getColor(color));
 
         return view;
     }

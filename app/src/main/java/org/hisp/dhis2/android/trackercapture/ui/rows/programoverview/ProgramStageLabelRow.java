@@ -7,6 +7,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
+import org.hisp.dhis2.android.sdk.utils.ui.views.FloatingActionButton;
 
 /**
  * @author Simen Skogly Russnes on 13.05.15.
@@ -30,7 +31,7 @@ public class ProgramStageLabelRow implements ProgramStageRow {
         } else {
             View root = inflater.inflate(org.hisp.dhis2.android.sdk.R.layout.programstagelayout, container, false);
             TextView programStageName = (TextView) root.findViewById(org.hisp.dhis2.android.sdk.R.id.programstagename);
-            Button newEventButton = (Button) root.findViewById(org.hisp.dhis2.android.sdk.R.id.neweventbutton);
+            FloatingActionButton newEventButton = (FloatingActionButton) root.findViewById(org.hisp.dhis2.android.sdk.R.id.neweventbutton);
             newEventButton.setVisibility(View.INVISIBLE);
             newEventButton.setEnabled(false);
             newEventButton.setTag(programStage);
@@ -52,10 +53,10 @@ public class ProgramStageLabelRow implements ProgramStageRow {
 
     private static class ProgramStageViewHolder {
         public final TextView programStageName;
-        public final Button newEventButton;
+        public final FloatingActionButton newEventButton;
 
         private ProgramStageViewHolder(TextView programStageName,
-                                Button newEventButton) {
+                                       FloatingActionButton newEventButton) {
             this.programStageName = programStageName;
             this.newEventButton = newEventButton;
         }

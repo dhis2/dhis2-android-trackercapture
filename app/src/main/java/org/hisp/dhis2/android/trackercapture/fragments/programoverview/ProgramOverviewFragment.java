@@ -393,7 +393,6 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
             modelsToTrack.add(Enrollment.class);
             modelsToTrack.add(TrackedEntityInstance.class);
             modelsToTrack.add(TrackedEntityAttributeValue.class);
-            // modelsToTrack.add(FailedItem.class);
             return new DbLoader<>(
                     getActivity().getBaseContext(), modelsToTrack,
                     new ProgramOverviewFragmentQuery(args.getString(ORG_UNIT_ID),
@@ -515,7 +514,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         terminateButton.setEnabled(false);
         terminateButton.setAlpha(0x40);
         followupButton.setEnabled(false);
-        followupButton.setImageAlpha(0x40);
+        followupButton.setAlpha(0x40);
     }
 
     public void terminateEnrollment() {
@@ -544,9 +543,9 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     public void setFollowupButton(boolean enabled) {
         if(followupButton==null) return;
         if(enabled) {
-            followupButton.setBackground(getResources().getDrawable(R.drawable.rounded_imagebutton_red));
+            followupButton.setBackgroundResource(R.drawable.rounded_imagebutton_red);
         } else {
-            followupButton.setBackground(getResources().getDrawable(R.drawable.rounded_imagebutton_gray));
+            followupButton.setBackgroundResource(R.drawable.rounded_imagebutton_gray);
         }
     }
 

@@ -56,15 +56,19 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.raizlabs.android.dbflow.structure.Model;
+import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis2.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
+import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.fragments.dataentry.DataEntryFragment;
+import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis2.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis2.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
+import org.hisp.dhis2.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
@@ -77,12 +81,15 @@ import org.hisp.dhis2.android.trackercapture.fragments.trackedentityinstanceprof
 import org.hisp.dhis2.android.trackercapture.fragments.upcomingevents.ProgramDialogFragment;
 import org.hisp.dhis2.android.trackercapture.ui.adapters.ProgramAdapter;
 import org.hisp.dhis2.android.trackercapture.ui.adapters.ProgramStageAdapter;
+import org.hisp.dhis2.android.trackercapture.ui.rows.programoverview.OnProgramStageEventClick;
 import org.hisp.dhis2.android.trackercapture.ui.rows.programoverview.ProgramStageEventRow;
 import org.hisp.dhis2.android.trackercapture.ui.rows.programoverview.ProgramStageLabelRow;
 import org.hisp.dhis2.android.trackercapture.ui.rows.programoverview.ProgramStageRow;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Simen Skogly Russnes on 20.02.15.
@@ -102,6 +109,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     private static final String ORG_UNIT_ID = "extra:orgUnitId";
     private static final String PROGRAM_ID = "extra:ProgramId";
     private static final String TRACKEDENTITYINSTANCE_ID = "extra:TrackedEntityInstanceId";
+    private String errorMessage;
 
     private ListView listView;
     private ProgressBar mProgressBar;
@@ -288,6 +296,18 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        Dhis2Application.getEventBus().unregister(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Dhis2Application.getEventBus().register(this);
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_upcoming_events, menu);
@@ -446,6 +466,10 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
                 attribute2Label.setText(data.getAttribute2Label());
                 attribute2Value.setText(data.getAttribute2Value());
             }
+
+            final Map<Long,FailedItem> failedEvents = getFailedEvents();
+            List<Event> events = DataValueController.getEventsByEnrollment(data.getEnrollment().localId);
+            Log.d(CLASS_TAG, "num failed events: " + failedEvents.size());
             for(ProgramStageRow row: data.getProgramStageRows()) {
                 if(row instanceof ProgramStageLabelRow) {
                     ProgramStageLabelRow stageRow = (ProgramStageLabelRow) row;
@@ -453,9 +477,51 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
                         stageRow.setButtonListener(this);
                     }
                 }
+                else if(row instanceof ProgramStageEventRow)
+                {
+                    final ProgramStageEventRow eventRow = (ProgramStageEventRow) row;
+
+                    if(failedEvents.containsKey(eventRow.getEvent().getLocalId()))
+                    {
+                        eventRow.setHasFailed(true);
+                        eventRow.setErrorMessage(failedEvents.get(eventRow.getEvent().getLocalId()).errorMessage);
+                    }
+
+                }
             }
+
             adapter.swapData(data.getProgramStageRows());
         }
+    }
+
+    @Subscribe
+    public void onItemClick(OnProgramStageEventClick eventClick)
+    {
+        if(eventClick.isHasPressedFailedButton())
+        {
+            //maybe method above works
+            Dhis2.showErrorDialog(getActivity(), getString(R.string.event_error),
+                    eventClick.getErrorMessage(), R.drawable.ic_event_error);
+        }
+        else
+        {
+            showDataEntryFragment(eventClick.getEvent(),eventClick.getEvent().getProgramStageId());
+        }
+    }
+
+    public Map<Long, FailedItem> getFailedEvents()
+    {
+        Map<Long, FailedItem> failedItemMap = new HashMap<>();
+        List<FailedItem> failedItems = DataValueController.getFailedItems();
+        if(failedItems != null && failedItems.size() > 0)
+        {
+            for(FailedItem failedItem : failedItems)
+            {
+                if(failedItem.itemType.equals(FailedItem.EVENT))
+                    failedItemMap.put(failedItem.itemId,failedItem);
+            }
+        }
+        return failedItemMap;
     }
 
     public void showNoActiveEnrollment() {
@@ -567,6 +633,14 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
                     showDataEntryFragment(null, programStage.getId());
                 }
                 break;
+            }
+
+            case R.id.eventbackground: {
+                if(mForm.getEnrollment().status.equals(Enrollment.ACTIVE))
+                {
+                    Event event = (Event) view.getTag();
+                    showDataEntryFragment(event, event.getProgramStageId());
+                }
             }
 
             case R.id.complete: {

@@ -33,14 +33,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton
+    <org.hisp.dhis.android.sdk.utils.ui.views.CardTextViewButton
         android:id="@+id/select_organisation_unit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="6dp"
         app:hint="@string/choose_organisation_unit" />
 
-    <org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton
+    <org.hisp.dhis.android.sdk.utils.ui.views.CardTextViewButton
         android:id="@+id/select_program"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -52,14 +52,14 @@
         android:orientation="horizontal"
         android:gravity="center">
 
-        <org.hisp.dhis2.android.sdk.utils.ui.views.FloatingActionButton
+        <org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton
             android:id="@+id/register_new_event"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:src="@drawable/ic_new"/>
 
-        <org.hisp.dhis2.android.sdk.utils.ui.views.FloatingActionButton
+        <org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton
             android:id="@+id/upcoming_events_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

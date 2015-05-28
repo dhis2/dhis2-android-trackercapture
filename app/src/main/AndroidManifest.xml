@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.hisp.dhis2.android.trackercapture" >
+    package="org.hisp.dhis.android.trackercapture" >
 
     <uses-sdk
     android:targetSdkVersion="21" />
@@ -13,13 +13,13 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
-        android:name="org.hisp.dhis2.android.trackercapture.TrackerCaptureApplication"
+        android:name="org.hisp.dhis.android.trackercapture.TrackerCaptureApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity
-            android:name="org.hisp.dhis2.android.sdk.activities.SplashActivity"
+            android:name="org.hisp.dhis.android.sdk.activities.SplashActivity"
             android:theme="@style/LoginScreenTheme"
             android:label="@string/app_name" >
             <intent-filter>
@@ -28,33 +28,33 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="org.hisp.dhis2.android.sdk.activities.LoginActivity"
+            android:name="org.hisp.dhis.android.sdk.activities.LoginActivity"
             android:theme="@style/LoginScreenTheme"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name="org.hisp.dhis2.android.trackercapture.MainActivity"
+            android:name="org.hisp.dhis.android.trackercapture.MainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_main"
             android:windowSoftInputMode="adjustPan" >
         </activity>
 
         <receiver
-            android:name="org.hisp.dhis2.android.sdk.services.PeriodicSynchronizer">
+            android:name="org.hisp.dhis.android.sdk.services.PeriodicSynchronizer">
         </receiver>
         <receiver
-            android:name="org.hisp.dhis2.android.sdk.services.PeriodicSynchronizerAutoStarter">
+            android:name="org.hisp.dhis.android.sdk.services.PeriodicSynchronizerAutoStarter">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
         <service
-            android:name="org.hisp.dhis2.android.sdk.services.StartPeriodicSynchronizerService"
+            android:name="org.hisp.dhis.android.sdk.services.StartPeriodicSynchronizerService"
             android:enabled="true" />
 
         <!-- Specify the next screen after SplashScreen if user already logged in -->
-        <meta-data android:name="nextClassName" android:value="org.hisp.dhis2.android.trackercapture.MainActivity" />
+        <meta-data android:name="nextClassName" android:value="org.hisp.dhis.android.trackercapture.MainActivity" />
     </application>
 </manifest>

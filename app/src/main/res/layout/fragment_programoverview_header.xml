@@ -62,7 +62,7 @@
                     android:text="@string/no_active_enrollment"
                     android:layout_gravity="center_horizontal" />
 
-                <org.hisp.dhis2.android.sdk.utils.ui.views.FloatingActionButton
+                <org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton
                     android:id="@+id/newenrollmentbutton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

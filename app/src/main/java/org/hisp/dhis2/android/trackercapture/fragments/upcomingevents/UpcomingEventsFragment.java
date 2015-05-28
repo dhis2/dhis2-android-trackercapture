@@ -58,6 +58,7 @@ import org.hisp.dhis2.android.sdk.persistence.models.Event;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
 import org.hisp.dhis2.android.sdk.utils.Utils;
+import org.hisp.dhis2.android.sdk.utils.support.DateUtils;
 import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.dataentry.DatePickerRow;
 import org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton;
 import org.hisp.dhis2.android.sdk.utils.ui.views.FloatingActionButton;
@@ -164,9 +165,9 @@ public class UpcomingEventsFragment extends Fragment implements View.OnClickList
         mQueryButton.hide();
 
         startDate = new DataValue();
-        startDate.value = Utils.getCurrentDate();
+        startDate.value = DateUtils.getMediumDateString();
         endDate = new DataValue();
-        endDate.value = new LocalDate(Utils.getCurrentDate()).plusYears(1).toString();
+        endDate.value = new LocalDate(DateUtils.getMediumDateString()).plusYears(1).toString();
         DatePickerRow startDatePicker = new DatePickerRow(getString(R.string.startdate), startDate);
         DatePickerRow endDatePicker = new DatePickerRow(getString(R.string.enddate), endDate);
         LinearLayout dateFilterContainer = (LinearLayout) header.findViewById(R.id.datefilterlayout);

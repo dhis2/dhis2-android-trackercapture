@@ -38,7 +38,7 @@
     <org.hisp.dhis2.android.sdk.utils.ui.views.FontTextView
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:text="@string/registered_events"
+        android:text="@string/tracked_entity_instances"
         android:textSize="@dimen/medium_text_size"
         android:textColor="@color/white"
         android:gravity="center"

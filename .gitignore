@@ -23,3 +23,6 @@ build
 
 #Windows
 *.db
+
+#Android
+*.apk

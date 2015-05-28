@@ -391,7 +391,7 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
                     mForm.getTrackedEntityInstance().save();
 
                     mForm.getTrackedEntityInstance().fromServer = false;
-                    mForm.getTrackedEntityInstance().lastUpdated = Utils.getCurrentTime();
+                    //mForm.getTrackedEntityInstance().lastUpdated = Utils.getCurrentTime();
                     mForm.getTrackedEntityInstance().save();
 
 

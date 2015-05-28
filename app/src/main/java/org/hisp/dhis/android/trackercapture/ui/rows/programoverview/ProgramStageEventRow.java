@@ -1,28 +1,38 @@
 package org.hisp.dhis.android.trackercapture.ui.rows.programoverview;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.OnProgramStageEventClick;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.utils.Utils;
 import org.hisp.dhis.android.sdk.utils.support.DateUtils;
+import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.ProgramStageRow;
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
+
+import java.util.Date;
 
 /**
  * @author Simen Skogly Russnes on 13.05.15.
  */
+
 public class ProgramStageEventRow implements ProgramStageRow {
 
-    public static final String TAG = ProgramStageEventRow.class.getSimpleName();
-    private boolean hasFailed = false;
-    private String errorMessage;
     private final Event event;
+    private boolean hasFailed = false;
     private EventViewHolder holder;
+
+    private String errorMessage;
+
     public ProgramStageEventRow(Event event) {
         this.event = event;
     }
@@ -30,7 +40,6 @@ public class ProgramStageEventRow implements ProgramStageRow {
     @Override
     public View getView(LayoutInflater inflater, View convertView, ViewGroup container) {
         View view;
-
         TextView orgUnit;
         TextView eventDate;
         ImageButton hasFailedButton = null;
@@ -43,9 +52,13 @@ public class ProgramStageEventRow implements ProgramStageRow {
             orgUnit = (TextView) root.findViewById(org.hisp.dhis.android.sdk.R.id.organisationunit);
             eventDate = (TextView) root.findViewById(org.hisp.dhis.android.sdk.R.id.date);
             hasFailedButton = (ImageButton) root.findViewById(org.hisp.dhis.android.sdk.R.id.hasfailedbutton);
+
+//            hasFailedButton.setVisibility(View.INVISIBLE);
+//            hasFailedButton.setEnabled(false);
             holder = new EventViewHolder(orgUnit, eventDate, hasFailedButton, new OnProgramStageEventInternalClickListener());
 
             root.findViewById(org.hisp.dhis.android.sdk.R.id.eventbackground).setOnClickListener(holder.listener);
+
             root.setTag(holder);
             view = root;
         }
@@ -72,6 +85,8 @@ public class ProgramStageEventRow implements ProgramStageRow {
             }
         }
 
+        holder.listener.setEvent(getEvent());
+        holder.listener.setErrorMessage(getErrorMessage());
         holder.orgUnit.setText(MetaDataController.getOrganisationUnit(event.organisationUnitId).getLabel());
         String date="";
         if(event.getDueDate()!=null) {
@@ -111,6 +126,8 @@ public class ProgramStageEventRow implements ProgramStageRow {
         return view;
     }
 
+
+
     private static class EventViewHolder {
         public final TextView orgUnit;
         public final TextView date;
@@ -129,6 +146,7 @@ public class ProgramStageEventRow implements ProgramStageRow {
     public Event getEvent() {
         return event;
     }
+
     @Override
     public boolean hasFailed() {
         return hasFailed;
@@ -165,7 +183,6 @@ public class ProgramStageEventRow implements ProgramStageRow {
         {
             this.errorMessage = errorMessage;
         }
-
 
         @Override
         public void onClick(View view)

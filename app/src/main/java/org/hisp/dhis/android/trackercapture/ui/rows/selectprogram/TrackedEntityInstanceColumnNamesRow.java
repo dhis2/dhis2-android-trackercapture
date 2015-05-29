@@ -26,7 +26,8 @@ public class TrackedEntityInstanceColumnNamesRow implements TrackedEntityInstanc
             view = inflater.inflate(R.layout.listview_column_names_item, container, false);
             holder = new ViewHolder(
                     (TextView) view.findViewById(R.id.first_column_name),
-                    (TextView) view.findViewById(R.id.second_column_name)
+                    (TextView) view.findViewById(R.id.second_column_name),
+                    (TextView) view.findViewById(R.id.third_column_name)
             );
             view.setTag(holder);
         } else {
@@ -36,6 +37,7 @@ public class TrackedEntityInstanceColumnNamesRow implements TrackedEntityInstanc
 
         holder.firstItem.setText(mFirstItem);
         holder.secondItem.setText(mSecondItem);
+        holder.thirdItem.setText(mThirdItem);
 
         return view;
     }
@@ -63,14 +65,21 @@ public class TrackedEntityInstanceColumnNamesRow implements TrackedEntityInstanc
         this.mFirstItem = firstItem;
     }
 
+    public void setThirdItem(String mThirdItem) {
+        this.mThirdItem = mThirdItem;
+    }
+
     private static class ViewHolder {
         public final TextView firstItem;
         public final TextView secondItem;
+        public final TextView thirdItem;
 
         private ViewHolder(TextView firstItem,
-                           TextView secondItem) {
+                           TextView secondItem,
+                           TextView thirdItem) {
             this.firstItem = firstItem;
             this.secondItem = secondItem;
+            this.thirdItem = thirdItem;
         }
     }
 

@@ -70,6 +70,9 @@ class SelectProgramFragmentQuery implements Query<List<TrackedEntityInstanceRow>
                     } else if (attributesToShow.size() == 2) {
                         columnNames.setSecondItem(name);
                     }
+                    else if(attributesToShow.size() == 3){
+                        columnNames.setThirdItem(name);
+                    }
 
                 }
             }

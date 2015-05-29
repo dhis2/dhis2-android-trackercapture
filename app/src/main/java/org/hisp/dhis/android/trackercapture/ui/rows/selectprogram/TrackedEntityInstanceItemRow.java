@@ -54,7 +54,7 @@ public class TrackedEntityInstanceItemRow implements TrackedEntityInstanceRow
         ViewHolder holder;
 
         if (convertView == null) {
-            view = inflater.inflate(R.layout.listview_event_item, container, false);
+            view = inflater.inflate(org.hisp.dhis.android.sdk.R.layout.listview_event_item, container, false);
             holder = new ViewHolder(
                     (TextView) view.findViewById(R.id.first_event_item),
                     (TextView) view.findViewById(R.id.second_event_item),

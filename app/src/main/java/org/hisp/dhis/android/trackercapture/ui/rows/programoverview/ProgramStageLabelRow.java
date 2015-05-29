@@ -17,6 +17,7 @@ public class ProgramStageLabelRow implements ProgramStageRow {
     private ProgramStageViewHolder holder;
     private View.OnClickListener listener;
     private boolean hasFailed = false;
+    private boolean isSynchronized = false;
 
     public ProgramStageLabelRow(ProgramStage programStage) {
         this.programStage = programStage;
@@ -70,6 +71,16 @@ public class ProgramStageLabelRow implements ProgramStageRow {
     @Override
     public void setHasFailed(boolean hasFailed) {
         this.hasFailed = hasFailed;
+    }
+
+    @Override
+    public void setSynchronized(boolean isSynchronized) {
+        this.isSynchronized = isSynchronized;
+    }
+
+    @Override
+    public boolean isSynchronized() {
+        return isSynchronized;
     }
 
     private static class ProgramStageViewHolder {

@@ -11,4 +11,6 @@ public interface ProgramStageRow {
     public View getView(LayoutInflater inflater, View convertView, ViewGroup container);
     public boolean hasFailed();
     public void setHasFailed(boolean hasFailed);
+    public void setSynchronized(boolean isSynchronized);
+    public boolean isSynchronized();
 }

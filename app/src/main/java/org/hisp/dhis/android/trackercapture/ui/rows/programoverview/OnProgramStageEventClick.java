@@ -12,17 +12,16 @@ public class OnProgramStageEventClick
     private final Event event;
     private final ImageButton hasFailedButton;
     private final boolean hasPressedFailedButton;
-
-
-
+    private final int status;
     private final String errorMessage;
 
-    public OnProgramStageEventClick(Event event, ImageButton hasFailedButton, boolean hasPressedFailedButton, String errorMessage)
+    public OnProgramStageEventClick(Event event, ImageButton hasFailedButton, boolean hasPressedFailedButton, String errorMessage, int status)
     {
         this.event = event;
         this.hasFailedButton = hasFailedButton;
         this.hasPressedFailedButton = hasPressedFailedButton;
         this.errorMessage = errorMessage;
+        this.status = status;
     }
     public boolean isHasPressedFailedButton() {
         return hasPressedFailedButton;
@@ -37,5 +36,8 @@ public class OnProgramStageEventClick
     }
     public String getErrorMessage() {
         return errorMessage;
+    }
+    public int getStatus() {
+        return status;
     }
 }

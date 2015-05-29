@@ -469,7 +469,6 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
 
             final Map<Long,FailedItem> failedEvents = getFailedEvents();
             List<Event> events = DataValueController.getEventsByEnrollment(data.getEnrollment().localId);
-            Log.d(CLASS_TAG, "num failed events: " + failedEvents.size());
             for(ProgramStageRow row: data.getProgramStageRows()) {
                 if(row instanceof ProgramStageLabelRow) {
                     ProgramStageLabelRow stageRow = (ProgramStageLabelRow) row;
@@ -484,8 +483,20 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
                     if(failedEvents.containsKey(eventRow.getEvent().getLocalId()))
                     {
                         eventRow.setHasFailed(true);
-                        eventRow.setErrorMessage(failedEvents.get(eventRow.getEvent().getLocalId()).errorMessage);
+                        eventRow.setMessage(failedEvents.get(eventRow.getEvent().getLocalId()).errorMessage);
                     }
+                    else if(eventRow.getEvent().isFromServer())
+                    {
+                        eventRow.setSynchronized(true);
+                        eventRow.setMessage(getString(R.string.status_sent_description));
+                        Log.d(CLASS_TAG, "Event is from server");
+                    }
+                    else if(!(eventRow.getEvent().isFromServer()))
+                    {
+                        eventRow.setSynchronized(false); //isn't really necessary
+                        eventRow.setMessage(getString(R.string.status_offline_description));
+                    }
+
 
                 }
             }
@@ -497,15 +508,48 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     @Subscribe
     public void onItemClick(OnProgramStageEventClick eventClick)
     {
-        if(eventClick.isHasPressedFailedButton())
-        {
-            //maybe method above works
-            Dhis2.showErrorDialog(getActivity(), getString(R.string.event_error),
-                    eventClick.getErrorMessage(), R.drawable.ic_event_error);
+        if(eventClick.isHasPressedFailedButton()) {
+            switch (eventClick.getStatus())
+            {
+
+                case ProgramStageEventRow.IS_ERROR:
+                {
+
+                    Dhis2.getInstance().showErrorDialog(getActivity(),
+                            getString(R.string.event_error),
+                            eventClick.getErrorMessage(), R.drawable.ic_event_error
+                    );
+                    break;
+                }
+
+                case ProgramStageEventRow.IS_OFFLINE:
+                {
+                    Dhis2.getInstance().showErrorDialog(getActivity(),
+                            getString(R.string.event_offline),
+                            getString(R.string.status_offline_description),
+                            R.drawable.ic_offline
+                    );
+                    break;                }
+                case ProgramStageEventRow.IS_ONLINE:
+                {
+                    Dhis2.getInstance().showErrorDialog(getActivity(),
+                            getString(R.string.event_sent),
+                            getString(R.string.status_sent_description),
+                            R.drawable.ic_from_server
+                    );
+                    break;
+                }
+//                if (eventClick.getHasFailedButton().getTag() != null) {
+//                    Dhis2.showErrorDialog(getActivity(), getString(R.string.event_status),
+//                            eventClick.getErrorMessage(), (Integer) eventClick.getHasFailedButton().getTag());
+//                } else
+//                    Log.d(CLASS_TAG, "OFFLINE IMAGE BUG");
+            }
+
         }
         else
         {
-            showDataEntryFragment(eventClick.getEvent(),eventClick.getEvent().getProgramStageId());
+            showDataEntryFragment(eventClick.getEvent(), eventClick.getEvent().getProgramStageId());
         }
     }
 

@@ -1,25 +1,17 @@
 package org.hisp.dhis.android.trackercapture.ui.rows.programoverview;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.OnProgramStageEventClick;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.utils.Utils;
 import org.hisp.dhis.android.sdk.utils.support.DateUtils;
-import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.ProgramStageRow;
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import org.joda.time.format.DateTimeFormat;
-
-import java.util.Date;
 
 /**
  * @author Simen Skogly Russnes on 13.05.15.
@@ -29,9 +21,14 @@ public class ProgramStageEventRow implements ProgramStageRow {
 
     private final Event event;
     private boolean hasFailed = false;
+    private boolean isSynchronized = false;
     private EventViewHolder holder;
+    private String message;
+    private int status;
 
-    private String errorMessage;
+    public static final int IS_OFFLINE = 1;
+    public static final int IS_ONLINE = 2;
+    public static final int IS_ERROR = 3;
 
     public ProgramStageEventRow(Event event) {
         this.event = event;
@@ -42,7 +39,7 @@ public class ProgramStageEventRow implements ProgramStageRow {
         View view;
         TextView orgUnit;
         TextView eventDate;
-        ImageButton hasFailedButton = null;
+        ImageButton statusButton = null;
 
         if (convertView != null && convertView.getTag() instanceof EventViewHolder) {
             view = convertView;
@@ -51,11 +48,10 @@ public class ProgramStageEventRow implements ProgramStageRow {
             View root = inflater.inflate(org.hisp.dhis.android.sdk.R.layout.eventlayout, container, false);
             orgUnit = (TextView) root.findViewById(org.hisp.dhis.android.sdk.R.id.organisationunit);
             eventDate = (TextView) root.findViewById(org.hisp.dhis.android.sdk.R.id.date);
-            hasFailedButton = (ImageButton) root.findViewById(org.hisp.dhis.android.sdk.R.id.hasfailedbutton);
+            statusButton = (ImageButton) root.findViewById(org.hisp.dhis.android.sdk.R.id.statusButton);
 
-//            hasFailedButton.setVisibility(View.INVISIBLE);
-//            hasFailedButton.setEnabled(false);
-            holder = new EventViewHolder(orgUnit, eventDate, hasFailedButton, new OnProgramStageEventInternalClickListener());
+
+            holder = new EventViewHolder(orgUnit, eventDate, statusButton, new OnProgramStageEventInternalClickListener());
 
             root.findViewById(org.hisp.dhis.android.sdk.R.id.eventbackground).setOnClickListener(holder.listener);
 
@@ -63,30 +59,53 @@ public class ProgramStageEventRow implements ProgramStageRow {
             view = root;
         }
 
-        if(hasFailed())
+        if(holder.statusButton != null)
         {
-            if(holder.hasFailedButton != null)
+            if (hasFailed())
             {
-                holder.hasFailedButton.setEnabled(true);
-                holder.hasFailedButton.setVisibility(View.VISIBLE);
-                holder.listener.setHasFailedButton(hasFailedButton);
-                view.findViewById(org.hisp.dhis.android.sdk.R.id.hasfailedbutton)
-                        .setOnClickListener(holder.listener);
+                holder.statusButton.setEnabled(true);
+                holder.statusButton.setVisibility(View.VISIBLE);
+                holder.statusButton.setBackgroundResource(org.hisp.dhis.android.sdk.R.drawable.ic_event_error);
+                holder.statusButton.setTag(org.hisp.dhis.android.sdk.R.drawable.ic_event_error);
+                holder.listener.setStatusButton(statusButton);
+                holder.listener.setStatus(IS_ERROR);
+                holder.statusButton.setOnClickListener(holder.listener);
+
             }
-        }
-        else
-        {
-            if(holder.hasFailedButton != null)
+            else if (!hasFailed())
             {
-                holder.hasFailedButton.setEnabled(false);
-                holder.hasFailedButton.setVisibility(View.INVISIBLE);
-                holder.listener.setHasFailedButton(null);
-                view.findViewById(org.hisp.dhis.android.sdk.R.id.hasfailedbutton).setOnClickListener(null);
+                holder.statusButton.setEnabled(false);
+                holder.statusButton.setVisibility(View.INVISIBLE);
+                holder.listener.setStatusButton(null);
+                holder.statusButton.setOnClickListener(null);
+
+            }
+            if (!isSynchronized())
+            {
+                holder.statusButton.setEnabled(true);
+                holder.statusButton.setVisibility(View.VISIBLE);
+                holder.statusButton.setBackgroundResource(org.hisp.dhis.android.sdk.R.drawable.ic_offline);
+                holder.statusButton.setTag(org.hisp.dhis.android.sdk.R.drawable.ic_offline);
+                holder.listener.setStatusButton(statusButton);
+                holder.listener.setStatus(IS_OFFLINE);
+                holder.statusButton.setOnClickListener(holder.listener);
+
+            }
+            else if (isSynchronized())
+            {
+                holder.statusButton.setEnabled(true);
+                holder.statusButton.setVisibility(View.VISIBLE);
+                holder.statusButton.setBackgroundResource(org.hisp.dhis.android.sdk.R.drawable.ic_from_server);
+                holder.statusButton.setTag(org.hisp.dhis.android.sdk.R.drawable.ic_from_server);
+                holder.listener.setStatusButton(statusButton);
+                holder.listener.setStatus(IS_ONLINE);
+                holder.statusButton.setOnClickListener(holder.listener);
+
             }
         }
 
         holder.listener.setEvent(getEvent());
-        holder.listener.setErrorMessage(getErrorMessage());
+        holder.listener.setMessage(getMessage());
         holder.orgUnit.setText(MetaDataController.getOrganisationUnit(event.organisationUnitId).getLabel());
         String date="";
         if(event.getDueDate()!=null) {
@@ -131,14 +150,14 @@ public class ProgramStageEventRow implements ProgramStageRow {
     private static class EventViewHolder {
         public final TextView orgUnit;
         public final TextView date;
-        public final ImageButton hasFailedButton;
+        public final ImageButton statusButton;
         public final OnProgramStageEventInternalClickListener listener;
 
         private EventViewHolder(TextView orgUnit,
-                                TextView date, ImageButton hasFailedButton, OnProgramStageEventInternalClickListener listener) {
+                                TextView date, ImageButton statusButton, OnProgramStageEventInternalClickListener listener) {
             this.orgUnit = orgUnit;
             this.date = date;
-            this.hasFailedButton = hasFailedButton;
+            this.statusButton = statusButton;
             this.listener = listener;
         }
     }
@@ -157,31 +176,54 @@ public class ProgramStageEventRow implements ProgramStageRow {
         this.hasFailed = hasFailed;
     }
 
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
-    public String getErrorMessage() {
-        return errorMessage;
+    @Override
+    public void setSynchronized(boolean isSynchronized) {
+        this.isSynchronized = isSynchronized;
+    }
+
+    @Override
+    public boolean isSynchronized() {
+        return isSynchronized;
+    }
+
+    public void setStatus(int status){
+        this.status = status;
+    }
+
+    public int getStatus()
+    {
+        return status;
+    }
+
+    public String getMessage() {
+        return message;
     }
 
     private static class OnProgramStageEventInternalClickListener implements View.OnClickListener
     {
         private Event event;
-        private ImageButton hasFailedButton;
-        private String errorMessage;
+        private ImageButton statusButton;
+        private String message;
+        private int status;
 
         public void setEvent(Event event) {
             this.event = event;
         }
 
-        public void setHasFailedButton(ImageButton hasFailedButton) {
-            this.hasFailedButton = hasFailedButton;
+        public void setStatusButton(ImageButton statusButton) {
+            this.statusButton = statusButton;
         }
 
-        public void setErrorMessage(String errorMessage)
+        public void setStatus(int status){
+            this.status = status;
+        }
+        public void setMessage(String message)
         {
-            this.errorMessage = errorMessage;
+            this.message = message;
         }
 
         @Override
@@ -189,11 +231,11 @@ public class ProgramStageEventRow implements ProgramStageRow {
         {
             if(view.getId() == org.hisp.dhis.android.sdk.R.id.eventbackground)
             {
-                Dhis2Application.getEventBus().post(new OnProgramStageEventClick(event, hasFailedButton,false, ""));
+                Dhis2Application.getEventBus().post(new OnProgramStageEventClick(event, statusButton,false, "", status));
             }
-            else if(view.getId() == org.hisp.dhis.android.sdk.R.id.hasfailedbutton)
+            else if(view.getId() == org.hisp.dhis.android.sdk.R.id.statusButton)
             {
-                Dhis2Application.getEventBus().post(new OnProgramStageEventClick(event, hasFailedButton,true, errorMessage));
+                Dhis2Application.getEventBus().post(new OnProgramStageEventClick(event, statusButton, true, message, status));
 
             }
         }

@@ -51,7 +51,7 @@ public class ProgramStageEventRow implements ProgramStageRow {
             View root = inflater.inflate(org.hisp.dhis.android.sdk.R.layout.eventlayout, container, false);
             orgUnit = (TextView) root.findViewById(org.hisp.dhis.android.sdk.R.id.organisationunit);
             eventDate = (TextView) root.findViewById(org.hisp.dhis.android.sdk.R.id.date);
-            hasFailedButton = (ImageButton) root.findViewById(org.hisp.dhis.android.sdk.R.id.hasfailedbutton);
+            hasFailedButton = (ImageButton) root.findViewById(org.hisp.dhis.android.sdk.R.id.statusButton);
 
 //            hasFailedButton.setVisibility(View.INVISIBLE);
 //            hasFailedButton.setEnabled(false);
@@ -70,7 +70,7 @@ public class ProgramStageEventRow implements ProgramStageRow {
                 holder.hasFailedButton.setEnabled(true);
                 holder.hasFailedButton.setVisibility(View.VISIBLE);
                 holder.listener.setHasFailedButton(hasFailedButton);
-                view.findViewById(org.hisp.dhis.android.sdk.R.id.hasfailedbutton)
+                view.findViewById(org.hisp.dhis.android.sdk.R.id.statusButton)
                         .setOnClickListener(holder.listener);
             }
         }
@@ -81,7 +81,7 @@ public class ProgramStageEventRow implements ProgramStageRow {
                 holder.hasFailedButton.setEnabled(false);
                 holder.hasFailedButton.setVisibility(View.INVISIBLE);
                 holder.listener.setHasFailedButton(null);
-                view.findViewById(org.hisp.dhis.android.sdk.R.id.hasfailedbutton).setOnClickListener(null);
+                view.findViewById(org.hisp.dhis.android.sdk.R.id.statusButton).setOnClickListener(null);
             }
         }
 
@@ -191,7 +191,7 @@ public class ProgramStageEventRow implements ProgramStageRow {
             {
                 Dhis2Application.getEventBus().post(new OnProgramStageEventClick(event, hasFailedButton,false, ""));
             }
-            else if(view.getId() == org.hisp.dhis.android.sdk.R.id.hasfailedbutton)
+            else if(view.getId() == org.hisp.dhis.android.sdk.R.id.statusButton)
             {
                 Dhis2Application.getEventBus().post(new OnProgramStageEventClick(event, hasFailedButton,true, errorMessage));
 

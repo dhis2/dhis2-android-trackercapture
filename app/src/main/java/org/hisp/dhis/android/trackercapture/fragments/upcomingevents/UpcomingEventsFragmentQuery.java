@@ -79,8 +79,8 @@ class UpcomingEventsFragmentQuery implements Query<List<UpcomingEventRow>> {
         List<String> attributesToShow = new ArrayList<>();
         UpcomingEventsColumnNamesRow columnNames = new UpcomingEventsColumnNamesRow();
         for (ProgramTrackedEntityAttribute attribute : programTrackedEntityAttributes) {
-            if (attribute.displayInList && attributesToShow.size() < mNumAttributesToShow) {
-                attributesToShow.add(attribute.trackedEntityAttribute);
+            if (attribute.getDisplayInList() && attributesToShow.size() < mNumAttributesToShow) {
+                attributesToShow.add(attribute.getTrackedEntityAttributeId());
                 if (attribute.getTrackedEntityAttribute() != null) {
                     String name = attribute.getTrackedEntityAttribute().getName();
                     if (attributesToShow.size() == 1) {
@@ -118,7 +118,7 @@ class UpcomingEventsFragmentQuery implements Query<List<UpcomingEventRow>> {
                                          Map<String, String> codeToName) {
         UpcomingEventItemRow eventItem = new UpcomingEventItemRow();
         eventItem.setEventId(event.getLocalId());
-        eventItem.setDueDate(event.dueDate);
+        eventItem.setDueDate(event.getDueDate());
         eventItem.setEventName(MetaDataController.getProgramStage(event.getProgramStageId()).
                 getName());
 
@@ -128,7 +128,7 @@ class UpcomingEventsFragmentQuery implements Query<List<UpcomingEventRow>> {
             if (trackedEntityAttribute != null) {
                 TrackedEntityAttributeValue trackedEntityAttributeValue = DataValueController.
                         getTrackedEntityAttributeValue(trackedEntityAttribute,
-                                event.trackedEntityInstance);
+                                event.getTrackedEntityInstance());
                 if (trackedEntityAttributeValue == null) {
                     continue;
                 }

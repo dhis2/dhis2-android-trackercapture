@@ -69,7 +69,7 @@ class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm>
         Enrollment activeEnrollment = null;
         if(enrollments!=null) {
             for(Enrollment enrollment: enrollments) {
-                if(enrollment.status.equals(Enrollment.ACTIVE)) {
+                if(enrollment.getStatus().equals(Enrollment.ACTIVE)) {
                     activeEnrollment = enrollment;
                 }
             }
@@ -82,22 +82,22 @@ class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm>
         programOverviewFragmentForm.setProgram(program);
         programOverviewFragmentForm.setTrackedEntityInstance(trackedEntityInstance);
 
-        programOverviewFragmentForm.setDateOfEnrollmentLabel(program.dateOfEnrollmentDescription);
-        programOverviewFragmentForm.setDateOfEnrollmentValue(Utils.removeTimeFromDateString(activeEnrollment.dateOfEnrollment));
-        programOverviewFragmentForm.setIncidentDateLabel(program.dateOfIncidentDescription);
-        programOverviewFragmentForm.setIncidentDateValue(Utils.removeTimeFromDateString(activeEnrollment.dateOfIncident));
+        programOverviewFragmentForm.setDateOfEnrollmentLabel(program.getDateOfEnrollmentDescription());
+        programOverviewFragmentForm.setDateOfEnrollmentValue(Utils.removeTimeFromDateString(activeEnrollment.getDateOfEnrollment()));
+        programOverviewFragmentForm.setIncidentDateLabel(program.getDateOfIncidentDescription());
+        programOverviewFragmentForm.setIncidentDateValue(Utils.removeTimeFromDateString(activeEnrollment.getDateOfIncident()));
 
         List<TrackedEntityAttributeValue> attributeValues = activeEnrollment.getAttributes();
         if(attributeValues!=null) {
             if(attributeValues.size() > 0) {
                 programOverviewFragmentForm.setAttribute1Label(MetaDataController.
-                        getTrackedEntityAttribute(attributeValues.get(0).trackedEntityAttributeId).
+                        getTrackedEntityAttribute(attributeValues.get(0).getTrackedEntityAttributeId()).
                         getName());
                 programOverviewFragmentForm.setAttribute1Value(attributeValues.get(0).getValue());
             }
             if(attributeValues.size() > 1) {
                 programOverviewFragmentForm.setAttribute2Label(MetaDataController.
-                        getTrackedEntityAttribute(attributeValues.get(1).trackedEntityAttributeId).
+                        getTrackedEntityAttribute(attributeValues.get(1).getTrackedEntityAttributeId()).
                         getName());
                 programOverviewFragmentForm.setAttribute2Value(attributeValues.get(1).getValue());
             }
@@ -113,10 +113,10 @@ class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm>
         List<Event> events = enrollment.getEvents(true);
         HashMap<String, List<Event>> eventsByStage = new HashMap<>();
         for(Event event: events) {
-            List<Event> eventsForStage = eventsByStage.get(event.programStageId);
+            List<Event> eventsForStage = eventsByStage.get(event.getProgramStageId());
             if(eventsForStage==null) {
                 eventsForStage = new ArrayList<>();
-                eventsByStage.put(event.programStageId, eventsForStage);
+                eventsByStage.put(event.getProgramStageId(), eventsForStage);
             }
             eventsForStage.add(event);
         }

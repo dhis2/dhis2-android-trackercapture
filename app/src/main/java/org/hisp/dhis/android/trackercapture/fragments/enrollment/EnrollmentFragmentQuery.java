@@ -70,7 +70,7 @@ class EnrollmentFragmentQuery implements Query<EnrollmentFragmentForm>
             currentTrackedEntityInstance = DataValueController.getTrackedEntityInstance(mTrackedEntityInstanceId);
         }
 
-        currentEnrollment = new Enrollment(mOrgUnitId, currentTrackedEntityInstance.trackedEntityInstance, mProgram);
+        currentEnrollment = new Enrollment(mOrgUnitId, currentTrackedEntityInstance.getTrackedEntityInstance(), mProgram);
 
         mForm.setProgram(mProgram);
         mForm.setOrganisationUnit(mOrgUnit);
@@ -85,18 +85,18 @@ class EnrollmentFragmentQuery implements Query<EnrollmentFragmentForm>
         programTrackedEntityAttributes = mProgram.getProgramTrackedEntityAttributes();
 
         for(ProgramTrackedEntityAttribute ptea: programTrackedEntityAttributes) {
-            TrackedEntityAttributeValue value = DataValueController.getTrackedEntityAttributeValue(ptea.trackedEntityAttribute, currentTrackedEntityInstance.trackedEntityInstance);
+            TrackedEntityAttributeValue value = DataValueController.getTrackedEntityAttributeValue(ptea.getTrackedEntityAttributeId(), currentTrackedEntityInstance.getTrackedEntityInstance());
             if(value!=null)
             {
                 trackedEntityAttributeValues.add(value);
             }
 
         }
-        currentEnrollment.attributes = trackedEntityAttributeValues;
+        currentEnrollment.setAttributes(trackedEntityAttributeValues);
         for(int i=0;i<programTrackedEntityAttributes.size();i++)
         {
             DataEntryRow row = createDataEntryView(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute(),
-                    getTrackedEntityDataValue(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().id, trackedEntityAttributeValues));
+                    getTrackedEntityDataValue(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getId(), trackedEntityAttributeValues));
             dataEntryRows.add(row);
         }
         mForm.setDataEntryRows(dataEntryRows);
@@ -108,15 +108,15 @@ class EnrollmentFragmentQuery implements Query<EnrollmentFragmentForm>
 
     public TrackedEntityAttributeValue getTrackedEntityDataValue(String trackedEntityAttribute, List<TrackedEntityAttributeValue> trackedEntityAttributeValues) {
         for(TrackedEntityAttributeValue trackedEntityAttributeValue: trackedEntityAttributeValues) {
-            if(trackedEntityAttributeValue.trackedEntityAttributeId.equals(trackedEntityAttribute))
+            if(trackedEntityAttributeValue.getTrackedEntityAttributeId().equals(trackedEntityAttribute))
                 return trackedEntityAttributeValue;
         }
 
         //the datavalue didnt exist for some reason. Create a new one.
         TrackedEntityAttributeValue trackedEntityAttributeValue = new TrackedEntityAttributeValue();
-        trackedEntityAttributeValue.trackedEntityAttributeId = trackedEntityAttribute;
-        trackedEntityAttributeValue.trackedEntityInstanceId = currentTrackedEntityInstance.trackedEntityInstance;
-        trackedEntityAttributeValue.value = "";
+        trackedEntityAttributeValue.setTrackedEntityAttributeId(trackedEntityAttribute);
+        trackedEntityAttributeValue.setTrackedEntityInstanceId(currentTrackedEntityInstance.getTrackedEntityInstance());
+        trackedEntityAttributeValue.setValue("");
         trackedEntityAttributeValues.add(trackedEntityAttributeValue);
         return trackedEntityAttributeValue;
     }
@@ -125,33 +125,33 @@ class EnrollmentFragmentQuery implements Query<EnrollmentFragmentForm>
         DataEntryRow row;
         String trackedEntityAttributeName = trackedEntityAttribute.getName();
         if (trackedEntityAttribute.getOptionSet() != null) {
-            OptionSet optionSet = MetaDataController.getOptionSet(trackedEntityAttribute.optionSet);
+            OptionSet optionSet = MetaDataController.getOptionSet(trackedEntityAttribute.getOptionSet());
             if (optionSet == null) {
                 row = new EditTextRow(trackedEntityAttributeName, dataValue, DataEntryRowTypes.TEXT);
             } else {
                 row = new AutoCompleteRow(trackedEntityAttributeName, dataValue, optionSet);
             }
-        } else if (trackedEntityAttribute.valueType.equalsIgnoreCase(DataElement.VALUE_TYPE_TEXT)) {
+        } else if (trackedEntityAttribute.getValueType().equalsIgnoreCase(DataElement.VALUE_TYPE_TEXT)) {
             row = new EditTextRow(trackedEntityAttributeName, dataValue, DataEntryRowTypes.TEXT);
-        } else if (trackedEntityAttribute.valueType.equalsIgnoreCase(DataElement.VALUE_TYPE_LONG_TEXT)) {
+        } else if (trackedEntityAttribute.getValueType().equalsIgnoreCase(DataElement.VALUE_TYPE_LONG_TEXT)) {
             row = new EditTextRow(trackedEntityAttributeName, dataValue, DataEntryRowTypes.LONG_TEXT);
-        } else if (trackedEntityAttribute.valueType.equalsIgnoreCase(DataElement.VALUE_TYPE_NUMBER)) {
+        } else if (trackedEntityAttribute.getValueType().equalsIgnoreCase(DataElement.VALUE_TYPE_NUMBER)) {
             row = new EditTextRow(trackedEntityAttributeName, dataValue, DataEntryRowTypes.NUMBER);
-        } else if (trackedEntityAttribute.valueType.equalsIgnoreCase(DataElement.VALUE_TYPE_INT)) {
+        } else if (trackedEntityAttribute.getValueType().equalsIgnoreCase(DataElement.VALUE_TYPE_INT)) {
             row = new EditTextRow(trackedEntityAttributeName, dataValue, DataEntryRowTypes.INTEGER);
-        } else if (trackedEntityAttribute.valueType.equalsIgnoreCase(DataElement.VALUE_TYPE_ZERO_OR_POSITIVE_INT)) {
+        } else if (trackedEntityAttribute.getValueType().equalsIgnoreCase(DataElement.VALUE_TYPE_ZERO_OR_POSITIVE_INT)) {
             row = new EditTextRow(trackedEntityAttributeName, dataValue, DataEntryRowTypes.INTEGER_ZERO_OR_POSITIVE);
-        } else if (trackedEntityAttribute.valueType.equalsIgnoreCase(DataElement.VALUE_TYPE_POSITIVE_INT)) {
+        } else if (trackedEntityAttribute.getValueType().equalsIgnoreCase(DataElement.VALUE_TYPE_POSITIVE_INT)) {
             row = new EditTextRow(trackedEntityAttributeName, dataValue, DataEntryRowTypes.INTEGER_POSITIVE);
-        } else if (trackedEntityAttribute.valueType.equalsIgnoreCase(DataElement.VALUE_TYPE_NEGATIVE_INT)) {
+        } else if (trackedEntityAttribute.getValueType().equalsIgnoreCase(DataElement.VALUE_TYPE_NEGATIVE_INT)) {
             row = new EditTextRow(trackedEntityAttributeName, dataValue, DataEntryRowTypes.INTEGER_NEGATIVE);
-        } else if (trackedEntityAttribute.valueType.equalsIgnoreCase(DataElement.VALUE_TYPE_BOOL)) {
+        } else if (trackedEntityAttribute.getValueType().equalsIgnoreCase(DataElement.VALUE_TYPE_BOOL)) {
             row = new RadioButtonsRow(trackedEntityAttributeName, dataValue, DataEntryRowTypes.BOOLEAN);
-        } else if (trackedEntityAttribute.valueType.equalsIgnoreCase(DataElement.VALUE_TYPE_TRUE_ONLY)) {
+        } else if (trackedEntityAttribute.getValueType().equalsIgnoreCase(DataElement.VALUE_TYPE_TRUE_ONLY)) {
             row = new CheckBoxRow(trackedEntityAttributeName, dataValue);
-        } else if (trackedEntityAttribute.valueType.equalsIgnoreCase(DataElement.VALUE_TYPE_DATE)) {
+        } else if (trackedEntityAttribute.getValueType().equalsIgnoreCase(DataElement.VALUE_TYPE_DATE)) {
             row = new DatePickerRow(trackedEntityAttributeName, dataValue);
-        } else if (trackedEntityAttribute.valueType.equalsIgnoreCase(DataElement.VALUE_TYPE_STRING)) {
+        } else if (trackedEntityAttribute.getValueType().equalsIgnoreCase(DataElement.VALUE_TYPE_STRING)) {
             row = new EditTextRow(trackedEntityAttributeName, dataValue, DataEntryRowTypes.LONG_TEXT);
         } else {
             row = new EditTextRow(trackedEntityAttributeName, dataValue, DataEntryRowTypes.LONG_TEXT);

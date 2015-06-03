@@ -107,7 +107,7 @@ public class TrackedEntityInstanceItemRow implements TrackedEntityInstanceRow
     @Override
     public long getId() {
         if (mTrackedEntityInstance != null) {
-            return mTrackedEntityInstance.localId;
+            return mTrackedEntityInstance.getLocalId();
         } else {
             return 0;
         }

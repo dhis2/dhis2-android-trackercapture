@@ -439,15 +439,15 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
             incidentDateLabel.setText(data.getIncidentDateLabel());
             incidentDateValue.setText(data.getIncidentDateValue());
 
-            if(mForm.getEnrollment().status.equals(Enrollment.COMPLETED)) {
+            if(mForm.getEnrollment().getStatus().equals(Enrollment.COMPLETED)) {
                 setCompleted();
             }
 
-            if(mForm.getEnrollment().status.equals(Enrollment.CANCELLED)) {
+            if(mForm.getEnrollment().getStatus().equals(Enrollment.CANCELLED)) {
                 setTerminated();
             }
 
-            if(mForm.getEnrollment().followup) {
+            if(mForm.getEnrollment().getFollowup()) {
                 setFollowupButton(true);
             }
 
@@ -468,11 +468,11 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
             }
 
             final Map<Long,FailedItem> failedEvents = getFailedEvents();
-            List<Event> events = DataValueController.getEventsByEnrollment(data.getEnrollment().localId);
+            List<Event> events = DataValueController.getEventsByEnrollment(data.getEnrollment().getLocalId());
             for(ProgramStageRow row: data.getProgramStageRows()) {
                 if(row instanceof ProgramStageLabelRow) {
                     ProgramStageLabelRow stageRow = (ProgramStageLabelRow) row;
-                    if(stageRow.getProgramStage().repeatable) {
+                    if(stageRow.getProgramStage().getRepeatable()) {
                         stageRow.setButtonListener(this);
                     }
                 }
@@ -483,17 +483,16 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
                     if(failedEvents.containsKey(eventRow.getEvent().getLocalId()))
                     {
                         eventRow.setHasFailed(true);
-                        eventRow.setMessage(failedEvents.get(eventRow.getEvent().getLocalId()).errorMessage);
+                        eventRow.setMessage(failedEvents.get(eventRow.getEvent().getLocalId()).getErrorMessage());
                     }
-                    else if(eventRow.getEvent().isFromServer())
+                    else if(eventRow.getEvent().getFromServer())
                     {
                         eventRow.setSynchronized(true);
                         eventRow.setMessage(getString(R.string.status_sent_description));
-                        Log.d(CLASS_TAG, "Event is from server");
                     }
-                    else if(!(eventRow.getEvent().isFromServer()))
+                    else if(!(eventRow.getEvent().getFromServer()))
                     {
-                        eventRow.setSynchronized(false); //isn't really necessary
+                        eventRow.setSynchronized(false);
                         eventRow.setMessage(getString(R.string.status_offline_description));
                     }
 
@@ -561,8 +560,8 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         {
             for(FailedItem failedItem : failedItems)
             {
-                if(failedItem.itemType.equals(FailedItem.EVENT))
-                    failedItemMap.put(failedItem.itemId,failedItem);
+                if(failedItem.getItemType().equals(FailedItem.EVENT))
+                    failedItemMap.put(failedItem.getItemId(),failedItem);
             }
         }
         return failedItemMap;
@@ -597,18 +596,18 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         Bundle args = getArguments();
         DataEntryFragment fragment;
         if(event == null) {
-            fragment = DataEntryFragment.newInstanceWithEnrollment(args.getString(ORG_UNIT_ID), args.getString(PROGRAM_ID), programStage, mForm.getEnrollment().localId);
+            fragment = DataEntryFragment.newInstanceWithEnrollment(args.getString(ORG_UNIT_ID), args.getString(PROGRAM_ID), programStage, mForm.getEnrollment().getLocalId());
         } else {
             fragment = DataEntryFragment.newInstanceWithEnrollment(args.getString(ORG_UNIT_ID), args.getString(PROGRAM_ID), programStage,
-                    event.localEnrollmentId, event.localId);
+                    event.getLocalEnrollmentId(), event.getLocalId());
         }
 
         mNavigationHandler.switchFragment(fragment, ProgramOverviewFragment.CLASS_TAG, true);
     }
 
     public void completeEnrollment() {
-        mForm.getEnrollment().status = Enrollment.COMPLETED;
-        mForm.getEnrollment().fromServer = false;
+        mForm.getEnrollment().setStatus(Enrollment.COMPLETED);
+        mForm.getEnrollment().setFromServer(false);
         mForm.getEnrollment().async().save();
         setCompleted();
         clearViews();
@@ -628,8 +627,8 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     }
 
     public void terminateEnrollment() {
-        mForm.getEnrollment().status = Enrollment.CANCELLED;
-        mForm.getEnrollment().fromServer = false;
+        mForm.getEnrollment().setStatus(Enrollment.CANCELLED);
+        mForm.getEnrollment().setFromServer(false);
         mForm.getEnrollment().async().save();
         setTerminated();
         clearViews();
@@ -644,10 +643,10 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
 
     public void toggleFollowup() {
         if(mForm==null || mForm.getEnrollment()==null) return;
-        mForm.getEnrollment().followup = !mForm.getEnrollment().followup;
-        mForm.getEnrollment().fromServer = false;
+        mForm.getEnrollment().setFollowup(!mForm.getEnrollment().getFollowup());
+        mForm.getEnrollment().setFromServer(false);
         mForm.getEnrollment().async().save();
-        setFollowupButton(mForm.getEnrollment().followup);
+        setFollowupButton(mForm.getEnrollment().getFollowup());
     }
 
     public void setFollowupButton(boolean enabled) {
@@ -672,7 +671,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
             }
 
             case R.id.neweventbutton: {
-                if(mForm.getEnrollment().status.equals(Enrollment.ACTIVE)) {
+                if(mForm.getEnrollment().getStatus().equals(Enrollment.ACTIVE)) {
                     ProgramStage programStage = (ProgramStage) view.getTag();
                     showDataEntryFragment(null, programStage.getId());
                 }
@@ -680,7 +679,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
             }
 
             case R.id.eventbackground: {
-                if(mForm.getEnrollment().status.equals(Enrollment.ACTIVE))
+                if(mForm.getEnrollment().getStatus().equals(Enrollment.ACTIVE))
                 {
                     Event event = (Event) view.getTag();
                     showDataEntryFragment(event, event.getProgramStageId());

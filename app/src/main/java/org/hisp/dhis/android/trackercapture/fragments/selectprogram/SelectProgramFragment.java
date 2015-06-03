@@ -306,7 +306,7 @@ public class SelectProgramFragment extends Fragment
 
             ProgramOverviewFragment fragment = ProgramOverviewFragment.
                     newInstance(mState.getOrgUnitId(), mState.getProgramId(),
-                            eventClick.getTrackedEntityInstance().localId);
+                            eventClick.getTrackedEntityInstance().getLocalId());
 
             mNavigationHandler.switchFragment(fragment, ProgramOverviewFragment.CLASS_TAG, true);
         } else {
@@ -338,28 +338,28 @@ public class SelectProgramFragment extends Fragment
     }
 
     private String getErrorDescription(TrackedEntityInstance trackedEntityInstance) {
-        FailedItem failedItem = DataValueController.getFailedItem(FailedItem.TRACKEDENTITYINSTANCE, trackedEntityInstance.localId);
+        FailedItem failedItem = DataValueController.getFailedItem(FailedItem.TRACKEDENTITYINSTANCE, trackedEntityInstance.getLocalId());
                 //Select.byId(FailedItem.class, trackedEntityInstance.localId);
 
         if (failedItem != null) {
-            if (failedItem.httpStatusCode == 200) {
+            if (failedItem.getHttpStatusCode() == 200) {
                 if(failedItem.getImportSummary()!=null)
-                    return failedItem.getImportSummary().description;
+                    return failedItem.getImportSummary().getDescription();
             }
-            if (failedItem.httpStatusCode == 401) {
+            if (failedItem.getHttpStatusCode() == 401) {
                 return getString(R.string.error_401_description);
             }
 
-            if (failedItem.httpStatusCode == 408) {
+            if (failedItem.getHttpStatusCode() == 408) {
                 return getString(R.string.error_408_description);
             }
 
-            if (failedItem.httpStatusCode >= 400 && failedItem.httpStatusCode < 500) {
+            if (failedItem.getHttpStatusCode() >= 400 && failedItem.getHttpStatusCode() < 500) {
                 return getString(R.string.error_series_400_description);
             }
 
-            if (failedItem.httpStatusCode >= 500) {
-                return failedItem.errorMessage;
+            if (failedItem.getHttpStatusCode()>= 500) {
+                return failedItem.getErrorMessage();
             }
         }
 

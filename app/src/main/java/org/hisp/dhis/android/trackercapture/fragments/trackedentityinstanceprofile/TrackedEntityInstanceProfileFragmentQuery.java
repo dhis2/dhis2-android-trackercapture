@@ -66,7 +66,7 @@ public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedE
         {
 
                 DataEntryRow row = createDataEntryView(attributes.get(i).getTrackedEntityAttribute(),
-                        getTrackedEntityDataValue(attributes.get(i).getTrackedEntityAttribute().getId(),
+                        getTrackedEntityDataValue(attributes.get(i).getTrackedEntityAttribute().id,
                                 values));
 
                 dataEntryRows.add(row);
@@ -88,8 +88,8 @@ public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedE
         //the datavalue didnt exist for some reason. Create a new one.
         TrackedEntityAttributeValue trackedEntityAttributeValue = new TrackedEntityAttributeValue();
         trackedEntityAttributeValue.setTrackedEntityAttributeId(trackedEntityAttribute);
-        trackedEntityAttributeValue.setTrackedEntityInstanceId(currentTrackedEntityInstance.getTrackedEntityInstance());
-        trackedEntityAttributeValue.setLocalTrackedEntityInstanceId(currentTrackedEntityInstance.getLocalId());
+        trackedEntityAttributeValue.setTrackedEntityInstanceId(currentTrackedEntityInstance.trackedEntityInstance);
+        trackedEntityAttributeValue.setLocalTrackedEntityInstanceId(currentTrackedEntityInstance.localId);
         trackedEntityAttributeValue.setValue("");
         trackedEntityAttributeValues.add(trackedEntityAttributeValue);
         return trackedEntityAttributeValue;

@@ -468,7 +468,8 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
             }
 
             final Map<Long,FailedItem> failedEvents = getFailedEvents();
-            List<Event> events = DataValueController.getEventsByEnrollment(data.getEnrollment().getLocalId());
+            List<Event> events = DataValueController.getEventsByEnrollment(data.getEnrollment().localId);
+            Log.d(CLASS_TAG, "num failed events: " + failedEvents.size());
             for(ProgramStageRow row: data.getProgramStageRows()) {
                 if(row instanceof ProgramStageLabelRow) {
                     ProgramStageLabelRow stageRow = (ProgramStageLabelRow) row;
@@ -596,7 +597,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         Bundle args = getArguments();
         DataEntryFragment fragment;
         if(event == null) {
-            fragment = DataEntryFragment.newInstanceWithEnrollment(args.getString(ORG_UNIT_ID), args.getString(PROGRAM_ID), programStage, mForm.getEnrollment().getLocalId());
+            fragment = DataEntryFragment.newInstanceWithEnrollment(args.getString(ORG_UNIT_ID), args.getString(PROGRAM_ID), programStage, mForm.getEnrollment().localId);
         } else {
             fragment = DataEntryFragment.newInstanceWithEnrollment(args.getString(ORG_UNIT_ID), args.getString(PROGRAM_ID), programStage,
                     event.getLocalEnrollmentId(), event.getLocalId());

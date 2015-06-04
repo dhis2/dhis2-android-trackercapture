@@ -80,7 +80,7 @@ class UpcomingEventsFragmentQuery implements Query<List<UpcomingEventRow>> {
         UpcomingEventsColumnNamesRow columnNames = new UpcomingEventsColumnNamesRow();
         for (ProgramTrackedEntityAttribute attribute : programTrackedEntityAttributes) {
             if (attribute.getDisplayInList() && attributesToShow.size() < mNumAttributesToShow) {
-                attributesToShow.add(attribute.getTrackedEntityAttributeId());
+                attributesToShow.add(attribute.trackedEntityAttribute);
                 if (attribute.getTrackedEntityAttribute() != null) {
                     String name = attribute.getTrackedEntityAttribute().getName();
                     if (attributesToShow.size() == 1) {
@@ -128,7 +128,7 @@ class UpcomingEventsFragmentQuery implements Query<List<UpcomingEventRow>> {
             if (trackedEntityAttribute != null) {
                 TrackedEntityAttributeValue trackedEntityAttributeValue = DataValueController.
                         getTrackedEntityAttributeValue(trackedEntityAttribute,
-                                event.getTrackedEntityInstance());
+                                event.trackedEntityInstance);
                 if (trackedEntityAttributeValue == null) {
                     continue;
                 }

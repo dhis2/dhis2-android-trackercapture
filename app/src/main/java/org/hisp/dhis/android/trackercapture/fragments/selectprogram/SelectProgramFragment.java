@@ -306,7 +306,7 @@ public class SelectProgramFragment extends Fragment
 
             ProgramOverviewFragment fragment = ProgramOverviewFragment.
                     newInstance(mState.getOrgUnitId(), mState.getProgramId(),
-                            eventClick.getTrackedEntityInstance().getLocalId());
+                            eventClick.getTrackedEntityInstance().localId);
 
             mNavigationHandler.switchFragment(fragment, ProgramOverviewFragment.CLASS_TAG, true);
         } else {
@@ -338,7 +338,7 @@ public class SelectProgramFragment extends Fragment
     }
 
     private String getErrorDescription(TrackedEntityInstance trackedEntityInstance) {
-        FailedItem failedItem = DataValueController.getFailedItem(FailedItem.TRACKEDENTITYINSTANCE, trackedEntityInstance.getLocalId());
+        FailedItem failedItem = DataValueController.getFailedItem(FailedItem.TRACKEDENTITYINSTANCE, trackedEntityInstance.localId);
                 //Select.byId(FailedItem.class, trackedEntityInstance.localId);
 
         if (failedItem != null) {
@@ -346,15 +346,15 @@ public class SelectProgramFragment extends Fragment
                 if(failedItem.getImportSummary()!=null)
                     return failedItem.getImportSummary().getDescription();
             }
-            if (failedItem.getHttpStatusCode() == 401) {
+            if (failedItem.getHttpStatusCode()== 401) {
                 return getString(R.string.error_401_description);
             }
 
-            if (failedItem.getHttpStatusCode() == 408) {
+            if (failedItem.getHttpStatusCode()== 408) {
                 return getString(R.string.error_408_description);
             }
 
-            if (failedItem.getHttpStatusCode() >= 400 && failedItem.getHttpStatusCode() < 500) {
+            if (failedItem.getHttpStatusCode()>= 400 && failedItem.getHttpStatusCode() < 500) {
                 return getString(R.string.error_series_400_description);
             }
 

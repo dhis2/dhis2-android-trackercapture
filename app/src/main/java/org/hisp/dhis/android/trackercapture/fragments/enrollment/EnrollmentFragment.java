@@ -152,7 +152,7 @@ public class EnrollmentFragment extends Fragment
         Map<String, ProgramTrackedEntityAttribute> attributeMap = new HashMap<>();
         if (attributes != null && !attributes.isEmpty()) {
             for (ProgramTrackedEntityAttribute attribute : attributes) {
-                attributeMap.put(attribute.getTrackedEntityAttributeId(), attribute);
+                attributeMap.put(attribute.trackedEntityAttribute, attribute);
             }
         }
         return attributeMap;
@@ -528,10 +528,10 @@ public class EnrollmentFragment extends Fragment
                 }
             });
 
-            String reportDateDescription = mForm.getProgram().getDateOfEnrollmentDescription() == null ?
+            String reportDateDescription = mForm.getProgram().getDateOfEnrollmentDescription()== null ?
                     getString(R.string.report_date) : mForm.getProgram().getDateOfEnrollmentDescription();
             label.setText(reportDateDescription);
-            if (mForm.getEnrollment() != null && mForm.getEnrollment().getDateOfEnrollment()!= null) {
+            if (mForm.getEnrollment() != null && mForm.getEnrollment().getDateOfEnrollment() != null) {
                 DateTime date = DateTime.parse(mForm.getEnrollment().getDateOfEnrollment());
                 String newValue = date.toString(DATE_FORMAT);
                 datePickerEditText.setText(newValue);
@@ -579,7 +579,7 @@ public class EnrollmentFragment extends Fragment
                 }
             });
 
-            String reportDateDescription = mForm.getProgram().getDateOfIncidentDescription() == null ?
+            String reportDateDescription = mForm.getProgram().getDateOfIncidentDescription()== null ?
                     getString(R.string.report_date) : mForm.getProgram().getDateOfIncidentDescription();
             label.setText(reportDateDescription);
             if (mForm.getEnrollment() != null && mForm.getEnrollment().getDateOfIncident() != null) {
@@ -675,7 +675,7 @@ public class EnrollmentFragment extends Fragment
                 if(mForm!=null && isAdded()) {
                     final Context context = getActivity().getBaseContext();
 
-                    if(mForm.getTrackedEntityInstance().getLocalId() < 0)
+                    if(mForm.getTrackedEntityInstance().localId < 0)
                     {
                         //mForm.getTrackedEntityInstance().fromServer = true;
                         //mForm.getTrackedEntityInstance().save(true);
@@ -684,7 +684,7 @@ public class EnrollmentFragment extends Fragment
                         mForm.getTrackedEntityInstance().save();
                     }
 
-                    mForm.getEnrollment().setLocalTrackedEntityInstanceId(mForm.getTrackedEntityInstance().getLocalId());
+                    mForm.getEnrollment().setLocalTrackedEntityInstanceId(mForm.getTrackedEntityInstance().localId);
 
                     //mForm.getEnrollment().fromServer = true;
                     //mForm.getEnrollment().save(true);
@@ -742,11 +742,11 @@ public class EnrollmentFragment extends Fragment
 
         for(ProgramTrackedEntityAttribute attributeValue : mForm.getProgram().getProgramTrackedEntityAttributes())
         {
-            ProgramTrackedEntityAttribute attribute = dataElements.get(attributeValue.getTrackedEntityAttribute());
+            ProgramTrackedEntityAttribute attribute = dataElements.get(attributeValue.trackedEntityAttribute);
 
-            if(attribute.getMandatory() && isEmpty(attributeValue.getTrackedEntityAttributeId()))
+            if(attribute.getMandatory() && isEmpty(attributeValue.trackedEntityAttribute))
             {
-                errors.add(mForm.getDataElementNames().get(attributeValue.getTrackedEntityAttribute()));
+                errors.add(mForm.getDataElementNames().get(attributeValue.trackedEntityAttribute));
             }
 
         }

@@ -70,7 +70,7 @@ class EnrollmentFragmentQuery implements Query<EnrollmentFragmentForm>
             currentTrackedEntityInstance = DataValueController.getTrackedEntityInstance(mTrackedEntityInstanceId);
         }
 
-        currentEnrollment = new Enrollment(mOrgUnitId, currentTrackedEntityInstance.getTrackedEntityInstance(), mProgram);
+        currentEnrollment = new Enrollment(mOrgUnitId, currentTrackedEntityInstance.trackedEntityInstance, mProgram);
 
         mForm.setProgram(mProgram);
         mForm.setOrganisationUnit(mOrgUnit);
@@ -85,7 +85,7 @@ class EnrollmentFragmentQuery implements Query<EnrollmentFragmentForm>
         programTrackedEntityAttributes = mProgram.getProgramTrackedEntityAttributes();
 
         for(ProgramTrackedEntityAttribute ptea: programTrackedEntityAttributes) {
-            TrackedEntityAttributeValue value = DataValueController.getTrackedEntityAttributeValue(ptea.getTrackedEntityAttributeId(), currentTrackedEntityInstance.getTrackedEntityInstance());
+            TrackedEntityAttributeValue value = DataValueController.getTrackedEntityAttributeValue(ptea.trackedEntityAttribute, currentTrackedEntityInstance.trackedEntityInstance);
             if(value!=null)
             {
                 trackedEntityAttributeValues.add(value);
@@ -96,7 +96,7 @@ class EnrollmentFragmentQuery implements Query<EnrollmentFragmentForm>
         for(int i=0;i<programTrackedEntityAttributes.size();i++)
         {
             DataEntryRow row = createDataEntryView(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute(),
-                    getTrackedEntityDataValue(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getId(), trackedEntityAttributeValues));
+                    getTrackedEntityDataValue(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().id, trackedEntityAttributeValues));
             dataEntryRows.add(row);
         }
         mForm.setDataEntryRows(dataEntryRows);
@@ -115,7 +115,7 @@ class EnrollmentFragmentQuery implements Query<EnrollmentFragmentForm>
         //the datavalue didnt exist for some reason. Create a new one.
         TrackedEntityAttributeValue trackedEntityAttributeValue = new TrackedEntityAttributeValue();
         trackedEntityAttributeValue.setTrackedEntityAttributeId(trackedEntityAttribute);
-        trackedEntityAttributeValue.setTrackedEntityInstanceId(currentTrackedEntityInstance.getTrackedEntityInstance());
+        trackedEntityAttributeValue.setTrackedEntityInstanceId(currentTrackedEntityInstance.trackedEntityInstance);
         trackedEntityAttributeValue.setValue("");
         trackedEntityAttributeValues.add(trackedEntityAttributeValue);
         return trackedEntityAttributeValue;

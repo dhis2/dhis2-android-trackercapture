@@ -62,7 +62,7 @@ class SelectProgramFragmentQuery implements Query<List<TrackedEntityInstanceRow>
         TrackedEntityInstanceColumnNamesRow columnNames = new TrackedEntityInstanceColumnNamesRow();
         for (ProgramTrackedEntityAttribute attribute : attributes) {
             if (attribute.getDisplayInList() && attributesToShow.size() < 3) {
-                attributesToShow.add(attribute.getTrackedEntityAttributeId());
+                attributesToShow.add(attribute.trackedEntityAttribute);
                 if (attribute.getTrackedEntityAttribute() != null) {
                     String name = attribute.getTrackedEntityAttribute().getName();
                     if (attributesToShow.size() == 1) {
@@ -149,7 +149,7 @@ class SelectProgramFragmentQuery implements Query<List<TrackedEntityInstanceRow>
             String attribute = attributesToShow.get(i);
             if(attribute != null)
             {
-                TrackedEntityAttributeValue teav = DataValueController.getTrackedEntityAttributeValue(attribute, trackedEntityInstance.getLocalId());
+                TrackedEntityAttributeValue teav = DataValueController.getTrackedEntityAttributeValue(attribute, trackedEntityInstance.localId);
                 String code = teav.getValue();
                 String name = codeToName.get(code) == null ? code : codeToName.get(code);
 

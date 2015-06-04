@@ -308,8 +308,8 @@ public class UpcomingEventsFragment extends Fragment implements View.OnClickList
                 break;
             }
             case R.id.upcoming_query_button: {
-                if(startDate.getValue() == null || startDate.getValue().isEmpty()
-                        || endDate.getValue() ==null || endDate.getValue().isEmpty())
+                if(startDate.getValue()==null || startDate.getValue().isEmpty()
+                        || endDate.getValue()==null || endDate.getValue().isEmpty())
                     break;
                 mProgressBar.setVisibility(View.VISIBLE);
                 // this call will trigger onCreateLoader method

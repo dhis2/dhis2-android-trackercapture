@@ -30,10 +30,14 @@
 package org.hisp.dhis.android.trackercapture.fragments.selectprogram;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -41,6 +45,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
@@ -75,7 +80,7 @@ import java.util.List;
 public class SelectProgramFragment extends Fragment
         implements View.OnClickListener, OrgUnitDialogFragment.OnOrgUnitSetListener,
         ProgramDialogFragment.OnProgramSetListener,
-        LoaderManager.LoaderCallbacks<List<TrackedEntityInstanceRow>> {
+        LoaderManager.LoaderCallbacks<List<TrackedEntityInstanceRow>>, SearchView.OnQueryTextListener{
     public static final String TAG = SelectProgramFragment.class.getSimpleName();
     private static final String STATE = "state:SelectProgramFragment";
     private static final int LOADER_ID = 1;
@@ -133,7 +138,7 @@ public class SelectProgramFragment extends Fragment
                 getActivity().getApplicationContext());
 
         mListView = (ListView) view.findViewById(R.id.event_listview);
-        mAdapter = new TrackedEntityInstanceAdapter(getLayoutInflater(savedInstanceState));
+        mAdapter = new TrackedEntityInstanceAdapter(getLayoutInflater(savedInstanceState), new ArrayList<TrackedEntityInstanceRow>());
         View header = getLayoutInflater(savedInstanceState).inflate(
                 R.layout.fragment_select_program_header, mListView, false
         );
@@ -195,15 +200,23 @@ public class SelectProgramFragment extends Fragment
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_select_program, menu);
+        MenuItem item = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
+        searchView.setOnQueryTextListener(this);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            mNavigationHandler.switchFragment(
-                    new SettingsFragment(), SettingsFragment.TAG, true);
+        switch (item.getItemId()){
+            case R.id.action_settings :{
+                mNavigationHandler.switchFragment(
+                        new SettingsFragment(), SettingsFragment.TAG, true);
+                break;
+            }
+
         }
+
 
         return super.onOptionsItemSelected(item);
     }
@@ -282,6 +295,7 @@ public class SelectProgramFragment extends Fragment
     public void onLoadFinished(Loader<List<TrackedEntityInstanceRow>> loader, List<TrackedEntityInstanceRow> data) {
         if (LOADER_ID == loader.getId()) {
             mProgressBar.setVisibility(View.GONE);
+            mAdapter.setData(data);
             mAdapter.swapData(data);
         }
     }
@@ -407,5 +421,24 @@ public class SelectProgramFragment extends Fragment
                 mRegisterEventButton.show();
                 mUpcomingEventsButton.show();
         }
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        Log.d(TAG, query);
+        View view = getActivity().getCurrentFocus();
+        if(view != null) //hide keyboard
+        {
+            InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        Log.d(TAG, newText);
+        mAdapter.getFilter().filter(newText);
+        return true;
     }
 }

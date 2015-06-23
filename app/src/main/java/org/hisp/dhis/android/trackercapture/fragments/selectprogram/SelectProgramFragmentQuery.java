@@ -9,6 +9,7 @@ import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis.android.sdk.persistence.models.Option;
+import org.hisp.dhis.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;

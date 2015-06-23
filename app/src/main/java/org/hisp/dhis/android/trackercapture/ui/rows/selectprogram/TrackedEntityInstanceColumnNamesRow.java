@@ -57,6 +57,11 @@ public class TrackedEntityInstanceColumnNamesRow implements TrackedEntityInstanc
         return false;
     }
 
+    @Override
+    public TrackedEntityInstanceItemRow getItemRow() {
+        return null;
+    }
+
     public void setSecondItem(String secondItem) {
         this.mSecondItem = secondItem;
     }

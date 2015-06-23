@@ -118,6 +118,11 @@ public class TrackedEntityInstanceItemRow implements TrackedEntityInstanceRow
         return true;
     }
 
+    @Override
+    public TrackedEntityInstanceItemRow getItemRow() {
+        return this;
+    }
+
     public void setTrackedEntityInstance(TrackedEntityInstance trackedEntityInstance) {
         mTrackedEntityInstance = trackedEntityInstance;
     }
@@ -132,6 +137,18 @@ public class TrackedEntityInstanceItemRow implements TrackedEntityInstanceRow
 
     public void setFirstItem(String firstItem) {
         this.mFirstItem = firstItem;
+    }
+
+    public String getmSecondItem() {
+        return mSecondItem;
+    }
+
+    public String getmThirdItem() {
+        return mThirdItem;
+    }
+
+    public String getmFirstItem() {
+        return mFirstItem;
     }
 
     public void setStatus(TrackedEntityInstanceItemStatus status) {

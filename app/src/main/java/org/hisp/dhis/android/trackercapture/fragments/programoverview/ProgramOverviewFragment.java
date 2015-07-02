@@ -74,6 +74,7 @@ import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
+import org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogFragment;
 import org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.fragments.enrollment.EnrollmentFragment;
@@ -96,7 +97,7 @@ import java.util.Map;
  */
 public class ProgramOverviewFragment extends Fragment implements View.OnClickListener,
         AdapterView.OnItemClickListener,
-        ProgramDialogFragment.OnProgramSetListener,
+        ProgramDialogFragment.OnOptionSelectedListener,
         LoaderManager.LoaderCallbacks<ProgramOverviewFragmentForm>, AdapterView.OnItemSelectedListener {
 
     public static final String CLASS_TAG = ProgramOverviewFragment.class.getSimpleName();
@@ -397,7 +398,6 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         return mSpinnerContainer != null;
     }
 
-    @Override
     public void onProgramSelected(String programId, String programName) {
 
         mState.setProgram(programId, programName);
@@ -757,5 +757,16 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
 
+    }
+
+    @Override
+    public void onOptionSelected(int dialogId, int position, String id, String name) {
+        switch (dialogId) {
+
+            case ProgramDialogFragment.ID: {
+                onProgramSelected(id, name);
+                break;
+            }
+        }
     }
 }

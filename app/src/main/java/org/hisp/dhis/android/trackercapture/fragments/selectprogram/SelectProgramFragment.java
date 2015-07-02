@@ -36,6 +36,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.internal.widget.TintImageView;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.util.Pair;
@@ -46,6 +47,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
@@ -62,6 +64,7 @@ import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
+import org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogFragment;
 import org.hisp.dhis.android.sdk.utils.ui.views.CardTextViewButton;
 import org.hisp.dhis.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton;
@@ -77,10 +80,12 @@ import org.hisp.dhis.android.trackercapture.ui.adapters.TrackedEntityInstanceAda
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogFragment.OnOptionSelectedListener;
+
 public class SelectProgramFragment extends Fragment
-        implements View.OnClickListener, OrgUnitDialogFragment.OnOrgUnitSetListener,
-        ProgramDialogFragment.OnProgramSetListener,
-        LoaderManager.LoaderCallbacks<List<TrackedEntityInstanceRow>>, SearchView.OnQueryTextListener{
+        implements View.OnClickListener, OnOptionSelectedListener,
+        LoaderManager.LoaderCallbacks<List<TrackedEntityInstanceRow>>, SearchView.OnQueryTextListener, SearchView.OnFocusChangeListener{
     public static final String TAG = SelectProgramFragment.class.getSimpleName();
     private static final String STATE = "state:SelectProgramFragment";
     private static final int LOADER_ID = 1;
@@ -138,7 +143,7 @@ public class SelectProgramFragment extends Fragment
                 getActivity().getApplicationContext());
 
         mListView = (ListView) view.findViewById(R.id.event_listview);
-        mAdapter = new TrackedEntityInstanceAdapter(getLayoutInflater(savedInstanceState), new ArrayList<TrackedEntityInstanceRow>());
+        mAdapter = new TrackedEntityInstanceAdapter(getLayoutInflater(savedInstanceState));
         View header = getLayoutInflater(savedInstanceState).inflate(
                 R.layout.fragment_select_program_header, mListView, false
         );
@@ -203,6 +208,7 @@ public class SelectProgramFragment extends Fragment
         MenuItem item = menu.findItem(R.id.action_search);
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
         searchView.setOnQueryTextListener(this);
+        searchView.setOnQueryTextFocusChangeListener(this);
     }
 
     @Override
@@ -249,7 +255,6 @@ public class SelectProgramFragment extends Fragment
         }
     }
 
-    @Override
     public void onUnitSelected(String orgUnitId, String orgUnitLabel) {
         mOrgUnitButton.setText(orgUnitLabel);
         mProgramButton.setEnabled(true);
@@ -263,7 +268,7 @@ public class SelectProgramFragment extends Fragment
         handleViews(0);
     }
 
-    @Override
+
     public void onProgramSelected(String programId, String programName) {
         mProgramButton.setText(programName);
 
@@ -347,6 +352,31 @@ public class SelectProgramFragment extends Fragment
                     );
                     break;
                 }
+            }
+        }
+    }
+
+    @Subscribe
+    public void onItemClick(OnTrackedEntityColumnClick eventClick)
+    {
+        Log.d(TAG, "COLUMN CLICKED : " + eventClick.getColumnClicked());
+        switch (eventClick.getColumnClicked())
+        {
+            case OnTrackedEntityColumnClick.FIRST_COLUMN:
+            {
+
+            }
+            case OnTrackedEntityColumnClick.SECOND_COLUMN:
+            {
+
+            }
+            case OnTrackedEntityColumnClick.THIRD_COLUMN:
+            {
+
+            }
+            case OnTrackedEntityColumnClick.STATUS_COLUMN:
+            {
+                mAdapter.getFilter().filter(TrackedEntityInstanceAdapter.FILTER_STATUS + "");
             }
         }
     }
@@ -436,9 +466,39 @@ public class SelectProgramFragment extends Fragment
     }
 
     @Override
-    public boolean onQueryTextChange(String newText) {
+    public boolean onQueryTextChange(String newText)
+    {
         Log.d(TAG, newText);
-        mAdapter.getFilter().filter(newText);
+        mAdapter.getFilter().filter(TrackedEntityInstanceAdapter.FILTER_SEARCH + newText);
         return true;
     }
+
+    @Override
+    public void onFocusChange(View v, boolean hasFocus)
+    {
+        if(v instanceof SearchView)
+        {
+            if(!hasFocus)
+            {
+                mAdapter.getFilter().filter(""); //show all rows
+            }
+        }
+    }
+
+    @Override
+    public void onOptionSelected(int dialogId, int position, String id, String name) {
+        switch (dialogId) {
+            case OrgUnitDialogFragment.ID: {
+                onUnitSelected(id, name);
+                break;
+            }
+            case ProgramDialogFragment.ID: {
+                onProgramSelected(id, name);
+                break;
+            }
+        }
+    }
+
+
+
 }

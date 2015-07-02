@@ -47,6 +47,8 @@ import org.hisp.dhis.android.sdk.controllers.Dhis2;
 import org.hisp.dhis.android.sdk.persistence.models.OrganisationUnit$Table;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.Program$Table;
+import org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogAdapter;
+import org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogFragment;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
@@ -55,68 +57,39 @@ import org.hisp.dhis.android.trackercapture.ui.adapters.SimpleAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProgramDialogFragment extends DialogFragment
-        implements AdapterView.OnItemClickListener, LoaderManager.LoaderCallbacks<List<Program>> {
-    private static String TAG = ProgramDialogFragment.class.getName();
+public class ProgramDialogFragment extends AutoCompleteDialogFragment
+        implements LoaderManager.LoaderCallbacks<List<AutoCompleteDialogAdapter.OptionAdapterValue>> {
+    public static final int ID = 921345;
     private static final int LOADER_ID = 1;
 
-    private ListView mListView;
-    private ProgressBar mProgressBar;
-    private SimpleAdapter<Program> mAdapter;
-    private OnProgramSetListener mListener;
-
-    public static ProgramDialogFragment newInstance(OnProgramSetListener listener,
-                                                    String orgUnitId, String... programKinds) {
+    public static ProgramDialogFragment newInstance(OnOptionSelectedListener listener,
+                                                    String orgUnitId, String ... programKinds) {
         ProgramDialogFragment fragment = new ProgramDialogFragment();
         Bundle args = new Bundle();
         args.putString(OrganisationUnit$Table.ID, orgUnitId);
         args.putStringArray(Program$Table.KIND, programKinds);
         fragment.setArguments(args);
-        fragment.setListener(listener);
+        fragment.setOnOptionSetListener(listener);
         return fragment;
     }
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setStyle(DialogFragment.STYLE_NO_TITLE,
-                R.style.Theme_AppCompat_Light_Dialog);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.dialog_fragment_listview, container, false);
-    }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        mProgressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
-        mProgressBar.setVisibility(View.INVISIBLE);
-
-        mListView = (ListView) view.findViewById(R.id.simple_listview);
-        mListView.setOnItemClickListener(this);
-
-        mAdapter = new SimpleAdapter<>(LayoutInflater.from(getActivity()));
-        mAdapter.setStringExtractor(new StringExtractor());
-        mListView.setAdapter(mAdapter);
+        super.onViewCreated(view, savedInstanceState);
+        setDialogLabel("Programs");
+        setDialogId(ID);
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mProgressBar.setVisibility(View.VISIBLE);
         getLoaderManager().initLoader(LOADER_ID, getArguments(), this);
     }
 
     @Override
-    public Loader<List<Program>> onCreateLoader(int id, Bundle args) {
+    public Loader<List<AutoCompleteDialogAdapter.OptionAdapterValue>> onCreateLoader(int id, Bundle args) {
         if (LOADER_ID == id && isAdded()) {
             String organisationUnitId = args.getString(OrganisationUnit$Table.ID);
             String[] kinds = args.getStringArray(Program$Table.KIND);
@@ -130,38 +103,18 @@ public class ProgramDialogFragment extends DialogFragment
     }
 
     @Override
-    public void onLoadFinished(Loader<List<Program>> loader, List<Program> data) {
+    public void onLoadFinished(Loader<List<AutoCompleteDialogAdapter.OptionAdapterValue>> loader,
+                               List<AutoCompleteDialogAdapter.OptionAdapterValue> data) {
         if (LOADER_ID == loader.getId()) {
-            mProgressBar.setVisibility(View.GONE);
-            mAdapter.swapData(data);
+            getAdapter().swapData(data);
         }
     }
 
     @Override
-    public void onLoaderReset(Loader<List<Program>> loader) {
-        mAdapter.swapData(null);
+    public void onLoaderReset(Loader<List<AutoCompleteDialogAdapter.OptionAdapterValue>> loader) {
+        getAdapter().swapData(null);
     }
 
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if (mListener != null) {
-            Program program = mAdapter.getItemSafely(position);
-            if (program != null) {
-                mListener.onProgramSelected(
-                        program.getId(), program.getName()
-                );
-            }
-        }
-        dismiss();
-    }
-
-    public void setListener(OnProgramSetListener listener) {
-        mListener = listener;
-    }
-
-    public void show(FragmentManager manager) {
-        show(manager, TAG);
-    }
 
     public interface OnProgramSetListener {
         public void onProgramSelected(String programId, String programName);
@@ -175,7 +128,7 @@ public class ProgramDialogFragment extends DialogFragment
         }
     }
 
-    static class ProgramQuery implements Query<List<Program>> {
+    static class ProgramQuery implements Query<List<AutoCompleteDialogAdapter.OptionAdapterValue>> {
         private final String mOrgUnitId;
         private final String[] mKinds;
 
@@ -185,12 +138,22 @@ public class ProgramDialogFragment extends DialogFragment
         }
 
         @Override
-        public List<Program> query(Context context) {
-            return Dhis2.getInstance()
+        public List<AutoCompleteDialogAdapter.OptionAdapterValue> query(Context context) {
+
+            List<Program> programs = Dhis2.getInstance()
                     .getMetaDataController()
                     .getProgramsForOrganisationUnit(
                             mOrgUnitId, mKinds
                     );
+
+            List<AutoCompleteDialogAdapter.OptionAdapterValue> values = new ArrayList<>();
+            if (programs != null && !programs.isEmpty()) {
+                for (Program program : programs) {
+                    values.add(new AutoCompleteDialogAdapter.OptionAdapterValue(program.getId(), program.getName()));
+                }
+            }
+
+            return values;
         }
     }
 }

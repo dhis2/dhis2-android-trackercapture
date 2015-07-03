@@ -85,7 +85,8 @@ import static org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogFragm
 
 public class SelectProgramFragment extends Fragment
         implements View.OnClickListener, OnOptionSelectedListener,
-        LoaderManager.LoaderCallbacks<List<TrackedEntityInstanceRow>>, SearchView.OnQueryTextListener, SearchView.OnFocusChangeListener{
+        LoaderManager.LoaderCallbacks<List<TrackedEntityInstanceRow>>, SearchView.OnQueryTextListener, SearchView.OnFocusChangeListener,
+        MenuItemCompat.OnActionExpandListener{
     public static final String TAG = SelectProgramFragment.class.getSimpleName();
     private static final String STATE = "state:SelectProgramFragment";
     private static final int LOADER_ID = 1;
@@ -207,6 +208,7 @@ public class SelectProgramFragment extends Fragment
         inflater.inflate(R.menu.menu_select_program, menu);
         MenuItem item = menu.findItem(R.id.action_search);
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
+        MenuItemCompat.setOnActionExpandListener(item,this);
         searchView.setOnQueryTextListener(this);
         searchView.setOnQueryTextFocusChangeListener(this);
     }
@@ -474,13 +476,14 @@ public class SelectProgramFragment extends Fragment
     }
 
     @Override
-    public void onFocusChange(View v, boolean hasFocus)
+    public void onFocusChange(View view, boolean hasFocus)
     {
-        if(v instanceof SearchView)
+        if(view instanceof SearchView)
         {
             if(!hasFocus)
             {
                 mAdapter.getFilter().filter(""); //show all rows
+
             }
         }
     }
@@ -499,6 +502,15 @@ public class SelectProgramFragment extends Fragment
         }
     }
 
+    @Override
+    public boolean onMenuItemActionExpand(MenuItem item) {
+        return true; //return true to expand
+    }
 
-
+    @Override
+    public boolean onMenuItemActionCollapse(MenuItem item) {
+        //
+        mAdapter.getFilter().filter(""); //showing all rows
+        return true;
+    }
 }

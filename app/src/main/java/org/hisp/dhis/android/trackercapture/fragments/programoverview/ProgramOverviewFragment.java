@@ -71,6 +71,7 @@ import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
+import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
@@ -470,16 +471,35 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
             final Map<Long,FailedItem> failedEvents = getFailedEvents();
             List<Event> events = DataValueController.getEventsByEnrollment(data.getEnrollment().localId);
             Log.d(CLASS_TAG, "num failed events: " + failedEvents.size());
+            boolean generateNextVisit = false;
+
             for(ProgramStageRow row: data.getProgramStageRows()) {
                 if(row instanceof ProgramStageLabelRow) {
                     ProgramStageLabelRow stageRow = (ProgramStageLabelRow) row;
                     if(stageRow.getProgramStage().getRepeatable()) {
                         stageRow.setButtonListener(this);
                     }
+                    if(generateNextVisit)
+                    {
+                        stageRow.setButtonListener(this);
+                        generateNextVisit = false;
+                    }
+
+                    if(stageRow.getProgramStage().getAllowGenerateNextVisit())
+                    {
+                        if(stageRow.getEventRows() != null)
+                        {
+                            for(ProgramStageEventRow eventRow : stageRow.getEventRows())
+                                if(eventRow.getEvent().getStatus().equals(Event.STATUS_COMPLETED))
+                                    generateNextVisit = true;
+                        }
+                    }
+
                 }
                 else if(row instanceof ProgramStageEventRow)
                 {
                     final ProgramStageEventRow eventRow = (ProgramStageEventRow) row;
+
 
                     if(failedEvents.containsKey(eventRow.getEvent().getLocalId()))
                     {

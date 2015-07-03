@@ -128,6 +128,8 @@ class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm>
             if(eventsForStage==null) continue;
             for(Event event: eventsForStage) {
                 ProgramStageEventRow row = new ProgramStageEventRow(event);
+                row.setLabelRow(labelRow);
+                labelRow.getEventRows().add(row);
                 rows.add(row);
             }
         }

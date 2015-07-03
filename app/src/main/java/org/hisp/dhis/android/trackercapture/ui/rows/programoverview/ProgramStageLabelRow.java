@@ -8,6 +8,9 @@ import android.widget.TextView;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Simen Skogly Russnes on 13.05.15.
  */
@@ -17,6 +20,8 @@ public class ProgramStageLabelRow implements ProgramStageRow {
     private ProgramStageViewHolder holder;
     private View.OnClickListener listener;
     private boolean hasFailed = false;
+    private boolean hasCompletedEvents = false;
+    private List<ProgramStageEventRow> eventRows = new ArrayList<>();
 
     public ProgramStageLabelRow(ProgramStage programStage) {
         this.programStage = programStage;
@@ -101,4 +106,20 @@ public class ProgramStageLabelRow implements ProgramStageRow {
         return programStage;
     }
 
+
+    public boolean getHasCompletedEvents() {
+        return hasCompletedEvents;
+    }
+
+    public void setHasCompletedEvents(boolean hasCompletedEvents) {
+        this.hasCompletedEvents = hasCompletedEvents;
+    }
+
+    public List<ProgramStageEventRow> getEventRows() {
+        return eventRows;
+    }
+
+    public void setEventRows(List<ProgramStageEventRow> eventRows) {
+        this.eventRows = eventRows;
+    }
 }

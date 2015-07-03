@@ -25,6 +25,7 @@ public class ProgramStageEventRow implements ProgramStageRow {
     private EventViewHolder holder;
     private String message;
     private int status;
+    private ProgramStageLabelRow labelRow;
 
     public static final int IS_OFFLINE = 1;
     public static final int IS_ONLINE = 2;
@@ -164,6 +165,15 @@ public class ProgramStageEventRow implements ProgramStageRow {
 
     public Event getEvent() {
         return event;
+    }
+
+    public ProgramStageLabelRow getLabelRow() {
+        return labelRow;
+    }
+
+
+    public void setLabelRow(ProgramStageLabelRow labelRow) {
+        this.labelRow = labelRow;
     }
 
     @Override

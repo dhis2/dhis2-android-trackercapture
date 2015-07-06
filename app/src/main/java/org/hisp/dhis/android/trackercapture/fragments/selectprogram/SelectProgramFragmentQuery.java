@@ -9,6 +9,7 @@ import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis.android.sdk.persistence.models.Option;
+import org.hisp.dhis.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
@@ -61,7 +62,7 @@ class SelectProgramFragmentQuery implements Query<List<TrackedEntityInstanceRow>
         List<String> attributesToShow = new ArrayList<>();
         TrackedEntityInstanceColumnNamesRow columnNames = new TrackedEntityInstanceColumnNamesRow();
         for (ProgramTrackedEntityAttribute attribute : attributes) {
-            if (attribute.displayInList && attributesToShow.size() < 3) {
+            if (attribute.getDisplayInList() && attributesToShow.size() < 3) {
                 attributesToShow.add(attribute.trackedEntityAttribute);
                 if (attribute.getTrackedEntityAttribute() != null) {
                     String name = attribute.getTrackedEntityAttribute().getName();
@@ -86,10 +87,10 @@ class SelectProgramFragmentQuery implements Query<List<TrackedEntityInstanceRow>
         else{
             for(Enrollment enrollment : enrollments)
             {
-                if(enrollment.localTrackedEntityInstanceId > 0)
+                if(enrollment.getLocalTrackedEntityInstanceId() > 0)
                 {
-                    if(!trackedEntityInstanceIds.contains(enrollment.localTrackedEntityInstanceId))
-                        trackedEntityInstanceIds.add(enrollment.localTrackedEntityInstanceId);
+                    if(!trackedEntityInstanceIds.contains(enrollment.getLocalTrackedEntityInstanceId()))
+                        trackedEntityInstanceIds.add(enrollment.getLocalTrackedEntityInstanceId());
                 }
             }
         }
@@ -134,7 +135,7 @@ class SelectProgramFragmentQuery implements Query<List<TrackedEntityInstanceRow>
         TrackedEntityInstanceItemRow trackedEntityInstanceItemRow = new TrackedEntityInstanceItemRow(context);
         trackedEntityInstanceItemRow.setTrackedEntityInstance(trackedEntityInstance);
 
-        if (trackedEntityInstance.fromServer) {
+        if (trackedEntityInstance.getFromServer()) {
             trackedEntityInstanceItemRow.setStatus(TrackedEntityInstanceItemStatus.SENT);
         } else if (failedEventIds.contains(trackedEntityInstance.getTrackedEntityInstance())) {
             trackedEntityInstanceItemRow.setStatus(TrackedEntityInstanceItemStatus.ERROR);

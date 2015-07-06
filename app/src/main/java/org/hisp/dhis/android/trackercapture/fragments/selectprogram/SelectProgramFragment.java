@@ -30,10 +30,15 @@
 package org.hisp.dhis.android.trackercapture.fragments.selectprogram;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.internal.widget.TintImageView;
+import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -41,6 +46,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
@@ -57,6 +64,7 @@ import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
+import org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogFragment;
 import org.hisp.dhis.android.sdk.utils.ui.views.CardTextViewButton;
 import org.hisp.dhis.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton;
@@ -72,10 +80,13 @@ import org.hisp.dhis.android.trackercapture.ui.adapters.TrackedEntityInstanceAda
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogFragment.OnOptionSelectedListener;
+
 public class SelectProgramFragment extends Fragment
-        implements View.OnClickListener, OrgUnitDialogFragment.OnOrgUnitSetListener,
-        ProgramDialogFragment.OnProgramSetListener,
-        LoaderManager.LoaderCallbacks<List<TrackedEntityInstanceRow>> {
+        implements View.OnClickListener, OnOptionSelectedListener,
+        LoaderManager.LoaderCallbacks<List<TrackedEntityInstanceRow>>, SearchView.OnQueryTextListener, SearchView.OnFocusChangeListener,
+        MenuItemCompat.OnActionExpandListener{
     public static final String TAG = SelectProgramFragment.class.getSimpleName();
     private static final String STATE = "state:SelectProgramFragment";
     private static final int LOADER_ID = 1;
@@ -195,15 +206,25 @@ public class SelectProgramFragment extends Fragment
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_select_program, menu);
+        MenuItem item = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
+        MenuItemCompat.setOnActionExpandListener(item,this);
+        searchView.setOnQueryTextListener(this);
+        searchView.setOnQueryTextFocusChangeListener(this);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            mNavigationHandler.switchFragment(
-                    new SettingsFragment(), SettingsFragment.TAG, true);
+        switch (item.getItemId()){
+            case R.id.action_settings :{
+                mNavigationHandler.switchFragment(
+                        new SettingsFragment(), SettingsFragment.TAG, true);
+                break;
+            }
+
         }
+
 
         return super.onOptionsItemSelected(item);
     }
@@ -236,7 +257,6 @@ public class SelectProgramFragment extends Fragment
         }
     }
 
-    @Override
     public void onUnitSelected(String orgUnitId, String orgUnitLabel) {
         mOrgUnitButton.setText(orgUnitLabel);
         mProgramButton.setEnabled(true);
@@ -250,7 +270,7 @@ public class SelectProgramFragment extends Fragment
         handleViews(0);
     }
 
-    @Override
+
     public void onProgramSelected(String programId, String programName) {
         mProgramButton.setText(programName);
 
@@ -282,6 +302,7 @@ public class SelectProgramFragment extends Fragment
     public void onLoadFinished(Loader<List<TrackedEntityInstanceRow>> loader, List<TrackedEntityInstanceRow> data) {
         if (LOADER_ID == loader.getId()) {
             mProgressBar.setVisibility(View.GONE);
+            mAdapter.setData(data);
             mAdapter.swapData(data);
         }
     }
@@ -337,29 +358,54 @@ public class SelectProgramFragment extends Fragment
         }
     }
 
+    @Subscribe
+    public void onItemClick(OnTrackedEntityColumnClick eventClick)
+    {
+        Log.d(TAG, "COLUMN CLICKED : " + eventClick.getColumnClicked());
+        switch (eventClick.getColumnClicked())
+        {
+            case OnTrackedEntityColumnClick.FIRST_COLUMN:
+            {
+
+            }
+            case OnTrackedEntityColumnClick.SECOND_COLUMN:
+            {
+
+            }
+            case OnTrackedEntityColumnClick.THIRD_COLUMN:
+            {
+
+            }
+            case OnTrackedEntityColumnClick.STATUS_COLUMN:
+            {
+                mAdapter.getFilter().filter(TrackedEntityInstanceAdapter.FILTER_STATUS + "");
+            }
+        }
+    }
+
     private String getErrorDescription(TrackedEntityInstance trackedEntityInstance) {
         FailedItem failedItem = DataValueController.getFailedItem(FailedItem.TRACKEDENTITYINSTANCE, trackedEntityInstance.localId);
                 //Select.byId(FailedItem.class, trackedEntityInstance.localId);
 
         if (failedItem != null) {
-            if (failedItem.httpStatusCode == 200) {
+            if (failedItem.getHttpStatusCode() == 200) {
                 if(failedItem.getImportSummary()!=null)
-                    return failedItem.getImportSummary().description;
+                    return failedItem.getImportSummary().getDescription();
             }
-            if (failedItem.httpStatusCode == 401) {
+            if (failedItem.getHttpStatusCode()== 401) {
                 return getString(R.string.error_401_description);
             }
 
-            if (failedItem.httpStatusCode == 408) {
+            if (failedItem.getHttpStatusCode()== 408) {
                 return getString(R.string.error_408_description);
             }
 
-            if (failedItem.httpStatusCode >= 400 && failedItem.httpStatusCode < 500) {
+            if (failedItem.getHttpStatusCode()>= 400 && failedItem.getHttpStatusCode() < 500) {
                 return getString(R.string.error_series_400_description);
             }
 
-            if (failedItem.httpStatusCode >= 500) {
-                return failedItem.errorMessage;
+            if (failedItem.getHttpStatusCode()>= 500) {
+                return failedItem.getErrorMessage();
             }
         }
 
@@ -407,5 +453,64 @@ public class SelectProgramFragment extends Fragment
                 mRegisterEventButton.show();
                 mUpcomingEventsButton.show();
         }
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        Log.d(TAG, query);
+        View view = getActivity().getCurrentFocus();
+        if(view != null) //hide keyboard
+        {
+            InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText)
+    {
+        Log.d(TAG, newText);
+        mAdapter.getFilter().filter(TrackedEntityInstanceAdapter.FILTER_SEARCH + newText);
+        return true;
+    }
+
+    @Override
+    public void onFocusChange(View view, boolean hasFocus)
+    {
+        if(view instanceof SearchView)
+        {
+            if(!hasFocus)
+            {
+                mAdapter.getFilter().filter(""); //show all rows
+
+            }
+        }
+    }
+
+    @Override
+    public void onOptionSelected(int dialogId, int position, String id, String name) {
+        switch (dialogId) {
+            case OrgUnitDialogFragment.ID: {
+                onUnitSelected(id, name);
+                break;
+            }
+            case ProgramDialogFragment.ID: {
+                onProgramSelected(id, name);
+                break;
+            }
+        }
+    }
+
+    @Override
+    public boolean onMenuItemActionExpand(MenuItem item) {
+        return true; //return true to expand
+    }
+
+    @Override
+    public boolean onMenuItemActionCollapse(MenuItem item) {
+        //
+        mAdapter.getFilter().filter(""); //showing all rows
+        return true;
     }
 }

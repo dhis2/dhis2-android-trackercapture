@@ -59,6 +59,7 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
     private static final int LOADER_ID = 95640;
 
     private boolean edit;
+    private boolean editableDataEntryRows;
     private boolean saving;
 
     private INavigationHandler mNavigationHandler;
@@ -90,6 +91,7 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
     {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        editableDataEntryRows = false;
     }
 
 
@@ -110,20 +112,6 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
         editFormButton.setEnabled(true);
         editFormButton.setIcon(R.drawable.ic_edit);
         editFormButton.getIcon().setAlpha(0xFF);
-        editFormButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-
-                if (edit) {
-
-                    setEditableDataEntryRows(false);
-                } else {
-                    setEditableDataEntryRows(true);
-                }
-
-                return false;
-            }
-        });
 
     }
 
@@ -133,7 +121,16 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
             doBack();
             return true;
         }
+        else if (menuItem.getItemId() == org.hisp.dhis.android.sdk.R.id.action_new_event)
+        {
 
+            if (editableDataEntryRows) {
+                setEditableDataEntryRows(false);
+            } else {
+                setEditableDataEntryRows(true);
+            }
+            editableDataEntryRows = !editableDataEntryRows;
+        }
 
         return super.onOptionsItemSelected(menuItem);
     }
@@ -241,7 +238,6 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
     public void onViewCreated(View view, Bundle savedInstanceState) {
         mProgressBar = (ProgressBar) view.findViewById(R.id.teiprofileprogressbar);
         mProgressBar.setVisibility(View.GONE);
-//
 
         getActivity().getLayoutInflater();
         mListViewAdapter = new DataValueAdapter(getChildFragmentManager(), getActivity().getLayoutInflater());
@@ -325,7 +321,8 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
 
     public void setEditableDataEntryRows(boolean editable)
     {
-        List<DataEntryRow> rows = mForm.getDataEntryRows();
+        List<DataEntryRow> rows = new ArrayList<>(mForm.getDataEntryRows());
+//        List<DataEntryRow> rows = mForm.getDataEntryRows();
         mListViewAdapter.swapData(null);
         if(editable)
         {
@@ -385,10 +382,10 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
                         val.save();
                     }
 
-                    mForm.getTrackedEntityInstance().fromServer=true;
+                    mForm.getTrackedEntityInstance().setFromServer(true);
                     mForm.getTrackedEntityInstance().save();
 
-                    mForm.getTrackedEntityInstance().fromServer = false;
+                    mForm.getTrackedEntityInstance().setFromServer(false);
                     //mForm.getTrackedEntityInstance().lastUpdated = Utils.getCurrentTime();
                     mForm.getTrackedEntityInstance().save();
 

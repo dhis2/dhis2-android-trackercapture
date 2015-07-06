@@ -59,6 +59,7 @@ import org.hisp.dhis.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.utils.support.DateUtils;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.DatePickerRow;
+import org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogFragment;
 import org.hisp.dhis.android.sdk.utils.ui.views.CardTextViewButton;
 import org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.trackercapture.R;
@@ -75,7 +76,7 @@ import java.util.List;
  */
 public class UpcomingEventsFragment extends Fragment implements View.OnClickListener,
         AdapterView.OnItemClickListener,
-        OrgUnitDialogFragment.OnOrgUnitSetListener,
+        OrgUnitDialogFragment.OnOptionSelectedListener,
         ProgramDialogFragment.OnProgramSetListener,
         LoaderManager.LoaderCallbacks<List<UpcomingEventRow>>{
 
@@ -164,9 +165,9 @@ public class UpcomingEventsFragment extends Fragment implements View.OnClickList
         mQueryButton.hide();
 
         startDate = new DataValue();
-        startDate.value = DateUtils.getMediumDateString();
+        startDate.setValue(DateUtils.getMediumDateString());
         endDate = new DataValue();
-        endDate.value = new LocalDate(DateUtils.getMediumDateString()).plusYears(1).toString();
+        endDate.setValue(new LocalDate(DateUtils.getMediumDateString()).plusYears(1).toString());
         DatePickerRow startDatePicker = new DatePickerRow(getString(R.string.startdate), startDate);
         DatePickerRow endDatePicker = new DatePickerRow(getString(R.string.enddate), endDate);
         LinearLayout dateFilterContainer = (LinearLayout) header.findViewById(R.id.datefilterlayout);
@@ -234,7 +235,7 @@ public class UpcomingEventsFragment extends Fragment implements View.OnClickList
         }
     }
 
-    @Override
+
     public void onUnitSelected(String orgUnitId, String orgUnitLabel) {
         mOrgUnitButton.setText(orgUnitLabel);
         mProgramButton.setEnabled(true);
@@ -261,7 +262,7 @@ public class UpcomingEventsFragment extends Fragment implements View.OnClickList
             return new DbLoader<>(
                     getActivity().getBaseContext(), modelsToTrack,
                     new UpcomingEventsFragmentQuery(mState.getOrgUnitId(), mState.getProgramId(),
-                    startDate.value, endDate.value));
+                    startDate.getValue(), endDate.getValue()));
         }
         return null;
     }
@@ -285,7 +286,7 @@ public class UpcomingEventsFragment extends Fragment implements View.OnClickList
         ProgramOverviewFragment fragment = ProgramOverviewFragment.
                 newInstance(mState.getOrgUnitId(), mState.getProgramId(),
                         DataValueController.getEnrollment
-                                (event.localEnrollmentId).localTrackedEntityInstanceId);
+                                (event.getLocalEnrollmentId()).getLocalTrackedEntityInstanceId());
 
         mNavigationHandler.switchFragment(fragment, ProgramOverviewFragment.CLASS_TAG, true);
     }
@@ -308,8 +309,8 @@ public class UpcomingEventsFragment extends Fragment implements View.OnClickList
                 break;
             }
             case R.id.upcoming_query_button: {
-                if(startDate.value==null || startDate.value.isEmpty()
-                        || endDate.value==null || endDate.value.isEmpty())
+                if(startDate.getValue()==null || startDate.getValue().isEmpty()
+                        || endDate.getValue()==null || endDate.getValue().isEmpty())
                     break;
                 mProgressBar.setVisibility(View.VISIBLE);
                 // this call will trigger onCreateLoader method
@@ -331,4 +332,17 @@ public class UpcomingEventsFragment extends Fragment implements View.OnClickList
     }
 
 
+    @Override
+    public void onOptionSelected(int dialogId, int position, String id, String name) {
+        switch (dialogId) {
+            case OrgUnitDialogFragment.ID: {
+                onUnitSelected(id, name);
+                break;
+            }
+            case ProgramDialogFragment.ID: {
+                onProgramSelected(id, name);
+                break;
+            }
+        }
+    }
 }

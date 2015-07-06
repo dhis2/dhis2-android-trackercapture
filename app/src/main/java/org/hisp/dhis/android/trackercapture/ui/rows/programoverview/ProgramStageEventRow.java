@@ -25,6 +25,7 @@ public class ProgramStageEventRow implements ProgramStageRow {
     private EventViewHolder holder;
     private String message;
     private int status;
+    private ProgramStageLabelRow labelRow;
 
     public static final int IS_OFFLINE = 1;
     public static final int IS_ONLINE = 2;
@@ -106,7 +107,7 @@ public class ProgramStageEventRow implements ProgramStageRow {
 
         holder.listener.setEvent(getEvent());
         holder.listener.setMessage(getMessage());
-        holder.orgUnit.setText(MetaDataController.getOrganisationUnit(event.organisationUnitId).getLabel());
+        holder.orgUnit.setText(MetaDataController.getOrganisationUnit(event.getOrganisationUnitId()).getLabel());
         String date="";
         if(event.getDueDate()!=null) {
             date = event.getDueDate();
@@ -122,17 +123,17 @@ public class ProgramStageEventRow implements ProgramStageRow {
         LocalDate dueDate = new LocalDate(DateUtils.parseDate(event.getDueDate()));
         LocalDate now = new LocalDate(DateUtils.parseDate(DateUtils.getMediumDateString()));
         int color = org.hisp.dhis.android.sdk.R.color.stage_skipped;
-        if(event.status.equals(Event.STATUS_COMPLETED)) {
+        if(event.getStatus().equals(Event.STATUS_COMPLETED)) {
             color = org.hisp.dhis.android.sdk.R.color.stage_completed;
-        } else if (event.status.equals(Event.STATUS_SKIPPED)) {
+        } else if (event.getStatus().equals(Event.STATUS_SKIPPED)) {
             color = org.hisp.dhis.android.sdk.R.color.stage_skipped;
-        } else if (event.status.equals(Event.STATUS_ACTIVE)) {
+        } else if (event.getStatus().equals(Event.STATUS_ACTIVE)) {
             if (now.isBefore(dueDate) || now.isEqual(dueDate)) {
                 color = org.hisp.dhis.android.sdk.R.color.stage_executed;
             } else {
                 color = org.hisp.dhis.android.sdk.R.color.stage_overdue;
             }
-        } else if (event.status.equals(Event.STATUS_FUTURE_VISIT)) {
+        } else if (event.getStatus().equals(Event.STATUS_FUTURE_VISIT)) {
             if (now.isBefore(dueDate) || now.isEqual(dueDate)) {
                 color = org.hisp.dhis.android.sdk.R.color.stage_ontime;
             } else {
@@ -164,6 +165,15 @@ public class ProgramStageEventRow implements ProgramStageRow {
 
     public Event getEvent() {
         return event;
+    }
+
+    public ProgramStageLabelRow getLabelRow() {
+        return labelRow;
+    }
+
+
+    public void setLabelRow(ProgramStageLabelRow labelRow) {
+        this.labelRow = labelRow;
     }
 
     @Override

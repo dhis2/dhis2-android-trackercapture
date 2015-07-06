@@ -107,7 +107,7 @@ public class TrackedEntityInstanceItemRow implements TrackedEntityInstanceRow
     @Override
     public long getId() {
         if (mTrackedEntityInstance != null) {
-            return mTrackedEntityInstance.localId;
+            return mTrackedEntityInstance.getLocalId();
         } else {
             return 0;
         }
@@ -116,6 +116,11 @@ public class TrackedEntityInstanceItemRow implements TrackedEntityInstanceRow
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    @Override
+    public TrackedEntityInstanceItemRow getItemRow() {
+        return this;
     }
 
     public void setTrackedEntityInstance(TrackedEntityInstance trackedEntityInstance) {
@@ -132,6 +137,18 @@ public class TrackedEntityInstanceItemRow implements TrackedEntityInstanceRow
 
     public void setFirstItem(String firstItem) {
         this.mFirstItem = firstItem;
+    }
+
+    public String getmSecondItem() {
+        return mSecondItem;
+    }
+
+    public String getmThirdItem() {
+        return mThirdItem;
+    }
+
+    public String getmFirstItem() {
+        return mFirstItem;
     }
 
     public void setStatus(TrackedEntityInstanceItemStatus status) {

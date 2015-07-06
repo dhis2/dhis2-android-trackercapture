@@ -46,6 +46,8 @@ import com.raizlabs.android.dbflow.structure.Model;
 import org.hisp.dhis.android.sdk.controllers.Dhis2;
 import org.hisp.dhis.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
+import org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogAdapter;
+import org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogFragment;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
@@ -55,53 +57,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class OrgUnitDialogFragment extends DialogFragment
-        implements AdapterView.OnItemClickListener, LoaderManager.LoaderCallbacks<List<OrganisationUnit>> {
+public class OrgUnitDialogFragment extends  AutoCompleteDialogFragment
+        implements LoaderManager.LoaderCallbacks<List<AutoCompleteDialogAdapter.OptionAdapterValue>> {
     private static final String TAG = OrgUnitDialogFragment.class.getName();
+    public static final int ID = 450123;
     private static final int LOADER_ID = 1;
 
-    private ListView mListView;
-    private ProgressBar mProgressBar;
-    private SimpleAdapter<OrganisationUnit> mAdapter;
-    private OnOrgUnitSetListener mListener;
-
-    public static OrgUnitDialogFragment newInstance(OnOrgUnitSetListener listener) {
+    public static OrgUnitDialogFragment newInstance(OnOptionSelectedListener listener) {
         OrgUnitDialogFragment fragment = new OrgUnitDialogFragment();
-        fragment.setListener(listener);
+        fragment.setOnOptionSetListener(listener);
         return fragment;
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setStyle(DialogFragment.STYLE_NO_TITLE,
-                R.style.Theme_AppCompat_Light_Dialog);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.dialog_fragment_listview, container, false);
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        setDialogLabel("Organisation Units");
+        setDialogId(ID);
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mProgressBar.setVisibility(View.VISIBLE);
         getLoaderManager().initLoader(LOADER_ID, getArguments(), this);
     }
 
     @Override
-    public Loader<List<OrganisationUnit>> onCreateLoader(int id, Bundle args) {
+    public Loader<List<AutoCompleteDialogAdapter.OptionAdapterValue>> onCreateLoader(int id, Bundle args) {
         if (LOADER_ID == id && isAdded()) {
             List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
-            modelsToTrack.add(OrganisationUnit.class);
             return new DbLoader<>(
                     getActivity().getBaseContext(), modelsToTrack, new OrgUnitQuery()
             );
@@ -110,53 +94,17 @@ public class OrgUnitDialogFragment extends DialogFragment
     }
 
     @Override
-    public void onLoadFinished(Loader<List<OrganisationUnit>> loader,
-                               List<OrganisationUnit> data) {
+    public void onLoadFinished(Loader<List<AutoCompleteDialogAdapter.OptionAdapterValue>> loader,
+                               List<AutoCompleteDialogAdapter.OptionAdapterValue> data) {
         if (loader.getId() == LOADER_ID) {
-            mProgressBar.setVisibility(View.GONE);
-            mAdapter.swapData(data);
+            getAdapter().swapData(data);
         }
     }
 
     @Override
-    public void onLoaderReset(Loader<List<OrganisationUnit>> loader) {
-        mAdapter.swapData(null);
+    public void onLoaderReset(Loader<List<AutoCompleteDialogAdapter.OptionAdapterValue>> loader) {
+        getAdapter().swapData(null);
     }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        mProgressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
-        mProgressBar.setVisibility(View.INVISIBLE);
-
-        mListView = (ListView) view.findViewById(R.id.simple_listview);
-        mListView.setOnItemClickListener(this);
-
-        mAdapter = new SimpleAdapter<>(LayoutInflater.from(getActivity()));
-        mAdapter.setStringExtractor(new StringExtractor());
-        mListView.setAdapter(mAdapter);
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if (mListener != null) {
-            OrganisationUnit unit = mAdapter.getItemSafely(position);
-            if (unit != null) {
-                mListener.onUnitSelected(
-                        unit.getId(), unit.getLabel()
-                );
-            }
-        }
-        dismiss();
-    }
-
-    public void setListener(OnOrgUnitSetListener listener) {
-        mListener = listener;
-    }
-
-    public void show(FragmentManager manager) {
-        show(manager, TAG);
-    }
-
 
     public interface OnOrgUnitSetListener {
         public void onUnitSelected(String orgUnitId, String orgUnitLabel);
@@ -170,15 +118,15 @@ public class OrgUnitDialogFragment extends DialogFragment
         }
     }
 
-    static class OrgUnitQuery implements Query<List<OrganisationUnit>> {
+    static class OrgUnitQuery implements Query<List<AutoCompleteDialogAdapter.OptionAdapterValue>> {
 
         @Override
-        public List<OrganisationUnit> query(Context context) {
+        public List<AutoCompleteDialogAdapter.OptionAdapterValue> query(Context context) {
             List<OrganisationUnit> orgUnits = queryUnits();
-            List<OrganisationUnit> filteredUnits = new ArrayList<>();
+            List<AutoCompleteDialogAdapter.OptionAdapterValue> filteredUnits = new ArrayList<>();
             for (OrganisationUnit orgUnit : orgUnits) {
                 if (hasPrograms(orgUnit.getId())) {
-                    filteredUnits.add(orgUnit);
+                    filteredUnits.add(new AutoCompleteDialogAdapter.OptionAdapterValue(orgUnit.getId(), orgUnit.getLabel()));
                 }
             }
 

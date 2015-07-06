@@ -506,14 +506,14 @@ public class EnrollmentFragment extends Fragment
                     LocalDate date = new LocalDate(year, monthOfYear + 1, dayOfMonth);
                     String newValue = date.toString(DATE_FORMAT);
                     datePickerEditText.setText(newValue);
-                    mForm.getEnrollment().dateOfEnrollment = newValue;
+                    mForm.getEnrollment().setDateOfEnrollment(newValue);
                     onRowValueChanged(null);
                 }
             };
             clearDateButton.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View v) {
                     datePickerEditText.setText(EMPTY_FIELD);
-                    mForm.getEnrollment().dateOfEnrollment = EMPTY_FIELD;
+                    mForm.getEnrollment().setDateOfEnrollment(EMPTY_FIELD);
                 }
             });
             datePickerEditText.setOnClickListener(new View.OnClickListener() {
@@ -528,11 +528,11 @@ public class EnrollmentFragment extends Fragment
                 }
             });
 
-            String reportDateDescription = mForm.getProgram().dateOfEnrollmentDescription == null ?
-                    getString(R.string.report_date) : mForm.getProgram().dateOfEnrollmentDescription;
+            String reportDateDescription = mForm.getProgram().getDateOfEnrollmentDescription()== null ?
+                    getString(R.string.report_date) : mForm.getProgram().getDateOfEnrollmentDescription();
             label.setText(reportDateDescription);
-            if (mForm.getEnrollment() != null && mForm.getEnrollment().dateOfEnrollment != null) {
-                DateTime date = DateTime.parse(mForm.getEnrollment().dateOfEnrollment);
+            if (mForm.getEnrollment() != null && mForm.getEnrollment().getDateOfEnrollment() != null) {
+                DateTime date = DateTime.parse(mForm.getEnrollment().getDateOfEnrollment());
                 String newValue = date.toString(DATE_FORMAT);
                 datePickerEditText.setText(newValue);
             }
@@ -557,14 +557,14 @@ public class EnrollmentFragment extends Fragment
                     LocalDate date = new LocalDate(year, monthOfYear + 1, dayOfMonth);
                     String newValue = date.toString(DATE_FORMAT);
                     datePickerEditText.setText(newValue);
-                    mForm.getEnrollment().dateOfEnrollment = newValue;
+                    mForm.getEnrollment().setDateOfEnrollment(newValue);
                     onRowValueChanged(null);
                 }
             };
             clearDateButton.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View v) {
                     datePickerEditText.setText(EMPTY_FIELD);
-                    mForm.getEnrollment().dateOfEnrollment = EMPTY_FIELD;
+                    mForm.getEnrollment().setDateOfEnrollment(EMPTY_FIELD);
                 }
             });
             datePickerEditText.setOnClickListener(new View.OnClickListener() {
@@ -579,11 +579,11 @@ public class EnrollmentFragment extends Fragment
                 }
             });
 
-            String reportDateDescription = mForm.getProgram().dateOfIncidentDescription == null ?
-                    getString(R.string.report_date) : mForm.getProgram().dateOfIncidentDescription;
+            String reportDateDescription = mForm.getProgram().getDateOfIncidentDescription()== null ?
+                    getString(R.string.report_date) : mForm.getProgram().getDateOfIncidentDescription();
             label.setText(reportDateDescription);
-            if (mForm.getEnrollment() != null && mForm.getEnrollment().dateOfIncident != null) {
-                DateTime date = DateTime.parse(mForm.getEnrollment().dateOfIncident);
+            if (mForm.getEnrollment() != null && mForm.getEnrollment().getDateOfIncident() != null) {
+                DateTime date = DateTime.parse(mForm.getEnrollment().getDateOfIncident());
                 String newValue = date.toString(DATE_FORMAT);
                 datePickerEditText.setText(newValue);
             }
@@ -680,11 +680,11 @@ public class EnrollmentFragment extends Fragment
                         //mForm.getTrackedEntityInstance().fromServer = true;
                         //mForm.getTrackedEntityInstance().save(true);
 
-                        mForm.getTrackedEntityInstance().fromServer = false;
+                        mForm.getTrackedEntityInstance().setFromServer(false);
                         mForm.getTrackedEntityInstance().save();
                     }
 
-                    mForm.getEnrollment().localTrackedEntityInstanceId = mForm.getTrackedEntityInstance().localId;
+                    mForm.getEnrollment().setLocalTrackedEntityInstanceId(mForm.getTrackedEntityInstance().localId);
 
                     //mForm.getEnrollment().fromServer = true;
                     //mForm.getEnrollment().save(true);
@@ -692,7 +692,7 @@ public class EnrollmentFragment extends Fragment
                     /*workaround for dbflow concurrency bug. This ensures that datavalues are saved
                     before Dhis2 sends data to server to avoid some data values not being sent in race
                     conditions*/
-                    mForm.getEnrollment().fromServer = false;
+                    mForm.getEnrollment().setFromServer(false);
                     mForm.getEnrollment().save();
 
                     final ApiRequestCallback callback = new ApiRequestCallback() {
@@ -730,9 +730,9 @@ public class EnrollmentFragment extends Fragment
             return errors;
         }
 
-        if (isEmpty(mForm.getEnrollment().dateOfEnrollment)) {
-            String reportDateDescription = mForm.getProgram().dateOfEnrollmentDescription == null ?
-                    getString(R.string.report_date) : mForm.getProgram().dateOfEnrollmentDescription;
+        if (isEmpty(mForm.getEnrollment().getDateOfEnrollment())) {
+            String reportDateDescription = mForm.getProgram().getDateOfEnrollmentDescription()== null ?
+                    getString(R.string.report_date) : mForm.getProgram().getDateOfEnrollmentDescription();
             errors.add(reportDateDescription);
         }
 
@@ -744,7 +744,7 @@ public class EnrollmentFragment extends Fragment
         {
             ProgramTrackedEntityAttribute attribute = dataElements.get(attributeValue.trackedEntityAttribute);
 
-            if(attribute.isMandatory() && isEmpty(attributeValue.trackedEntityAttribute))
+            if(attribute.getMandatory() && isEmpty(attributeValue.trackedEntityAttribute))
             {
                 errors.add(mForm.getDataElementNames().get(attributeValue.trackedEntityAttribute));
             }

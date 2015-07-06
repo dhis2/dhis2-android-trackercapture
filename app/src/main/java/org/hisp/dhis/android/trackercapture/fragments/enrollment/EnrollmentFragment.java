@@ -60,13 +60,18 @@ import com.squareup.otto.Subscribe;
 import org.hisp.dhis.android.sdk.R;
 import org.hisp.dhis.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis.android.sdk.activities.OnBackPressedListener;
+import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.fragments.ProgressDialogFragment;
 import org.hisp.dhis.android.sdk.fragments.dataentry.EditTextValueChangedEvent;
 import org.hisp.dhis.android.sdk.fragments.dataentry.ValidationErrorDialog;
 import org.hisp.dhis.android.sdk.network.http.ApiRequestCallback;
 import org.hisp.dhis.android.sdk.network.http.Response;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
+import org.hisp.dhis.android.sdk.persistence.models.DataValue;
+import org.hisp.dhis.android.sdk.persistence.models.ProgramStageDataElement;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.utils.APIException;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.DataValueAdapter;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.SectionAdapter;
@@ -152,7 +157,7 @@ public class EnrollmentFragment extends Fragment
         Map<String, ProgramTrackedEntityAttribute> attributeMap = new HashMap<>();
         if (attributes != null && !attributes.isEmpty()) {
             for (ProgramTrackedEntityAttribute attribute : attributes) {
-                attributeMap.put(attribute.trackedEntityAttribute, attribute);
+                attributeMap.put(attribute.getTrackedEntityAttributeId(), attribute);
             }
         }
         return attributeMap;
@@ -669,86 +674,85 @@ public class EnrollmentFragment extends Fragment
     public void submitEvent() {
         if(saving) return;
         flagDataChanged(false);
-        new Thread() {
-            public void run() {
-                saving = true;
-                if(mForm!=null && isAdded()) {
-                    final Context context = getActivity().getBaseContext();
+        if(validate())
+        {
+            new Thread() {
+                public void run() {
+                    saving = true;
+                    if (mForm != null && isAdded()) {
+                        final Context context = getActivity().getBaseContext();
 
-                    if(mForm.getTrackedEntityInstance().localId < 0)
-                    {
-                        //mForm.getTrackedEntityInstance().fromServer = true;
-                        //mForm.getTrackedEntityInstance().save(true);
+                        if (mForm.getTrackedEntityInstance().localId < 0) {
+                            //mForm.getTrackedEntityInstance().fromServer = true;
+                            //mForm.getTrackedEntityInstance().save(true);
 
-                        mForm.getTrackedEntityInstance().setFromServer(false);
-                        mForm.getTrackedEntityInstance().save();
-                    }
+                            mForm.getTrackedEntityInstance().setFromServer(false);
+                            mForm.getTrackedEntityInstance().save();
+                        }
 
-                    mForm.getEnrollment().setLocalTrackedEntityInstanceId(mForm.getTrackedEntityInstance().localId);
+                        mForm.getEnrollment().setLocalTrackedEntityInstanceId(mForm.getTrackedEntityInstance().localId);
 
-                    //mForm.getEnrollment().fromServer = true;
-                    //mForm.getEnrollment().save(true);
+                        //mForm.getEnrollment().fromServer = true;
+                        //mForm.getEnrollment().save(true);
 
                     /*workaround for dbflow concurrency bug. This ensures that datavalues are saved
                     before Dhis2 sends data to server to avoid some data values not being sent in race
                     conditions*/
-                    mForm.getEnrollment().setFromServer(false);
-                    mForm.getEnrollment().save();
+                        mForm.getEnrollment().setFromServer(false);
+                        mForm.getEnrollment().save();
 
-                    final ApiRequestCallback callback = new ApiRequestCallback() {
-                        @Override
-                        public void onSuccess(Response response) {
-                            //do nothing
-                        }
+                        final ApiRequestCallback callback = new ApiRequestCallback() {
+                            @Override
+                            public void onSuccess(Response response) {
+                                //do nothing
+                            }
 
-                        @Override
-                        public void onFailure(APIException exception) {
-                            //do nothing
-                        }
-                    };
+                            @Override
+                            public void onFailure(APIException exception) {
+                                //do nothing
+                            }
+                        };
 
-                    TimerTask timerTask = new TimerTask() {
-                        @Override
-                        public void run() {
-                            Dhis2.sendLocalData(context, callback);
-                        }
-                    };
-                    Timer timer = new Timer();
-                    timer.schedule(timerTask, 5000);
+                        TimerTask timerTask = new TimerTask() {
+                            @Override
+                            public void run() {
+                                Dhis2.sendLocalData(context, callback);
+                            }
+                        };
+                        Timer timer = new Timer();
+                        timer.schedule(timerTask, 5000);
+                    }
+                    saving = false;
                 }
-                saving = false;
-            }
 
-        }.start();
+            }.start();
+        }
     }
 
 
     private ArrayList<String> isEnrollmentValid() {
         ArrayList<String> errors = new ArrayList<>();
 
-        if (mForm == null || mForm.getEnrollment() == null || mForm.getProgram() == null) {
+        if (mForm.getEnrollment() == null || mForm.getProgram() == null || mForm.getOrganisationUnit() == null) {
             return errors;
         }
 
         if (isEmpty(mForm.getEnrollment().getDateOfEnrollment())) {
-            String reportDateDescription = mForm.getProgram().getDateOfEnrollmentDescription()== null ?
+            String dateOfEnrollmentDescription = mForm.getProgram().getDateOfEnrollmentDescription() == null ?
                     getString(R.string.report_date) : mForm.getProgram().getDateOfEnrollmentDescription();
-            errors.add(reportDateDescription);
+            errors.add(dateOfEnrollmentDescription);
         }
 
         Map<String, ProgramTrackedEntityAttribute> dataElements = toMap(
-                mForm.getProgram().getProgramTrackedEntityAttributes()
+                MetaDataController.getProgramTrackedEntityAttributes(mForm.getProgram().getId())
         );
 
-        for(ProgramTrackedEntityAttribute attributeValue : mForm.getProgram().getProgramTrackedEntityAttributes())
-        {
-            ProgramTrackedEntityAttribute attribute = dataElements.get(attributeValue.trackedEntityAttribute);
+        for (TrackedEntityAttributeValue value : mForm.getEnrollment().getAttributes()) {
+            ProgramTrackedEntityAttribute programTrackedEntityAttribute = dataElements.get(value.getTrackedEntityAttributeId());
 
-            if(attribute.getMandatory() && isEmpty(attributeValue.trackedEntityAttribute))
-            {
-                errors.add(mForm.getDataElementNames().get(attributeValue.trackedEntityAttribute));
+            if (programTrackedEntityAttribute.getMandatory() && isEmpty(value.getValue())) {
+                errors.add(programTrackedEntityAttribute.getTrackedEntityAttribute().getName());
             }
-
         }
 
         return errors;

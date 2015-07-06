@@ -479,9 +479,22 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
                     if(stageRow.getProgramStage().getRepeatable()) {
                         stageRow.setButtonListener(this);
                     }
+
                     if(generateNextVisit)
                     {
-                        stageRow.setButtonListener(this);
+                        int stageCount = 0;
+
+                        if(stageRow.getEventRows() != null)
+                        {
+
+                            for(ProgramStageEventRow eventRow : stageRow.getEventRows())
+                            {
+                                    stageCount++;
+                            }
+                        }
+                        if(stageCount < 1 || stageRow.getProgramStage().getRepeatable()) // should only be able to add more stages if stage is repeatable
+                            stageRow.setButtonListener(this);
+
                         generateNextVisit = false;
                     }
 
@@ -490,10 +503,14 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
                         if(stageRow.getEventRows() != null)
                         {
                             for(ProgramStageEventRow eventRow : stageRow.getEventRows())
+                            {
                                 if(eventRow.getEvent().getStatus().equals(Event.STATUS_COMPLETED))
                                     generateNextVisit = true;
+                            }
                         }
                     }
+
+
 
                 }
                 else if(row instanceof ProgramStageEventRow)

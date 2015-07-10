@@ -71,6 +71,7 @@ import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
+import org.hisp.dhis.android.sdk.persistence.models.ProgramIndicator;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
@@ -516,7 +517,6 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
                 else if(row instanceof ProgramStageEventRow)
                 {
                     final ProgramStageEventRow eventRow = (ProgramStageEventRow) row;
-
 
                     if(failedEvents.containsKey(eventRow.getEvent().getLocalId()))
                     {

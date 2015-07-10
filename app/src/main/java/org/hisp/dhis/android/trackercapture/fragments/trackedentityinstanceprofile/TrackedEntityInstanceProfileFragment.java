@@ -26,7 +26,7 @@ import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis.android.sdk.controllers.Dhis2;
-import org.hisp.dhis.android.sdk.fragments.dataentry.EditTextValueChangedEvent;
+import org.hisp.dhis.android.sdk.fragments.dataentry.RowValueChangedEvent;
 import org.hisp.dhis.android.sdk.network.http.ApiRequestCallback;
 import org.hisp.dhis.android.sdk.network.http.Response;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
@@ -348,7 +348,7 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
     }
 
     @Subscribe
-    public void onRowValueChanged(final EditTextValueChangedEvent event) {
+    public void onRowValueChanged(final RowValueChangedEvent event) {
         Log.d(TAG, "onRowValueChanged");
         flagDataChanged(true);
         if (mForm == null ) {

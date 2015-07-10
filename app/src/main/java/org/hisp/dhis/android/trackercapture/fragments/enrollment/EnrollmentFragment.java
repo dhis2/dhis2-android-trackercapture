@@ -62,17 +62,20 @@ import org.hisp.dhis.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis.android.sdk.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.fragments.ProgressDialogFragment;
-import org.hisp.dhis.android.sdk.fragments.dataentry.EditTextValueChangedEvent;
+import org.hisp.dhis.android.sdk.fragments.dataentry.RowValueChangedEvent;
 import org.hisp.dhis.android.sdk.fragments.dataentry.ValidationErrorDialog;
 import org.hisp.dhis.android.sdk.network.http.ApiRequestCallback;
 import org.hisp.dhis.android.sdk.network.http.Response;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.models.DataValue;
+import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
+import org.hisp.dhis.android.sdk.persistence.models.ProgramRuleAction;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramStageDataElement;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.utils.APIException;
+import org.hisp.dhis.android.sdk.utils.services.ProgramRuleService;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.DataValueAdapter;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.SectionAdapter;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
@@ -467,7 +470,7 @@ public class EnrollmentFragment extends Fragment
     }
 
     @Subscribe
-    public void onRowValueChanged(final EditTextValueChangedEvent event) {
+    public void onRowValueChanged(final RowValueChangedEvent event) {
         Log.d(TAG, "onRowValueChanged");
         flagDataChanged(true);
         if (mForm == null ) {
@@ -757,4 +760,5 @@ public class EnrollmentFragment extends Fragment
 
         return errors;
     }
+
 }

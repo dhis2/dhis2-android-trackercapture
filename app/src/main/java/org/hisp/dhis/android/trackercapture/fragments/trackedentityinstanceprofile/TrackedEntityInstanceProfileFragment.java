@@ -26,6 +26,7 @@ import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis.android.sdk.controllers.Dhis2;
+import org.hisp.dhis.android.sdk.controllers.ResponseHolder;
 import org.hisp.dhis.android.sdk.fragments.dataentry.EditTextValueChangedEvent;
 import org.hisp.dhis.android.sdk.network.http.ApiRequestCallback;
 import org.hisp.dhis.android.sdk.network.http.Response;
@@ -396,12 +397,12 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
                         public void run() {
                             ApiRequestCallback callback = new ApiRequestCallback() {
                                 @Override
-                                public void onSuccess(Response response) {
+                                public void onSuccess(ResponseHolder holder) {
 
                                 }
 
                                 @Override
-                                public void onFailure(APIException exception) {
+                                public void onFailure(ResponseHolder holder) {
 
                                 }
                             };

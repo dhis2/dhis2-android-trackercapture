@@ -33,6 +33,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
@@ -56,6 +57,7 @@ import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.sdk.controllers.Dhis2;
 import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
+import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.events.InvalidateEvent;
 import org.hisp.dhis.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
@@ -63,6 +65,9 @@ import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
+import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogFragment;
 import org.hisp.dhis.android.sdk.utils.ui.views.CardTextViewButton;
@@ -99,6 +104,7 @@ public class SelectProgramFragment extends Fragment
     private CardTextViewButton mOrgUnitButton;
     private CardTextViewButton mProgramButton;
     private FloatingActionButton mRegisterEventButton;
+    private FloatingActionButton mQueryTrackedEntityInstancesButton;
     private FloatingActionButton mUpcomingEventsButton;
 
     private SelectProgramFragmentState mState;
@@ -157,16 +163,19 @@ public class SelectProgramFragment extends Fragment
         mOrgUnitButton = (CardTextViewButton) header.findViewById(R.id.select_organisation_unit);
         mProgramButton = (CardTextViewButton) header.findViewById(R.id.select_program);
         mRegisterEventButton = (FloatingActionButton) header.findViewById(R.id.register_new_event);
+        mQueryTrackedEntityInstancesButton = (FloatingActionButton) header.findViewById(R.id.query_trackedentityinstances_button);
         mUpcomingEventsButton = (FloatingActionButton) header.findViewById(R.id.upcoming_events_button);
         mOrgUnitButton.setOnClickListener(this);
         mProgramButton.setOnClickListener(this);
         mRegisterEventButton.setOnClickListener(this);
+        mQueryTrackedEntityInstancesButton.setOnClickListener(this);
         mUpcomingEventsButton.setOnClickListener(this);
 
         mOrgUnitButton.setEnabled(true);
         mProgramButton.setEnabled(false);
         mRegisterEventButton.hide();
         mUpcomingEventsButton.hide();
+        mQueryTrackedEntityInstancesButton.hide();
 
         if (savedInstanceState != null &&
                 savedInstanceState.getParcelable(STATE) != null) {
@@ -224,7 +233,6 @@ public class SelectProgramFragment extends Fragment
             }
 
         }
-
 
         return super.onOptionsItemSelected(item);
     }
@@ -438,8 +446,19 @@ public class SelectProgramFragment extends Fragment
             case R.id.upcoming_events_button: {
                 UpcomingEventsFragment fragment = new UpcomingEventsFragment();
                 mNavigationHandler.switchFragment(fragment, UpcomingEventsFragment.class.getName(), true);
+                break;
+            }
+            case R.id.query_trackedentityinstances_button: {
+                showQueryTrackedEntityInstancesDialog(getChildFragmentManager(), mState.getOrgUnitId(), mState.getProgramId());
+                break;
             }
         }
+    }
+
+    private static final void showQueryTrackedEntityInstancesDialog(FragmentManager fragmentManager, String orgUnit, String program) {
+
+        QueryTrackedEntityInstancesDialogFragment dialog = QueryTrackedEntityInstancesDialogFragment.newInstance(program, orgUnit);
+        dialog.show(fragmentManager);
     }
 
     private void handleViews(int level) {
@@ -448,10 +467,12 @@ public class SelectProgramFragment extends Fragment
             case 0:
                 mRegisterEventButton.hide();
                 mUpcomingEventsButton.hide();
+                mQueryTrackedEntityInstancesButton.hide();
                 break;
             case 1:
                 mRegisterEventButton.show();
                 mUpcomingEventsButton.show();
+                mQueryTrackedEntityInstancesButton.show();
         }
     }
 

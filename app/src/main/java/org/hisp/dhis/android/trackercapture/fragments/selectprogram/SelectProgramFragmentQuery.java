@@ -151,7 +151,13 @@ class SelectProgramFragmentQuery implements Query<List<TrackedEntityInstanceRow>
             if(attribute != null)
             {
                 TrackedEntityAttributeValue teav = DataValueController.getTrackedEntityAttributeValue(attribute, trackedEntityInstance.localId);
-                String code = teav.getValue();
+                String code;
+                if(teav == null) {
+                    code = "";
+                } else {
+                    code = teav.getValue();
+                }
+
                 String name = codeToName.get(code) == null ? code : codeToName.get(code);
 
                 if (i == 0) {

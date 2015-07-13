@@ -469,8 +469,6 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
             }
 
             final Map<Long,FailedItem> failedEvents = getFailedEvents();
-            List<Event> events = DataValueController.getEventsByEnrollment(data.getEnrollment().localId);
-            Log.d(CLASS_TAG, "num failed events: " + failedEvents.size());
             boolean generateNextVisit = false;
 
             for(ProgramStageRow row: data.getProgramStageRows()) {

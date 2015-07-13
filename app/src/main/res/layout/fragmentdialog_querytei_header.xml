@@ -28,61 +28,24 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal">
 
-    <org.hisp.dhis.android.sdk.utils.ui.views.CardTextViewButton
-        android:id="@+id/select_organisation_unit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="6dp"
-        app:hint="@string/choose_organisation_unit" />
-
-    <org.hisp.dhis.android.sdk.utils.ui.views.CardTextViewButton
-        android:id="@+id/select_program"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="4dp"
-        app:hint="@string/choose_program" />
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center">
-
-        <org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton
-            android:id="@+id/register_new_event"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:src="@drawable/ic_new"/>
-
-        <org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton
-            android:id="@+id/query_trackedentityinstances_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:src="@drawable/ic_search_server" />
-
-        <org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton
-            android:id="@+id/upcoming_events_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:src="@drawable/ic_menu_find_mtrl_alpha" />
-
-        </LinearLayout>
-
-
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        style="?android:attr/progressBarStyle"
+    <org.hisp.dhis.android.sdk.utils.ui.views.FontTextView
+        android:textSize="@dimen/medium_text_size"
+        android:text="@string/detailed_search"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="28dp"
-        android:layout_gravity="center_horizontal"
-        android:indeterminate="true" />
+        android:layout_gravity="center" />
+
+        <org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton
+            android:id="@+id/detailed_search_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:src="@drawable/ic_new"
+            android:layout_gravity="center_vertical" />
 
 </LinearLayout>

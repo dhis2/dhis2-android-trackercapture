@@ -71,8 +71,6 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
         Dhis2.activatePeriodicSynchronizer(this);
         if (Dhis2.isInitialDataLoaded(this)) {
             showSelectProgramFragment();
-        } else {
-            loadInitialData();
         }
     }
 
@@ -158,9 +156,24 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Dhis2Application.bus.unregister(this);
+    public void onPause() {
+        super.onPause();
+        Dhis2Application.getEventBus().unregister(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Dhis2Application.getEventBus().register(this);
+        if (Dhis2.isInitialDataLoaded(this)) {
+            if(Dhis2.getInstance().isBlocking()) {
+                showLoadingFragment();
+            } else {
+
+            }
+        } else {
+            loadInitialData();
+        }
     }
 
     @Override

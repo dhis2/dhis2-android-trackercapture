@@ -107,7 +107,11 @@ public class ProgramStageEventRow implements ProgramStageRow {
 
         holder.listener.setEvent(getEvent());
         holder.listener.setMessage(getMessage());
-        holder.orgUnit.setText(MetaDataController.getOrganisationUnit(event.getOrganisationUnitId()).getLabel());
+        if(event.getOrganisationUnitId()!=null) {
+            holder.orgUnit.setText(MetaDataController.getOrganisationUnit(event.getOrganisationUnitId()).getLabel());
+        } else {
+            holder.orgUnit.setText("");
+        }
         String date="";
         if(event.getDueDate()!=null) {
             date = event.getDueDate();

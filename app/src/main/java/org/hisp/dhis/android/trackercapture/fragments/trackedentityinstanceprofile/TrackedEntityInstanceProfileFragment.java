@@ -27,13 +27,12 @@ import com.squareup.otto.Subscribe;
 import org.hisp.dhis.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis.android.sdk.controllers.Dhis2;
 import org.hisp.dhis.android.sdk.fragments.dataentry.RowValueChangedEvent;
+import org.hisp.dhis.android.sdk.controllers.ResponseHolder;
 import org.hisp.dhis.android.sdk.network.http.ApiRequestCallback;
-import org.hisp.dhis.android.sdk.network.http.Response;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
-import org.hisp.dhis.android.sdk.utils.APIException;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.DataValueAdapter;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.DataEntryRow;
 import org.hisp.dhis.android.trackercapture.R;
@@ -396,12 +395,12 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
                         public void run() {
                             ApiRequestCallback callback = new ApiRequestCallback() {
                                 @Override
-                                public void onSuccess(Response response) {
+                                public void onSuccess(ResponseHolder holder) {
 
                                 }
 
                                 @Override
-                                public void onFailure(APIException exception) {
+                                public void onFailure(ResponseHolder holder) {
 
                                 }
                             };

@@ -61,6 +61,7 @@ import org.hisp.dhis.android.sdk.R;
 import org.hisp.dhis.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis.android.sdk.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis.android.sdk.controllers.ResponseHolder;
 import org.hisp.dhis.android.sdk.fragments.ProgressDialogFragment;
 import org.hisp.dhis.android.sdk.fragments.dataentry.RowValueChangedEvent;
 import org.hisp.dhis.android.sdk.fragments.dataentry.ValidationErrorDialog;
@@ -704,17 +705,18 @@ public class EnrollmentFragment extends Fragment
                         mForm.getEnrollment().setFromServer(false);
                         mForm.getEnrollment().save();
 
-                        final ApiRequestCallback callback = new ApiRequestCallback() {
-                            @Override
-                            public void onSuccess(Response response) {
-                                //do nothing
-                            }
 
-                            @Override
-                            public void onFailure(APIException exception) {
-                                //do nothing
-                            }
-                        };
+                    final ApiRequestCallback callback = new ApiRequestCallback() {
+                        @Override
+                        public void onSuccess(ResponseHolder holder) {
+                            //do nothing
+                        }
+
+                        @Override
+                        public void onFailure(ResponseHolder holder) {
+                            //do nothing
+                        }
+                    };
 
                         TimerTask timerTask = new TimerTask() {
                             @Override

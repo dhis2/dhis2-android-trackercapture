@@ -27,6 +27,7 @@
 package org.hisp.dhis.android.trackercapture.fragments.programoverview;
 
 import android.content.Context;
+import android.util.Log;
 
 import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;

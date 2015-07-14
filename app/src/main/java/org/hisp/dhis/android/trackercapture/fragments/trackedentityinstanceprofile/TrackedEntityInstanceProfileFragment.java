@@ -216,7 +216,7 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
                             submitChanges();
                             onDetach();
                             getFragmentManager().popBackStack();
-
+                            Dhis2.hasUnSynchronizedDatavalues = true;
                         }
                     }, new DialogInterface.OnClickListener() {
                         @Override

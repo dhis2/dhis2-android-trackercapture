@@ -8,15 +8,14 @@ import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
 
+import org.hisp.dhis.android.sdk.events.OnRowClick;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.AbsAdapter;
 import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceColumnNamesRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceItemRow;
-import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceItemStatus;
 import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.EventRowType;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -26,9 +25,7 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<TrackedEntityInstan
 
     private List<TrackedEntityInstanceRow> allRows;
     private List<TrackedEntityInstanceRow> filteredRows;
-    private Activity context;
     private TrackedEntityInstanceRowFilter filter;
-    private LayoutInflater layoutInflater;
     public static final int FILTER_SEARCH = 1;
     public static final int FILTER_STATUS = 2;
     public static final int FILTER_DATE = 3;
@@ -136,7 +133,7 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<TrackedEntityInstan
 
                 for (int i = 0, l = allRows.size(); i < l; i++) {
                     TrackedEntityInstanceRow row = allRows.get(i);
-                    TrackedEntityInstanceItemStatus status = null;
+                    OnRowClick.ITEM_STATUS status = null;
                     if(row instanceof TrackedEntityInstanceColumnNamesRow)
                         filteredItems.add(row);
                     else if(row instanceof TrackedEntityInstanceItemRow)
@@ -145,11 +142,11 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<TrackedEntityInstan
                     if(status != null)
                     {
 
-                        if (status.toString().equalsIgnoreCase(TrackedEntityInstanceItemStatus.OFFLINE.toString()))
+                        if (status.toString().equalsIgnoreCase(OnRowClick.ITEM_STATUS.OFFLINE.toString()))
                             offlineRows.add(row);
-                        if(status.toString().equalsIgnoreCase(TrackedEntityInstanceItemStatus.ERROR.toString()))
+                        if(status.toString().equalsIgnoreCase(OnRowClick.ITEM_STATUS.ERROR.toString()))
                             errorRows.add(row);
-                        if(status.toString().equalsIgnoreCase(TrackedEntityInstanceItemStatus.SENT.toString()))
+                        if(status.toString().equalsIgnoreCase(OnRowClick.ITEM_STATUS.SENT.toString()))
                             sentRows.add(row);
 
                     }

@@ -6,10 +6,11 @@ import com.raizlabs.android.dbflow.sql.language.Select;
 
 import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis.android.sdk.events.OnRowClick;
+import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis.android.sdk.persistence.models.Option;
-import org.hisp.dhis.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
@@ -17,9 +18,6 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceColumnNamesRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceItemRow;
-import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceItemStatus;
-import org.hisp.dhis.android.sdk.persistence.loaders.Query;
-
 import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceRow;
 
 import java.util.ArrayList;
@@ -135,12 +133,12 @@ class SelectProgramFragmentQuery implements Query<List<TrackedEntityInstanceRow>
         TrackedEntityInstanceItemRow trackedEntityInstanceItemRow = new TrackedEntityInstanceItemRow(context);
         trackedEntityInstanceItemRow.setTrackedEntityInstance(trackedEntityInstance);
 
-        if (trackedEntityInstance.getFromServer()) {
-            trackedEntityInstanceItemRow.setStatus(TrackedEntityInstanceItemStatus.SENT);
+        if (trackedEntityInstance.isFromServer()) {
+            trackedEntityInstanceItemRow.setStatus(OnRowClick.ITEM_STATUS.SENT);
         } else if (failedEventIds.contains(trackedEntityInstance.getTrackedEntityInstance())) {
-            trackedEntityInstanceItemRow.setStatus(TrackedEntityInstanceItemStatus.ERROR);
+            trackedEntityInstanceItemRow.setStatus(OnRowClick.ITEM_STATUS.ERROR);
         } else {
-            trackedEntityInstanceItemRow.setStatus(TrackedEntityInstanceItemStatus.OFFLINE);
+            trackedEntityInstanceItemRow.setStatus(OnRowClick.ITEM_STATUS.OFFLINE);
         }
 
         for(int i=0; i<attributesToShow.size(); i++)
@@ -150,7 +148,7 @@ class SelectProgramFragmentQuery implements Query<List<TrackedEntityInstanceRow>
             String attribute = attributesToShow.get(i);
             if(attribute != null)
             {
-                TrackedEntityAttributeValue teav = DataValueController.getTrackedEntityAttributeValue(attribute, trackedEntityInstance.localId);
+                TrackedEntityAttributeValue teav = DataValueController.getTrackedEntityAttributeValue(attribute, trackedEntityInstance.getLocalId());
                 String code;
                 if(teav == null) {
                     code = "";

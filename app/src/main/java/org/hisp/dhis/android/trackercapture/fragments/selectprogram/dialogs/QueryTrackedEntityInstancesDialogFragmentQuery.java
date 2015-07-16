@@ -1,9 +1,8 @@
-package org.hisp.dhis.android.trackercapture.fragments.selectprogram;
+package org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs;
 
 import android.content.Context;
 import android.util.Log;
 
-import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.persistence.models.DataElement;
@@ -12,7 +11,6 @@ import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
-import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.AutoCompleteRow;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.CheckBoxRow;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.DataEntryRow;
@@ -20,7 +18,6 @@ import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.DataEntryRowTy
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.DatePickerRow;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.EditTextRow;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.RadioButtonsRow;
-import org.hisp.dhis.android.trackercapture.fragments.trackedentityinstanceprofile.TrackedEntityInstanceProfileFragmentForm;
 
 import java.util.ArrayList;
 import java.util.List;

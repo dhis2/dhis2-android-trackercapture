@@ -686,7 +686,7 @@ public class EnrollmentFragment extends Fragment
                     if (mForm != null && isAdded()) {
                         final Context context = getActivity().getBaseContext();
 
-                        if (mForm.getTrackedEntityInstance().localId < 0) {
+                        if (mForm.getTrackedEntityInstance().getLocalId() < 0) {
                             //mForm.getTrackedEntityInstance().fromServer = true;
                             //mForm.getTrackedEntityInstance().save(true);
 
@@ -694,7 +694,7 @@ public class EnrollmentFragment extends Fragment
                             mForm.getTrackedEntityInstance().save();
                         }
 
-                        mForm.getEnrollment().setLocalTrackedEntityInstanceId(mForm.getTrackedEntityInstance().localId);
+                        mForm.getEnrollment().setLocalTrackedEntityInstanceId(mForm.getTrackedEntityInstance().getLocalId());
 
                         //mForm.getEnrollment().fromServer = true;
                         //mForm.getEnrollment().save(true);

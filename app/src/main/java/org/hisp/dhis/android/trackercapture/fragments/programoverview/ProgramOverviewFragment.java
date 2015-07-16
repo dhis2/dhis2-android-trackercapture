@@ -49,6 +49,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -62,6 +63,7 @@ import org.hisp.dhis.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis.android.sdk.controllers.Dhis2;
 import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis.android.sdk.events.OnRowClick;
 import org.hisp.dhis.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis.android.sdk.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
@@ -136,6 +138,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
 
     private ImageButton followupButton;
     private ImageButton profileButton;
+    private ImageView enrollmentServerStatus;
     private Button completeButton;
     private Button terminateButton;
 
@@ -177,8 +180,6 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
 
         if (activity instanceof AppCompatActivity) {
             getActionBar().setDisplayShowTitleEnabled(false);
-            //getActionBar().setDisplayHomeAsUpEnabled(true);
-            //getActionBar().setHomeButtonEnabled(true);
         }
 
         if (activity instanceof INavigationHandler) {
@@ -242,6 +243,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(this);
 
+        enrollmentServerStatus = (ImageView) header.findViewById(R.id.enrollmentstatus);
         enrollmentLayout = (LinearLayout) header.findViewById(R.id.enrollmentLayout);
         enrollmentDateLabel = (TextView) header.findViewById(R.id.dateOfEnrollmentLabel);
         enrollmentDateValue = (TextView) header.findViewById(R.id.dateOfEnrollmentValue);
@@ -257,8 +259,10 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         completeButton.setOnClickListener(this);
         terminateButton.setOnClickListener(this);
         followupButton.setOnClickListener(this);
+        followupButton.setVisibility(View.GONE);
         profileButton.setOnClickListener(this);
         profileCardView.setOnClickListener(this);
+        enrollmentServerStatus.setOnClickListener(this);
 
 
         missingEnrollmentLayout = (LinearLayout) header.findViewById(R.id.missingenrollmentlayout);
@@ -269,8 +273,6 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         attribute1Value = (TextView) header.findViewById(R.id.headerItem1value);
         attribute2Label = (TextView) header.findViewById(R.id.headerItem2label);
         attribute2Value = (TextView) header.findViewById(R.id.headerItem2value);
-
-
 
         Bundle fragmentArguments = getArguments();
         Log.d(CLASS_TAG, "program: " + fragmentArguments.getString(PROGRAM_ID));
@@ -415,6 +417,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
             modelsToTrack.add(Enrollment.class);
             modelsToTrack.add(TrackedEntityInstance.class);
             modelsToTrack.add(TrackedEntityAttributeValue.class);
+            modelsToTrack.add(FailedItem.class);
             return new DbLoader<>(
                     getActivity().getBaseContext(), modelsToTrack,
                     new ProgramOverviewFragmentQuery(args.getString(ORG_UNIT_ID),
@@ -440,6 +443,14 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
             enrollmentDateValue.setText(data.getDateOfEnrollmentValue());
             incidentDateLabel.setText(data.getIncidentDateLabel());
             incidentDateValue.setText(data.getIncidentDateValue());
+
+            if(DataValueController.getFailedItem(FailedItem.ENROLLMENT, mForm.getEnrollment().getLocalId()) != null) {
+                enrollmentServerStatus.setImageResource(R.drawable.ic_event_error);
+            } else if(!mForm.getEnrollment().isFromServer()) {
+                enrollmentServerStatus.setImageResource(R.drawable.ic_offline);
+            } else {
+                enrollmentServerStatus.setImageResource(R.drawable.ic_from_server);
+            }
 
             if(mForm.getEnrollment().getStatus().equals(Enrollment.COMPLETED)) {
                 setCompleted();
@@ -485,11 +496,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
 
                         if(stageRow.getEventRows() != null)
                         {
-
-                            for(ProgramStageEventRow eventRow : stageRow.getEventRows())
-                            {
-                                    stageCount++;
-                            }
+                            stageCount = stageRow.getEventRows().size();
                         }
                         if(stageCount < 1 || stageRow.getProgramStage().getRepeatable()) // should only be able to add more stages if stage is repeatable
                             stageRow.setButtonListener(this);
@@ -508,34 +515,28 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
                             }
                         }
                     }
-
-
-
                 }
                 else if(row instanceof ProgramStageEventRow)
                 {
                     final ProgramStageEventRow eventRow = (ProgramStageEventRow) row;
 
-                    if(failedEvents.containsKey(eventRow.getEvent().getLocalId()))
+                    if(DataValueController.getFailedItem(FailedItem.EVENT, eventRow.getEvent().getLocalId())!=null)
                     {
                         eventRow.setHasFailed(true);
                         eventRow.setMessage(failedEvents.get(eventRow.getEvent().getLocalId()).getErrorMessage());
                     }
-                    else if(eventRow.getEvent().getFromServer())
+                    else if(eventRow.getEvent().isFromServer())
                     {
                         eventRow.setSynchronized(true);
                         eventRow.setMessage(getString(R.string.status_sent_description));
                     }
-                    else if(!(eventRow.getEvent().getFromServer()))
+                    else
                     {
                         eventRow.setSynchronized(false);
                         eventRow.setMessage(getString(R.string.status_offline_description));
                     }
-
-
                 }
             }
-
             adapter.swapData(data.getProgramStageRows());
         }
     }
@@ -544,43 +545,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     public void onItemClick(OnProgramStageEventClick eventClick)
     {
         if(eventClick.isHasPressedFailedButton()) {
-            switch (eventClick.getStatus())
-            {
-
-                case ProgramStageEventRow.IS_ERROR:
-                {
-
-                    Dhis2.getInstance().showErrorDialog(getActivity(),
-                            getString(R.string.event_error),
-                            eventClick.getErrorMessage(), R.drawable.ic_event_error
-                    );
-                    break;
-                }
-
-                case ProgramStageEventRow.IS_OFFLINE:
-                {
-                    Dhis2.getInstance().showErrorDialog(getActivity(),
-                            getString(R.string.event_offline),
-                            getString(R.string.status_offline_description),
-                            R.drawable.ic_offline
-                    );
-                    break;                }
-                case ProgramStageEventRow.IS_ONLINE:
-                {
-                    Dhis2.getInstance().showErrorDialog(getActivity(),
-                            getString(R.string.event_sent),
-                            getString(R.string.status_sent_description),
-                            R.drawable.ic_from_server
-                    );
-                    break;
-                }
-//                if (eventClick.getHasFailedButton().getTag() != null) {
-//                    Dhis2.showErrorDialog(getActivity(), getString(R.string.event_status),
-//                            eventClick.getErrorMessage(), (Integer) eventClick.getHasFailedButton().getTag());
-//                } else
-//                    Log.d(CLASS_TAG, "OFFLINE IMAGE BUG");
-            }
-
+            Dhis2.showStatusDialog(getChildFragmentManager(), eventClick.getItem());
         }
         else
         {
@@ -632,7 +597,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         Bundle args = getArguments();
         DataEntryFragment fragment;
         if(event == null) {
-            fragment = DataEntryFragment.newInstanceWithEnrollment(args.getString(ORG_UNIT_ID), args.getString(PROGRAM_ID), programStage, mForm.getEnrollment().localId);
+            fragment = DataEntryFragment.newInstanceWithEnrollment(args.getString(ORG_UNIT_ID), args.getString(PROGRAM_ID), programStage, mForm.getEnrollment().getLocalId());
         } else {
             fragment = DataEntryFragment.newInstanceWithEnrollment(args.getString(ORG_UNIT_ID), args.getString(PROGRAM_ID), programStage,
                     event.getLocalEnrollmentId(), event.getLocalId());
@@ -769,6 +734,9 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
             case R.id.profile_button: {
                 editTrackedEntityInstanceProfile();
                 break;
+            }
+            case R.id.enrollmentstatus: {
+                Dhis2.showStatusDialog(getChildFragmentManager(), mForm.getEnrollment());
             }
         }
     }

@@ -1,6 +1,5 @@
 package org.hisp.dhis.android.trackercapture.ui.rows.selectprogram;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,7 +7,7 @@ import android.widget.TextView;
 
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.trackercapture.R;
-import org.hisp.dhis.android.trackercapture.fragments.selectprogram.OnTrackedEntityColumnClick;
+import org.hisp.dhis.android.sdk.events.OnTrackerItemColumnClick;
 import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.EventRowType;
 
 /**
@@ -111,16 +110,16 @@ public class TrackedEntityInstanceColumnNamesRow implements TrackedEntityInstanc
         public void onClick(View view)
         {
             if(view.getId() == R.id.first_column_name)
-                    Dhis2Application.getEventBus().post(new OnTrackedEntityColumnClick(OnTrackedEntityColumnClick.FIRST_COLUMN));
+                    Dhis2Application.getEventBus().post(new OnTrackerItemColumnClick(OnTrackerItemColumnClick.FIRST_COLUMN));
 
             else if(view.getId() == R.id.second_column_name)
-                    Dhis2Application.getEventBus().post(new OnTrackedEntityColumnClick(OnTrackedEntityColumnClick.SECOND_COLUMN));
+                    Dhis2Application.getEventBus().post(new OnTrackerItemColumnClick(OnTrackerItemColumnClick.SECOND_COLUMN));
 
             else if (view.getId() == R.id.third_column_name)
-                    Dhis2Application.getEventBus().post(new OnTrackedEntityColumnClick(OnTrackedEntityColumnClick.THIRD_COLUMN));
+                    Dhis2Application.getEventBus().post(new OnTrackerItemColumnClick(OnTrackerItemColumnClick.THIRD_COLUMN));
 
             else if(view.getId() == R.id.status_column)
-                    Dhis2Application.getEventBus().post(new OnTrackedEntityColumnClick(OnTrackedEntityColumnClick.STATUS_COLUMN));
+                    Dhis2Application.getEventBus().post(new OnTrackerItemColumnClick(OnTrackerItemColumnClick.STATUS_COLUMN));
         }
 
     }

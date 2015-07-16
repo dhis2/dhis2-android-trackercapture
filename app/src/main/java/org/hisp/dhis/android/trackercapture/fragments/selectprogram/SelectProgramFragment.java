@@ -37,7 +37,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.internal.widget.TintImageView;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.util.Pair;
@@ -48,7 +47,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
@@ -57,19 +55,16 @@ import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.sdk.controllers.Dhis2;
 import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
-import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.events.InvalidateEvent;
+import org.hisp.dhis.android.sdk.events.OnTrackerItemColumnClick;
+import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
 import org.hisp.dhis.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
-import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
-import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
-import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
-import org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogFragment;
 import org.hisp.dhis.android.sdk.utils.ui.views.CardTextViewButton;
 import org.hisp.dhis.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton;
@@ -77,6 +72,7 @@ import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.fragments.enrollment.EnrollmentFragment;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.trackercapture.fragments.programoverview.ProgramOverviewFragment;
+import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.QueryTrackedEntityInstancesDialogFragment;
 import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceRow;
 import org.hisp.dhis.android.trackercapture.fragments.upcomingevents.OrgUnitDialogFragment;
 import org.hisp.dhis.android.trackercapture.fragments.upcomingevents.ProgramDialogFragment;
@@ -98,7 +94,6 @@ public class SelectProgramFragment extends Fragment
 
     private ListView mListView;
     private ProgressBar mProgressBar;
-//    private EventAdapter mAdapter;
     private TrackedEntityInstanceAdapter mAdapter;
 
     private CardTextViewButton mOrgUnitButton;
@@ -330,61 +325,38 @@ public class SelectProgramFragment extends Fragment
     }
 
     @Subscribe
-    public void onItemClick(OnTrackedEntityInstanceClick eventClick) {
+    public void onItemClick(OnTrackerItemClick eventClick) {
         if (eventClick.isOnDescriptionClick()) {
 
             ProgramOverviewFragment fragment = ProgramOverviewFragment.
                     newInstance(mState.getOrgUnitId(), mState.getProgramId(),
-                            eventClick.getTrackedEntityInstance().localId);
+                            eventClick.getItem().getLocalId());
 
             mNavigationHandler.switchFragment(fragment, ProgramOverviewFragment.CLASS_TAG, true);
         } else {
-            switch (eventClick.getStatus()) {
-                case SENT:
-                    Dhis2.getInstance().showErrorDialog(getActivity(),
-                            getString(R.string.event_sent),
-                            getString(R.string.status_sent_description),
-                            R.drawable.ic_from_server
-                    );
-                    break;
-                case OFFLINE:
-                    Dhis2.getInstance().showErrorDialog(getActivity(),
-                            getString(R.string.event_offline),
-                            getString(R.string.status_offline_description),
-                            R.drawable.ic_offline
-                    );
-                    break;
-                case ERROR: {
-                    String message = getErrorDescription(eventClick.getTrackedEntityInstance());
-                    Dhis2.getInstance().showErrorDialog(getActivity(),
-                            getString(R.string.event_error),
-                            message, R.drawable.ic_event_error
-                    );
-                    break;
-                }
-            }
+            Dhis2.showStatusDialog(getChildFragmentManager(), eventClick.getItem());
         }
     }
 
     @Subscribe
-    public void onItemClick(OnTrackedEntityColumnClick eventClick)
+    public void onItemClick(OnTrackerItemColumnClick eventClick)
     {
         Log.d(TAG, "COLUMN CLICKED : " + eventClick.getColumnClicked());
         switch (eventClick.getColumnClicked())
         {
-            case OnTrackedEntityColumnClick.FIRST_COLUMN:
+            case OnTrackerItemColumnClick.FIRST_COLUMN:
             {
 
             }
-            case OnTrackedEntityColumnClick.SECOND_COLUMN:
+            case OnTrackerItemColumnClick.SECOND_COLUMN:
             {
 
             }
-            case OnTrackedEntityColumnClick.THIRD_COLUMN:
+            case OnTrackerItemColumnClick.THIRD_COLUMN:
             {
 
             }
-            case OnTrackedEntityColumnClick.STATUS_COLUMN:
+            case OnTrackerItemColumnClick.STATUS_COLUMN:
             {
                 mAdapter.getFilter().filter(TrackedEntityInstanceAdapter.FILTER_STATUS + "");
             }
@@ -392,7 +364,7 @@ public class SelectProgramFragment extends Fragment
     }
 
     private String getErrorDescription(TrackedEntityInstance trackedEntityInstance) {
-        FailedItem failedItem = DataValueController.getFailedItem(FailedItem.TRACKEDENTITYINSTANCE, trackedEntityInstance.localId);
+        FailedItem failedItem = DataValueController.getFailedItem(FailedItem.TRACKEDENTITYINSTANCE, trackedEntityInstance.getLocalId());
                 //Select.byId(FailedItem.class, trackedEntityInstance.localId);
 
         if (failedItem != null) {
@@ -504,7 +476,6 @@ public class SelectProgramFragment extends Fragment
             if(!hasFocus)
             {
                 mAdapter.getFilter().filter(""); //show all rows
-
             }
         }
     }

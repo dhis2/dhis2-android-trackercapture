@@ -1,4 +1,4 @@
-package org.hisp.dhis.android.trackercapture.fragments.selectprogram;
+package org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs;
 
 import org.hisp.dhis.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;

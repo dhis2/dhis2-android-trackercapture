@@ -78,11 +78,28 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/medium_text_size"
-                android:text="@string/enrollment"/>
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="@dimen/medium_text_size"
+                    android:text="@string/enrollment"/>
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:id="@+id/enrollmentstatus"
+                    android:src="@drawable/ic_offline"
+                    android:layout_gravity="right" />
+
+            </LinearLayout>
+
+
 
             <View
                 android:layout_width="wrap_content"
@@ -194,7 +211,7 @@
                 <ImageButton
                     android:id="@+id/profile_button"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_gravity="right"
                     android:src="@drawable/ic_dataentry"
                     android:background="@color/transparent"/>

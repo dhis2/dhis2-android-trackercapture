@@ -1,5 +1,6 @@
 package org.hisp.dhis.android.trackercapture.ui.rows.programoverview;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,6 +8,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis.android.sdk.events.OnRowClick;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.utils.Utils;
@@ -19,6 +21,8 @@ import org.joda.time.LocalDate;
 
 public class ProgramStageEventRow implements ProgramStageRow {
 
+    private static final String TAG = ProgramStageEventRow.class.getSimpleName();
+
     private final Event event;
     private boolean hasFailed = false;
     private boolean isSynchronized = false;
@@ -26,10 +30,6 @@ public class ProgramStageEventRow implements ProgramStageRow {
     private String message;
     private int status;
     private ProgramStageLabelRow labelRow;
-
-    public static final int IS_OFFLINE = 1;
-    public static final int IS_ONLINE = 2;
-    public static final int IS_ERROR = 3;
 
     public ProgramStageEventRow(Event event) {
         this.event = event;
@@ -69,26 +69,18 @@ public class ProgramStageEventRow implements ProgramStageRow {
                 holder.statusButton.setBackgroundResource(org.hisp.dhis.android.sdk.R.drawable.ic_event_error);
                 holder.statusButton.setTag(org.hisp.dhis.android.sdk.R.drawable.ic_event_error);
                 holder.listener.setStatusButton(statusButton);
-                holder.listener.setStatus(IS_ERROR);
+                holder.listener.setStatus(OnRowClick.ITEM_STATUS.ERROR);
                 holder.statusButton.setOnClickListener(holder.listener);
 
             }
-            else if (!hasFailed())
-            {
-                holder.statusButton.setEnabled(false);
-                holder.statusButton.setVisibility(View.INVISIBLE);
-                holder.listener.setStatusButton(null);
-                holder.statusButton.setOnClickListener(null);
-
-            }
-            if (!isSynchronized())
+            else if (!isSynchronized())
             {
                 holder.statusButton.setEnabled(true);
                 holder.statusButton.setVisibility(View.VISIBLE);
                 holder.statusButton.setBackgroundResource(org.hisp.dhis.android.sdk.R.drawable.ic_offline);
                 holder.statusButton.setTag(org.hisp.dhis.android.sdk.R.drawable.ic_offline);
                 holder.listener.setStatusButton(statusButton);
-                holder.listener.setStatus(IS_OFFLINE);
+                holder.listener.setStatus(OnRowClick.ITEM_STATUS.OFFLINE);
                 holder.statusButton.setOnClickListener(holder.listener);
 
             }
@@ -99,7 +91,7 @@ public class ProgramStageEventRow implements ProgramStageRow {
                 holder.statusButton.setBackgroundResource(org.hisp.dhis.android.sdk.R.drawable.ic_from_server);
                 holder.statusButton.setTag(org.hisp.dhis.android.sdk.R.drawable.ic_from_server);
                 holder.listener.setStatusButton(statusButton);
-                holder.listener.setStatus(IS_ONLINE);
+                holder.listener.setStatus(OnRowClick.ITEM_STATUS.SENT);
                 holder.statusButton.setOnClickListener(holder.listener);
 
             }
@@ -222,7 +214,7 @@ public class ProgramStageEventRow implements ProgramStageRow {
         private Event event;
         private ImageButton statusButton;
         private String message;
-        private int status;
+        private OnRowClick.ITEM_STATUS status;
 
         public void setEvent(Event event) {
             this.event = event;
@@ -232,7 +224,7 @@ public class ProgramStageEventRow implements ProgramStageRow {
             this.statusButton = statusButton;
         }
 
-        public void setStatus(int status){
+        public void setStatus(OnRowClick.ITEM_STATUS status){
             this.status = status;
         }
         public void setMessage(String message)

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.hisp.dhis.android.trackercapture.fragments.selectprogram;
+package org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs;
 
 import android.view.LayoutInflater;
 import android.view.View;

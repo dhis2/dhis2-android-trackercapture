@@ -82,6 +82,7 @@ import org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogFragment;
 import org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.fragments.enrollment.EnrollmentFragment;
+import org.hisp.dhis.android.trackercapture.fragments.enrollmentdate.EnrollmentDateFragment;
 import org.hisp.dhis.android.trackercapture.fragments.trackedentityinstanceprofile.TrackedEntityInstanceProfileFragment;
 import org.hisp.dhis.android.trackercapture.fragments.upcomingevents.ProgramDialogFragment;
 import org.hisp.dhis.android.trackercapture.ui.adapters.ProgramAdapter;
@@ -263,6 +264,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         profileButton.setOnClickListener(this);
         profileCardView.setOnClickListener(this);
         enrollmentServerStatus.setOnClickListener(this);
+        enrollmentLayout.setOnClickListener(this);
 
 
         missingEnrollmentLayout = (LinearLayout) header.findViewById(R.id.missingenrollmentlayout);
@@ -589,7 +591,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     }
 
     public void enroll() {
-        EnrollmentFragment enrollmentFragment = EnrollmentFragment.newInstance(mState.getOrgUnitId(),mState.getProgramId(), mState.getTrackedEntityInstanceId());
+        EnrollmentFragment enrollmentFragment = EnrollmentFragment.newInstance(mState.getOrgUnitId(), mState.getProgramId(), mState.getTrackedEntityInstanceId());
         mNavigationHandler.switchFragment(enrollmentFragment, EnrollmentFragment.class.getName(), true);
     }
 
@@ -738,6 +740,10 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
             case R.id.enrollmentstatus: {
                 Dhis2.showStatusDialog(getChildFragmentManager(), mForm.getEnrollment());
             }
+            case R.id.enrollmentLayout:
+            {
+                editEnrollmentDates();
+            }
         }
     }
 
@@ -745,6 +751,11 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         adapter.swapData(null);
     }
 
+    private void editEnrollmentDates()
+    {
+        EnrollmentDateFragment fragment = EnrollmentDateFragment.newInstance(mForm.getEnrollment().getLocalId());
+        mNavigationHandler.switchFragment(fragment, EnrollmentDateFragment.TAG, true);
+    }
     private void editTrackedEntityInstanceProfile()
     {
         TrackedEntityInstanceProfileFragment fragment = TrackedEntityInstanceProfileFragment.newInstance(getArguments().

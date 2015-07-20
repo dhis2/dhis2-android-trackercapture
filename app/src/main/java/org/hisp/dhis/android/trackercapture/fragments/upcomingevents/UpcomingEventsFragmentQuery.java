@@ -32,15 +32,15 @@ import com.raizlabs.android.dbflow.sql.language.Select;
 
 import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.Option;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
-import org.hisp.dhis.android.sdk.persistence.loaders.Query;
-import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.UpcomingEventsColumnNamesRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.UpcomingEventItemRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.UpcomingEventRow;
+import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.UpcomingEventsColumnNamesRow;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -80,7 +80,7 @@ class UpcomingEventsFragmentQuery implements Query<List<UpcomingEventRow>> {
         UpcomingEventsColumnNamesRow columnNames = new UpcomingEventsColumnNamesRow();
         for (ProgramTrackedEntityAttribute attribute : programTrackedEntityAttributes) {
             if (attribute.getDisplayInList() && attributesToShow.size() < mNumAttributesToShow) {
-                attributesToShow.add(attribute.trackedEntityAttribute);
+                attributesToShow.add(attribute.getTrackedEntityAttributeId());
                 if (attribute.getTrackedEntityAttribute() != null) {
                     String name = attribute.getTrackedEntityAttribute().getName();
                     if (attributesToShow.size() == 1) {
@@ -115,7 +115,7 @@ class UpcomingEventsFragmentQuery implements Query<List<UpcomingEventRow>> {
     }
 
     private UpcomingEventItemRow createEventItem(Event event, List<String> attributesToShow,
-                                         Map<String, String> codeToName) {
+                                                 Map<String, String> codeToName) {
         UpcomingEventItemRow eventItem = new UpcomingEventItemRow();
         eventItem.setEventId(event.getLocalId());
         eventItem.setDueDate(event.getDueDate());
@@ -123,12 +123,12 @@ class UpcomingEventsFragmentQuery implements Query<List<UpcomingEventRow>> {
                 getName());
 
         for (int i = 0; i < mNumAttributesToShow; i++) {
-            if(i>=attributesToShow.size()) break;
+            if (i >= attributesToShow.size()) break;
             String trackedEntityAttribute = attributesToShow.get(i);
             if (trackedEntityAttribute != null) {
                 TrackedEntityAttributeValue trackedEntityAttributeValue = DataValueController.
                         getTrackedEntityAttributeValue(trackedEntityAttribute,
-                                event.trackedEntityInstance);
+                                event.getTrackedEntityInstance());
                 if (trackedEntityAttributeValue == null) {
                     continue;
                 }

@@ -27,27 +27,24 @@ import java.util.List;
 /**
  * Created by erling on 5/19/15.
  */
-public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedEntityInstanceProfileFragmentForm>
-{
+public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedEntityInstanceProfileFragmentForm> {
     private long mTrackedEntityInstanceId;
     private String mProgramId;
     private TrackedEntityInstance currentTrackedEntityInstance;
     private boolean editable;
 
-    public TrackedEntityInstanceProfileFragmentQuery(long mTrackedEntityInstanceId, String mProgramId)
-    {
+    public TrackedEntityInstanceProfileFragmentQuery(long mTrackedEntityInstanceId, String mProgramId) {
         this.mTrackedEntityInstanceId = mTrackedEntityInstanceId;
         this.mProgramId = mProgramId;
     }
 
     @Override
-    public TrackedEntityInstanceProfileFragmentForm query(Context context)
-    {
+    public TrackedEntityInstanceProfileFragmentForm query(Context context) {
         TrackedEntityInstanceProfileFragmentForm mForm = new TrackedEntityInstanceProfileFragmentForm();
         final Program mProgram = MetaDataController.getProgram(mProgramId);
         final TrackedEntityInstance mTrackedEntityInstance = DataValueController.getTrackedEntityInstance(mTrackedEntityInstanceId);
 
-        if(mProgram == null || mTrackedEntityInstance == null)
+        if (mProgram == null || mTrackedEntityInstance == null)
             return mForm;
 
         currentTrackedEntityInstance = mTrackedEntityInstance;
@@ -55,21 +52,20 @@ public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedE
         mForm.setProgram(mProgram);
         mForm.setTrackedEntityInstance(mTrackedEntityInstance);
 
-        List<TrackedEntityAttributeValue> values = DataValueController.getProgramTrackedEntityAttributeValues(mProgram,mTrackedEntityInstance);
+        List<TrackedEntityAttributeValue> values = DataValueController.getProgramTrackedEntityAttributeValues(mProgram, mTrackedEntityInstance);
         List<ProgramTrackedEntityAttribute> attributes = MetaDataController.getProgramTrackedEntityAttributes(mProgramId);
 
-        if(values == null && attributes == null)
+        if (values == null && attributes == null)
             return mForm;
 
         List<DataEntryRow> dataEntryRows = new ArrayList<>();
-        for(int i=0;i<attributes.size();i++)
-        {
+        for (int i = 0; i < attributes.size(); i++) {
 
-                DataEntryRow row = createDataEntryView(attributes.get(i).getTrackedEntityAttribute(),
-                        getTrackedEntityDataValue(attributes.get(i).getTrackedEntityAttribute().id,
-                                values));
+            DataEntryRow row = createDataEntryView(attributes.get(i).getTrackedEntityAttribute(),
+                    getTrackedEntityDataValue(attributes.get(i).getTrackedEntityAttribute().getId(),
+                            values));
 
-                dataEntryRows.add(row);
+            dataEntryRows.add(row);
 
 
             Log.d(attributes.get(i).getTrackedEntityAttribute().getName(), values.get(i).getValue());
@@ -80,15 +76,15 @@ public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedE
     }
 
     public TrackedEntityAttributeValue getTrackedEntityDataValue(String trackedEntityAttribute, List<TrackedEntityAttributeValue> trackedEntityAttributeValues) {
-        for(TrackedEntityAttributeValue trackedEntityAttributeValue: trackedEntityAttributeValues) {
-            if(trackedEntityAttributeValue.getTrackedEntityAttributeId().equals(trackedEntityAttribute))
+        for (TrackedEntityAttributeValue trackedEntityAttributeValue : trackedEntityAttributeValues) {
+            if (trackedEntityAttributeValue.getTrackedEntityAttributeId().equals(trackedEntityAttribute))
                 return trackedEntityAttributeValue;
         }
 
         //the datavalue didnt exist for some reason. Create a new one.
         TrackedEntityAttributeValue trackedEntityAttributeValue = new TrackedEntityAttributeValue();
         trackedEntityAttributeValue.setTrackedEntityAttributeId(trackedEntityAttribute);
-        trackedEntityAttributeValue.setTrackedEntityInstanceId(currentTrackedEntityInstance.trackedEntityInstance);
+        trackedEntityAttributeValue.setTrackedEntityInstanceId(currentTrackedEntityInstance.getTrackedEntityInstance());
         trackedEntityAttributeValue.setLocalTrackedEntityInstanceId(currentTrackedEntityInstance.getLocalId());
         trackedEntityAttributeValue.setValue("");
         trackedEntityAttributeValues.add(trackedEntityAttributeValue);

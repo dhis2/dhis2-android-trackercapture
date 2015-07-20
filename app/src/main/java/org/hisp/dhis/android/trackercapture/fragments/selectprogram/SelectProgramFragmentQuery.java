@@ -61,15 +61,14 @@ class SelectProgramFragmentQuery implements Query<List<TrackedEntityInstanceRow>
         TrackedEntityInstanceColumnNamesRow columnNames = new TrackedEntityInstanceColumnNamesRow();
         for (ProgramTrackedEntityAttribute attribute : attributes) {
             if (attribute.getDisplayInList() && attributesToShow.size() < 3) {
-                attributesToShow.add(attribute.trackedEntityAttribute);
+                attributesToShow.add(attribute.getTrackedEntityAttributeId());
                 if (attribute.getTrackedEntityAttribute() != null) {
                     String name = attribute.getTrackedEntityAttribute().getName();
                     if (attributesToShow.size() == 1) {
                         columnNames.setFirstItem(name);
                     } else if (attributesToShow.size() == 2) {
                         columnNames.setSecondItem(name);
-                    }
-                    else if(attributesToShow.size() == 3){
+                    } else if (attributesToShow.size() == 3) {
                         columnNames.setThirdItem(name);
                     }
 
@@ -79,24 +78,21 @@ class SelectProgramFragmentQuery implements Query<List<TrackedEntityInstanceRow>
         teiRows.add(columnNames);
 
         List<Enrollment> enrollments = DataValueController.getEnrollments(
-                 mProgramId, mOrgUnitId);
+                mProgramId, mOrgUnitId);
         List<Long> trackedEntityInstanceIds = new ArrayList<>();
-        if (isListEmpty(enrollments)) {return teiRows;}
-        else{
-            for(Enrollment enrollment : enrollments)
-            {
-                if(enrollment.getLocalTrackedEntityInstanceId() > 0)
-                {
-                    if(!trackedEntityInstanceIds.contains(enrollment.getLocalTrackedEntityInstanceId()))
+        if (isListEmpty(enrollments)) {
+            return teiRows;
+        } else {
+            for (Enrollment enrollment : enrollments) {
+                if (enrollment.getLocalTrackedEntityInstanceId() > 0) {
+                    if (!trackedEntityInstanceIds.contains(enrollment.getLocalTrackedEntityInstanceId()))
                         trackedEntityInstanceIds.add(enrollment.getLocalTrackedEntityInstanceId());
                 }
             }
         }
         List<TrackedEntityInstance> trackedEntityInstanceList = new ArrayList<>();
-        if(!isListEmpty(trackedEntityInstanceIds))
-        {
-            for(long localId : trackedEntityInstanceIds)
-            {
+        if (!isListEmpty(trackedEntityInstanceIds)) {
+            for (long localId : trackedEntityInstanceIds) {
                 TrackedEntityInstance tei = DataValueController.getTrackedEntityInstance(localId);
                 trackedEntityInstanceList.add(tei);
             }
@@ -117,7 +113,7 @@ class SelectProgramFragmentQuery implements Query<List<TrackedEntityInstanceRow>
         }
 
         for (TrackedEntityInstance trackedEntityInstance : trackedEntityInstanceList) {
-            if(trackedEntityInstance==null) continue;
+            if (trackedEntityInstance == null) continue;
             teiRows.add(createTrackedEntityInstanceItem(context,
                     trackedEntityInstance, attributesToShow, attributes,
                     codeToName, failedEventIds));
@@ -128,8 +124,8 @@ class SelectProgramFragmentQuery implements Query<List<TrackedEntityInstanceRow>
 
     private TrackedEntityInstanceItemRow createTrackedEntityInstanceItem(Context context, TrackedEntityInstance trackedEntityInstance,
                                                                          List<String> attributesToShow, List<ProgramTrackedEntityAttribute> attributes,
-                                         Map<String, String> codeToName,
-                                         Set<String> failedEventIds) {
+                                                                         Map<String, String> codeToName,
+                                                                         Set<String> failedEventIds) {
         TrackedEntityInstanceItemRow trackedEntityInstanceItemRow = new TrackedEntityInstanceItemRow(context);
         trackedEntityInstanceItemRow.setTrackedEntityInstance(trackedEntityInstance);
 
@@ -141,16 +137,14 @@ class SelectProgramFragmentQuery implements Query<List<TrackedEntityInstanceRow>
             trackedEntityInstanceItemRow.setStatus(OnRowClick.ITEM_STATUS.OFFLINE);
         }
 
-        for(int i=0; i<attributesToShow.size(); i++)
-        {
-            if(i>attributesToShow.size()) break;
+        for (int i = 0; i < attributesToShow.size(); i++) {
+            if (i > attributesToShow.size()) break;
 
             String attribute = attributesToShow.get(i);
-            if(attribute != null)
-            {
+            if (attribute != null) {
                 TrackedEntityAttributeValue teav = DataValueController.getTrackedEntityAttributeValue(attribute, trackedEntityInstance.getLocalId());
                 String code;
-                if(teav == null) {
+                if (teav == null) {
                     code = "";
                 } else {
                     code = teav.getValue();

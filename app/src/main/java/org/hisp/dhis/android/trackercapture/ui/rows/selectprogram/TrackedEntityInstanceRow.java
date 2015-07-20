@@ -13,5 +13,5 @@ public interface TrackedEntityInstanceRow
     public int getViewType();
     public long getId();
     public boolean isEnabled();
-    public TrackedEntityInstanceItemRow getItemRow();
+    public TrackedEntityInstanceRow getItemRow();
 }

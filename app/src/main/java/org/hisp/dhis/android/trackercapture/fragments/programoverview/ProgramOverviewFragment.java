@@ -63,7 +63,6 @@ import org.hisp.dhis.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis.android.sdk.controllers.Dhis2;
 import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
-import org.hisp.dhis.android.sdk.events.OnRowClick;
 import org.hisp.dhis.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis.android.sdk.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
@@ -73,15 +72,18 @@ import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
-import org.hisp.dhis.android.sdk.persistence.models.ProgramIndicator;
-import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramStage;
+import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
+import org.hisp.dhis.android.sdk.persistence.models.Relationship;
+import org.hisp.dhis.android.sdk.persistence.models.RelationshipType;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
-import org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogFragment;
 import org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton;
+import org.hisp.dhis.android.sdk.utils.ui.views.FontTextView;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.fragments.enrollment.EnrollmentFragment;
+import org.hisp.dhis.android.trackercapture.fragments.programoverview.registerRelationshipDialogFragment.RegisterRelationshipDialogFragment;
 import org.hisp.dhis.android.trackercapture.fragments.trackedentityinstanceprofile.TrackedEntityInstanceProfileFragment;
 import org.hisp.dhis.android.trackercapture.fragments.upcomingevents.ProgramDialogFragment;
 import org.hisp.dhis.android.trackercapture.ui.adapters.ProgramAdapter;
@@ -146,6 +148,9 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     private TextView attribute1Value;
     private TextView attribute2Label;
     private TextView attribute2Value;
+
+    private LinearLayout relationshipsLinearLayout;
+    private Button newRelationshipButton;
 
     private ProgramOverviewFragmentState mState;
     private ProgramOverviewFragmentForm mForm;
@@ -235,6 +240,11 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         View header = getLayoutInflater(savedInstanceState).inflate(
                 R.layout.fragment_programoverview_header, listView, false
         );
+
+        relationshipsLinearLayout = (LinearLayout) header.findViewById(R.id.relationships_linearlayout);
+        newRelationshipButton = (Button) header.findViewById(R.id.addrelationshipbutton);
+        newRelationshipButton.setOnClickListener(this);
+
         mProgressBar = (ProgressBar) header.findViewById(R.id.progress_bar);
         mProgressBar.setVisibility(View.GONE);
 
@@ -417,11 +427,11 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
             modelsToTrack.add(Enrollment.class);
             modelsToTrack.add(TrackedEntityInstance.class);
             modelsToTrack.add(TrackedEntityAttributeValue.class);
+            modelsToTrack.add(Relationship.class);
             modelsToTrack.add(FailedItem.class);
             return new DbLoader<>(
                     getActivity().getBaseContext(), modelsToTrack,
-                    new ProgramOverviewFragmentQuery(args.getString(ORG_UNIT_ID),
-                            args.getString(PROGRAM_ID),
+                    new ProgramOverviewFragmentQuery(args.getString(PROGRAM_ID),
                             args.getLong(TRACKEDENTITYINSTANCE_ID, -1)));
         }
         return null;
@@ -537,7 +547,95 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
                     }
                 }
             }
+            setRelationships(getLayoutInflater(getArguments().getBundle(EXTRA_SAVED_INSTANCE_STATE)));
             adapter.swapData(data.getProgramStageRows());
+        }
+    }
+
+    /**
+     * Inflates views and adds them to linear layout for relationships, sort of like a listview, but
+     * inside another listview
+     */
+    public void setRelationships(LayoutInflater inflater) {
+        relationshipsLinearLayout.removeAllViews();
+        if(mForm.getTrackedEntityInstance() != null && mForm.getTrackedEntityInstance().getRelationships()!=null) {
+            for(Relationship relationship: mForm.getTrackedEntityInstance().getRelationships()) {
+                if(relationship==null) {
+                    continue;
+                }
+                LinearLayout ll = (LinearLayout) inflater.inflate(R.layout.listview_row_relationship, null);
+                FontTextView currentTeiRelationshipLabel = (FontTextView) ll.findViewById(R.id.current_tei_relationship_label);
+                FontTextView relativeLabel = (FontTextView) ll.findViewById(R.id.relative_relationship_label);
+                RelationshipType relationshipType = MetaDataController.getRelationshipType(relationship.getRelationship());
+
+                if(relationshipType!=null) {
+
+                    /* establishing if the relative is A or B in Relationship Type */
+                    final TrackedEntityInstance relative;
+                    if(mForm.getTrackedEntityInstance().getTrackedEntityInstance() != null &&
+                            mForm.getTrackedEntityInstance().getTrackedEntityInstance().equals(relationship.getTrackedEntityInstanceA())) {
+
+                        currentTeiRelationshipLabel.setText(relationshipType.getaIsToB());
+                        relative = DataValueController.getTrackedEntityInstance(relationship.getTrackedEntityInstanceB());
+
+                    } else if(mForm.getTrackedEntityInstance().getTrackedEntityInstance() != null &&
+                            mForm.getTrackedEntityInstance().getTrackedEntityInstance().equals(relationship.getTrackedEntityInstanceB())) {
+
+                        currentTeiRelationshipLabel.setText(relationshipType.getbIsToA());
+                        relative = DataValueController.getTrackedEntityInstance(relationship.getTrackedEntityInstanceA());
+                    } else {
+                        continue;
+                    }
+
+                    /* Creating a string to display as name of relative from attributes */
+                    String relativeString = "";
+                    if(relative != null && relative.getAttributes() != null) {List<Enrollment> enrollments = DataValueController.getEnrollments(relative);
+                        List<TrackedEntityAttribute> attributesToShow = new ArrayList<>();
+                        if(enrollments!=null && !enrollments.isEmpty()) {
+                            Program program = null;
+                            for (Enrollment e : enrollments) {
+                                if (e != null && e.getProgram() != null && e.getProgram().getProgramTrackedEntityAttributes() != null) {
+                                    program = e.getProgram();
+                                    break;
+                                }
+                            }
+                            List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = program.getProgramTrackedEntityAttributes();
+                            for (int i = 0; i < programTrackedEntityAttributes.size() && i < 2; i++) {
+                                attributesToShow.add(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute());
+                            }
+                            for (int i = 0; i < attributesToShow.size() && i < 2; i++) {
+                                TrackedEntityAttributeValue av = DataValueController.getTrackedEntityAttributeValue(attributesToShow.get(i).getId(), relative.getLocalId());
+                                if (av != null && av.getValue() != null) {
+                                    relativeString += av.getValue() + " ";
+                                }
+                            }
+                        } else {
+                            for(int i = 0; i<relative.getAttributes().size() && i<2; i++) {
+                                if(relative.getAttributes().get(i) != null && relative.getAttributes().get(i).getValue() != null) {
+                                    relativeString += relative.getAttributes().get(i).getValue() + " ";
+                                }
+                            }
+                        }
+                    }
+                    if(relativeString.isEmpty()) {
+                        relativeString = getString(R.string.unknown);
+                    }
+                    relativeLabel.setText(relativeString);
+
+                    ll.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if(relative != null) {
+                                ProgramOverviewFragment fragment = ProgramOverviewFragment.
+                                        newInstance(getArguments().getString(ORG_UNIT_ID),
+                                                getArguments().getString(PROGRAM_ID), relative.getLocalId());
+                                mNavigationHandler.switchFragment(fragment, CLASS_TAG, true);
+                            }
+                        }
+                    });
+                    relationshipsLinearLayout.addView(ll);
+                }
+            }
         }
     }
 
@@ -685,6 +783,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
                     Event event = (Event) view.getTag();
                     showDataEntryFragment(event, event.getProgramStageId());
                 }
+                break;
             }
 
             case R.id.complete: {
@@ -737,6 +836,11 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
             }
             case R.id.enrollmentstatus: {
                 Dhis2.showStatusDialog(getChildFragmentManager(), mForm.getEnrollment());
+                break;
+            }
+            case R.id.addrelationshipbutton: {
+                showAddRelationshipFragment();
+                break;
             }
         }
     }
@@ -750,6 +854,11 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         TrackedEntityInstanceProfileFragment fragment = TrackedEntityInstanceProfileFragment.newInstance(getArguments().
                 getLong(TRACKEDENTITYINSTANCE_ID), getArguments().getString(PROGRAM_ID));
         mNavigationHandler.switchFragment(fragment, TrackedEntityInstanceProfileFragment.TAG, true);
+    }
+
+    private void showAddRelationshipFragment() {
+        RegisterRelationshipDialogFragment fragment = RegisterRelationshipDialogFragment.newInstance(mForm.getTrackedEntityInstance().getLocalId());
+        fragment.show(getChildFragmentManager(), CLASS_TAG);
     }
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {

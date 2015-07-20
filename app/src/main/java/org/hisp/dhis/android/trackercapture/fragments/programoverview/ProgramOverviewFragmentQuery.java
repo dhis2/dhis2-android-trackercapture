@@ -51,12 +51,10 @@ class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm>
 
     public static final String CLASS_TAG = ProgramOverviewFragmentQuery.class.getSimpleName();
 
-    private final String mOrgUnitId;
     private final String mProgramId;
     private final long mTrackedEntityInstanceId;
 
-    public ProgramOverviewFragmentQuery(String orgUnitId, String programId, long trackedEntityInstanceId) {
-        mOrgUnitId = orgUnitId;
+    public ProgramOverviewFragmentQuery(String programId, long trackedEntityInstanceId) {
         mProgramId = programId;
         mTrackedEntityInstanceId = trackedEntityInstanceId;
     }

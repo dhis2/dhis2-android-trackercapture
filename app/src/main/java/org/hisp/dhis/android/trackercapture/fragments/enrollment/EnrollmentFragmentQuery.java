@@ -85,7 +85,7 @@ class EnrollmentFragmentQuery implements Query<EnrollmentFragmentForm>
         programTrackedEntityAttributes = mProgram.getProgramTrackedEntityAttributes();
 
         for(ProgramTrackedEntityAttribute ptea: programTrackedEntityAttributes) {
-            TrackedEntityAttributeValue value = DataValueController.getTrackedEntityAttributeValue(ptea.trackedEntityAttribute, currentTrackedEntityInstance.trackedEntityInstance);
+            TrackedEntityAttributeValue value = DataValueController.getTrackedEntityAttributeValue(ptea.trackedEntityAttribute, currentTrackedEntityInstance.getLocalId());
             if(value!=null)
             {
                 trackedEntityAttributeValues.add(value);

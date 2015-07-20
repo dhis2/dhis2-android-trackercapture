@@ -79,21 +79,23 @@ public class TrackedEntityInstanceItemRow implements TrackedEntityInstanceRow
         holder.secondItem.setText(mSecondItem);
         holder.thirdItem.setText(mThirdItem);
 
-        switch (mStatus) {
-            case OFFLINE: {
-                holder.statusImageView.setImageDrawable(mOfflineDrawable);
-                holder.statusTextView.setText(mOffline);
-                break;
-            }
-            case ERROR: {
-                holder.statusImageView.setImageDrawable(mErrorDrawable);
-                holder.statusTextView.setText(mError);
-                break;
-            }
-            case SENT: {
-                holder.statusImageView.setImageDrawable(mSentDrawable);
-                holder.statusTextView.setText(mSent);
-                break;
+        if(mStatus!=null) {
+            switch (mStatus) {
+                case OFFLINE: {
+                    holder.statusImageView.setImageDrawable(mOfflineDrawable);
+                    holder.statusTextView.setText(mOffline);
+                    break;
+                }
+                case ERROR: {
+                    holder.statusImageView.setImageDrawable(mErrorDrawable);
+                    holder.statusTextView.setText(mError);
+                    break;
+                }
+                case SENT: {
+                    holder.statusImageView.setImageDrawable(mSentDrawable);
+                    holder.statusTextView.setText(mSent);
+                    break;
+                }
             }
         }
 

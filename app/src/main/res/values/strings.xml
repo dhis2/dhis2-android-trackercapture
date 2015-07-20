@@ -6,7 +6,9 @@
     <string name="action_settings">Settings</string>
     <string name="register_new_event">Register new event</string>
     <string name="registered_events">Registered events</string>
+    <string name="register_relationship">Register relationship</string>
     <string name="new_event">New event</string>
+    <string name="is">is</string>
 
     <string name="report_date">Report date</string>
     <string name="event_sent">Sent</string>
@@ -25,6 +27,7 @@
         enrollment? This cannot be undone.</string>
 
     <string name="no_active_enrollment">No active enrollment</string>
+    <string name="select_relationship_type">Select relationship type</string>
 
     
 

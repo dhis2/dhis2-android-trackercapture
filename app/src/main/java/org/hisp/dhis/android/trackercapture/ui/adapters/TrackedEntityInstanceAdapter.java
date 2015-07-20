@@ -96,7 +96,6 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<TrackedEntityInstan
             constraint = constraint.toString().toLowerCase();
             FilterResults result = new FilterResults();
             List<TrackedEntityInstanceRow> filteredItems = new ArrayList<TrackedEntityInstanceRow>();
-
             if(constraint.toString().startsWith(Integer.toString(FILTER_SEARCH)))
             {
                 constraint = constraint.subSequence(1,constraint.length()); // remove the filter flag from search string
@@ -107,23 +106,25 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<TrackedEntityInstan
                         TrackedEntityInstanceRow row = allRows.get(i);
                         if (row.getItemRow() != null) {
 
-                            if (row.getItemRow().getmFirstItem() != null)
-                                if (row.getItemRow().getmFirstItem().toLowerCase().contains(constraint))
+                            if ( ( (TrackedEntityInstanceItemRow) row.getItemRow() ).getmFirstItem() != null)
+                                if ( ( (TrackedEntityInstanceItemRow) row.getItemRow() ).getmFirstItem().toLowerCase().contains(constraint))
                                     filteredItems.add(row);
-                                else if (row.getItemRow().getmSecondItem() != null)
-                                    if (row.getItemRow().getmSecondItem().toLowerCase().contains(constraint))
+                                else if ( ( (TrackedEntityInstanceItemRow) row.getItemRow() ).getmSecondItem() != null)
+                                    if ( ( (TrackedEntityInstanceItemRow) row.getItemRow() ).getmSecondItem().toLowerCase().contains(constraint))
                                         filteredItems.add(row);
-                                    else if (row.getItemRow().getmThirdItem() != null)
-                                        if (row.getItemRow().getmThirdItem().toLowerCase().contains(constraint))
+                                    else if ( ( (TrackedEntityInstanceItemRow) row.getItemRow() ).getmThirdItem() != null)
+                                        if ( ( (TrackedEntityInstanceItemRow) row.getItemRow() ).getmThirdItem().toLowerCase().contains(constraint))
                                             filteredItems.add(row);
                         } else {
                             if (row instanceof TrackedEntityInstanceColumnNamesRow)
                                 filteredItems.add(row);
                         }
                     }
-                    result.count = filteredItems.size();
-                    result.values = filteredItems;
+                } else {
+                    filteredItems.addAll(allRows);
                 }
+                result.count = filteredItems.size();
+                result.values = filteredItems;
             }
             else if (constraint.toString().startsWith(Integer.toString(FILTER_STATUS)))
             {
@@ -137,7 +138,7 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<TrackedEntityInstan
                     if(row instanceof TrackedEntityInstanceColumnNamesRow)
                         filteredItems.add(row);
                     else if(row instanceof TrackedEntityInstanceItemRow)
-                        status = row.getItemRow().getStatus();
+                        status =  ( (TrackedEntityInstanceItemRow) row.getItemRow() ).getStatus();
 
                     if(status != null)
                     {

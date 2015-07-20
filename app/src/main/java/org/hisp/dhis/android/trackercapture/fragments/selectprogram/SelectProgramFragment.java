@@ -223,7 +223,7 @@ public class SelectProgramFragment extends Fragment
         switch (item.getItemId()){
             case R.id.action_settings :{
                 mNavigationHandler.switchFragment(
-                        new SettingsFragment(), SettingsFragment.TAG, true);
+                        new SettingsFragment(), TAG, true);
                 break;
             }
 

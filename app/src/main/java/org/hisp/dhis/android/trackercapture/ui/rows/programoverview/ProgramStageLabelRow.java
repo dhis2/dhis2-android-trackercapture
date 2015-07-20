@@ -3,6 +3,7 @@ package org.hisp.dhis.android.trackercapture.ui.rows.programoverview;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import org.hisp.dhis.android.sdk.persistence.models.ProgramStage;
@@ -31,7 +32,7 @@ public class ProgramStageLabelRow implements ProgramStageRow {
     public View getView(LayoutInflater inflater, View convertView, ViewGroup container) {
         View view;
         TextView programStageName;
-        FloatingActionButton newEventButton = null;
+        Button newEventButton = null;
 
         if (convertView != null && convertView.getTag() instanceof ProgramStageViewHolder) {
             view = convertView;
@@ -39,11 +40,10 @@ public class ProgramStageLabelRow implements ProgramStageRow {
         } else {
             View root = inflater.inflate(org.hisp.dhis.android.sdk.R.layout.programstagelayout, container, false);
             programStageName = (TextView) root.findViewById(org.hisp.dhis.android.sdk.R.id.programstagename);
-            newEventButton = (FloatingActionButton) root.findViewById(org.hisp.dhis.android.sdk.R.id.neweventbutton);
+            newEventButton = (Button) root.findViewById(org.hisp.dhis.android.sdk.R.id.neweventbutton);
             newEventButton.setVisibility(View.INVISIBLE);
             newEventButton.setEnabled(false);
             newEventButton.setTag(programStage);
-
 
             holder = new ProgramStageViewHolder(programStageName, newEventButton);
 
@@ -89,10 +89,10 @@ public class ProgramStageLabelRow implements ProgramStageRow {
 
     private static class ProgramStageViewHolder {
         public final TextView programStageName;
-        public final FloatingActionButton newEventButton;
+        public final Button newEventButton;
 
         private ProgramStageViewHolder(TextView programStageName,
-                                       FloatingActionButton newEventButton) {
+                                       Button newEventButton) {
             this.programStageName = programStageName;
             this.newEventButton = newEventButton;
         }

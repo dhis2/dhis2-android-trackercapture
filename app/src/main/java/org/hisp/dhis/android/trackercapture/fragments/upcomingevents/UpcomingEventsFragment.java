@@ -304,7 +304,8 @@ public class UpcomingEventsFragment extends Fragment implements View.OnClickList
                 ProgramDialogFragment fragment = ProgramDialogFragment
                         .newInstance(this, mState.getOrgUnitId(),
                                 Program.MULTIPLE_EVENTS_WITH_REGISTRATION,
-                                Program.SINGLE_EVENT_WITH_REGISTRATION);
+                                Program.SINGLE_EVENT_WITH_REGISTRATION,
+                                Program.WITH_REGISTRATION);
                 fragment.show(getChildFragmentManager());
                 break;
             }

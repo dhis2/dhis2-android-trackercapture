@@ -62,29 +62,27 @@ public class ProgramDialogFragment extends AutoCompleteDialogFragment
     public static final int ID = 921345;
     private static final int LOADER_ID = 1;
 
-    public static ProgramDialogFragment newInstance(OnOptionSelectedListener listener,
-                                                    String orgUnitId, String ... programKinds) {
+    public static ProgramDialogFragment newInstance( OnOptionSelectedListener listener,
+                                                    String orgUnitId, String... programKinds ) {
         ProgramDialogFragment fragment = new ProgramDialogFragment();
         Bundle args = new Bundle();
-        args.putString(OrganisationUnit$Table.ID, orgUnitId);
-        args.putStringArray(Program$Table.KIND, programKinds);
-        fragment.setArguments(args);
-        fragment.setOnOptionSetListener(listener);
+        args.putString( OrganisationUnit$Table.ID, orgUnitId );
+        args.putStringArray( Program$Table.KIND, programKinds );
+        fragment.setArguments( args );
+        fragment.setOnOptionSetListener( listener );
         return fragment;
     }
 
-
-
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+        super.onViewCreated( view, savedInstanceState );
         setDialogLabel("Programs");
         setDialogId(ID);
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+        super.onActivityCreated( savedInstanceState );
         getLoaderManager().initLoader(LOADER_ID, getArguments(), this);
     }
 

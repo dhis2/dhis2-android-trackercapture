@@ -144,6 +144,15 @@
         android:hint="@string/search"
         app:font="@string/light_font_name"/>
 
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="28dp"
+        android:layout_gravity="center_horizontal"
+        android:indeterminate="true" />
+
     <ListView
         android:id="@+id/simple_listview"
         android:layout_width="match_parent"

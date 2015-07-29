@@ -13,6 +13,7 @@ import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.trackercapture.R;
+import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceItemRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.EventRowType;
 
@@ -21,17 +22,13 @@ import static org.hisp.dhis.android.sdk.utils.Preconditions.isNull;
 /**
  * Created by erling on 5/11/15.
  */
-public class SearchRelativeTrackedEntityInstanceItemRow implements TrackedEntityInstanceRow
+public class SearchRelativeTrackedEntityInstanceItemRow extends TrackedEntityInstanceItemRow
 {
-    private TrackedEntityInstance mTrackedEntityInstance;
-    private String mFirstItem;
-    private String mSecondItem;
-    private String mThirdItem;
     private String mFourthItem;
 
     public SearchRelativeTrackedEntityInstanceItemRow(Context context)
     {
-        isNull(context, "Context must not be null");
+        super(context);
     }
 
     @Override
@@ -62,55 +59,8 @@ public class SearchRelativeTrackedEntityInstanceItemRow implements TrackedEntity
     }
 
     @Override
-    public int getViewType() {
-        return EventRowType.EVENT_ITEM_ROW.ordinal();
-    }
-
-    @Override
-    public long getId() {
-        if (mTrackedEntityInstance != null) {
-            return mTrackedEntityInstance.getLocalId();
-        } else {
-            return 0;
-        }
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
-    @Override
     public SearchRelativeTrackedEntityInstanceItemRow getItemRow() {
         return this;
-    }
-
-    public void setTrackedEntityInstance(TrackedEntityInstance trackedEntityInstance) {
-        mTrackedEntityInstance = trackedEntityInstance;
-    }
-
-    public void setSecondItem(String secondItem) {
-        this.mSecondItem = secondItem;
-    }
-
-    public void setThirdItem(String thirdItem) {
-        this.mThirdItem = thirdItem;
-    }
-
-    public void setFirstItem(String firstItem) {
-        this.mFirstItem = firstItem;
-    }
-
-    public String getmSecondItem() {
-        return mSecondItem;
-    }
-
-    public String getmThirdItem() {
-        return mThirdItem;
-    }
-
-    public String getmFirstItem() {
-        return mFirstItem;
     }
 
     public String getmFourthItem() {

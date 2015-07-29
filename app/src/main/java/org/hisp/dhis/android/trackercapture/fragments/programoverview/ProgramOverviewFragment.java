@@ -97,6 +97,7 @@ import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.ProgramStage
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 /**
@@ -561,13 +562,23 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     public void setRelationships(LayoutInflater inflater) {
         relationshipsLinearLayout.removeAllViews();
         if(mForm.getTrackedEntityInstance() != null && mForm.getTrackedEntityInstance().getRelationships()!=null) {
-            for(Relationship relationship: mForm.getTrackedEntityInstance().getRelationships()) {
+            ListIterator<Relationship> it = mForm.getTrackedEntityInstance().getRelationships().listIterator();
+            while( it.hasNext() ) {
+                final Relationship relationship = it.next();
                 if(relationship==null) {
                     continue;
                 }
                 LinearLayout ll = (LinearLayout) inflater.inflate(R.layout.listview_row_relationship, null);
                 FontTextView currentTeiRelationshipLabel = (FontTextView) ll.findViewById(R.id.current_tei_relationship_label);
                 FontTextView relativeLabel = (FontTextView) ll.findViewById(R.id.relative_relationship_label);
+                Button deleteButton = (Button) ll.findViewById(R.id.delete_relationship);
+                deleteButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showConfirmDeleteRelationshipDialog(relationship,
+                                mForm.getTrackedEntityInstance(), getActivity());
+                    }
+                });
                 RelationshipType relationshipType = MetaDataController.getRelationshipType(relationship.getRelationship());
 
                 if(relationshipType!=null) {
@@ -636,9 +647,33 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
                         }
                     });
                     relationshipsLinearLayout.addView(ll);
+                    if( it.hasNext() ) {
+                        View view = new View(getActivity());
+                        view.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
+                        view.setBackgroundColor(getResources().getColor(R.color.light_grey));
+                        relationshipsLinearLayout.addView(view);
+                    }
                 }
             }
         }
+    }
+
+    public static void showConfirmDeleteRelationshipDialog(final Relationship relationship,
+                                                           final TrackedEntityInstance trackedEntityInstance,
+                                                           Activity activity) {
+        if( activity == null ) return;
+        Dhis2.showConfirmDialog(activity, activity.getString(R.string.confirm),
+                activity.getString(R.string.confirm_delete_relationship),
+                activity.getString(R.string.delete), activity.getString(R.string.cancel),
+                new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                relationship.delete();
+                trackedEntityInstance.setFromServer(false);
+                trackedEntityInstance.save();
+                dialog.dismiss();
+            }
+        });
     }
 
     @Subscribe

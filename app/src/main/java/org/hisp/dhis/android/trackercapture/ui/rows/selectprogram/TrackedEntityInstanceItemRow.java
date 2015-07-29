@@ -22,10 +22,10 @@ import static org.hisp.dhis.android.sdk.utils.Preconditions.isNull;
  */
 public class TrackedEntityInstanceItemRow implements TrackedEntityInstanceRow
 {
-    private TrackedEntityInstance mTrackedEntityInstance;
-    private String mFirstItem;
-    private String mSecondItem;
-    private String mThirdItem;
+    protected TrackedEntityInstance mTrackedEntityInstance;
+    protected String mFirstItem;
+    protected String mSecondItem;
+    protected String mThirdItem;
     private OnRowClick.ITEM_STATUS mStatus;
 
     private Drawable mOfflineDrawable;
@@ -114,6 +114,10 @@ public class TrackedEntityInstanceItemRow implements TrackedEntityInstanceRow
         } else {
             return 0;
         }
+    }
+
+    public TrackedEntityInstance getTrackedEntityInstance() {
+        return mTrackedEntityInstance;
     }
 
     @Override

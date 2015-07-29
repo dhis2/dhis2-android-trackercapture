@@ -9,6 +9,8 @@ import android.widget.Filter;
 import android.widget.Filterable;
 
 import org.hisp.dhis.android.sdk.events.OnRowClick;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.AbsAdapter;
 import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceColumnNamesRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceItemRow;
@@ -23,12 +25,15 @@ import java.util.List;
  */
 public class TrackedEntityInstanceAdapter extends AbsAdapter<TrackedEntityInstanceRow> implements Filterable {
 
+    public static final String TAG = TrackedEntityInstanceAdapter.class.getSimpleName();
+
     private List<TrackedEntityInstanceRow> allRows;
     private List<TrackedEntityInstanceRow> filteredRows;
-    private TrackedEntityInstanceRowFilter filter;
+    private Filter filter;
     public static final int FILTER_SEARCH = 1;
     public static final int FILTER_STATUS = 2;
     public static final int FILTER_DATE = 3;
+    public static final int FILTER_ALL_ATTRIBUTES = 4;
 
     public TrackedEntityInstanceAdapter(LayoutInflater inflater) {
         super(inflater);
@@ -89,8 +94,6 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<TrackedEntityInstan
 
     private class TrackedEntityInstanceRowFilter extends Filter
     {
-
-
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             constraint = constraint.toString().toLowerCase();
@@ -121,7 +124,9 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<TrackedEntityInstan
                         }
                     }
                 } else {
-                    filteredItems.addAll(allRows);
+                    synchronized ( this ) {
+                        filteredItems.addAll(allRows);
+                    }
                 }
                 result.count = filteredItems.size();
                 result.values = filteredItems;
@@ -155,12 +160,58 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<TrackedEntityInstan
                 filteredItems.addAll(offlineRows);
                 filteredItems.addAll(errorRows);
                 filteredItems.addAll(sentRows);
-
-
             }
             else if (constraint.toString().startsWith(Integer.toString(FILTER_DATE)))
             {
 
+            }
+            else if(constraint.toString().startsWith(Integer.toString(FILTER_ALL_ATTRIBUTES)))
+            {
+                constraint = constraint.subSequence(1,constraint.length()); // remove the filter flag from search string
+
+                if (constraint != null && constraint.toString().length() > 0) {
+
+                    String prefixString = constraint.toString().toLowerCase();
+
+                    ArrayList<TrackedEntityInstanceRow> values;
+                    synchronized (this) {
+                        values = new ArrayList<>(allRows);
+                    }
+
+                    final int count = values.size();
+
+                    for (int i = 0; i < count; i++) {
+                        if( values.get(i) instanceof TrackedEntityInstanceItemRow ) {
+                            final TrackedEntityInstance trackedEntityInstanceValue = ((TrackedEntityInstanceItemRow) values.get(i)).getTrackedEntityInstance();
+                            for (TrackedEntityAttributeValue attrValue : trackedEntityInstanceValue.getAttributes()) {
+                                final String value = attrValue.getValue();
+                                final String valueText = value.toLowerCase();
+
+                                // First match against the whole, non-splitted value
+                                if (valueText.startsWith(prefixString)) {
+                                    filteredItems.add(values.get(i));
+                                } else {
+                                    final String[] words = valueText.split(" ");
+                                    final int wordCount = words.length;
+
+                                    // Start at index 0, in case valueText starts with space(s)
+                                    for (int k = 0; k < wordCount; k++) {
+                                        if (words[k].startsWith(prefixString)) {
+                                            filteredItems.add(values.get(i));
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    synchronized(this) {
+                        filteredItems.addAll(allRows);
+                    }
+                }
+                result.count = filteredItems.size();
+                result.values = filteredItems;
             }
             else
             {

@@ -46,6 +46,7 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -91,6 +92,7 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
     private Spinner mSpinner;
     private RelationshipTypeAdapter mSpinnerAdapter;
     private int mDialogId;
+    private ProgressBar mProgressBar;
 
     private static final String EXTRA_TRACKEDENTITYINSTANCEID = "extra:trackedEntityInstanceId";
     private static final String EXTRA_ARGUMENTS = "extra:Arguments";
@@ -126,6 +128,7 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
                 .findViewById(R.id.simple_listview);
         mRelationshipTypeButton = (CardTextViewButton) view.findViewById(org.hisp.dhis.android.trackercapture.R.id.relationshiptypebutton);
         mRelationshipTypeButton.setOnClickListener(this);
+        mProgressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
 
         ImageView registerDialogButton = (ImageView) view
                 .findViewById(R.id.load_dialog_button);
@@ -146,7 +149,7 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
 
         mFilter.addTextChangedListener(new AbsTextWatcher() {
             @Override public void afterTextChanged(Editable s) {
-                mAdapter.getFilter().filter(TrackedEntityInstanceAdapter.FILTER_SEARCH + s.toString());
+                mAdapter.getFilter().filter(TrackedEntityInstanceAdapter.FILTER_ALL_ATTRIBUTES + s.toString());
             }
         });
 
@@ -196,6 +199,7 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
         Log.d(TAG, "load finished");
         if (loader.getId() == LOADER_ID && isAdded())
         {
+            mProgressBar.setVisibility(View.GONE);
             mListView.setVisibility(View.VISIBLE);
 
             mForm = data;
@@ -236,7 +240,8 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
 
     @Override
     public void onLoaderReset(Loader<RegisterRelationshipDialogFragmentForm> loader) {
-
+        mAdapter.swapData(null);
+        mProgressBar.setVisibility(View.VISIBLE);
     }
 
     /* This method must be called only after onViewCreated() */

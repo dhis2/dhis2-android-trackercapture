@@ -48,7 +48,11 @@ public class RegisterRelationshipDialogFragmentQuery implements Query<RegisterRe
         List<TrackedEntityInstanceRow> teiRows = new ArrayList<>();
 
         for (TrackedEntityInstance tei : trackedEntityInstances) {
-            if(trackedEntityInstance==null) continue;
+            if(trackedEntityInstance==null ||
+                    tei.getLocalId() == trackedEntityInstanceId) {
+                //avoid adding the current TEI to the list of TEIs to form relationship with
+                continue;
+            }
             teiRows.add(createTrackedEntityInstanceItem(context,
                     tei));
         }

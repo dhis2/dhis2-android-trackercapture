@@ -51,6 +51,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.raizlabs.android.dbflow.sql.builder.Condition;
+import com.raizlabs.android.dbflow.sql.language.Select;
 import com.raizlabs.android.dbflow.structure.Model;
 
 import org.hisp.dhis.android.sdk.R;
@@ -62,6 +64,7 @@ import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.Relationship;
+import org.hisp.dhis.android.sdk.persistence.models.Relationship$Table;
 import org.hisp.dhis.android.sdk.persistence.models.RelationshipType;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
@@ -304,7 +307,7 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
         }
     }
 
-    public boolean registerRelationship(TrackedEntityInstance relative) {
+    public int registerRelationship(TrackedEntityInstance relative) {
         Relationship relationship = new Relationship();
         if(mSpinnerAdapter != null && relative != null) {
             if(mSpinnerAdapter.getRelationshipType()!=null) {
@@ -316,13 +319,26 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
                     relationship.setTrackedEntityInstanceB(mForm.getTrackedEntityInstance().getTrackedEntityInstance());
                     relationship.setTrackedEntityInstanceA(relative.getTrackedEntityInstance());
                 }
-                relationship.save();
-                mForm.getTrackedEntityInstance().setFromServer(false);
-                mForm.getTrackedEntityInstance().update();
-                return true;
+
+                //now we check if this relationship already exists
+                Relationship existingRelationship = new Select().from(Relationship.class).
+                        where(Condition.column(Relationship$Table.TRACKEDENTITYINSTANCEA).
+                                is(relationship.getTrackedEntityInstanceA())).
+                        and(Condition.column(Relationship$Table.TRACKEDENTITYINSTANCEB).
+                                is(relationship.getTrackedEntityInstanceB())).
+                        and(Condition.column(Relationship$Table.RELATIONSHIP).
+                                is(relationship.getRelationship())).querySingle();
+                if( existingRelationship == null ) {
+                    relationship.save();
+                    mForm.getTrackedEntityInstance().setFromServer(false);
+                    mForm.getTrackedEntityInstance().update();
+                    return 1;
+                } else {
+                    return 0;
+                }
             }
         }
-        return false;
+        return -1;
     }
 
     public void showConfirmRelationshipDialog(final int position) {
@@ -331,11 +347,18 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
                 getString(R.string.cancel), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
                         TrackedEntityInstance relative = DataValueController.getTrackedEntityInstance(mAdapter.getItemId(position));
-                        if(registerRelationship(relative)){
-                            RegisterRelationshipDialogFragment.this.dismiss();
-                        } else {
-                            Toast.makeText(getActivity(), getString(R.string.please_select_relationshiptype), Toast.LENGTH_SHORT).show();
+                        switch(registerRelationship(relative)){
+                            case -1:
+                                Toast.makeText(getActivity(), getString(R.string.please_select_relationshiptype), Toast.LENGTH_SHORT).show();
+                                break;
+                            case 0:
+                                Toast.makeText(getActivity(), getString(R.string.relationship_exists), Toast.LENGTH_SHORT).show();
+                                break;
+                            case 1:
+                                RegisterRelationshipDialogFragment.this.dismiss();
+                                break;
                         }
                     }
                 });

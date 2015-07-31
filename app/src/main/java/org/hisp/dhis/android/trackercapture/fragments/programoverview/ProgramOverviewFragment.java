@@ -118,7 +118,6 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     private static final String ORG_UNIT_ID = "extra:orgUnitId";
     private static final String PROGRAM_ID = "extra:ProgramId";
     private static final String TRACKEDENTITYINSTANCE_ID = "extra:TrackedEntityInstanceId";
-    private String errorMessage;
 
     private ListView listView;
     private ProgressBar mProgressBar;
@@ -288,7 +287,6 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         attribute2Value = (TextView) header.findViewById(R.id.headerItem2value);
 
         Bundle fragmentArguments = getArguments();
-        Log.d(CLASS_TAG, "program: " + fragmentArguments.getString(PROGRAM_ID));
 
         attachSpinner();
         mSpinnerAdapter.swapData(MetaDataController.getProgramsForOrganisationUnit
@@ -416,10 +414,11 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     }
 
     public void onProgramSelected(String programId, String programName) {
-
         mState.setProgram(programId, programName);
+        Bundle args = getArguments();
+        args.putString(PROGRAM_ID, programId);
         clearViews();
-        getLoaderManager().restartLoader(LOADER_ID, getArguments(), this);
+        getLoaderManager().restartLoader(LOADER_ID, args, this);
     }
 
     @Override

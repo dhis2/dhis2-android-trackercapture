@@ -66,17 +66,10 @@ import org.hisp.dhis.android.sdk.fragments.ProgressDialogFragment;
 import org.hisp.dhis.android.sdk.fragments.dataentry.RowValueChangedEvent;
 import org.hisp.dhis.android.sdk.fragments.dataentry.ValidationErrorDialog;
 import org.hisp.dhis.android.sdk.network.http.ApiRequestCallback;
-import org.hisp.dhis.android.sdk.network.http.Response;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
-import org.hisp.dhis.android.sdk.persistence.models.DataValue;
-import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
-import org.hisp.dhis.android.sdk.persistence.models.ProgramRuleAction;
-import org.hisp.dhis.android.sdk.persistence.models.ProgramStageDataElement;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
-import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
-import org.hisp.dhis.android.sdk.utils.APIException;
-import org.hisp.dhis.android.sdk.utils.services.ProgramRuleService;
+import org.hisp.dhis.android.sdk.utils.support.DateUtils;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.DataValueAdapter;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.SectionAdapter;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
@@ -100,7 +93,6 @@ public class EnrollmentFragment extends Fragment
     public static final String TAG = EnrollmentFragment.class.getSimpleName();
 
     private static final String EMPTY_FIELD = "";
-    private static final String DATE_FORMAT = "YYYY-MM-dd";
 
     private static final int LOADER_ID = 1;
 
@@ -110,17 +102,11 @@ public class EnrollmentFragment extends Fragment
     private static final String ORG_UNIT_ID = "extra:orgUnitId";
     private static final String PROGRAM_ID = "extra:ProgramId";
     private static final String TRACKEDENTITYINSTANCE_ID = "extra:TrackedEntityInstanceId";
-    private static final String ENROLLMENT_ID = "extra:EnrollmentId";
 
 
 
     private ListView mListView;
     private ProgressBar mProgressBar;
-
-    private View mSpinnerContainer;
-    private Spinner mSpinner;
-
-    private SectionAdapter mSpinnerAdapter;
     private DataValueAdapter mListViewAdapter;
 
     private INavigationHandler mNavigationHandler;
@@ -130,10 +116,6 @@ public class EnrollmentFragment extends Fragment
     private View mIncidentDatePicker;
 
     private boolean hasDataChanged = false;
-    private boolean saving = false;
-    private ProgressDialogFragment progressDialogFragment;
-
-    private boolean refreshing = false;
 
     public static EnrollmentFragment newInstance(String unitId, String programId) {
         EnrollmentFragment fragment = new EnrollmentFragment();
@@ -270,7 +252,6 @@ public class EnrollmentFragment extends Fragment
 
     @Override
     public void onDestroyView() {
-        detachSpinner();
         super.onDestroyView();
     }
 
@@ -281,7 +262,7 @@ public class EnrollmentFragment extends Fragment
             return true;
         } else if (menuItem.getItemId() == R.id.action_new_event) {
             if(validate()) {
-                submitEvent();
+                save();
             }
         }
 
@@ -323,8 +304,7 @@ public class EnrollmentFragment extends Fragment
 
             return new DbLoader<>(
                     getActivity().getBaseContext(), modelsToTrack, new EnrollmentFragmentQuery(
-                    orgUnitId,programId, trackedEntityInstance
-            )
+                    orgUnitId,programId, trackedEntityInstance )
             );
         }
         return null;
@@ -337,10 +317,7 @@ public class EnrollmentFragment extends Fragment
             mProgressBar.setVisibility(View.GONE);
             mListView.setVisibility(View.VISIBLE);
 
-            System.out.println("TIME: " + (System.currentTimeMillis() - timerStart));
             mForm = data;
-            String programId = getArguments().getString(PROGRAM_ID);
-            String orgUnitId = getArguments().getString(ORG_UNIT_ID);
 
             if (data.getProgram() != null) {
                 attachEnrollmentDatePicker();
@@ -351,8 +328,6 @@ public class EnrollmentFragment extends Fragment
             {
                 mListViewAdapter.swapData(data.getDataEntryRows());
             }
-
-
         }
     }
 
@@ -360,9 +335,6 @@ public class EnrollmentFragment extends Fragment
     @Override
     public void onLoaderReset(Loader<EnrollmentFragmentForm> loader) {
         if (loader.getId() == LOADER_ID) {
-            if (mSpinnerAdapter != null) {
-                mSpinnerAdapter.swapData(null);
-            }
             if (mListViewAdapter != null) {
                 mListViewAdapter.swapData(null);
             }
@@ -396,7 +368,7 @@ public class EnrollmentFragment extends Fragment
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             if(validate()) {
-                                submitEvent();
+                                save();
                                 getFragmentManager().popBackStack();
                             }
                         }
@@ -415,54 +387,6 @@ public class EnrollmentFragment extends Fragment
         return hasDataChanged;
     }
 
-    private void showLoadingDialog() {
-        Activity activity = getActivity();
-        if(activity==null) return;
-        activity.runOnUiThread(new Thread() {
-            public void run() {
-                if(progressDialogFragment==null) {
-                    progressDialogFragment = ProgressDialogFragment.newInstance(R.string.please_wait);
-                }
-                if(!progressDialogFragment.isAdded())
-                    progressDialogFragment.show(getChildFragmentManager(), ProgressDialogFragment.TAG);
-            }
-        });
-    }
-
-    private void hideLoadingDialog() {
-        if(progressDialogFragment!=null) {
-            progressDialogFragment.dismiss();
-        }
-    }
-
-
-
-    private void refreshListView() {
-        Activity activity = getActivity();
-        if (activity == null) {
-            refreshing = false;
-            return;
-        }
-        activity.runOnUiThread(new Thread() {
-            public void run() {
-                int start = mListView.getFirstVisiblePosition();
-                int end = mListView.getLastVisiblePosition();
-                for (int pos = 0; pos <= end - start; pos++) {
-                    View view = mListView.getChildAt(pos);
-                    if (view != null) {
-                        int adapterPosition = view.getId();
-                        if (adapterPosition < 0 || adapterPosition >= mListViewAdapter.getCount())
-                            continue;
-                        if (!view.hasFocus()) {
-                            mListViewAdapter.getView(adapterPosition, view, mListView);
-                        }
-                    }
-                }
-                refreshing = false;
-            }
-        });
-    }
-
     public void flagDataChanged(boolean changed) {
         if(hasDataChanged!=changed) {
             hasDataChanged = changed;
@@ -477,7 +401,6 @@ public class EnrollmentFragment extends Fragment
         if (mForm == null ) {
             return;
         }
-
     }
 
     private ActionBar getActionBar() {
@@ -488,15 +411,6 @@ public class EnrollmentFragment extends Fragment
             throw new IllegalArgumentException("Fragment should be attached to ActionBarActivity");
         }
     }
-
-    private Toolbar getActionBarToolbar() {
-        if (isAdded() && getActivity() != null ) {
-            return (Toolbar) getActivity().findViewById(R.id.toolbar);
-        } else {
-            throw new IllegalArgumentException("Fragment should be attached to MainActivity");
-        }
-    }
-
 
     private void attachEnrollmentDatePicker() {
         if (mForm != null && isAdded()) {
@@ -513,7 +427,7 @@ public class EnrollmentFragment extends Fragment
                 @Override public void onDateSet(DatePicker view, int year,
                                                 int monthOfYear, int dayOfMonth) {
                     LocalDate date = new LocalDate(year, monthOfYear + 1, dayOfMonth);
-                    String newValue = date.toString(DATE_FORMAT);
+                    String newValue = date.toString(DateUtils.DATE_PATTERN);
                     datePickerEditText.setText(newValue);
                     mForm.getEnrollment().setDateOfEnrollment(newValue);
                     onRowValueChanged(null);
@@ -542,7 +456,7 @@ public class EnrollmentFragment extends Fragment
             label.setText(reportDateDescription);
             if (mForm.getEnrollment() != null && mForm.getEnrollment().getDateOfEnrollment() != null) {
                 DateTime date = DateTime.parse(mForm.getEnrollment().getDateOfEnrollment());
-                String newValue = date.toString(DATE_FORMAT);
+                String newValue = date.toString(DateUtils.DATE_PATTERN);
                 datePickerEditText.setText(newValue);
             }
 
@@ -564,7 +478,7 @@ public class EnrollmentFragment extends Fragment
                 @Override public void onDateSet(DatePicker view, int year,
                                                 int monthOfYear, int dayOfMonth) {
                     LocalDate date = new LocalDate(year, monthOfYear + 1, dayOfMonth);
-                    String newValue = date.toString(DATE_FORMAT);
+                    String newValue = date.toString(DateUtils.DATE_PATTERN);
                     datePickerEditText.setText(newValue);
                     mForm.getEnrollment().setDateOfEnrollment(newValue);
                     onRowValueChanged(null);
@@ -593,70 +507,10 @@ public class EnrollmentFragment extends Fragment
             label.setText(reportDateDescription);
             if (mForm.getEnrollment() != null && mForm.getEnrollment().getDateOfIncident() != null) {
                 DateTime date = DateTime.parse(mForm.getEnrollment().getDateOfIncident());
-                String newValue = date.toString(DATE_FORMAT);
+                String newValue = date.toString(DateUtils.DATE_PATTERN);
                 datePickerEditText.setText(newValue);
             }
         }
-    }
-
-
-    private void attachSpinner() {
-        if (!isSpinnerAttached()) {
-            Toolbar toolbar = getActionBarToolbar();
-
-            LayoutInflater inflater = LayoutInflater.from(getActivity());
-            mSpinnerContainer = inflater.inflate(
-                    R.layout.toolbar_spinner, toolbar, false);
-            ImageView previousSectionButton = (ImageView) mSpinnerContainer
-                    .findViewById(R.id.previous_section);
-            ImageView nextSectionButton = (ImageView) mSpinnerContainer
-                    .findViewById(R.id.next_section);
-            ActionBar.LayoutParams lp = new ActionBar.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-            toolbar.addView(mSpinnerContainer, lp);
-
-            mSpinnerAdapter = new SectionAdapter(inflater);
-
-            mSpinner = (Spinner) mSpinnerContainer.findViewById(R.id.toolbar_spinner);
-            mSpinner.setAdapter(mSpinnerAdapter);
-            mSpinner.setOnItemSelectedListener(this);
-
-            previousSectionButton.setOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(View v) {
-                    int currentPosition = mSpinner.getSelectedItemPosition();
-                    if (!(currentPosition - 1 < 0)) {
-                        mSpinner.setSelection(currentPosition - 1);
-                    }
-                }
-            });
-
-            nextSectionButton.setOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(View v) {
-                    int currentPosition = mSpinner.getSelectedItemPosition();
-                    if (!(currentPosition + 1 >= mSpinnerAdapter.getCount())) {
-                        mSpinner.setSelection(currentPosition + 1);
-                    }
-                }
-            });
-        }
-    }
-
-    private void detachSpinner() {
-        if (isSpinnerAttached()) {
-            if (mSpinnerContainer != null) {
-                ((ViewGroup) mSpinnerContainer.getParent()).removeView(mSpinnerContainer);
-                mSpinnerContainer = null;
-                mSpinner = null;
-                if (mSpinnerAdapter != null) {
-                    mSpinnerAdapter.swapData(null);
-                    mSpinnerAdapter = null;
-                }
-            }
-        }
-    }
-
-    private boolean isSpinnerAttached() {
-        return mSpinnerContainer != null;
     }
 
     public boolean validate() {
@@ -672,17 +526,15 @@ public class EnrollmentFragment extends Fragment
     }
 
     /**
-     * returns true if the event was successfully saved
+     * returns true if the enrollment was successfully saved
      * @return
      */
-    public void submitEvent() {
-        if(saving) return;
+    public void save() {
         flagDataChanged(false);
         if(validate())
         {
             new Thread() {
                 public void run() {
-                    saving = true;
                     if (mForm != null && isAdded()) {
                         final Context context = getActivity().getBaseContext();
 
@@ -696,12 +548,6 @@ public class EnrollmentFragment extends Fragment
 
                         mForm.getEnrollment().setLocalTrackedEntityInstanceId(mForm.getTrackedEntityInstance().getLocalId());
 
-                        //mForm.getEnrollment().fromServer = true;
-                        //mForm.getEnrollment().save(true);
-
-                    /*workaround for dbflow concurrency bug. This ensures that datavalues are saved
-                    before Dhis2 sends data to server to avoid some data values not being sent in race
-                    conditions*/
                         mForm.getEnrollment().setFromServer(false);
                         mForm.getEnrollment().save();
 
@@ -727,13 +573,11 @@ public class EnrollmentFragment extends Fragment
                         Timer timer = new Timer();
                         timer.schedule(timerTask, 5000);
                     }
-                    saving = false;
                 }
 
             }.start();
         }
     }
-
 
     private ArrayList<String> isEnrollmentValid() {
         ArrayList<String> errors = new ArrayList<>();
@@ -759,8 +603,6 @@ public class EnrollmentFragment extends Fragment
                 errors.add(programTrackedEntityAttribute.getTrackedEntityAttribute().getName());
             }
         }
-
         return errors;
     }
-
 }

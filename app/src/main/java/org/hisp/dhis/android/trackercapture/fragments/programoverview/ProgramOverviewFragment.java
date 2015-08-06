@@ -39,7 +39,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -86,7 +85,7 @@ import org.hisp.dhis.android.trackercapture.fragments.enrollment.EnrollmentFragm
 import org.hisp.dhis.android.trackercapture.fragments.enrollmentdate.EnrollmentDateFragment;
 import org.hisp.dhis.android.trackercapture.fragments.programoverview.registerRelationshipDialogFragment.RegisterRelationshipDialogFragment;
 import org.hisp.dhis.android.trackercapture.fragments.trackedentityinstanceprofile.TrackedEntityInstanceProfileFragment;
-import org.hisp.dhis.android.trackercapture.fragments.upcomingevents.ProgramDialogFragment;
+import org.hisp.dhis.android.sdk.utils.ui.dialogs.ProgramDialogFragment;
 import org.hisp.dhis.android.trackercapture.ui.adapters.ProgramAdapter;
 import org.hisp.dhis.android.trackercapture.ui.adapters.ProgramStageAdapter;
 import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.OnProgramStageEventClick;

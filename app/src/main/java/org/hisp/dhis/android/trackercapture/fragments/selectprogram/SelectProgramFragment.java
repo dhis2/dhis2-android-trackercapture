@@ -65,6 +65,7 @@ import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
+import org.hisp.dhis.android.sdk.utils.ui.dialogs.OrgUnitDialogFragment;
 import org.hisp.dhis.android.sdk.utils.ui.views.CardTextViewButton;
 import org.hisp.dhis.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton;
@@ -74,8 +75,7 @@ import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.trackercapture.fragments.programoverview.ProgramOverviewFragment;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.QueryTrackedEntityInstancesDialogFragment;
 import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceRow;
-import org.hisp.dhis.android.trackercapture.fragments.upcomingevents.OrgUnitDialogFragment;
-import org.hisp.dhis.android.trackercapture.fragments.upcomingevents.ProgramDialogFragment;
+import org.hisp.dhis.android.sdk.utils.ui.dialogs.ProgramDialogFragment;
 import org.hisp.dhis.android.trackercapture.fragments.upcomingevents.UpcomingEventsFragment;
 import org.hisp.dhis.android.trackercapture.ui.adapters.TrackedEntityInstanceAdapter;
 

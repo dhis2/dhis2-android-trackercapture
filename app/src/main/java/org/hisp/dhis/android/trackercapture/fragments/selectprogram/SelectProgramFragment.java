@@ -404,8 +404,9 @@ public class SelectProgramFragment extends Fragment
             case R.id.select_program: {
                 ProgramDialogFragment fragment = ProgramDialogFragment
                         .newInstance(this, mState.getOrgUnitId(),
-                                Program.MULTIPLE_EVENTS_WITH_REGISTRATION,
-                                Program.SINGLE_EVENT_WITH_REGISTRATION);
+                                Program.ProgramType.MULTIPLE_EVENTS_WITH_REGISTRATION,
+                                Program.ProgramType.SINGLE_EVENT_WITH_REGISTRATION,
+                                Program.ProgramType.WITH_REGISTRATION);
                 fragment.show(getChildFragmentManager());
                 break;
             }

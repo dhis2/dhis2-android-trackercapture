@@ -62,14 +62,20 @@ public class ProgramDialogFragment extends AutoCompleteDialogFragment
     public static final int ID = 921345;
     private static final int LOADER_ID = 1;
 
-    public static ProgramDialogFragment newInstance(OnOptionSelectedListener listener,
-                                                    String orgUnitId, String ... programKinds) {
+    public static ProgramDialogFragment newInstance( OnOptionSelectedListener listener,
+                                                    String orgUnitId, Program.ProgramType... programKinds ) {
         ProgramDialogFragment fragment = new ProgramDialogFragment();
         Bundle args = new Bundle();
-        args.putString(OrganisationUnit$Table.ID, orgUnitId);
-        args.putStringArray(Program$Table.KIND, programKinds);
-        fragment.setArguments(args);
-        fragment.setOnOptionSetListener(listener);
+        args.putString( OrganisationUnit$Table.ID, orgUnitId );
+        if( programKinds != null ) {
+            String[] programKindStrings = new String[programKinds.length];
+            for(int i = 0; i<programKinds.length; i++) {
+                programKindStrings[i] = programKinds[i].name();
+            }
+            args.putStringArray(Program$Table.KIND, programKindStrings);
+        }
+        fragment.setArguments( args );
+        fragment.setOnOptionSetListener( listener );
         return fragment;
     }
 
@@ -93,10 +99,17 @@ public class ProgramDialogFragment extends AutoCompleteDialogFragment
         if (LOADER_ID == id && isAdded()) {
             String organisationUnitId = args.getString(OrganisationUnit$Table.ID);
             String[] kinds = args.getStringArray(Program$Table.KIND);
+            Program.ProgramType[] types = null;
+            if( kinds != null ) {
+                types = new Program.ProgramType[kinds.length];
+                for( int i = 0; i<kinds.length; i++ ) {
+                    types[i] = Program.ProgramType.valueOf(kinds[i]);
+                }
+            }
             List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
             modelsToTrack.add(Program.class);
             return new DbLoader<>(
-                    getActivity().getBaseContext(), modelsToTrack, new ProgramQuery(organisationUnitId, kinds)
+                    getActivity().getBaseContext(), modelsToTrack, new ProgramQuery(organisationUnitId, types)
             );
         }
         return null;
@@ -130,9 +143,9 @@ public class ProgramDialogFragment extends AutoCompleteDialogFragment
 
     static class ProgramQuery implements Query<List<AutoCompleteDialogAdapter.OptionAdapterValue>> {
         private final String mOrgUnitId;
-        private final String[] mKinds;
+        private final Program.ProgramType[] mKinds;
 
-        public ProgramQuery(String orgUnitId, String[] kinds) {
+        public ProgramQuery(String orgUnitId, Program.ProgramType[] kinds) {
             mOrgUnitId = orgUnitId;
             mKinds = kinds;
         }

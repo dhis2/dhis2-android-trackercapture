@@ -59,7 +59,8 @@ import org.hisp.dhis.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.utils.support.DateUtils;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.DatePickerRow;
-import org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogFragment;
+import org.hisp.dhis.android.sdk.utils.ui.dialogs.OrgUnitDialogFragment;
+import org.hisp.dhis.android.sdk.utils.ui.dialogs.ProgramDialogFragment;
 import org.hisp.dhis.android.sdk.utils.ui.views.CardTextViewButton;
 import org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.trackercapture.R;
@@ -77,7 +78,6 @@ import java.util.List;
 public class UpcomingEventsFragment extends Fragment implements View.OnClickListener,
         AdapterView.OnItemClickListener,
         OrgUnitDialogFragment.OnOptionSelectedListener,
-        ProgramDialogFragment.OnProgramSetListener,
         LoaderManager.LoaderCallbacks<List<UpcomingEventRow>>{
 
     private static final String CLASS_TAG = "UpcomingEventsFragment";
@@ -245,7 +245,6 @@ public class UpcomingEventsFragment extends Fragment implements View.OnClickList
         handleViews(0);
     }
 
-    @Override
     public void onProgramSelected(String programId, String programName) {
         mProgramButton.setText(programName);
 

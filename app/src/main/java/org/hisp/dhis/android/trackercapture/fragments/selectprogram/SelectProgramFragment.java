@@ -47,7 +47,6 @@ import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.sdk.controllers.Dhis2;
 import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
-import org.hisp.dhis.android.sdk.events.OnTrackerItemColumnClick;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
@@ -151,31 +150,6 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.fragments.s
             mNavigationHandler.switchFragment(fragment, ProgramOverviewFragment.CLASS_TAG, true);
         } else {
             Dhis2.showStatusDialog(getChildFragmentManager(), eventClick.getItem());
-        }
-    }
-
-    @Subscribe
-    public void onItemClick(OnTrackerItemColumnClick eventClick)
-    {
-        Log.d(TAG, "COLUMN CLICKED : " + eventClick.getColumnClicked());
-        switch (eventClick.getColumnClicked())
-        {
-            case OnTrackerItemColumnClick.FIRST_COLUMN:
-            {
-
-            }
-            case OnTrackerItemColumnClick.SECOND_COLUMN:
-            {
-
-            }
-            case OnTrackerItemColumnClick.THIRD_COLUMN:
-            {
-
-            }
-            case OnTrackerItemColumnClick.STATUS_COLUMN:
-            {
-                ( ( TrackedEntityInstanceAdapter ) mAdapter ).getFilter().filter(TrackedEntityInstanceAdapter.FILTER_STATUS + "");
-            }
         }
     }
 

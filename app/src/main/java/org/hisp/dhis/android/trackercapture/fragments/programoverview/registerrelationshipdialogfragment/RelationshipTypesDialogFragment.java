@@ -26,7 +26,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.trackercapture.fragments.programoverview.registerRelationshipDialogFragment;
+package org.hisp.dhis.android.trackercapture.fragments.programoverview.registerrelationshipdialogfragment;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -41,10 +41,10 @@ import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.RelationshipType;
+import org.hisp.dhis.android.sdk.utils.ui.adapters.SimpleAdapter;
 import org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogAdapter;
 import org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogFragment;
 import org.hisp.dhis.android.trackercapture.R;
-import org.hisp.dhis.android.trackercapture.ui.adapters.SimpleAdapter;
 
 import java.util.ArrayList;
 import java.util.List;

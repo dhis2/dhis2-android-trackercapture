@@ -26,7 +26,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.trackercapture.fragments.programoverview.registerRelationshipDialogFragment;
+package org.hisp.dhis.android.trackercapture.fragments.programoverview.registerrelationshipdialogfragment;
 
 import android.content.Context;
 import android.content.DialogInterface;

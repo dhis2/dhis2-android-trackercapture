@@ -83,7 +83,7 @@ import org.hisp.dhis.android.sdk.utils.ui.views.FontTextView;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.fragments.enrollment.EnrollmentFragment;
 import org.hisp.dhis.android.trackercapture.fragments.enrollmentdate.EnrollmentDateFragment;
-import org.hisp.dhis.android.trackercapture.fragments.programoverview.registerRelationshipDialogFragment.RegisterRelationshipDialogFragment;
+import org.hisp.dhis.android.trackercapture.fragments.programoverview.registerrelationshipdialogfragment.RegisterRelationshipDialogFragment;
 import org.hisp.dhis.android.trackercapture.fragments.trackedentityinstanceprofile.TrackedEntityInstanceProfileFragment;
 import org.hisp.dhis.android.sdk.utils.ui.dialogs.ProgramDialogFragment;
 import org.hisp.dhis.android.trackercapture.ui.adapters.ProgramAdapter;
@@ -903,6 +903,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     }
 
     private void showAddRelationshipFragment() {
+        if( mForm == null || mForm.getTrackedEntityInstance() == null ) return;
         RegisterRelationshipDialogFragment fragment = RegisterRelationshipDialogFragment.newInstance(mForm.getTrackedEntityInstance().getLocalId());
         fragment.show(getChildFragmentManager(), CLASS_TAG);
     }

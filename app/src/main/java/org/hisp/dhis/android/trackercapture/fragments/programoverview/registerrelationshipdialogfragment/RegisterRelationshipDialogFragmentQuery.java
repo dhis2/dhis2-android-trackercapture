@@ -1,4 +1,4 @@
-package org.hisp.dhis.android.trackercapture.fragments.programoverview.registerRelationshipDialogFragment;
+package org.hisp.dhis.android.trackercapture.fragments.programoverview.registerrelationshipdialogfragment;
 
 import android.content.Context;
 

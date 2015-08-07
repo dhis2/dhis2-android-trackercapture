@@ -5,10 +5,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.trackercapture.R;
-import org.hisp.dhis.android.sdk.events.OnTrackerItemColumnClick;
 import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.EventRowType;
 
 /**
@@ -31,8 +29,7 @@ public class TrackedEntityInstanceColumnNamesRow implements EventRow
                     (TextView) view.findViewById(R.id.first_column_name),
                     (TextView) view.findViewById(R.id.second_column_name),
                     (TextView) view.findViewById(R.id.third_column_name),
-                    (TextView) view.findViewById(R.id.status_column),
-                    new OnInternalColumnRowClickListener()
+                    (TextView) view.findViewById(R.id.status_column)
             );
             view.setTag(holder);
         } else {
@@ -41,12 +38,8 @@ public class TrackedEntityInstanceColumnNamesRow implements EventRow
         }
 
         holder.firstItem.setText(mFirstItem);
-        holder.firstItem.setOnClickListener(holder.listener);
         holder.secondItem.setText(mSecondItem);
-        holder.secondItem.setOnClickListener(holder.listener);
         holder.thirdItem.setText(mThirdItem);
-        holder.thirdItem.setOnClickListener(holder.listener);
-        holder.statusItem.setOnClickListener(holder.listener);
 
         return view;
     }
@@ -84,40 +77,16 @@ public class TrackedEntityInstanceColumnNamesRow implements EventRow
         public final TextView secondItem;
         public final TextView thirdItem;
         public final TextView statusItem;
-        public final OnInternalColumnRowClickListener listener;
 
 
         private ViewHolder(TextView firstItem,
                            TextView secondItem,
                            TextView thirdItem,
-                           TextView statusItem,
-                           OnInternalColumnRowClickListener listener) {
+                           TextView statusItem) {
             this.firstItem = firstItem;
             this.secondItem = secondItem;
             this.thirdItem = thirdItem;
             this.statusItem = statusItem;
-            this.listener = listener;
         }
     }
-
-    private static class OnInternalColumnRowClickListener implements View.OnClickListener
-    {
-        @Override
-        public void onClick(View view)
-        {
-            if(view.getId() == R.id.first_column_name)
-                    Dhis2Application.getEventBus().post(new OnTrackerItemColumnClick(OnTrackerItemColumnClick.FIRST_COLUMN));
-
-            else if(view.getId() == R.id.second_column_name)
-                    Dhis2Application.getEventBus().post(new OnTrackerItemColumnClick(OnTrackerItemColumnClick.SECOND_COLUMN));
-
-            else if (view.getId() == R.id.third_column_name)
-                    Dhis2Application.getEventBus().post(new OnTrackerItemColumnClick(OnTrackerItemColumnClick.THIRD_COLUMN));
-
-            else if(view.getId() == R.id.status_column)
-                    Dhis2Application.getEventBus().post(new OnTrackerItemColumnClick(OnTrackerItemColumnClick.STATUS_COLUMN));
-        }
-
-    }
-
 }

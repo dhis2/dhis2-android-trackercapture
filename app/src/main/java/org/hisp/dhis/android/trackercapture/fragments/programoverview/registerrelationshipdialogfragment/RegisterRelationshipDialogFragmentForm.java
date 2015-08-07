@@ -1,4 +1,4 @@
-package org.hisp.dhis.android.trackercapture.fragments.programoverview.registerRelationshipDialogFragment;
+package org.hisp.dhis.android.trackercapture.fragments.programoverview.registerrelationshipdialogfragment;
 
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;

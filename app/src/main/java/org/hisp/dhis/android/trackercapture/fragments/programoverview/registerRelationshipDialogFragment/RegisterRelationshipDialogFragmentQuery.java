@@ -12,8 +12,8 @@ import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribut
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
+import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.SearchRelativeTrackedEntityInstanceItemRow;
-import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceRow;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +45,7 @@ public class RegisterRelationshipDialogFragmentQuery implements Query<RegisterRe
         if(trackedEntityInstances == null)
             return form;
 
-        List<TrackedEntityInstanceRow> teiRows = new ArrayList<>();
+        List<EventRow> teiRows = new ArrayList<>();
 
         for (TrackedEntityInstance tei : trackedEntityInstances) {
             if(trackedEntityInstance==null ||

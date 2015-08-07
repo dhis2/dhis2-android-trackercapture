@@ -12,9 +12,9 @@ import org.hisp.dhis.android.sdk.events.OnRowClick;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.AbsAdapter;
+import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceColumnNamesRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceItemRow;
-import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.EventRowType;
 
 import java.util.ArrayList;
@@ -23,12 +23,12 @@ import java.util.List;
 /**
  * Created by erling on 5/11/15.
  */
-public class TrackedEntityInstanceAdapter extends AbsAdapter<TrackedEntityInstanceRow> implements Filterable {
+public class TrackedEntityInstanceAdapter extends AbsAdapter<EventRow> implements Filterable {
 
     public static final String TAG = TrackedEntityInstanceAdapter.class.getSimpleName();
 
-    private List<TrackedEntityInstanceRow> allRows;
-    private List<TrackedEntityInstanceRow> filteredRows;
+    private List<EventRow> allRows;
+    private List<EventRow> filteredRows;
     private Filter filter;
     public static final int FILTER_SEARCH = 1;
     public static final int FILTER_STATUS = 2;
@@ -39,7 +39,7 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<TrackedEntityInstan
         super(inflater);
     }
 
-    public void setData(List<TrackedEntityInstanceRow> allRows) {
+    public void setData(List<EventRow> allRows) {
         this.allRows = allRows;
     }
 
@@ -98,7 +98,7 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<TrackedEntityInstan
         protected FilterResults performFiltering(CharSequence constraint) {
             constraint = constraint.toString().toLowerCase();
             FilterResults result = new FilterResults();
-            List<TrackedEntityInstanceRow> filteredItems = new ArrayList<TrackedEntityInstanceRow>();
+            List<EventRow> filteredItems = new ArrayList<>();
             if(constraint.toString().startsWith(Integer.toString(FILTER_SEARCH)))
             {
                 constraint = constraint.subSequence(1,constraint.length()); // remove the filter flag from search string
@@ -106,17 +106,17 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<TrackedEntityInstan
                 if (constraint != null && constraint.toString().length() > 0) {
 
                     for (int i = 0, l = allRows.size(); i < l; i++) {
-                        TrackedEntityInstanceRow row = allRows.get(i);
-                        if (row.getItemRow() != null) {
+                        EventRow row = allRows.get(i);
+                        if ( row != null && row instanceof TrackedEntityInstanceItemRow ) {
 
-                            if ( ( (TrackedEntityInstanceItemRow) row.getItemRow() ).getmFirstItem() != null)
-                                if ( ( (TrackedEntityInstanceItemRow) row.getItemRow() ).getmFirstItem().toLowerCase().contains(constraint))
+                            if ( ( (TrackedEntityInstanceItemRow) row ).getmFirstItem() != null)
+                                if ( ( (TrackedEntityInstanceItemRow) row ).getmFirstItem().toLowerCase().contains(constraint))
                                     filteredItems.add(row);
-                                else if ( ( (TrackedEntityInstanceItemRow) row.getItemRow() ).getmSecondItem() != null)
-                                    if ( ( (TrackedEntityInstanceItemRow) row.getItemRow() ).getmSecondItem().toLowerCase().contains(constraint))
+                                else if ( ( (TrackedEntityInstanceItemRow) row ).getmSecondItem() != null)
+                                    if ( ( (TrackedEntityInstanceItemRow) row ).getmSecondItem().toLowerCase().contains(constraint))
                                         filteredItems.add(row);
-                                    else if ( ( (TrackedEntityInstanceItemRow) row.getItemRow() ).getmThirdItem() != null)
-                                        if ( ( (TrackedEntityInstanceItemRow) row.getItemRow() ).getmThirdItem().toLowerCase().contains(constraint))
+                                    else if ( ( (TrackedEntityInstanceItemRow) row ).getmThirdItem() != null)
+                                        if ( ( (TrackedEntityInstanceItemRow) row ).getmThirdItem().toLowerCase().contains(constraint))
                                             filteredItems.add(row);
                         } else {
                             if (row instanceof TrackedEntityInstanceColumnNamesRow)
@@ -133,17 +133,17 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<TrackedEntityInstan
             }
             else if (constraint.toString().startsWith(Integer.toString(FILTER_STATUS)))
             {
-                List<TrackedEntityInstanceRow> offlineRows = new ArrayList<>();
-                List<TrackedEntityInstanceRow> errorRows = new ArrayList<>();
-                List<TrackedEntityInstanceRow> sentRows = new ArrayList<>();
+                List<EventRow> offlineRows = new ArrayList<>();
+                List<EventRow> errorRows = new ArrayList<>();
+                List<EventRow> sentRows = new ArrayList<>();
 
                 for (int i = 0, l = allRows.size(); i < l; i++) {
-                    TrackedEntityInstanceRow row = allRows.get(i);
+                    EventRow row = allRows.get(i);
                     OnRowClick.ITEM_STATUS status = null;
                     if(row instanceof TrackedEntityInstanceColumnNamesRow)
                         filteredItems.add(row);
                     else if(row instanceof TrackedEntityInstanceItemRow)
-                        status =  ( (TrackedEntityInstanceItemRow) row.getItemRow() ).getStatus();
+                        status =  ( (TrackedEntityInstanceItemRow) row ).getStatus();
 
                     if(status != null)
                     {
@@ -173,7 +173,7 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<TrackedEntityInstan
 
                     String prefixString = constraint.toString().toLowerCase();
 
-                    ArrayList<TrackedEntityInstanceRow> values;
+                    ArrayList<EventRow> values;
                     synchronized (this) {
                         values = new ArrayList<>(allRows);
                     }
@@ -240,12 +240,12 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<TrackedEntityInstan
             if(results.count == 0)
             {
                 Log.d(getClass().getSimpleName(), "results count == 0");
-                swapData(new ArrayList<TrackedEntityInstanceRow>());
+                swapData(new ArrayList<EventRow>());
                 return;
             }
             else
             {
-                filteredRows = (ArrayList<TrackedEntityInstanceRow>) results.values;
+                filteredRows = (ArrayList<EventRow>) results.values;
                 swapData(filteredRows);
             }
         }

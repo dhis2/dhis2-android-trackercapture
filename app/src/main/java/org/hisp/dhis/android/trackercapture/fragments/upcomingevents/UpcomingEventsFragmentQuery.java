@@ -38,8 +38,8 @@ import org.hisp.dhis.android.sdk.persistence.models.Option;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
+import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.UpcomingEventItemRow;
-import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.UpcomingEventRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.UpcomingEventsColumnNamesRow;
 
 import java.util.ArrayList;
@@ -47,7 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class UpcomingEventsFragmentQuery implements Query<List<UpcomingEventRow>> {
+class UpcomingEventsFragmentQuery implements Query<List<EventRow>> {
     private final String mOrgUnitId;
     private final String mProgramId;
     private final String mStartDate;
@@ -64,8 +64,8 @@ class UpcomingEventsFragmentQuery implements Query<List<UpcomingEventRow>> {
     }
 
     @Override
-    public List<UpcomingEventRow> query(Context context) {
-        List<UpcomingEventRow> eventUpcomingEventRows = new ArrayList<>();
+    public List<EventRow> query(Context context) {
+        List<EventRow> eventUpcomingEventRows = new ArrayList<>();
 
         // create a list of EventItems
         Program selectedProgram = MetaDataController.getProgram(mProgramId);

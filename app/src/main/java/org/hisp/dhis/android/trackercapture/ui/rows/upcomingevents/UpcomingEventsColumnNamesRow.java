@@ -34,12 +34,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.trackercapture.R;
 
 /**
  * Created by araz on 03.04.2015.
  */
-public class UpcomingEventsColumnNamesRow implements UpcomingEventRow {
+public class UpcomingEventsColumnNamesRow implements EventRow {
     private String mFirstItem;
     private String mSecondItem;
 

@@ -16,9 +16,9 @@ import org.hisp.dhis.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
+import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceColumnNamesRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceItemRow;
-import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceRow;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-class SelectProgramFragmentQuery implements Query<List<TrackedEntityInstanceRow>> {
+class SelectProgramFragmentQuery implements Query<List<EventRow>> {
     private final String mOrgUnitId;
     private final String mProgramId;
 
@@ -37,8 +37,8 @@ class SelectProgramFragmentQuery implements Query<List<TrackedEntityInstanceRow>
     }
 
     @Override
-    public List<TrackedEntityInstanceRow> query(Context context) {
-        List<TrackedEntityInstanceRow> teiRows = new ArrayList<>();
+    public List<EventRow> query(Context context) {
+        List<EventRow> teiRows = new ArrayList<>();
 
         // create a list of EventItems
         Program selectedProgram = MetaDataController.getProgram(mProgramId);
@@ -122,7 +122,7 @@ class SelectProgramFragmentQuery implements Query<List<TrackedEntityInstanceRow>
         return teiRows;
     }
 
-    private TrackedEntityInstanceItemRow createTrackedEntityInstanceItem(Context context, TrackedEntityInstance trackedEntityInstance,
+    private EventRow createTrackedEntityInstanceItem(Context context, TrackedEntityInstance trackedEntityInstance,
                                                                          List<String> attributesToShow, List<ProgramTrackedEntityAttribute> attributes,
                                                                          Map<String, String> codeToName,
                                                                          Set<String> failedEventIds) {

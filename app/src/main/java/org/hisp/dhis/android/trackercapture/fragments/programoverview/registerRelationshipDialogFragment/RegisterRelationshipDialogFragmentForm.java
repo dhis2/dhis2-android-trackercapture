@@ -1,7 +1,7 @@
 package org.hisp.dhis.android.trackercapture.fragments.programoverview.registerRelationshipDialogFragment;
 
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
-import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceRow;
+import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import java.util.List;
 class RegisterRelationshipDialogFragmentForm
 {
     TrackedEntityInstance trackedEntityInstance;
-    List<TrackedEntityInstanceRow> rows;
+    List<EventRow> rows;
     private String queryString;
 
     public TrackedEntityInstance getTrackedEntityInstance() {
@@ -22,11 +22,11 @@ class RegisterRelationshipDialogFragmentForm
         this.trackedEntityInstance = trackedEntityInstance;
     }
 
-    public List<TrackedEntityInstanceRow> getRows() {
+    public List<EventRow> getRows() {
         return rows;
     }
 
-    public void setRows(List<TrackedEntityInstanceRow> rows) {
+    public void setRows(List<EventRow> rows) {
         this.rows = rows;
     }
 

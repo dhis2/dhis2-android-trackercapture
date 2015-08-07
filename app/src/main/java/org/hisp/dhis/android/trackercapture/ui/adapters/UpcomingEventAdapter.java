@@ -34,10 +34,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.hisp.dhis.android.sdk.utils.ui.adapters.AbsAdapter;
+import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.EventRowType;
-import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.UpcomingEventRow;
 
-public class UpcomingEventAdapter extends AbsAdapter<UpcomingEventRow> {
+public class UpcomingEventAdapter extends AbsAdapter<EventRow> {
 
     public UpcomingEventAdapter(LayoutInflater inflater) {
         super(inflater);

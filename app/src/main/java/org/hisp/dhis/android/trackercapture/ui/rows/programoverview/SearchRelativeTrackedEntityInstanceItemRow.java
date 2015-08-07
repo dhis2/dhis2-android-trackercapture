@@ -1,23 +1,13 @@
 package org.hisp.dhis.android.trackercapture.ui.rows.programoverview;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.hisp.dhis.android.sdk.events.OnRowClick;
-import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
-import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
-import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceItemRow;
-import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceRow;
-import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.EventRowType;
-
-import static org.hisp.dhis.android.sdk.utils.Preconditions.isNull;
 
 /**
  * Created by erling on 5/11/15.
@@ -56,11 +46,6 @@ public class SearchRelativeTrackedEntityInstanceItemRow extends TrackedEntityIns
         holder.fourthItem.setText(mFourthItem);
 
         return view;
-    }
-
-    @Override
-    public SearchRelativeTrackedEntityInstanceItemRow getItemRow() {
-        return this;
     }
 
     public String getmFourthItem() {

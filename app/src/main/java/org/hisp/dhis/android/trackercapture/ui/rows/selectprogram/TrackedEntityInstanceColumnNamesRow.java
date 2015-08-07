@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
+import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.sdk.events.OnTrackerItemColumnClick;
 import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.EventRowType;
@@ -13,7 +14,7 @@ import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.EventRowType;
 /**
  * Created by erling on 5/8/15.
  */
-public class TrackedEntityInstanceColumnNamesRow implements TrackedEntityInstanceRow
+public class TrackedEntityInstanceColumnNamesRow implements EventRow
 {
     private String mFirstItem;
     private String mSecondItem;
@@ -63,11 +64,6 @@ public class TrackedEntityInstanceColumnNamesRow implements TrackedEntityInstanc
     @Override
     public boolean isEnabled() {
         return false;
-    }
-
-    @Override
-    public TrackedEntityInstanceItemRow getItemRow() {
-        return null;
     }
 
     public void setSecondItem(String secondItem) {

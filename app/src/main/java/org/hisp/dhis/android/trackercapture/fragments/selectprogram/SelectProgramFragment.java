@@ -54,6 +54,7 @@ import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
+import org.hisp.dhis.android.sdk.utils.ui.dialogs.OrgUnitDialogFragment;
 import org.hisp.dhis.android.sdk.utils.ui.dialogs.ProgramDialogFragment;
 import org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.trackercapture.R;
@@ -105,6 +106,21 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.fragments.s
             public void onClick(View v) {
                 ProgramDialogFragment fragment = ProgramDialogFragment
                         .newInstance(SelectProgramFragment.this, mState.getOrgUnitId(),
+                                Program.ProgramType.MULTIPLE_EVENTS_WITH_REGISTRATION,
+                                Program.ProgramType.SINGLE_EVENT_WITH_REGISTRATION,
+                                Program.ProgramType.WITH_REGISTRATION);
+                fragment.show(getChildFragmentManager());
+            }
+        };
+    }
+
+    @Override
+    protected View.OnClickListener getOrgUnitButtonOnClickListener() {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                OrgUnitDialogFragment fragment = OrgUnitDialogFragment
+                        .newInstance(SelectProgramFragment.this,
                                 Program.ProgramType.MULTIPLE_EVENTS_WITH_REGISTRATION,
                                 Program.ProgramType.SINGLE_EVENT_WITH_REGISTRATION,
                                 Program.ProgramType.WITH_REGISTRATION);

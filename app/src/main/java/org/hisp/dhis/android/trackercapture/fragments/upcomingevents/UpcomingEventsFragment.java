@@ -51,6 +51,7 @@ import org.hisp.dhis.android.sdk.utils.support.DateUtils;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.AbsAdapter;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.DatePickerRow;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
+import org.hisp.dhis.android.sdk.utils.ui.dialogs.OrgUnitDialogFragment;
 import org.hisp.dhis.android.sdk.utils.ui.dialogs.ProgramDialogFragment;
 import org.hisp.dhis.android.sdk.utils.ui.views.CardTextViewButton;
 import org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton;
@@ -122,6 +123,21 @@ public class UpcomingEventsFragment extends SelectProgramFragment implements Ada
             public void onClick(View v) {
                 ProgramDialogFragment fragment = ProgramDialogFragment
                         .newInstance(UpcomingEventsFragment.this, mState.getOrgUnitId(),
+                                Program.ProgramType.MULTIPLE_EVENTS_WITH_REGISTRATION,
+                                Program.ProgramType.SINGLE_EVENT_WITH_REGISTRATION,
+                                Program.ProgramType.WITH_REGISTRATION);
+                fragment.show(getChildFragmentManager());
+            }
+        };
+    }
+
+    @Override
+    protected View.OnClickListener getOrgUnitButtonOnClickListener() {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                OrgUnitDialogFragment fragment = OrgUnitDialogFragment
+                        .newInstance(UpcomingEventsFragment.this,
                                 Program.ProgramType.MULTIPLE_EVENTS_WITH_REGISTRATION,
                                 Program.ProgramType.SINGLE_EVENT_WITH_REGISTRATION,
                                 Program.ProgramType.WITH_REGISTRATION);

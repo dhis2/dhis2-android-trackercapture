@@ -117,34 +117,14 @@ public class UpcomingEventsFragment extends SelectProgramFragment implements Ada
     }
 
     @Override
-    protected View.OnClickListener getProgramButtonOnClickListener() {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ProgramDialogFragment fragment = ProgramDialogFragment
-                        .newInstance(UpcomingEventsFragment.this, mState.getOrgUnitId(),
-                                Program.ProgramType.MULTIPLE_EVENTS_WITH_REGISTRATION,
-                                Program.ProgramType.SINGLE_EVENT_WITH_REGISTRATION,
-                                Program.ProgramType.WITH_REGISTRATION);
-                fragment.show(getChildFragmentManager());
-            }
+    protected Program.ProgramType[] getProgramTypes() {
+        return new Program.ProgramType[] {
+                Program.ProgramType.MULTIPLE_EVENTS_WITH_REGISTRATION,
+                Program.ProgramType.SINGLE_EVENT_WITH_REGISTRATION,
+                Program.ProgramType.WITH_REGISTRATION
         };
     }
 
-    @Override
-    protected View.OnClickListener getOrgUnitButtonOnClickListener() {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                OrgUnitDialogFragment fragment = OrgUnitDialogFragment
-                        .newInstance(UpcomingEventsFragment.this,
-                                Program.ProgramType.MULTIPLE_EVENTS_WITH_REGISTRATION,
-                                Program.ProgramType.SINGLE_EVENT_WITH_REGISTRATION,
-                                Program.ProgramType.WITH_REGISTRATION);
-                fragment.show(getChildFragmentManager());
-            }
-        };
-    }
 
     @Override
     public Loader<List<EventRow>> onCreateLoader(int id, Bundle args) {

@@ -17,6 +17,7 @@ public class TrackedEntityInstanceColumnNamesRow implements EventRow
     private String mFirstItem;
     private String mSecondItem;
     private String mThirdItem;
+    private String mTitle;
 
     @Override
     public View getView(LayoutInflater inflater, View convertView, ViewGroup container) {
@@ -26,6 +27,7 @@ public class TrackedEntityInstanceColumnNamesRow implements EventRow
         if (convertView == null) {
             view = inflater.inflate(R.layout.listview_column_names_item, container, false);
             holder = new ViewHolder(
+                    (TextView) view.findViewById(R.id.tracked_entity_title),
                     (TextView) view.findViewById(R.id.first_column_name),
                     (TextView) view.findViewById(R.id.second_column_name),
                     (TextView) view.findViewById(R.id.third_column_name),
@@ -36,7 +38,7 @@ public class TrackedEntityInstanceColumnNamesRow implements EventRow
             view = convertView;
             holder = (ViewHolder) view.getTag();
         }
-
+        holder.trackedEntityTitle.setText(mTitle);
         holder.firstItem.setText(mFirstItem);
         holder.secondItem.setText(mSecondItem);
         holder.thirdItem.setText(mThirdItem);
@@ -71,18 +73,25 @@ public class TrackedEntityInstanceColumnNamesRow implements EventRow
         this.mThirdItem = mThirdItem;
     }
 
+    public void setmTitle(String mTitle) {
+        this.mTitle = mTitle;
+    }
+
 
     private static class ViewHolder {
+        public final TextView trackedEntityTitle;
         public final TextView firstItem;
         public final TextView secondItem;
         public final TextView thirdItem;
         public final TextView statusItem;
 
 
-        private ViewHolder(TextView firstItem,
+        private ViewHolder(TextView trackedEntityTitle,
+                           TextView firstItem,
                            TextView secondItem,
                            TextView thirdItem,
                            TextView statusItem) {
+            this.trackedEntityTitle = trackedEntityTitle;
             this.firstItem = firstItem;
             this.secondItem = secondItem;
             this.thirdItem = thirdItem;

@@ -59,6 +59,10 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
 
         List<String> attributesToShow = new ArrayList<>();
         TrackedEntityInstanceColumnNamesRow columnNames = new TrackedEntityInstanceColumnNamesRow();
+
+        if(selectedProgram.getTrackedEntity() != null)
+            columnNames.setmTitle(selectedProgram.getTrackedEntity().getName());
+
         for (ProgramTrackedEntityAttribute attribute : attributes) {
             if (attribute.getDisplayInList() && attributesToShow.size() < 3) {
                 attributesToShow.add(attribute.getTrackedEntityAttributeId());

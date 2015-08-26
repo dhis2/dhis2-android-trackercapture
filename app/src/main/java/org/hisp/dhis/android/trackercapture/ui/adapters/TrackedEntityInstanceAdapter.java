@@ -1,6 +1,5 @@
 package org.hisp.dhis.android.trackercapture.ui.adapters;
 
-import android.app.Activity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,15 +8,16 @@ import android.widget.Filter;
 import android.widget.Filterable;
 
 import org.hisp.dhis.android.sdk.events.OnRowClick;
-import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
-import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.AbsAdapter;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
-import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceColumnNamesRow;
+import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.TrackedEntityInstanceColumnNamesRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceItemRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.EventRowType;
+import org.joda.time.DateTime;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -30,10 +30,15 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<EventRow> implement
     private List<EventRow> allRows;
     private List<EventRow> filteredRows;
     private Filter filter;
+    private int filteredColumn;
+    private boolean listIsReversed;
     public static final int FILTER_SEARCH = 1;
     public static final int FILTER_STATUS = 2;
-    public static final int FILTER_DATE = 3;
-    public static final int FILTER_ALL_ATTRIBUTES = 4;
+    public static final int FILTER_FIRST_COLUMN = 3;
+    public static final int FILTER_SECOND_COLUMN = 4;
+    public static final int FILTER_THIRD_COLUMN = 5;
+    public static final int FILTER_DATE = 6;
+    public static final int FILTER_ALL_ATTRIBUTES = 7;
 
     public TrackedEntityInstanceAdapter(LayoutInflater inflater) {
         super(inflater);
@@ -85,6 +90,22 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<EventRow> implement
         }
     }
 
+    public int getFilteredColumn() {
+        return filteredColumn;
+    }
+
+    public void setFilteredColumn(int filteredColumn) {
+        this.filteredColumn = filteredColumn;
+    }
+
+    public boolean isListIsReversed(int column) {
+        return listIsReversed;
+    }
+
+    public void setListIsReversed(boolean listIsReversed, int column) {
+        this.listIsReversed = listIsReversed;
+    }
+
     @Override
     public Filter getFilter() {
         if(filter == null)
@@ -96,6 +117,7 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<EventRow> implement
     {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
+            Log.d("Filter", constraint.toString());
             constraint = constraint.toString().toLowerCase();
             FilterResults result = new FilterResults();
             List<EventRow> filteredItems = new ArrayList<>();
@@ -161,58 +183,22 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<EventRow> implement
                 filteredItems.addAll(errorRows);
                 filteredItems.addAll(sentRows);
             }
-            else if (constraint.toString().startsWith(Integer.toString(FILTER_DATE)))
+            else if(constraint.toString().startsWith(Integer.toString(FILTER_FIRST_COLUMN)))
             {
-
+                filteredItems = filterColumnValues(1); //filter column #1
+                setFilteredColumn(1);
             }
-            else if(constraint.toString().startsWith(Integer.toString(FILTER_ALL_ATTRIBUTES)))
+            else if(constraint.toString().startsWith(Integer.toString(FILTER_SECOND_COLUMN)))
             {
-                constraint = constraint.subSequence(1,constraint.length()); // remove the filter flag from search string
-
-                if (constraint != null && constraint.toString().length() > 0) {
-
-                    String prefixString = constraint.toString().toLowerCase();
-
-                    ArrayList<EventRow> values;
-                    synchronized (this) {
-                        values = new ArrayList<>(allRows);
-                    }
-
-                    final int count = values.size();
-
-                    for (int i = 0; i < count; i++) {
-                        if( values.get(i) instanceof TrackedEntityInstanceItemRow ) {
-                            final TrackedEntityInstance trackedEntityInstanceValue = ((TrackedEntityInstanceItemRow) values.get(i)).getTrackedEntityInstance();
-                            for (TrackedEntityAttributeValue attrValue : trackedEntityInstanceValue.getAttributes()) {
-                                final String value = attrValue.getValue();
-                                final String valueText = value.toLowerCase();
-
-                                // First match against the whole, non-splitted value
-                                if (valueText.startsWith(prefixString)) {
-                                    filteredItems.add(values.get(i));
-                                } else {
-                                    final String[] words = valueText.split(" ");
-                                    final int wordCount = words.length;
-
-                                    // Start at index 0, in case valueText starts with space(s)
-                                    for (int k = 0; k < wordCount; k++) {
-                                        if (words[k].startsWith(prefixString)) {
-                                            filteredItems.add(values.get(i));
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    synchronized(this) {
-                        filteredItems.addAll(allRows);
-                    }
-                }
-                result.count = filteredItems.size();
-                result.values = filteredItems;
+                filteredItems = filterColumnValues(2); //filter column #2
+                setFilteredColumn(2);
             }
+            else if(constraint.toString().startsWith(Integer.toString(FILTER_THIRD_COLUMN)))
+            {
+                filteredItems = filterColumnValues(3); //filter column #3
+                setFilteredColumn(3);
+            }
+
             else
             {
                 synchronized(this)
@@ -226,6 +212,23 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<EventRow> implement
             result.values = filteredItems;
 
             return result;
+        }
+
+        public List<EventRow> filterColumnValues(int columnNumber)
+        {
+            List<EventRow> filteredItems = new ArrayList<>();
+            EventRow headerRow = null;
+            String value = null;
+            for (int i = 0, l = allRows.size(); i < l; i++) {
+                EventRow row = allRows.get(i);
+                if (row instanceof TrackedEntityInstanceColumnNamesRow)
+                    headerRow = row;
+                else if (row instanceof TrackedEntityInstanceItemRow)
+                    filteredItems.add(row);
+            }
+            Collections.sort(filteredItems, new RowComparator(columnNumber));
+            filteredItems.add(0,headerRow); // setting headerRow to first row
+            return filteredItems;
         }
 
         @Override
@@ -248,6 +251,158 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<EventRow> implement
                 filteredRows = (ArrayList<EventRow>) results.values;
                 swapData(filteredRows);
             }
+        }
+    }
+
+    private class RowComparator<T extends EventRow> implements Comparator<T>
+    {
+
+        private final int column;
+        DateTime lhsDate = null;
+        DateTime rhsDate = null;
+
+        public RowComparator( int column)
+        {
+            this.column = column;
+        }
+
+        @Override
+        public int compare(T lhs, T rhs)
+        {
+            if(column == getFilteredColumn()) // if the filteredColumn is the current one, reverse it
+            {
+                setListIsReversed(true, column);
+                return sortDescending(lhs,rhs) ; // we cannot return sortAscending * (-1) because it is prone to overflow
+            }
+            else if(isListIsReversed(column)) // if list is reversed, sort Ascending
+            {
+                setListIsReversed(false, column);
+                return sortAscending(lhs, rhs);
+            }
+            else
+                return sortAscending(lhs,rhs);
+        }
+
+        private int sortAscending(T lhs, T rhs)
+        {
+
+            if(column == 1 )
+            {
+                try
+                {
+                    lhsDate = new DateTime(((TrackedEntityInstanceItemRow) lhs).getmFirstItem());
+                    rhsDate = new DateTime(((TrackedEntityInstanceItemRow) rhs).getmFirstItem());
+
+                }
+                catch(Exception e)
+                {
+                }
+                if(lhsDate != null && rhsDate != null)
+                {
+                    return lhsDate.compareTo(rhsDate);
+                }
+                int compare = ((TrackedEntityInstanceItemRow) lhs).getmFirstItem().toLowerCase().compareTo(((TrackedEntityInstanceItemRow) rhs).getmFirstItem().toLowerCase());
+                return compare;
+            }
+            else if(column == 2)
+            {
+                try
+                {
+                    lhsDate = new DateTime(((TrackedEntityInstanceItemRow) lhs).getmSecondItem());
+                    rhsDate = new DateTime(((TrackedEntityInstanceItemRow) rhs).getmSecondItem());
+
+                }
+                catch(Exception e)
+                {
+
+                }
+                if(lhsDate != null && rhsDate != null)
+                {
+                    return lhsDate.compareTo(rhsDate);
+                }
+                int compare = ((TrackedEntityInstanceItemRow) lhs).getmSecondItem().toLowerCase().compareTo(((TrackedEntityInstanceItemRow) rhs).getmSecondItem().toLowerCase());
+                return compare;
+            }
+            else if(column == 3)
+            {
+                try
+                {
+                    lhsDate = new DateTime(((TrackedEntityInstanceItemRow) lhs).getmThirdItem());
+                    rhsDate = new DateTime(((TrackedEntityInstanceItemRow) rhs).getmThirdItem());
+
+                }
+                catch(Exception e)
+                {
+
+                }
+                if(lhsDate != null && rhsDate != null)
+                {
+                    return lhsDate.compareTo(rhsDate);
+                }
+                int compare = ((TrackedEntityInstanceItemRow) lhs).getmThirdItem().toLowerCase().compareTo(((TrackedEntityInstanceItemRow) rhs).getmThirdItem().toLowerCase());
+
+                return compare;
+            }
+
+
+            return 0;
+        }
+        private int sortDescending(T lhs, T rhs)
+        {
+
+            if(column == 1 )
+            {
+                try
+                {
+                    lhsDate = new DateTime(((TrackedEntityInstanceItemRow) lhs).getmFirstItem());
+                    rhsDate = new DateTime(((TrackedEntityInstanceItemRow) rhs).getmFirstItem());
+
+                }
+                catch(Exception e)
+                {
+                }
+                if(lhsDate != null && rhsDate != null)
+                {
+                    return rhsDate.compareTo(lhsDate);
+                }
+                int compare = ((TrackedEntityInstanceItemRow) rhs).getmFirstItem().toLowerCase().compareTo(((TrackedEntityInstanceItemRow) lhs).getmFirstItem().toLowerCase());
+                return compare;
+            }
+            else if(column == 2)
+            {
+                try
+                {
+                    lhsDate = new DateTime(((TrackedEntityInstanceItemRow) lhs).getmSecondItem());
+                    rhsDate = new DateTime(((TrackedEntityInstanceItemRow) rhs).getmSecondItem());
+
+                }
+                catch(Exception e)
+                {
+
+                }
+                if(lhsDate != null && rhsDate != null)
+                {
+                    return rhsDate.compareTo(lhsDate);
+                }
+                int compare = ((TrackedEntityInstanceItemRow) rhs).getmSecondItem().toLowerCase().compareTo(((TrackedEntityInstanceItemRow) lhs).getmSecondItem().toLowerCase());
+                return compare;
+            }
+            else if(column == 3) {
+                try {
+                    lhsDate = new DateTime(((TrackedEntityInstanceItemRow) lhs).getmThirdItem());
+                    rhsDate = new DateTime(((TrackedEntityInstanceItemRow) rhs).getmThirdItem());
+
+                } catch (Exception e) {
+
+                }
+                if (lhsDate != null && rhsDate != null) {
+                    return rhsDate.compareTo(lhsDate);
+                }
+                int compare = ((TrackedEntityInstanceItemRow) rhs).getmThirdItem().toLowerCase().compareTo(((TrackedEntityInstanceItemRow) lhs).getmThirdItem().toLowerCase());
+
+                return compare;
+            }
+            return 0;
         }
     }
 }

@@ -30,8 +30,10 @@
 package org.hisp.dhis.android.trackercapture.fragments.selectprogram;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.SearchView;
@@ -41,12 +43,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.TextView;
 
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.sdk.controllers.Dhis2;
 import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
+import org.hisp.dhis.android.sdk.fragments.selectprogram.SelectProgramFragmentForm;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
@@ -54,8 +58,6 @@ import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
-import org.hisp.dhis.android.sdk.utils.ui.dialogs.OrgUnitDialogFragment;
-import org.hisp.dhis.android.sdk.utils.ui.dialogs.ProgramDialogFragment;
 import org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.fragments.enrollment.EnrollmentFragment;
@@ -63,18 +65,20 @@ import org.hisp.dhis.android.trackercapture.fragments.programoverview.ProgramOve
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.QueryTrackedEntityInstancesDialogFragment;
 import org.hisp.dhis.android.trackercapture.fragments.upcomingevents.UpcomingEventsFragment;
 import org.hisp.dhis.android.trackercapture.ui.adapters.TrackedEntityInstanceAdapter;
+import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.OnTrackedEntityInstanceColumnClick;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SelectProgramFragment extends org.hisp.dhis.android.sdk.fragments.selectprogram.SelectProgramFragment
         implements SearchView.OnQueryTextListener, SearchView.OnFocusChangeListener,
-        MenuItemCompat.OnActionExpandListener{
+        MenuItemCompat.OnActionExpandListener, LoaderManager.LoaderCallbacks<SelectProgramFragmentForm>{
     public static final String TAG = SelectProgramFragment.class.getSimpleName();
 
     private FloatingActionButton mRegisterEventButton;
     private FloatingActionButton mQueryTrackedEntityInstancesButton;
     private FloatingActionButton mUpcomingEventsButton;
+    private SelectProgramFragmentForm mForm;
 
     @Override
     protected TrackedEntityInstanceAdapter getAdapter(Bundle savedInstanceState) {
@@ -120,7 +124,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.fragments.s
     }
 
     @Override
-    public Loader<List<EventRow>> onCreateLoader(int id, Bundle args) {
+    public Loader<SelectProgramFragmentForm> onCreateLoader(int id, Bundle args) {
         if (LOADER_ID == id && isAdded()) {
             List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
             modelsToTrack.add(TrackedEntityInstance.class);
@@ -190,11 +194,12 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.fragments.s
     }
 
     @Override
-    public void onLoadFinished(Loader<List<EventRow>> loader, List<EventRow> data) {
+    public void onLoadFinished(Loader<SelectProgramFragmentForm> loader, SelectProgramFragmentForm data) {
         if (LOADER_ID == loader.getId()) {
             mProgressBar.setVisibility(View.GONE);
-            ( ( TrackedEntityInstanceAdapter ) mAdapter).setData(data);
-            mAdapter.swapData(data);
+            mForm = data;
+            ( ( TrackedEntityInstanceAdapter ) mAdapter).setData(data.getEventRowList());
+            mAdapter.swapData(data.getEventRowList());
         }
     }
 
@@ -226,6 +231,84 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.fragments.s
             if(!hasFocus)
             {
                 ( ( TrackedEntityInstanceAdapter ) mAdapter ).getFilter().filter(""); //show all rows
+            }
+        }
+    }
+
+    private void setFocusSortColumn(int column)
+    {
+        TrackedEntityInstanceAdapter teiAdapter = (TrackedEntityInstanceAdapter) mAdapter;
+        View view = mForm.getColumnNames().getView();
+
+
+        switch (column) {
+            //todo put UI stuff inside here when list is sorted either ascending or descending
+            case 1: //first column
+            {
+
+                if(teiAdapter.getFilteredColumn() == column)
+                {
+
+
+                }
+                else if(teiAdapter.isListIsReversed(column))
+                {
+
+                }
+
+                break;
+            }
+            case 2: // second column
+            {
+
+                break;
+            }
+            case 3: // third column
+            {
+
+                break;
+            }
+            case 4: // status column
+            {
+
+                break;
+            }
+        }
+    }
+
+    @Subscribe
+    public void onItemClick(OnTrackedEntityInstanceColumnClick eventClick)
+    {
+        Log.d(TAG, "COLUMN CLICKED : " + eventClick.getColumnClicked());
+        switch (eventClick.getColumnClicked())
+        {
+            case OnTrackedEntityInstanceColumnClick.FIRST_COLUMN:
+            {
+                Log.d(TAG, "Filter column " + TrackedEntityInstanceAdapter.FILTER_FIRST_COLUMN);
+                ( ( TrackedEntityInstanceAdapter ) mAdapter ).getFilter().filter(TrackedEntityInstanceAdapter.FILTER_FIRST_COLUMN + "");
+                setFocusSortColumn(1);
+                break;
+
+            }
+            case OnTrackedEntityInstanceColumnClick.SECOND_COLUMN:
+            {
+                Log.d(TAG, "Filter column " + TrackedEntityInstanceAdapter.FILTER_SECOND_COLUMN);
+                ( ( TrackedEntityInstanceAdapter ) mAdapter ).getFilter().filter(TrackedEntityInstanceAdapter.FILTER_SECOND_COLUMN + "");
+                break;
+
+            }
+            case OnTrackedEntityInstanceColumnClick.THIRD_COLUMN:
+            {
+                Log.d(TAG, "Filter column " + TrackedEntityInstanceAdapter.FILTER_THIRD_COLUMN);
+                ( ( TrackedEntityInstanceAdapter ) mAdapter ).getFilter().filter(TrackedEntityInstanceAdapter.FILTER_THIRD_COLUMN + "");
+                break;
+
+            }
+            case OnTrackedEntityInstanceColumnClick.STATUS_COLUMN:
+            {
+                Log.d(TAG, "Filter column " + TrackedEntityInstanceAdapter.FILTER_STATUS);
+                ( ( TrackedEntityInstanceAdapter ) mAdapter ).getFilter().filter(TrackedEntityInstanceAdapter.FILTER_STATUS + "");
+                break;
             }
         }
     }

@@ -7,6 +7,7 @@ import com.raizlabs.android.dbflow.sql.language.Select;
 import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.events.OnRowClick;
+import org.hisp.dhis.android.sdk.fragments.selectprogram.SelectProgramFragmentForm;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
@@ -17,7 +18,7 @@ import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribut
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
-import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceColumnNamesRow;
+import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.TrackedEntityInstanceColumnNamesRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceItemRow;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-class SelectProgramFragmentQuery implements Query<List<EventRow>> {
+class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
     private final String mOrgUnitId;
     private final String mProgramId;
 
@@ -37,24 +38,26 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
     }
 
     @Override
-    public List<EventRow> query(Context context) {
+    public SelectProgramFragmentForm query(Context context) {
+
+        SelectProgramFragmentForm fragmentForm = new SelectProgramFragmentForm();
         List<EventRow> teiRows = new ArrayList<>();
 
         // create a list of EventItems
         Program selectedProgram = MetaDataController.getProgram(mProgramId);
         if (selectedProgram == null || isListEmpty(selectedProgram.getProgramStages())) {
-            return teiRows;
+            return fragmentForm;
         }
 
         // since this is single event its only 1 stage
         ProgramStage programStage = selectedProgram.getProgramStages().get(0);
         if (programStage == null || isListEmpty(programStage.getProgramStageDataElements())) {
-            return teiRows;
+            return fragmentForm;
         }
 
         List<ProgramTrackedEntityAttribute> attributes = selectedProgram.getProgramTrackedEntityAttributes();
         if (isListEmpty(attributes)) {
-            return teiRows;
+            return fragmentForm;
         }
 
         List<String> attributesToShow = new ArrayList<>();
@@ -85,7 +88,7 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
                 mProgramId, mOrgUnitId);
         List<Long> trackedEntityInstanceIds = new ArrayList<>();
         if (isListEmpty(enrollments)) {
-            return teiRows;
+            return fragmentForm;
         } else {
             for (Enrollment enrollment : enrollments) {
                 if (enrollment.getLocalTrackedEntityInstanceId() > 0) {
@@ -123,7 +126,10 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
                     codeToName, failedEventIds));
         }
 
-        return teiRows;
+        fragmentForm.setEventRowList(teiRows);
+        fragmentForm.setProgram(selectedProgram);
+        fragmentForm.setColumnNames(columnNames);
+        return fragmentForm;
     }
 
     private EventRow createTrackedEntityInstanceItem(Context context, TrackedEntityInstance trackedEntityInstance,

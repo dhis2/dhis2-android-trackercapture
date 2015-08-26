@@ -32,6 +32,7 @@ import com.raizlabs.android.dbflow.sql.language.Select;
 
 import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis.android.sdk.fragments.selectprogram.SelectProgramFragmentForm;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.Option;
@@ -47,7 +48,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class UpcomingEventsFragmentQuery implements Query<List<EventRow>> {
+class UpcomingEventsFragmentQuery implements Query<SelectProgramFragmentForm> {
     private final String mOrgUnitId;
     private final String mProgramId;
     private final String mStartDate;
@@ -64,13 +65,14 @@ class UpcomingEventsFragmentQuery implements Query<List<EventRow>> {
     }
 
     @Override
-    public List<EventRow> query(Context context) {
+    public SelectProgramFragmentForm query(Context context) {
         List<EventRow> eventUpcomingEventRows = new ArrayList<>();
+        SelectProgramFragmentForm fragmentForm = new SelectProgramFragmentForm();
 
         // create a list of EventItems
         Program selectedProgram = MetaDataController.getProgram(mProgramId);
         if (selectedProgram == null || isListEmpty(selectedProgram.getProgramStages())) {
-            return eventUpcomingEventRows;
+            return fragmentForm;
         }
 
         List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes =
@@ -97,7 +99,7 @@ class UpcomingEventsFragmentQuery implements Query<List<EventRow>> {
                 mProgramId, mOrgUnitId, mStartDate, mEndDate
         );
         if (isListEmpty(events)) {
-            return eventUpcomingEventRows;
+            return fragmentForm;
         }
 
         List<Option> options = new Select().from(Option.class).queryList();
@@ -110,8 +112,9 @@ class UpcomingEventsFragmentQuery implements Query<List<EventRow>> {
             eventUpcomingEventRows.add(createEventItem(event, attributesToShow,
                     codeToName));
         }
-
-        return eventUpcomingEventRows;
+        fragmentForm.setEventRowList(eventUpcomingEventRows);
+        fragmentForm.setProgram(selectedProgram);
+        return fragmentForm;
     }
 
     private UpcomingEventItemRow createEventItem(Event event, List<String> attributesToShow,

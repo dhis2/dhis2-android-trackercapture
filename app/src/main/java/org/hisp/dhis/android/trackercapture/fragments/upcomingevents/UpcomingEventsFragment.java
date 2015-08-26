@@ -30,6 +30,7 @@
 package org.hisp.dhis.android.trackercapture.fragments.upcomingevents;
 
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.view.View;
 import android.widget.AdapterView;
@@ -42,6 +43,7 @@ import com.raizlabs.android.dbflow.structure.Model;
 import org.hisp.dhis.android.sdk.controllers.Dhis2;
 import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis.android.sdk.fragments.selectprogram.SelectProgramFragment;
+import org.hisp.dhis.android.sdk.fragments.selectprogram.SelectProgramFragmentForm;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
@@ -66,7 +68,7 @@ import java.util.List;
 /**
  * @author Simen Skogly Russnes on 20.02.15.
  */
-public class UpcomingEventsFragment extends SelectProgramFragment implements AdapterView.OnItemClickListener {
+public class UpcomingEventsFragment extends SelectProgramFragment implements AdapterView.OnItemClickListener, LoaderManager.LoaderCallbacks<SelectProgramFragmentForm> {
 
     private static final String CLASS_TAG = "UpcomingEventsFragment";
 
@@ -127,7 +129,7 @@ public class UpcomingEventsFragment extends SelectProgramFragment implements Ada
 
 
     @Override
-    public Loader<List<EventRow>> onCreateLoader(int id, Bundle args) {
+    public Loader<SelectProgramFragmentForm> onCreateLoader(int id, Bundle args) {
         if (LOADER_ID == id && isAdded()) {
             List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
             modelsToTrack.add(Event.class);

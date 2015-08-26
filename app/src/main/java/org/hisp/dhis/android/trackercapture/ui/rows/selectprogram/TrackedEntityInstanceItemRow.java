@@ -16,12 +16,14 @@ import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
 import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.EventRowType;
 
+import java.util.Comparator;
+
 import static org.hisp.dhis.android.sdk.utils.Preconditions.isNull;
 
 /**
  * Created by erling on 5/11/15.
  */
-public class TrackedEntityInstanceItemRow implements EventRow
+public class TrackedEntityInstanceItemRow implements EventRow, Comparator<TrackedEntityInstanceItemRow>
 {
     protected TrackedEntityInstance mTrackedEntityInstance;
     protected String mFirstItem;
@@ -160,6 +162,11 @@ public class TrackedEntityInstanceItemRow implements EventRow
 
     public OnRowClick.ITEM_STATUS getStatus() {
         return mStatus;
+    }
+
+    @Override
+    public int compare(TrackedEntityInstanceItemRow lhs, TrackedEntityInstanceItemRow rhs) {
+        return 0;
     }
 
     private static class ViewHolder {

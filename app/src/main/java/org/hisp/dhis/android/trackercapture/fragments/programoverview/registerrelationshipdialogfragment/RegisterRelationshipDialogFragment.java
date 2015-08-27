@@ -56,8 +56,8 @@ import com.raizlabs.android.dbflow.sql.language.Select;
 import com.raizlabs.android.dbflow.structure.Model;
 
 import org.hisp.dhis.android.sdk.R;
-import org.hisp.dhis.android.sdk.controllers.Dhis2;
-import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
+import org.hisp.dhis.android.sdk.controllers.DhisController;
+import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
@@ -69,10 +69,11 @@ import org.hisp.dhis.android.sdk.persistence.models.RelationshipType;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.AbsTextWatcher;
-import org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogFragment;
-import org.hisp.dhis.android.sdk.utils.ui.views.CardTextViewButton;
-import org.hisp.dhis.android.sdk.utils.ui.views.FontTextView;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.AbsTextWatcher;
+import org.hisp.dhis.android.sdk.ui.dialogs.AutoCompleteDialogFragment;
+import org.hisp.dhis.android.sdk.ui.views.CardTextViewButton;
+import org.hisp.dhis.android.sdk.ui.views.FontTextView;
+import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.ui.adapters.RelationshipTypeAdapter;
 import org.hisp.dhis.android.trackercapture.ui.adapters.TrackedEntityInstanceAdapter;
 
@@ -207,7 +208,7 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
 
             mForm = data;
             if(mForm.getTrackedEntityInstance()!=null) {
-                List<Enrollment> enrollments = DataValueController.getEnrollments(mForm.getTrackedEntityInstance());
+                List<Enrollment> enrollments = TrackerController.getEnrollments(mForm.getTrackedEntityInstance());
                 List<TrackedEntityAttribute> attributesToShow = new ArrayList<>();
                 String value = "";
                 if(enrollments!=null && !enrollments.isEmpty()) {
@@ -222,7 +223,7 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
                         attributesToShow.add(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute());
                     }
                     for(int i=0; i<attributesToShow.size() && i<2; i++) {
-                        TrackedEntityAttributeValue av = DataValueController.getTrackedEntityAttributeValue(attributesToShow.get(i).getId(), mForm.getTrackedEntityInstance().getLocalId());
+                        TrackedEntityAttributeValue av = TrackerController.getTrackedEntityAttributeValue(attributesToShow.get(i).getUid(), mForm.getTrackedEntityInstance().getLocalId());
                         if (av != null && av.getValue() != null) {
                             value +=av.getValue() + " ";
                         }
@@ -342,14 +343,14 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
     }
 
     public void showConfirmRelationshipDialog(final int position) {
-        Dhis2.showConfirmDialog(getActivity(), getString(R.string.confirm),
+        UiUtils.showConfirmDialog(getActivity(), getString(R.string.confirm),
                 getString(R.string.confirm_relationship), getString(R.string.yes),
                 getString(R.string.cancel), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
-                        TrackedEntityInstance relative = DataValueController.getTrackedEntityInstance(mAdapter.getItemId(position));
-                        switch(registerRelationship(relative)){
+                        TrackedEntityInstance relative = TrackerController.getTrackedEntityInstance(mAdapter.getItemId(position));
+                        switch (registerRelationship(relative)) {
                             case -1:
                                 Toast.makeText(getActivity(), getString(R.string.please_select_relationshiptype), Toast.LENGTH_SHORT).show();
                                 break;

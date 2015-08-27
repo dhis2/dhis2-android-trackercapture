@@ -27,9 +27,8 @@
 package org.hisp.dhis.android.trackercapture.fragments.programoverview;
 
 import android.content.Context;
-import android.util.Log;
 
-import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
+import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
@@ -63,8 +62,8 @@ class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm>
     public ProgramOverviewFragmentForm query(Context context) {
         ProgramOverviewFragmentForm programOverviewFragmentForm = new ProgramOverviewFragmentForm();
         Program program = MetaDataController.getProgram(mProgramId);
-        TrackedEntityInstance trackedEntityInstance = DataValueController.getTrackedEntityInstance(mTrackedEntityInstanceId);
-        List<Enrollment> enrollments = DataValueController.getEnrollments(mProgramId, trackedEntityInstance);
+        TrackedEntityInstance trackedEntityInstance = TrackerController.getTrackedEntityInstance(mTrackedEntityInstanceId);
+        List<Enrollment> enrollments = TrackerController.getEnrollments(mProgramId, trackedEntityInstance);
         Enrollment activeEnrollment = null;
         if(enrollments!=null) {
             for(Enrollment enrollment: enrollments) {
@@ -121,7 +120,7 @@ class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm>
         }
         Program program = MetaDataController.getProgram(mProgramId);
         for(ProgramStage programStage: program.getProgramStages()) {
-            List<Event> eventsForStage = eventsByStage.get(programStage.getId());
+            List<Event> eventsForStage = eventsByStage.get(programStage.getUid());
             ProgramStageLabelRow labelRow = new ProgramStageLabelRow(programStage);
             rows.add(labelRow);
             if(eventsForStage==null) continue;

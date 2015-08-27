@@ -7,7 +7,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import org.hisp.dhis.android.sdk.persistence.models.ProgramStage;
-import org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton;
+import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;

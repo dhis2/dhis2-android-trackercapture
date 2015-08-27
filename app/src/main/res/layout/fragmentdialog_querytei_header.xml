@@ -33,14 +33,14 @@
     android:layout_height="match_parent"
     android:gravity="center_horizontal">
 
-    <org.hisp.dhis.android.sdk.utils.ui.views.FontTextView
+    <org.hisp.dhis.android.sdk.ui.views.FontTextView
         android:textSize="@dimen/medium_text_size"
         android:text="@string/detailed_search"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center" />
 
-        <org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton
+        <org.hisp.dhis.android.sdk.ui.views.FloatingActionButton
             android:id="@+id/detailed_search_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

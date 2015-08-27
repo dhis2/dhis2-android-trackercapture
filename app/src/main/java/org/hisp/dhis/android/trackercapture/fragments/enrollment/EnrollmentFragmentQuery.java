@@ -2,7 +2,7 @@ package org.hisp.dhis.android.trackercapture.fragments.enrollment;
 
 import android.content.Context;
 
-import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
+import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.persistence.models.DataElement;
@@ -14,13 +14,13 @@ import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribut
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.AutoCompleteRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.CheckBoxRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.DataEntryRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.DataEntryRowTypes;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.DatePickerRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.EditTextRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.RadioButtonsRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.AutoCompleteRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.CheckBoxRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowTypes;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DatePickerRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EditTextRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.RadioButtonsRow;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,7 +62,7 @@ class EnrollmentFragmentQuery implements Query<EnrollmentFragmentForm> {
         if (mTrackedEntityInstanceId < 0) {
             currentTrackedEntityInstance = new TrackedEntityInstance(mProgram, mOrgUnitId);
         } else {
-            currentTrackedEntityInstance = DataValueController.getTrackedEntityInstance(mTrackedEntityInstanceId);
+            currentTrackedEntityInstance = TrackerController.getTrackedEntityInstance(mTrackedEntityInstanceId);
         }
 
         currentEnrollment = new Enrollment(mOrgUnitId, currentTrackedEntityInstance.getTrackedEntityInstance(), mProgram);
@@ -80,7 +80,7 @@ class EnrollmentFragmentQuery implements Query<EnrollmentFragmentForm> {
         programTrackedEntityAttributes = mProgram.getProgramTrackedEntityAttributes();
 
         for (ProgramTrackedEntityAttribute ptea : programTrackedEntityAttributes) {
-            TrackedEntityAttributeValue value = DataValueController.getTrackedEntityAttributeValue(ptea.getTrackedEntityAttributeId(), currentTrackedEntityInstance.getLocalId());
+            TrackedEntityAttributeValue value = TrackerController.getTrackedEntityAttributeValue(ptea.getTrackedEntityAttributeId(), currentTrackedEntityInstance.getLocalId());
             if (value != null) {
                 trackedEntityAttributeValues.add(value);
             }
@@ -89,7 +89,7 @@ class EnrollmentFragmentQuery implements Query<EnrollmentFragmentForm> {
         currentEnrollment.setAttributes(trackedEntityAttributeValues);
         for (int i = 0; i < programTrackedEntityAttributes.size(); i++) {
             DataEntryRow row = createDataEntryView(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute(),
-                    getTrackedEntityDataValue(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getId(), trackedEntityAttributeValues));
+                    getTrackedEntityDataValue(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getUid(), trackedEntityAttributeValues));
             dataEntryRows.add(row);
         }
         mForm.setDataEntryRows(dataEntryRows);

@@ -42,7 +42,7 @@
         android:orientation="horizontal"
         android:weightSum="1">
 
-        <org.hisp.dhis.android.sdk.utils.ui.views.FontTextView
+        <org.hisp.dhis.android.sdk.ui.views.FontTextView
             android:id="@+id/dialog_label"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -86,7 +86,7 @@
         android:layout_height="1px"
         android:background="@color/dark_navy_blue"/>
 
-    <org.hisp.dhis.android.sdk.utils.ui.views.CardTextViewButton
+    <org.hisp.dhis.android.sdk.ui.views.CardTextViewButton
         android:id="@+id/relationshiptypebutton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -98,7 +98,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <org.hisp.dhis.android.sdk.utils.ui.views.FontTextView
+        <org.hisp.dhis.android.sdk.ui.views.FontTextView
             android:id="@+id/tei_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -111,7 +111,7 @@
             android:text=""
             app:font="@string/condensed_font_name"/>
 
-        <org.hisp.dhis.android.sdk.utils.ui.views.FontTextView
+        <org.hisp.dhis.android.sdk.ui.views.FontTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"
@@ -134,7 +134,7 @@
 
         </LinearLayout>
 
-    <org.hisp.dhis.android.sdk.utils.ui.views.FontEditText
+    <org.hisp.dhis.android.sdk.ui.views.FontEditText
         android:id="@+id/filter_options"
         android:layout_width="match_parent"
         android:layout_height="48dp"

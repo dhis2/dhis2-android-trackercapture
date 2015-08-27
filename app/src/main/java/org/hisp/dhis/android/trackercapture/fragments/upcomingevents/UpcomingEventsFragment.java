@@ -34,27 +34,23 @@ import android.support.v4.content.Loader;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TableLayout;
 
 import com.raizlabs.android.dbflow.structure.Model;
 
-import org.hisp.dhis.android.sdk.controllers.Dhis2;
-import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
-import org.hisp.dhis.android.sdk.fragments.selectprogram.SelectProgramFragment;
+import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
+import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
+import org.hisp.dhis.android.sdk.ui.adapters.AbsAdapter;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DatePickerRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
+import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragment;
+import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.sdk.utils.support.DateUtils;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.AbsAdapter;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.DatePickerRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
-import org.hisp.dhis.android.sdk.utils.ui.dialogs.OrgUnitDialogFragment;
-import org.hisp.dhis.android.sdk.utils.ui.dialogs.ProgramDialogFragment;
-import org.hisp.dhis.android.sdk.utils.ui.views.CardTextViewButton;
-import org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.fragments.programoverview.ProgramOverviewFragment;
 import org.hisp.dhis.android.trackercapture.ui.adapters.UpcomingEventAdapter;
@@ -92,8 +88,7 @@ public class UpcomingEventsFragment extends SelectProgramFragment implements Ada
 
         mListView.setOnItemClickListener(this);
         mQueryButton = (FloatingActionButton) header.findViewById(R.id.upcoming_query_button);
-        assignedOrganisationUnits = Dhis2.getInstance().
-                getMetaDataController().getAssignedOrganisationUnits();
+        assignedOrganisationUnits = MetaDataController.getAssignedOrganisationUnits();
         if( assignedOrganisationUnits==null || assignedOrganisationUnits.size() <= 0 ) {
             return header;
         }
@@ -141,10 +136,10 @@ public class UpcomingEventsFragment extends SelectProgramFragment implements Ada
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Event event = DataValueController.getEvent(id);
+        Event event = TrackerController.getEvent(id);
         ProgramOverviewFragment fragment = ProgramOverviewFragment.
                 newInstance(mState.getOrgUnitId(), mState.getProgramId(),
-                        DataValueController.getEnrollment
+                        TrackerController.getEnrollment
                                 (event.getLocalEnrollmentId()).getLocalTrackedEntityInstanceId());
 
         mNavigationHandler.switchFragment(fragment, ProgramOverviewFragment.CLASS_TAG, true);

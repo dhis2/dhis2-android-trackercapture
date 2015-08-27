@@ -30,8 +30,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.hisp.dhis.android.sdk.utils.ui.adapters.AbsAdapter;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
+import org.hisp.dhis.android.sdk.ui.adapters.AbsAdapter;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.EventRowType;
 
 public class UpcomingEventAdapter extends AbsAdapter<EventRow> {

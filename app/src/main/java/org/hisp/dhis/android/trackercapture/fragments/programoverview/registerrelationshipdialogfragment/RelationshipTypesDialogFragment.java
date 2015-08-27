@@ -41,9 +41,9 @@ import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.RelationshipType;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.SimpleAdapter;
-import org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogAdapter;
-import org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogFragment;
+import org.hisp.dhis.android.sdk.ui.adapters.SimpleAdapter;
+import org.hisp.dhis.android.sdk.ui.dialogs.AutoCompleteDialogAdapter;
+import org.hisp.dhis.android.sdk.ui.dialogs.AutoCompleteDialogFragment;
 import org.hisp.dhis.android.trackercapture.R;
 
 import java.util.ArrayList;
@@ -128,7 +128,7 @@ public class RelationshipTypesDialogFragment extends AutoCompleteDialogFragment
             List<AutoCompleteDialogAdapter.OptionAdapterValue> values = new ArrayList<>();
             if (relationshipTypes != null && !relationshipTypes.isEmpty()) {
                 for (RelationshipType relationshipType : relationshipTypes) {
-                    values.add(new AutoCompleteDialogAdapter.OptionAdapterValue(relationshipType.getId(), relationshipType.getName()));
+                    values.add(new AutoCompleteDialogAdapter.OptionAdapterValue(relationshipType.getUid(), relationshipType.getName()));
                 }
             }
 

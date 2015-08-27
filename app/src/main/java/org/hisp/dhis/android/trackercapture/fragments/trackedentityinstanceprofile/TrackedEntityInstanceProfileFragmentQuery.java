@@ -3,7 +3,7 @@ package org.hisp.dhis.android.trackercapture.fragments.trackedentityinstanceprof
 import android.content.Context;
 import android.util.Log;
 
-import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
+import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.persistence.models.DataElement;
@@ -13,13 +13,13 @@ import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribut
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.AutoCompleteRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.CheckBoxRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.DataEntryRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.DataEntryRowTypes;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.DatePickerRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.EditTextRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.RadioButtonsRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.AutoCompleteRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.CheckBoxRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowTypes;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DatePickerRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EditTextRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.RadioButtonsRow;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +42,7 @@ public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedE
     public TrackedEntityInstanceProfileFragmentForm query(Context context) {
         TrackedEntityInstanceProfileFragmentForm mForm = new TrackedEntityInstanceProfileFragmentForm();
         final Program mProgram = MetaDataController.getProgram(mProgramId);
-        final TrackedEntityInstance mTrackedEntityInstance = DataValueController.getTrackedEntityInstance(mTrackedEntityInstanceId);
+        final TrackedEntityInstance mTrackedEntityInstance = TrackerController.getTrackedEntityInstance(mTrackedEntityInstanceId);
 
         if (mProgram == null || mTrackedEntityInstance == null)
             return mForm;
@@ -52,7 +52,7 @@ public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedE
         mForm.setProgram(mProgram);
         mForm.setTrackedEntityInstance(mTrackedEntityInstance);
 
-        List<TrackedEntityAttributeValue> values = DataValueController.getProgramTrackedEntityAttributeValues(mProgram, mTrackedEntityInstance);
+        List<TrackedEntityAttributeValue> values = TrackerController.getProgramTrackedEntityAttributeValues(mProgram, mTrackedEntityInstance);
         List<ProgramTrackedEntityAttribute> attributes = MetaDataController.getProgramTrackedEntityAttributes(mProgramId);
 
         if (values == null && attributes == null)
@@ -62,7 +62,7 @@ public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedE
         for (int i = 0; i < attributes.size(); i++) {
 
             DataEntryRow row = createDataEntryView(attributes.get(i).getTrackedEntityAttribute(),
-                    getTrackedEntityDataValue(attributes.get(i).getTrackedEntityAttribute().getId(),
+                    getTrackedEntityDataValue(attributes.get(i).getTrackedEntityAttribute().getUid(),
                             values));
 
             dataEntryRows.add(row);

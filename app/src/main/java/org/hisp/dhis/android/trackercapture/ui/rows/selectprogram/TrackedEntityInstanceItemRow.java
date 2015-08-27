@@ -11,7 +11,7 @@ import android.widget.TextView;
 import org.hisp.dhis.android.sdk.events.OnRowClick;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
 import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.EventRowType;

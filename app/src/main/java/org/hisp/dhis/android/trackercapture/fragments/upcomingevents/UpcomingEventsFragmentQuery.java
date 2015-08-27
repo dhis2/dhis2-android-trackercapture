@@ -30,16 +30,16 @@ import android.content.Context;
 
 import com.raizlabs.android.dbflow.sql.language.Select;
 
-import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
+import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
-import org.hisp.dhis.android.sdk.fragments.selectprogram.SelectProgramFragmentForm;
+import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.Option;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.UpcomingEventItemRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.UpcomingEventsColumnNamesRow;
 
@@ -95,7 +95,7 @@ class UpcomingEventsFragmentQuery implements Query<SelectProgramFragmentForm> {
         }
         eventUpcomingEventRows.add(columnNames);
 
-        List<Event> events = DataValueController.getScheduledEvents(
+        List<Event> events = TrackerController.getScheduledEvents(
                 mProgramId, mOrgUnitId, mStartDate, mEndDate
         );
         if (isListEmpty(events)) {
@@ -129,7 +129,7 @@ class UpcomingEventsFragmentQuery implements Query<SelectProgramFragmentForm> {
             if (i >= attributesToShow.size()) break;
             String trackedEntityAttribute = attributesToShow.get(i);
             if (trackedEntityAttribute != null) {
-                TrackedEntityAttributeValue trackedEntityAttributeValue = DataValueController.
+                TrackedEntityAttributeValue trackedEntityAttributeValue = TrackerController.
                         getTrackedEntityAttributeValue(trackedEntityAttribute,
                                 event.getTrackedEntityInstance());
                 if (trackedEntityAttributeValue == null) {

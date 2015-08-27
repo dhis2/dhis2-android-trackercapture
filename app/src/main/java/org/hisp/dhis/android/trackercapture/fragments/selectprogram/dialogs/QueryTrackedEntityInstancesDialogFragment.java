@@ -49,12 +49,22 @@ import android.widget.TextView;
 import com.raizlabs.android.dbflow.structure.Model;
 
 import org.hisp.dhis.android.sdk.R;
-import org.hisp.dhis.android.sdk.controllers.Dhis2;
+import org.hisp.dhis.android.sdk.controllers.DhisController;
+import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
+import org.hisp.dhis.android.sdk.events.UiEvent;
+import org.hisp.dhis.android.sdk.job.JobExecutor;
+import org.hisp.dhis.android.sdk.job.NetworkJob;
+import org.hisp.dhis.android.sdk.network.APIException;
+import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.DataValueAdapter;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.AbsTextWatcher;
-import org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
+import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
+import org.hisp.dhis.android.sdk.ui.adapters.DataValueAdapter;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.AbsTextWatcher;
+import org.hisp.dhis.android.sdk.ui.dialogs.QueryTrackedEntityInstancesResultDialogFragment;
+import org.hisp.dhis.android.sdk.ui.fragments.progressdialog.ProgressDialogFragment;
+import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -273,12 +283,46 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
     }
 
     public void runQuery() {
-        List<TrackedEntityAttributeValue> searchValues = new ArrayList<>();
+        final List<TrackedEntityAttributeValue> searchValues = new ArrayList<>();
         if(mForm!=null && mForm.getTrackedEntityAttributeValues()!=null) {
             for (TrackedEntityAttributeValue value : mForm.getTrackedEntityAttributeValues()) {
                 searchValues.add(value);
             }
         }
-        Dhis2.queryTrackedEntityInstances(getFragmentManager(), mForm.getOrganisationUnit(), mForm.getProgram(), mForm.getQueryString(), searchValues.toArray(new TrackedEntityAttributeValue[]{}));
+        new Thread() {
+            @Override
+            public void run() {
+                queryTrackedEntityInstances(getFragmentManager(),
+                        mForm.getOrganisationUnit(), mForm.getProgram(),
+                        mForm.getQueryString(), searchValues.toArray(new TrackedEntityAttributeValue[]{}));
+            }
+        }.start();
+    }
+
+    /**
+     * Queries the server for TrackedEntityInstances and shows a Dialog containing the results
+     * @param orgUnit
+     * @param program can be null
+     * @param params can be null
+     */
+    public static void queryTrackedEntityInstances(final FragmentManager fragmentManager, final String orgUnit, final String program, final String queryString, final TrackedEntityAttributeValue... params)
+            throws APIException {
+        JobExecutor.enqueueJob(new NetworkJob<Object>(0,
+                null) {
+
+            @Override
+            public Object execute() throws APIException {
+                Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_START));
+                List<TrackedEntityInstance> trackedEntityInstancesQueryResult = TrackerController.queryTrackedEntityInstancesDataFromServer(DhisController.getInstance().getDhisApi(), orgUnit, program, queryString, params);
+                Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_END));
+                showTrackedEntityInstanceQueryResultDialog(fragmentManager, trackedEntityInstancesQueryResult, orgUnit);
+                return new Object();
+            }
+        });
+    }
+
+    public static void showTrackedEntityInstanceQueryResultDialog(FragmentManager fragmentManager, List<TrackedEntityInstance> trackedEntityInstances, String orgUnit) {
+        QueryTrackedEntityInstancesResultDialogFragment dialog = QueryTrackedEntityInstancesResultDialogFragment.newInstance(trackedEntityInstances, orgUnit);
+        dialog.show(fragmentManager);
     }
 }

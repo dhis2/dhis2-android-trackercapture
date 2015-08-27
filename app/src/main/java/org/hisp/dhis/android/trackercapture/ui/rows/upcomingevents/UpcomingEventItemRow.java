@@ -34,7 +34,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.trackercapture.R;
 
 /**

@@ -8,9 +8,9 @@ import android.widget.Filter;
 import android.widget.Filterable;
 
 import org.hisp.dhis.android.sdk.events.OnRowClick;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.AbsAdapter;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.TrackedEntityInstanceColumnNamesRow;
+import org.hisp.dhis.android.sdk.ui.adapters.AbsAdapter;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceColumnNamesRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceItemRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.EventRowType;
 import org.joda.time.DateTime;

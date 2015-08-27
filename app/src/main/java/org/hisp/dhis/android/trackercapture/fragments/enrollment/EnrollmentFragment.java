@@ -36,7 +36,6 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -48,32 +47,33 @@ import android.widget.AdapterView;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.sdk.R;
-import org.hisp.dhis.android.sdk.activities.INavigationHandler;
-import org.hisp.dhis.android.sdk.activities.OnBackPressedListener;
+import org.hisp.dhis.android.sdk.controllers.DhisService;
+import org.hisp.dhis.android.sdk.ui.activities.INavigationHandler;
+import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
-import org.hisp.dhis.android.sdk.controllers.ResponseHolder;
-import org.hisp.dhis.android.sdk.fragments.ProgressDialogFragment;
-import org.hisp.dhis.android.sdk.fragments.dataentry.RowValueChangedEvent;
-import org.hisp.dhis.android.sdk.fragments.dataentry.ValidationErrorDialog;
-import org.hisp.dhis.android.sdk.network.http.ApiRequestCallback;
+import org.hisp.dhis.android.sdk.ui.fragments.dataentry.RowValueChangedEvent;
+import org.hisp.dhis.android.sdk.ui.fragments.dataentry.ValidationErrorDialog;
+import org.hisp.dhis.android.sdk.job.JobExecutor;
+import org.hisp.dhis.android.sdk.job.NetworkJob;
+import org.hisp.dhis.android.sdk.network.APIException;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
+import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
+import org.hisp.dhis.android.sdk.controllers.GpsController;
+import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.sdk.utils.support.DateUtils;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.DataValueAdapter;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.SectionAdapter;
+import org.hisp.dhis.android.sdk.ui.adapters.DataValueAdapter;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
-import org.hisp.dhis.android.sdk.controllers.Dhis2;
+import org.hisp.dhis.android.sdk.controllers.DhisController;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
@@ -186,7 +186,7 @@ public class EnrollmentFragment extends Fragment
             ((INavigationHandler) getActivity()).setBackPressedListener(null);
         }
 
-        Dhis2.disableGps();
+        GpsController.disableGps();
         mNavigationHandler = null;
         super.onDetach();
     }
@@ -354,7 +354,7 @@ public class EnrollmentFragment extends Fragment
     @Override
     public void doBack() {
         if (haveValuesChanged()) {
-            Dhis2.getInstance().showConfirmDialog(getActivity(),
+            UiUtils.showConfirmDialog(getActivity(),
                     getString(R.string.discard), getString(R.string.discard_confirm_changes),
                     getString(R.string.discard),
                     getString(R.string.save_and_close),
@@ -367,7 +367,7 @@ public class EnrollmentFragment extends Fragment
                     }, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            if(validate()) {
+                            if (validate()) {
                                 save();
                                 getFragmentManager().popBackStack();
                             }
@@ -551,30 +551,16 @@ public class EnrollmentFragment extends Fragment
                         mForm.getEnrollment().setFromServer(false);
                         mForm.getEnrollment().save();
 
-
-                    final ApiRequestCallback callback = new ApiRequestCallback() {
-                        @Override
-                        public void onSuccess(ResponseHolder holder) {
-                            //do nothing
-                        }
-
-                        @Override
-                        public void onFailure(ResponseHolder holder) {
-                            //do nothing
-                        }
-                    };
-
                         TimerTask timerTask = new TimerTask() {
                             @Override
                             public void run() {
-                                Dhis2.sendLocalData(context, callback);
+                                DhisService.sendData();
                             }
                         };
                         Timer timer = new Timer();
                         timer.schedule(timerTask, 5000);
                     }
                 }
-
             }.start();
         }
     }
@@ -593,7 +579,7 @@ public class EnrollmentFragment extends Fragment
         }
 
         Map<String, ProgramTrackedEntityAttribute> dataElements = toMap(
-                MetaDataController.getProgramTrackedEntityAttributes(mForm.getProgram().getId())
+                MetaDataController.getProgramTrackedEntityAttributes(mForm.getProgram().getUid())
         );
 
         for (TrackedEntityAttributeValue value : mForm.getEnrollment().getAttributes()) {

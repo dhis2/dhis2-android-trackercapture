@@ -11,13 +11,13 @@ import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.AutoCompleteRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.CheckBoxRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.DataEntryRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.DataEntryRowTypes;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.DatePickerRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.EditTextRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.RadioButtonsRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.AutoCompleteRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.CheckBoxRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowTypes;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DatePickerRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EditTextRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.RadioButtonsRow;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +65,7 @@ public class QueryTrackedEntityInstancesDialogFragmentQuery implements Query<Que
         for(int i=0;i<listAttributes.size();i++)
         {
             TrackedEntityAttributeValue value = new TrackedEntityAttributeValue();
-            value.setTrackedEntityAttributeId(listAttributes.get(i).getId());
+            value.setTrackedEntityAttributeId(listAttributes.get(i).getUid());
             values.add(value);
 
             DataEntryRow row = createDataEntryView(listAttributes.get(i), value);

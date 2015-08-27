@@ -2,7 +2,6 @@ package org.hisp.dhis.android.trackercapture.fragments.enrollmentdate;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -15,7 +14,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -25,17 +23,21 @@ import android.widget.TextView;
 
 import com.squareup.otto.Subscribe;
 
-import org.hisp.dhis.android.sdk.activities.INavigationHandler;
-import org.hisp.dhis.android.sdk.activities.OnBackPressedListener;
-import org.hisp.dhis.android.sdk.controllers.Dhis2;
-import org.hisp.dhis.android.sdk.controllers.ResponseHolder;
-import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
-import org.hisp.dhis.android.sdk.fragments.dataentry.RowValueChangedEvent;
-import org.hisp.dhis.android.sdk.network.http.ApiRequestCallback;
+import org.hisp.dhis.android.sdk.controllers.DhisService;
+import org.hisp.dhis.android.sdk.ui.activities.INavigationHandler;
+import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
+import org.hisp.dhis.android.sdk.controllers.DhisController;
+import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
+import org.hisp.dhis.android.sdk.ui.fragments.dataentry.RowValueChangedEvent;
+import org.hisp.dhis.android.sdk.job.JobExecutor;
+import org.hisp.dhis.android.sdk.job.NetworkJob;
+import org.hisp.dhis.android.sdk.network.APIException;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.DataValueAdapter;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.DataEntryRow;
+import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
+import org.hisp.dhis.android.sdk.ui.adapters.DataValueAdapter;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRow;
+import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.R;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -114,7 +116,7 @@ public class EnrollmentDateFragment extends Fragment implements OnBackPressedLis
 
         mListView.addHeaderView(mEnrollmentDatePicker);
         mListView.addHeaderView(mIncidentDatePicker);
-        enrollment = DataValueController.getEnrollment(getArguments().getLong(ENROLLMENT_ID));
+        enrollment = TrackerController.getEnrollment(getArguments().getLong(ENROLLMENT_ID));
 
 
         attachIncidentDatePicker();
@@ -180,7 +182,7 @@ public class EnrollmentDateFragment extends Fragment implements OnBackPressedLis
     {
         if(edit)
         {
-            Dhis2.getInstance().showConfirmDialog(getActivity(),
+            UiUtils.showConfirmDialog(getActivity(),
                     getString(org.hisp.dhis.android.sdk.R.string.discard), getString(org.hisp.dhis.android.sdk.R.string.discard_confirm_changes),
                     getString(org.hisp.dhis.android.sdk.R.string.discard),
                     getString(org.hisp.dhis.android.sdk.R.string.save_and_close),
@@ -198,7 +200,7 @@ public class EnrollmentDateFragment extends Fragment implements OnBackPressedLis
                             submitChanges();
                             onDetach();
                             getFragmentManager().popBackStack();
-                            Dhis2.hasUnSynchronizedDatavalues = true;
+                            DhisController.hasUnSynchronizedDatavalues = true;
                         }
                     }, new DialogInterface.OnClickListener() {
                         @Override
@@ -282,29 +284,13 @@ public class EnrollmentDateFragment extends Fragment implements OnBackPressedLis
                 saving = true;
                 if(mForm!=null && isAdded())
                 {
-
-                    final Context context = getActivity().getBaseContext();
-
                     enrollment.setFromServer(false);
                     enrollment.save();
-
-
 
                     TimerTask timerTask = new TimerTask() {
                         @Override
                         public void run() {
-                            ApiRequestCallback callback = new ApiRequestCallback() {
-                                @Override
-                                public void onSuccess(ResponseHolder holder) {
-
-                                }
-
-                                @Override
-                                public void onFailure(ResponseHolder holder) {
-
-                                }
-                            };
-                            Dhis2.sendLocalData(context, callback);
+                            DhisService.sendData();
                         }
                     };
                     Timer timer = new Timer();

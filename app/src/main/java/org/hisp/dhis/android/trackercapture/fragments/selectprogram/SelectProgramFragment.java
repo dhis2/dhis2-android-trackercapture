@@ -30,7 +30,6 @@
 package org.hisp.dhis.android.trackercapture.fragments.selectprogram;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
@@ -43,34 +42,33 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.TextView;
 
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
-import org.hisp.dhis.android.sdk.controllers.Dhis2;
 import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
-import org.hisp.dhis.android.sdk.fragments.selectprogram.SelectProgramFragmentForm;
+import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
+import org.hisp.dhis.android.sdk.events.UiEvent;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
-import org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton;
+import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
+import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.fragments.enrollment.EnrollmentFragment;
 import org.hisp.dhis.android.trackercapture.fragments.programoverview.ProgramOverviewFragment;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.QueryTrackedEntityInstancesDialogFragment;
 import org.hisp.dhis.android.trackercapture.fragments.upcomingevents.UpcomingEventsFragment;
 import org.hisp.dhis.android.trackercapture.ui.adapters.TrackedEntityInstanceAdapter;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.OnTrackedEntityInstanceColumnClick;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnTrackedEntityInstanceColumnClick;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SelectProgramFragment extends org.hisp.dhis.android.sdk.fragments.selectprogram.SelectProgramFragment
+public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragment
         implements SearchView.OnQueryTextListener, SearchView.OnFocusChangeListener,
         MenuItemCompat.OnActionExpandListener, LoaderManager.LoaderCallbacks<SelectProgramFragmentForm>{
     public static final String TAG = SelectProgramFragment.class.getSimpleName();
@@ -148,8 +146,13 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.fragments.s
 
             mNavigationHandler.switchFragment(fragment, ProgramOverviewFragment.CLASS_TAG, true);
         } else {
-            Dhis2.showStatusDialog(getChildFragmentManager(), eventClick.getItem());
+            UiUtils.showStatusDialog(getChildFragmentManager(), eventClick.getItem());
         }
+    }
+
+    @Subscribe
+    public void onReceivedUiEvent(UiEvent uiEvent) {
+        super.onReceivedUiEvent(uiEvent);
     }
 
     @Override

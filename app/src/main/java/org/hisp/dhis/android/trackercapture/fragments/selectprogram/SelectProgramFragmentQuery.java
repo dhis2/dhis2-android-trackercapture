@@ -4,10 +4,11 @@ import android.content.Context;
 
 import com.raizlabs.android.dbflow.sql.language.Select;
 
-import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
+import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.events.OnRowClick;
-import org.hisp.dhis.android.sdk.fragments.selectprogram.SelectProgramFragmentForm;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceColumnNamesRow;
+import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
@@ -17,8 +18,7 @@ import org.hisp.dhis.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.TrackedEntityInstanceColumnNamesRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.selectprogram.TrackedEntityInstanceItemRow;
 
 import java.util.ArrayList;
@@ -84,7 +84,7 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
         }
         teiRows.add(columnNames);
 
-        List<Enrollment> enrollments = DataValueController.getEnrollments(
+        List<Enrollment> enrollments = TrackerController.getEnrollments(
                 mProgramId, mOrgUnitId);
         List<Long> trackedEntityInstanceIds = new ArrayList<>();
         if (isListEmpty(enrollments)) {
@@ -100,7 +100,7 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
         List<TrackedEntityInstance> trackedEntityInstanceList = new ArrayList<>();
         if (!isListEmpty(trackedEntityInstanceIds)) {
             for (long localId : trackedEntityInstanceIds) {
-                TrackedEntityInstance tei = DataValueController.getTrackedEntityInstance(localId);
+                TrackedEntityInstance tei = TrackerController.getTrackedEntityInstance(localId);
                 trackedEntityInstanceList.add(tei);
             }
         }
@@ -111,7 +111,7 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
             codeToName.put(option.getCode(), option.getName());
         }
 
-        List<FailedItem> failedEvents = DataValueController.getFailedItems(FailedItem.TRACKEDENTITYINSTANCE);
+        List<FailedItem> failedEvents = TrackerController.getFailedItems(FailedItem.TRACKEDENTITYINSTANCE);
 
         Set<String> failedEventIds = new HashSet<>();
         for (FailedItem failedItem : failedEvents) {
@@ -152,7 +152,7 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
 
             String attribute = attributesToShow.get(i);
             if (attribute != null) {
-                TrackedEntityAttributeValue teav = DataValueController.getTrackedEntityAttributeValue(attribute, trackedEntityInstance.getLocalId());
+                TrackedEntityAttributeValue teav = TrackerController.getTrackedEntityAttributeValue(attribute, trackedEntityInstance.getLocalId());
                 String code;
                 if (teav == null) {
                     code = "";

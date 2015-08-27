@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.raizlabs.android.dbflow.sql.language.Select;
 
-import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
+import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
@@ -12,7 +12,7 @@ import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribut
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.SearchRelativeTrackedEntityInstanceItemRow;
 
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ public class RegisterRelationshipDialogFragmentQuery implements Query<RegisterRe
     public RegisterRelationshipDialogFragmentForm query(Context context)
     {
         RegisterRelationshipDialogFragmentForm form = new RegisterRelationshipDialogFragmentForm();
-        TrackedEntityInstance trackedEntityInstance = DataValueController.getTrackedEntityInstance(trackedEntityInstanceId);
+        TrackedEntityInstance trackedEntityInstance = TrackerController.getTrackedEntityInstance(trackedEntityInstanceId);
         if(trackedEntityInstance==null) {
             return form;
         }
@@ -70,7 +70,7 @@ public class RegisterRelationshipDialogFragmentQuery implements Query<RegisterRe
 
         //checking if the tei has an enrollment so that we can order the displayed attributes
         //in some logical fashion
-        List<Enrollment> enrollments = DataValueController.getEnrollments(trackedEntityInstance);
+        List<Enrollment> enrollments = TrackerController.getEnrollments(trackedEntityInstance);
         List<TrackedEntityAttribute> attributesToShow = new ArrayList<>();
         if(enrollments!=null && !enrollments.isEmpty()) {
             Program program = null;
@@ -94,7 +94,7 @@ public class RegisterRelationshipDialogFragmentQuery implements Query<RegisterRe
                     value = trackedEntityInstance.getAttributes().get(i).getValue();
                 }
             } else {
-                TrackedEntityAttributeValue av = DataValueController.getTrackedEntityAttributeValue(attributesToShow.get(i).getId(), trackedEntityInstance.getLocalId());
+                TrackedEntityAttributeValue av = TrackerController.getTrackedEntityAttributeValue(attributesToShow.get(i).getUid(), trackedEntityInstance.getLocalId());
                 if(av!=null && av.getValue()!=null) {
                     value = av.getValue();
                 }

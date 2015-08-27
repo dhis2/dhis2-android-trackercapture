@@ -33,7 +33,7 @@ import android.widget.TextView;
 
 import org.hisp.dhis.android.sdk.R;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.AbsAdapter;
+import org.hisp.dhis.android.sdk.ui.adapters.AbsAdapter;
 
 import java.util.List;
 

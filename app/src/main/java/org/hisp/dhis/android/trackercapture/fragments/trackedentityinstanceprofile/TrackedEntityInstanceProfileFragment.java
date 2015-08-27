@@ -24,17 +24,21 @@ import android.widget.ProgressBar;
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
-import org.hisp.dhis.android.sdk.activities.INavigationHandler;
-import org.hisp.dhis.android.sdk.controllers.Dhis2;
-import org.hisp.dhis.android.sdk.fragments.dataentry.RowValueChangedEvent;
-import org.hisp.dhis.android.sdk.controllers.ResponseHolder;
-import org.hisp.dhis.android.sdk.network.http.ApiRequestCallback;
+import org.hisp.dhis.android.sdk.controllers.DhisService;
+import org.hisp.dhis.android.sdk.ui.activities.INavigationHandler;
+import org.hisp.dhis.android.sdk.controllers.DhisController;
+import org.hisp.dhis.android.sdk.ui.fragments.dataentry.RowValueChangedEvent;
+import org.hisp.dhis.android.sdk.job.JobExecutor;
+import org.hisp.dhis.android.sdk.job.NetworkJob;
+import org.hisp.dhis.android.sdk.network.APIException;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
-import org.hisp.dhis.android.sdk.activities.OnBackPressedListener;
+import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.DataValueAdapter;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.dataentry.DataEntryRow;
+import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
+import org.hisp.dhis.android.sdk.ui.adapters.DataValueAdapter;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRow;
+import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.R;
 
 import java.util.ArrayList;
@@ -198,7 +202,7 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
     public void doBack() {
         if(edit)
         {
-            Dhis2.getInstance().showConfirmDialog(getActivity(),
+            UiUtils.showConfirmDialog(getActivity(),
                     getString(org.hisp.dhis.android.sdk.R.string.discard), getString(org.hisp.dhis.android.sdk.R.string.discard_confirm_changes),
                     getString(org.hisp.dhis.android.sdk.R.string.discard),
                     getString(org.hisp.dhis.android.sdk.R.string.save_and_close),
@@ -216,7 +220,7 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
                             submitChanges();
                             onDetach();
                             getFragmentManager().popBackStack();
-                            Dhis2.hasUnSynchronizedDatavalues = true;
+                            DhisController.hasUnSynchronizedDatavalues = true;
                         }
                     }, new DialogInterface.OnClickListener() {
                         @Override
@@ -393,18 +397,7 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
                     TimerTask timerTask = new TimerTask() {
                         @Override
                         public void run() {
-                            ApiRequestCallback callback = new ApiRequestCallback() {
-                                @Override
-                                public void onSuccess(ResponseHolder holder) {
-
-                                }
-
-                                @Override
-                                public void onFailure(ResponseHolder holder) {
-
-                                }
-                            };
-                            Dhis2.sendLocalData(context, callback);
+                            DhisService.sendData();
                         }
                     };
                     Timer timer = new Timer();

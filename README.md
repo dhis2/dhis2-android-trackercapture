@@ -18,3 +18,5 @@ A workspace folder structure would look like this:
 dhis2-android-sdk
 
 dhis2-android-trackercapture
+
+Then open Android Studio, select "Open an existing Android Studio project", and select the build.gradle in dhis2-android-eventcapture/

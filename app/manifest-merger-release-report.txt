@@ -16,7 +16,7 @@ ADDED from AndroidManifest.xml:2:1
 uses-sdk
 ADDED from AndroidManifest.xml:5:5
 MERGED from dhis2-android-trackercapture....dhis2-android-sdk:app:unspecified:33:5
-MERGED from com.raizlabs.android:DBFlow:2.0.0:7:5
+MERGED from com.raizlabs.android:DBFlow:2.2.1:7:5
 MERGED from com.android.support:appcompat-v7:22.1.1:20:5
 MERGED from com.android.support:support-v4:22.1.1:20:5
 MERGED from com.android.support:cardview-v7:21.0.3:15:5
@@ -54,7 +54,7 @@ ADDED from AndroidManifest.xml:13:5
 application
 ADDED from AndroidManifest.xml:15:5
 MERGED from dhis2-android-trackercapture....dhis2-android-sdk:app:unspecified:37:5
-MERGED from com.raizlabs.android:DBFlow:2.0.0:11:5
+MERGED from com.raizlabs.android:DBFlow:2.2.1:11:5
 MERGED from com.android.support:appcompat-v7:22.1.1:22:5
 MERGED from com.android.support:support-v4:22.1.1:22:5
 MERGED from com.android.support:cardview-v7:21.0.3:16:5
@@ -68,7 +68,7 @@ MERGED from com.android.support:cardview-v7:21.0.3:16:5
 		ADDED from AndroidManifest.xml:20:9
 	android:name
 		ADDED from AndroidManifest.xml:16:9
-activity#org.hisp.dhis.android.sdk.activities.SplashActivity
+activity#org.hisp.dhis.android.sdk.ui.activities.SplashActivity
 ADDED from AndroidManifest.xml:21:9
 	android:label
 		ADDED from AndroidManifest.xml:24:13
@@ -86,7 +86,7 @@ category#android.intent.category.LAUNCHER
 ADDED from AndroidManifest.xml:27:17
 	android:name
 		ADDED from AndroidManifest.xml:27:27
-activity#org.hisp.dhis.android.sdk.activities.LoginActivity
+activity#org.hisp.dhis.android.sdk.ui.activities.LoginActivity
 ADDED from AndroidManifest.xml:30:9
 	android:label
 		ADDED from AndroidManifest.xml:34:13

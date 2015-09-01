@@ -373,14 +373,14 @@ public class EnrollmentDateFragment extends Fragment implements OnBackPressedLis
                     LocalDate date = new LocalDate(year, monthOfYear + 1, dayOfMonth);
                     String newValue = date.toString(DATE_FORMAT);
                     incidentDatePickerEditText.setText(newValue);
-                    enrollment.setDateOfEnrollment(newValue);
+                    enrollment.setDateOfIncident(newValue);
                     onRowValueChanged(null);
                 }
             };
             incidentClearDateButton.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View v) {
                     incidentDatePickerEditText.setText(EMPTY_FIELD);
-                    enrollment.setDateOfEnrollment(EMPTY_FIELD);
+                    enrollment.setDateOfIncident(EMPTY_FIELD);
                 }
             });
             incidentDatePickerEditText.setOnClickListener(new View.OnClickListener() {

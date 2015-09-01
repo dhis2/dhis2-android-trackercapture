@@ -480,14 +480,14 @@ public class EnrollmentFragment extends Fragment
                     LocalDate date = new LocalDate(year, monthOfYear + 1, dayOfMonth);
                     String newValue = date.toString(DateUtils.DATE_PATTERN);
                     datePickerEditText.setText(newValue);
-                    mForm.getEnrollment().setDateOfEnrollment(newValue);
+                    mForm.getEnrollment().setDateOfIncident(newValue);
                     onRowValueChanged(null);
                 }
             };
             clearDateButton.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View v) {
                     datePickerEditText.setText(EMPTY_FIELD);
-                    mForm.getEnrollment().setDateOfEnrollment(EMPTY_FIELD);
+                    mForm.getEnrollment().setDateOfIncident(EMPTY_FIELD);
                 }
             });
             datePickerEditText.setOnClickListener(new View.OnClickListener() {

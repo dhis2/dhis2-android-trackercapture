@@ -32,6 +32,8 @@ package org.hisp.dhis.android.trackercapture.fragments.upcomingevents;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.view.ContextMenu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
@@ -77,6 +79,16 @@ public class UpcomingEventsFragment extends SelectProgramFragment implements Ada
 
     public UpcomingEventsFragment(){
         super("state:UpcomingEventsFragment", 2);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        return false;
     }
 
     protected AbsAdapter getAdapter(Bundle savedInstanceState) {

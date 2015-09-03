@@ -37,16 +37,19 @@ import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceItemRow;
 import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
 import org.hisp.dhis.android.sdk.events.UiEvent;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
@@ -324,6 +327,39 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     @Override
     public boolean onMenuItemActionCollapse(MenuItem item) {
         ( ( TrackedEntityInstanceAdapter ) mAdapter ).getFilter().filter(""); //showing all rows
+        return true;
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        new MenuInflater(this.getActivity()).inflate(org.hisp.dhis.android.sdk.R.menu.menu_selected_trackedentityinstance, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info=
+                (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
+
+        TrackedEntityInstanceItemRow itemRow = (TrackedEntityInstanceItemRow) mListView.getItemAtPosition(info.position);
+
+        Log.d(TAG, "" + itemRow.getTrackedEntityInstance().getTrackedEntityInstance());
+
+
+        if(item.getTitle().toString().equals(getResources().getString(org.hisp.dhis.android.sdk.R.string.go_to_programoverview_fragment)))
+        {
+            mNavigationHandler.switchFragment(
+                    ProgramOverviewFragment.newInstance(
+                            mState.getOrgUnitId(),mState.getProgramId(), itemRow.getTrackedEntityInstance().getLocalId()),
+                            TAG, true);
+        }
+        else if(item.getTitle().toString().equals(getResources().getString(org.hisp.dhis.android.sdk.R.string.delete)))
+        {
+            //soft delete
+            itemRow.getTrackedEntityInstance().delete();
+        }
+
+
+
         return true;
     }
 }

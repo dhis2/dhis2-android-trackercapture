@@ -34,6 +34,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+
 import org.hisp.dhis.android.sdk.controllers.DhisController;
 import org.hisp.dhis.android.sdk.controllers.DhisService;
 import org.hisp.dhis.android.sdk.controllers.LoadingController;
@@ -70,31 +72,13 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
         setSupportActionBar(toolbar);
 
         PeriodicSynchronizerController.activatePeriodicSynchronizer(this);
-        if (LoadingController.isInitialDataLoaded(this)) {
-            showSelectProgramFragment();
-        }
+        showSelectProgramFragment();
     }
 
     public void loadInitialData() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                showLoadingFragment();
-            }
-        });
         String message = getString(org.hisp.dhis.android.sdk.R.string.finishing_up);
         UiUtils.postProgressMessage(message);
-        new Thread() {
-            @Override
-            public void run() {
-                DhisService.loadInitialData(MainActivity.this);
-                runOnUiThread(new Runnable() {
-                    public void run() {
-                        showSelectProgramFragment();
-                    }
-                });
-            }
-        }.start();
+        DhisService.loadInitialData(MainActivity.this);
     }
 
     public void showLoadingFragment() {

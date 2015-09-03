@@ -14,13 +14,10 @@ import java.util.Map;
 /**
  * Created by erling on 5/12/15.
  */
-class EnrollmentFragmentForm
+class EnrollmentDataEntryFragmentForm
 {
     private Enrollment enrollment;
     private Program program;
-
-
-
     private TrackedEntityInstance trackedEntityInstance;
     private OrganisationUnit organisationUnit;
     private Map<String, DataValue> dataValues;

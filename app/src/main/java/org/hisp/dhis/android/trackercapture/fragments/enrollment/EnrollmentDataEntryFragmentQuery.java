@@ -1,6 +1,7 @@
 package org.hisp.dhis.android.trackercapture.fragments.enrollment;
 
 import android.content.Context;
+import android.util.Log;
 
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
@@ -29,8 +30,8 @@ import java.util.List;
 /**
  * Created by erling on 5/12/15.
  */
-class EnrollmentFragmentQuery implements Query<EnrollmentFragmentForm> {
-    public static final String CLASS_TAG = EnrollmentFragmentQuery.class.getSimpleName();
+class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragmentForm> {
+    public static final String CLASS_TAG = EnrollmentDataEntryFragmentQuery.class.getSimpleName();
 
     private String mOrgUnitId;
     private String mProgramId;
@@ -38,7 +39,7 @@ class EnrollmentFragmentQuery implements Query<EnrollmentFragmentForm> {
     private TrackedEntityInstance currentTrackedEntityInstance;
     private Enrollment currentEnrollment;
 
-    EnrollmentFragmentQuery(String mOrgUnitId, String mProgramId, long mTrackedEntityInstanceId) {
+    EnrollmentDataEntryFragmentQuery(String mOrgUnitId, String mProgramId, long mTrackedEntityInstanceId) {
         this.mOrgUnitId = mOrgUnitId;
         this.mProgramId = mProgramId;
         this.mTrackedEntityInstanceId = mTrackedEntityInstanceId;
@@ -46,8 +47,9 @@ class EnrollmentFragmentQuery implements Query<EnrollmentFragmentForm> {
 
 
     @Override
-    public EnrollmentFragmentForm query(Context context) {
-        EnrollmentFragmentForm mForm = new EnrollmentFragmentForm();
+    public EnrollmentDataEntryFragmentForm query(Context context) {
+        Log.d(CLASS_TAG, "query");
+        EnrollmentDataEntryFragmentForm mForm = new EnrollmentDataEntryFragmentForm();
         final Program mProgram = MetaDataController.getProgram(mProgramId);
         final OrganisationUnit mOrgUnit = MetaDataController.getOrganisationUnit(mOrgUnitId);//Select.byId(OrganisationUnit.class, mOrgUnitId);
 
@@ -74,10 +76,8 @@ class EnrollmentFragmentQuery implements Query<EnrollmentFragmentForm> {
         mForm.setTrackedEntityInstance(currentTrackedEntityInstance);
 
         List<TrackedEntityAttributeValue> trackedEntityAttributeValues = new ArrayList<>();
-        List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = new ArrayList<>();
+        List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = mProgram.getProgramTrackedEntityAttributes();
         List<DataEntryRow> dataEntryRows = new ArrayList<>();
-
-        programTrackedEntityAttributes = mProgram.getProgramTrackedEntityAttributes();
 
         for (ProgramTrackedEntityAttribute ptea : programTrackedEntityAttributes) {
             TrackedEntityAttributeValue value = TrackerController.getTrackedEntityAttributeValue(ptea.getTrackedEntityAttributeId(), currentTrackedEntityInstance.getLocalId());
@@ -94,8 +94,6 @@ class EnrollmentFragmentQuery implements Query<EnrollmentFragmentForm> {
         }
         mForm.setDataEntryRows(dataEntryRows);
         mForm.setEnrollment(currentEnrollment);
-
-
         return mForm;
     }
 

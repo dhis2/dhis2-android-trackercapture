@@ -60,15 +60,10 @@ public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedE
 
         List<DataEntryRow> dataEntryRows = new ArrayList<>();
         for (int i = 0; i < attributes.size(); i++) {
-
             DataEntryRow row = createDataEntryView(attributes.get(i).getTrackedEntityAttribute(),
                     getTrackedEntityDataValue(attributes.get(i).getTrackedEntityAttribute().getUid(),
                             values));
-
             dataEntryRows.add(row);
-
-
-            Log.d(attributes.get(i).getTrackedEntityAttribute().getName(), values.get(i).getValue());
         }
         mForm.setTrackedEntityAttributeValues(values);
         mForm.setDataEntryRows(dataEntryRows);

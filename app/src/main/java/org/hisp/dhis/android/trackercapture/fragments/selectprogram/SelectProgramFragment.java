@@ -30,6 +30,7 @@
 package org.hisp.dhis.android.trackercapture.fragments.selectprogram;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
@@ -48,6 +49,7 @@ import android.widget.AdapterView;
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
+import org.hisp.dhis.android.sdk.events.OnRowClick;
 import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceItemRow;
 import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
@@ -340,7 +342,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
         AdapterView.AdapterContextMenuInfo info=
                 (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
 
-        TrackedEntityInstanceItemRow itemRow = (TrackedEntityInstanceItemRow) mListView.getItemAtPosition(info.position);
+        final TrackedEntityInstanceItemRow itemRow = (TrackedEntityInstanceItemRow) mListView.getItemAtPosition(info.position);
 
         Log.d(TAG, "" + itemRow.getTrackedEntityInstance().getTrackedEntityInstance());
 
@@ -349,13 +351,35 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
         {
             mNavigationHandler.switchFragment(
                     ProgramOverviewFragment.newInstance(
-                            mState.getOrgUnitId(),mState.getProgramId(), itemRow.getTrackedEntityInstance().getLocalId()),
-                            TAG, true);
+                            mState.getOrgUnitId(), mState.getProgramId(), itemRow.getTrackedEntityInstance().getLocalId()),
+                    TAG, true);
         }
         else if(item.getTitle().toString().equals(getResources().getString(org.hisp.dhis.android.sdk.R.string.delete)))
         {
-            //soft delete
-            itemRow.getTrackedEntityInstance().delete();
+
+            if( !(itemRow.getStatus().equals(OnRowClick.ITEM_STATUS.SENT))) // if not sent to server, present dialog to user
+            {
+
+                UiUtils.showConfirmDialog(getActivity(), getActivity().getString(R.string.confirm),
+                        getActivity().getString(R.string.warning_delete_unsent_tei),
+                        getActivity().getString(R.string.delete), getActivity().getString(R.string.cancel),
+                        (R.drawable.ic_event_error),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                itemRow.getTrackedEntityInstance().delete();
+                                dialog.dismiss();
+                            }
+                        });
+            }
+            else
+            {
+                //if sent to server, be able to soft delete without annoying the user
+                itemRow.getTrackedEntityInstance().delete();
+            }
+
+
+
         }
 
 

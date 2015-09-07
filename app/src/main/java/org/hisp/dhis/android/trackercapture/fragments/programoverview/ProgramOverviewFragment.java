@@ -367,7 +367,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
 
     private Toolbar getActionBarToolbar() {
         if (isAdded() && getActivity() != null) {
-            return (Toolbar) getActivity().findViewById(R.id.toolbar1);
+            return (Toolbar) getActivity().findViewById(R.id.toolbar);
         } else {
             throw new IllegalArgumentException("Fragment should be attached to MainActivity");
         }

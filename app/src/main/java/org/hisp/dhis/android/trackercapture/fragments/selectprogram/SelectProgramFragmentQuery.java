@@ -116,7 +116,11 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
         Set<String> failedEventIds = new HashSet<>();
         for (FailedItem failedItem : failedEvents) {
             TrackedEntityInstance tei = (TrackedEntityInstance) failedItem.getItem();
-            failedEventIds.add(tei.getTrackedEntityInstance());
+            if(tei == null) {
+                failedItem.delete();
+            } else {
+                failedEventIds.add(tei.getTrackedEntityInstance());
+            }
         }
 
         for (TrackedEntityInstance trackedEntityInstance : trackedEntityInstanceList) {

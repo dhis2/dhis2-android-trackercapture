@@ -18,6 +18,7 @@ import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowTypes;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DatePickerRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EditTextRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.RadioButtonsRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,14 +62,14 @@ public class QueryTrackedEntityInstancesDialogFragmentQuery implements Query<Que
         if(listAttributes == null)
             return form;
 
-        List<DataEntryRow> dataEntryRows = new ArrayList<>();
+        List<Row> dataEntryRows = new ArrayList<>();
         for(int i=0;i<listAttributes.size();i++)
         {
             TrackedEntityAttributeValue value = new TrackedEntityAttributeValue();
             value.setTrackedEntityAttributeId(listAttributes.get(i).getUid());
             values.add(value);
 
-            DataEntryRow row = createDataEntryView(listAttributes.get(i), value);
+            Row row = createDataEntryView(listAttributes.get(i), value);
             dataEntryRows.add(row);
         }
         Log.d(TAG, "rows: " + dataEntryRows.size());
@@ -77,8 +78,8 @@ public class QueryTrackedEntityInstancesDialogFragmentQuery implements Query<Que
         return form;
     }
 
-    public DataEntryRow createDataEntryView(TrackedEntityAttribute trackedEntityAttribute, TrackedEntityAttributeValue dataValue) {
-        DataEntryRow row;
+    public Row createDataEntryView(TrackedEntityAttribute trackedEntityAttribute, TrackedEntityAttributeValue dataValue) {
+        Row row;
         String trackedEntityAttributeName = trackedEntityAttribute.getName();
         if (trackedEntityAttribute.getOptionSet() != null) {
             OptionSet optionSet = MetaDataController.getOptionSet(trackedEntityAttribute.getOptionSet());

@@ -7,6 +7,7 @@ import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.IndicatorRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 
 import java.util.List;
 import java.util.Map;
@@ -23,13 +24,13 @@ class EnrollmentDataEntryFragmentForm
     private Map<String, DataValue> dataValues;
     private Map<String, String> dataElementNames;
     private List<IndicatorRow> indicatorRows;
-    private List<DataEntryRow> dataEntryRows;
+    private List<Row> dataEntryRows;
 
-    public List<DataEntryRow> getDataEntryRows() {
+    public List<Row> getDataEntryRows() {
         return dataEntryRows;
     }
 
-    public void setDataEntryRows(List<DataEntryRow> dataEntryRows) {
+    public void setDataEntryRows(List<Row> dataEntryRows) {
         this.dataEntryRows = dataEntryRows;
     }
 

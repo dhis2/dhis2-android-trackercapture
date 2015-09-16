@@ -5,6 +5,7 @@ import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ public class TrackedEntityInstanceProfileFragmentForm
     private Enrollment mEnrollment;
     private Program mProgram;
     private TrackedEntityInstance mTrackedEntityInstance;
-    private List<DataEntryRow> mDataEntryRows;
+    private List<Row> mDataEntryRows;
     private List<TrackedEntityAttributeValue> trackedEntityAttributeValues;
 
 
@@ -52,11 +53,11 @@ public class TrackedEntityInstanceProfileFragmentForm
         this.mTrackedEntityInstance = mTrackedEntityInstance;
     }
 
-    public List<DataEntryRow> getDataEntryRows() {
+    public List<Row> getDataEntryRows() {
         return mDataEntryRows;
     }
 
-    public void setDataEntryRows(List<DataEntryRow> mDataEntryRows) {
+    public void setDataEntryRows(List<Row> mDataEntryRows) {
         this.mDataEntryRows = mDataEntryRows;
     }
 }

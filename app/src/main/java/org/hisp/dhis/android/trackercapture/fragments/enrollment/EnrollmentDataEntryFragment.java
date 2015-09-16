@@ -47,6 +47,8 @@ import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EventDatePickerRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnDetailedInfoButtonClick;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.HideLoadingDialogEvent;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.RefreshListViewEvent;
@@ -344,34 +346,16 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
         }
     }
 
-//    @Override
-//    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-//        LocalDate date = new LocalDate(year, monthOfYear + 1, dayOfMonth);
-//        String newValue = date.toString(DateUtils.DATE_PATTERN);
-//        ((TextView) view.findViewById(R.id.date_picker_edit_text)).setText(newValue);
-//        form.getEnrollment().setDateOfEnrollment(newValue);
-//        onRowValueChanged(null);
-//    }
-
-//    @Override
-//    public void onClick(View v) {
-//        switch (v.getId()) {
-//            case R.id.date_picker_edit_text:{
-//                    LocalDate currentDate = new LocalDate();
-//                DatePickerDialog picker = new DatePickerDialog(getActivity(),
-//                        EnrollmentDataEntryFragment.this, currentDate.getYear(),
-//                        currentDate.getMonthOfYear() - 1,
-//                        currentDate.getDayOfMonth());
-//                picker.getDatePicker().setMaxDate(DateTime.now().getMillis());
-//                picker.show();
-//                }
-//        }
-//    }
-
     @Subscribe
     public void onRowValueChanged(final RowValueChangedEvent event) {
         super.onRowValueChanged(event);
         saveThread.schedule();
+    }
+
+    @Subscribe
+    public void onDetailedInfoClick(OnDetailedInfoButtonClick eventClick)
+    {
+        super.onShowDetailedInfo(eventClick);
     }
 
     @Subscribe

@@ -29,6 +29,7 @@
 package org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
@@ -47,9 +48,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.raizlabs.android.dbflow.structure.Model;
+import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.sdk.R;
 import org.hisp.dhis.android.sdk.controllers.DhisController;
+import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.events.UiEvent;
 import org.hisp.dhis.android.sdk.job.JobExecutor;
@@ -57,14 +60,22 @@ import org.hisp.dhis.android.sdk.job.NetworkJob;
 import org.hisp.dhis.android.sdk.network.APIException;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
+import org.hisp.dhis.android.sdk.persistence.models.DataElement;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
 import org.hisp.dhis.android.sdk.ui.adapters.DataValueAdapter;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.AbsTextWatcher;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.CoordinatesRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.IndicatorRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.StatusRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnDetailedInfoButtonClick;
 import org.hisp.dhis.android.sdk.ui.dialogs.QueryTrackedEntityInstancesResultDialogFragment;
+import org.hisp.dhis.android.sdk.ui.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.progressdialog.ProgressDialogFragment;
 import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
+import org.hisp.dhis.android.sdk.utils.UiUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -112,6 +123,19 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
         super.onCreate(savedInstanceState);
         setStyle(DialogFragment.STYLE_NO_TITLE,
                 R.style.Theme_AppCompat_Light_Dialog);
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Dhis2Application.getEventBus().unregister(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Dhis2Application.getEventBus().register(this);
     }
 
     @Override
@@ -218,6 +242,49 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
     @Override
     public void onLoaderReset(Loader<QueryTrackedEntityInstancesDialogFragmentForm> loader) {
 
+    }
+
+    @Subscribe
+    public void onShowDetailedInfo(OnDetailedInfoButtonClick eventClick) // may re-use code from DataEntryFragment
+    {
+
+        String message = "";
+
+        if(eventClick.getRow() instanceof CoordinatesRow)
+            message = getResources().getString(R.string.detailed_info_coordinate_row);
+        else if(eventClick.getRow() instanceof StatusRow)
+            message = getResources().getString(R.string.detailed_info_status_row);
+        else if(eventClick.getRow() instanceof IndicatorRow)
+            message = ""; // need to change ProgramIndicator to extend BaseValue for this to work
+
+        // rest of the rows can either be of data element or tracked entity instance attribute
+
+        DataElement dataElement = MetaDataController.getDataElement(eventClick.getRow().getDataElementId());
+
+        if(dataElement != null)
+            message = dataElement.getDescription();
+        else
+        {
+            TrackedEntityAttribute attribute = MetaDataController.getTrackedEntityAttribute(eventClick.getRow().getDataElementId());
+            if(attribute != null)
+                message = attribute.getDescription();
+        }
+
+
+
+        if(message == null || message.equals(""))
+            message = getResources().getString(R.string.no_detailed_info_for_dataelement);
+
+
+        UiUtils.showConfirmDialog(getActivity(),
+                getResources().getString(R.string.detailed_info_dataelement),
+                message, getResources().getString(R.string.ok_option),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int i) {
+                        dialog.dismiss();
+                    }
+                });
     }
 
     public void toggleDetailedSearch(View v) {

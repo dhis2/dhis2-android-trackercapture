@@ -1,56 +1,40 @@
 package org.hisp.dhis.android.trackercapture.fragments.trackedentityinstanceprofile;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
+
 import android.support.v4.content.Loader;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.ProgressBar;
 
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
-import org.hisp.dhis.android.sdk.controllers.DhisService;
-import org.hisp.dhis.android.sdk.ui.activities.INavigationHandler;
 import org.hisp.dhis.android.sdk.controllers.DhisController;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnDetailedInfoButtonClick;
+import org.hisp.dhis.android.sdk.ui.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.RowValueChangedEvent;
-import org.hisp.dhis.android.sdk.job.JobExecutor;
-import org.hisp.dhis.android.sdk.job.NetworkJob;
-import org.hisp.dhis.android.sdk.network.APIException;
-import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
-import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
-import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
-import org.hisp.dhis.android.sdk.ui.adapters.DataValueAdapter;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRow;
+import org.hisp.dhis.android.sdk.ui.fragments.dataentry.SaveThread;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.R;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+
 
 /**
  * Created by erling on 5/18/15.
  */
-public class TrackedEntityInstanceProfileFragment extends Fragment implements OnBackPressedListener,
-        LoaderManager.LoaderCallbacks<TrackedEntityInstanceProfileFragmentForm>
+public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<TrackedEntityInstanceProfileFragmentForm>
 {
     public static final String TAG = TrackedEntityInstanceProfileFragment.class.getName();
     public static final String TRACKEDENTITYINSTANCE_ID = "extra:TrackedEntityInstanceId";
@@ -63,15 +47,9 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
 
     private boolean edit;
     private boolean editableDataEntryRows;
-    private boolean saving;
 
-    private INavigationHandler mNavigationHandler;
-    private ProgressBar mProgressBar;
-    private ListView mListView;
-    private DataValueAdapter mListViewAdapter;
     private TrackedEntityInstanceProfileFragmentForm mForm;
-
-    AdapterView.OnItemClickListener onItemClickListener;
+    private SaveThread saveThread;
 
     public TrackedEntityInstanceProfileFragment()
     {
@@ -93,24 +71,25 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        if(saveThread == null || saveThread.isKilled()) {
+            saveThread = new SaveThread();
+            saveThread.start();
+        }
+        saveThread.init(this);
         setHasOptionsMenu(true);
         editableDataEntryRows = false;
     }
 
-
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_trackedentityinstanceprofile, container, false);
+    public void onDestroy() {
+        saveThread.kill();
+        super.onDestroy();
     }
-
-
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(org.hisp.dhis.android.sdk.R.menu.menu_data_entry, menu);
-        Log.d(TAG, "onCreateOptionsMenu");
         final MenuItem editFormButton = menu.findItem(org.hisp.dhis.android.sdk.R.id.action_new_event);
-
 
         editFormButton.setEnabled(true);
         editFormButton.setIcon(R.drawable.ic_edit);
@@ -139,88 +118,29 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        Dhis2Application.getEventBus().register(this);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        Dhis2Application.getEventBus().unregister(this);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        if (activity instanceof AppCompatActivity) {
-            getActionBar().setDisplayShowTitleEnabled(false);
-            getActionBar().setDisplayHomeAsUpEnabled(true);
-            getActionBar().setHomeButtonEnabled(true);
-        }
-
-        if (activity instanceof INavigationHandler) {
-            ((INavigationHandler) activity).setBackPressedListener(this);
-        }
-
-        if (activity instanceof INavigationHandler) {
-            mNavigationHandler = (INavigationHandler) activity;
-        } else {
-            throw new IllegalArgumentException("Activity must implement INavigationHandler interface");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        if (getActivity() != null &&
-                getActivity() instanceof AppCompatActivity) {
-            getActionBar().setDisplayShowTitleEnabled(true);
-            getActionBar().setDisplayHomeAsUpEnabled(false);
-            getActionBar().setHomeButtonEnabled(false);
-        }
-
-        // we need to nullify reference
-        // to parent activity in order not to leak it
-        if (getActivity() != null &&
-                getActivity() instanceof INavigationHandler) {
-            ((INavigationHandler) getActivity()).setBackPressedListener(null);
-        }
-
-        mListView = null;
-        mNavigationHandler = null;
-        Log.d(TAG, "FRAGMENT IS DETACHED");
-        super.onDetach();
-    }
-
-    @Override
     public void doBack() {
         if(edit)
         {
             UiUtils.showConfirmDialog(getActivity(),
                     getString(org.hisp.dhis.android.sdk.R.string.discard), getString(org.hisp.dhis.android.sdk.R.string.discard_confirm_changes),
-                    getString(org.hisp.dhis.android.sdk.R.string.discard),
                     getString(org.hisp.dhis.android.sdk.R.string.save_and_close),
+                    getString(org.hisp.dhis.android.sdk.R.string.discard),
                     getString(org.hisp.dhis.android.sdk.R.string.cancel),
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+                            save();
                             onDetach();
                             getFragmentManager().popBackStack();
+                            DhisController.hasUnSynchronizedDatavalues = true;
+
                         }
                     }, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-
-                            submitChanges();
                             onDetach();
                             getFragmentManager().popBackStack();
-                            DhisController.hasUnSynchronizedDatavalues = true;
+
                         }
                     }, new DialogInterface.OnClickListener() {
                         @Override
@@ -238,30 +158,6 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        mProgressBar = (ProgressBar) view.findViewById(R.id.teiprofileprogressbar);
-        mProgressBar.setVisibility(View.GONE);
-
-        getActivity().getLayoutInflater();
-        mListViewAdapter = new DataValueAdapter(getChildFragmentManager(), getActivity().getLayoutInflater());
-        mListView = (ListView) view.findViewById(R.id.profile_listview);
-        mListView.setVisibility(View.VISIBLE);
-        onItemClickListener = mListView.getOnItemClickListener();
-
-        mListView.setAdapter(mListViewAdapter);
-
-    }
-
-    private ActionBar getActionBar() {
-        if (getActivity() != null &&
-                getActivity() instanceof AppCompatActivity) {
-            return ((AppCompatActivity) getActivity()).getSupportActionBar();
-        } else {
-            throw new IllegalArgumentException("Fragment should be attached to ActionBarActivity");
-        }
-    }
-
-    @Override
     public void onActivityCreated(Bundle savedInstanceState)
     {
         super.onActivityCreated(savedInstanceState);
@@ -270,8 +166,8 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
         argumentsBundle.putBundle(EXTRA_SAVED_INSTANCE_STATE, savedInstanceState);
         getLoaderManager().initLoader(LOADER_ID, argumentsBundle, this);
 
-        mProgressBar.setVisibility(View.VISIBLE);
-        mListView.setVisibility(View.GONE);
+        progressBar.setVisibility(View.VISIBLE);
+        listView.setVisibility(View.GONE);
     }
 
     @Override
@@ -299,51 +195,46 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
 
         if (loader.getId() == LOADER_ID && isAdded())
         {
-            mProgressBar.setVisibility(View.GONE);
-            mListView.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.GONE);
+            listView.setVisibility(View.VISIBLE);
 
             mForm = data;
 
             if(mForm.getDataEntryRows() != null)
             {
                 setEditableDataEntryRows(false);
-//                mListViewAdapter.swapData(mForm.getDataEntryRows());
-
             }
-
         }
     }
 
     @Override
     public void onLoaderReset(Loader<TrackedEntityInstanceProfileFragmentForm> loader)
     {
-        if (mListViewAdapter != null)
-            mListViewAdapter.swapData(null);
-
+        if (listViewAdapter != null)
+            listViewAdapter.swapData(null);
     }
 
     public void setEditableDataEntryRows(boolean editable)
     {
-        List<DataEntryRow> rows = new ArrayList<>(mForm.getDataEntryRows());
-//        List<DataEntryRow> rows = mForm.getDataEntryRows();
-        mListViewAdapter.swapData(null);
+        List<Row> rows = new ArrayList<>(mForm.getDataEntryRows());
+        listViewAdapter.swapData(null);
         if(editable)
         {
-            for(DataEntryRow row : rows)
+            for(Row row : rows)
             {
                 row.setEditable(true);
             }
         }
         else
         {
-            for(DataEntryRow row : rows)
+            for(Row row : rows)
             {
                 row.setEditable(false);
             }
         }
-        mListView.setAdapter(null);
-        mListViewAdapter.swapData(rows);
-        mListView.setAdapter(mListViewAdapter);
+        listView.setAdapter(null);
+        listViewAdapter.swapData(rows);
+        listView.setAdapter(listViewAdapter);
     }
     public void flagDataChanged(boolean changed)
     {
@@ -357,56 +248,47 @@ public class TrackedEntityInstanceProfileFragment extends Fragment implements On
         if (mForm == null ) {
             return;
         }
-
-//        if (refreshing)
-//            return; //we don't want to stack this up since it runs every time a character is entered for example
-//        refreshing = true;
-
     }
 
-    public void submitChanges()
+    @Override
+    protected ArrayList<String> getValidationErrors() {
+        return null;
+    }
+
+    @Override
+    protected boolean isValid() {
+        return true;
+    }
+
+    @Override
+    protected void save()
     {
-        if(saving) return;
+        if(!edit) // if rows are not edited
+            return;
+
+        if(mForm!=null && isAdded() && mForm.getTrackedEntityInstance() != null )
+        {
+            for(TrackedEntityAttributeValue val : mForm.getTrackedEntityAttributeValues())
+                val.save();
+
+            mForm.getTrackedEntityInstance().setFromServer(false);
+            mForm.getTrackedEntityInstance().save();
+
+
+        }
 
         flagDataChanged(false);
 
-        new Thread() {
-            public void run() {
-                saving = true;
-                if(mForm!=null && isAdded())
-                {
-                    Log.d("TEIPROFILEFRAGMENT", "IS SAVING CHANGES");
+    }
 
-                    final Context context = getActivity().getBaseContext();
+    @Subscribe
+    public void onDetailedInfoClick(OnDetailedInfoButtonClick eventClick)
+    {
+        super.onShowDetailedInfo(eventClick);
+    }
 
-
-                    for(TrackedEntityAttributeValue val : mForm.getTrackedEntityAttributeValues())
-                    {
-                        val.save();
-                    }
-
-                    mForm.getTrackedEntityInstance().setFromServer(true);
-                    mForm.getTrackedEntityInstance().save();
-
-                    mForm.getTrackedEntityInstance().setFromServer(false);
-                    //mForm.getTrackedEntityInstance().lastUpdated = Utils.getCurrentTime();
-                    mForm.getTrackedEntityInstance().save();
-
-
-
-                    TimerTask timerTask = new TimerTask() {
-                        @Override
-                        public void run() {
-                            DhisService.sendData();
-                        }
-                    };
-                    Timer timer = new Timer();
-                    timer.schedule(timerTask, 5000);
-                }
-                saving = false;
-            }
-
-        }.start();
+    @Override
+    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 
     }
 }

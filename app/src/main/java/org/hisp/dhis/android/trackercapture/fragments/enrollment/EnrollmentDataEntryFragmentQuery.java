@@ -22,6 +22,7 @@ import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowTypes;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DatePickerRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EditTextRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.RadioButtonsRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,12 +73,12 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
         mForm.setProgram(mProgram);
         mForm.setOrganisationUnit(mOrgUnit);
         mForm.setDataElementNames(new HashMap<String, String>());
-        mForm.setDataEntryRows(new ArrayList<DataEntryRow>());
+        mForm.setDataEntryRows(new ArrayList<Row>());
         mForm.setTrackedEntityInstance(currentTrackedEntityInstance);
 
         List<TrackedEntityAttributeValue> trackedEntityAttributeValues = new ArrayList<>();
         List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = mProgram.getProgramTrackedEntityAttributes();
-        List<DataEntryRow> dataEntryRows = new ArrayList<>();
+        List<Row> dataEntryRows = new ArrayList<>();
 
         for (ProgramTrackedEntityAttribute ptea : programTrackedEntityAttributes) {
             TrackedEntityAttributeValue value = TrackerController.getTrackedEntityAttributeValue(ptea.getTrackedEntityAttributeId(), currentTrackedEntityInstance.getLocalId());
@@ -88,7 +89,7 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
         }
         currentEnrollment.setAttributes(trackedEntityAttributeValues);
         for (int i = 0; i < programTrackedEntityAttributes.size(); i++) {
-            DataEntryRow row = createDataEntryView(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute(),
+            Row row = createDataEntryView(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute(),
                     getTrackedEntityDataValue(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getUid(), trackedEntityAttributeValues));
             dataEntryRows.add(row);
         }
@@ -112,8 +113,8 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
         return trackedEntityAttributeValue;
     }
 
-    public DataEntryRow createDataEntryView(TrackedEntityAttribute trackedEntityAttribute, TrackedEntityAttributeValue dataValue) {
-        DataEntryRow row;
+    public Row createDataEntryView(TrackedEntityAttribute trackedEntityAttribute, TrackedEntityAttributeValue dataValue) {
+        Row row;
         String trackedEntityAttributeName = trackedEntityAttribute.getName();
         if (trackedEntityAttribute.getOptionSet() != null) {
             OptionSet optionSet = MetaDataController.getOptionSet(trackedEntityAttribute.getOptionSet());

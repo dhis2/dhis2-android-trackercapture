@@ -32,7 +32,6 @@ package org.hisp.dhis.android.trackercapture.fragments.selectprogram;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -52,16 +51,17 @@ import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.sdk.events.OnRowClick;
 import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
-import org.hisp.dhis.android.sdk.persistence.models.BaseSerializableModel;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceItemRow;
-import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
 import org.hisp.dhis.android.sdk.events.UiEvent;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
+import org.hisp.dhis.android.sdk.persistence.models.BaseSerializableModel;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnTrackedEntityInstanceColumnClick;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceItemRow;
+import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
 import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.R;
@@ -71,8 +71,6 @@ import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.Item
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.QueryTrackedEntityInstancesDialogFragment;
 import org.hisp.dhis.android.trackercapture.fragments.upcomingevents.UpcomingEventsFragment;
 import org.hisp.dhis.android.trackercapture.ui.adapters.TrackedEntityInstanceAdapter;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnTrackedEntityInstanceColumnClick;
-import org.hisp.dhis.android.trackercapture.utils.NetworkUtils;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -350,7 +350,7 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
      */
     public static void queryTrackedEntityInstances(final FragmentManager fragmentManager, final String orgUnit, final String program, final String queryString, final TrackedEntityAttributeValue... params)
             throws APIException {
-        JobExecutor.enqueueJob(new NetworkJob<Object>(0,
+        JobExecutor.enqueueJob(new NetworkJob<Object>(1,
                 null) {
 
             @Override

@@ -33,6 +33,7 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
@@ -58,6 +59,7 @@ import android.widget.TextView;
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
+import org.hisp.dhis.android.sdk.persistence.models.BaseSerializableModel;
 import org.hisp.dhis.android.sdk.ui.activities.INavigationHandler;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
@@ -84,6 +86,7 @@ import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.fragments.enrollment.EnrollmentDataEntryFragment;
 import org.hisp.dhis.android.trackercapture.fragments.enrollmentdate.EnrollmentDateFragment;
 import org.hisp.dhis.android.trackercapture.fragments.programoverview.registerrelationshipdialogfragment.RegisterRelationshipDialogFragment;
+import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.ItemStatusDialogFragment;
 import org.hisp.dhis.android.trackercapture.fragments.trackedentityinstanceprofile.TrackedEntityInstanceProfileFragment;
 import org.hisp.dhis.android.sdk.ui.dialogs.ProgramDialogFragment;
 import org.hisp.dhis.android.trackercapture.ui.adapters.ProgramAdapter;
@@ -933,7 +936,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
                 break;
             }
             case R.id.enrollmentstatus: {
-                UiUtils.showStatusDialog(getChildFragmentManager(), mForm.getEnrollment());
+               showStatusDialog();
                 break;
             }
             case R.id.addrelationshipbutton: {
@@ -948,6 +951,12 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
 
     private void clearViews() {
         adapter.swapData(null);
+    }
+
+    public void showStatusDialog() {
+
+        ItemStatusDialogFragment fragment = ItemStatusDialogFragment.newInstance(mForm.getEnrollment());
+        fragment.show(getChildFragmentManager());
     }
 
     private void editEnrollmentDates() {

@@ -29,9 +29,19 @@
     <string name="no_active_enrollment">No active enrollment</string>
     <string name="select_relationship_type">Select relationship type</string>
 
-    
-
     <string name="search">Search</string>
+    <string name="http_error_400">Bad request</string>
+    <string name="http_error_401">Unauthorized</string>
+    <string name="http_error_403">Forbidden</string>
+    <string name="http_error_409">Conflict</string>
+    <string name="http_error_500">Internal server error</string>
+    <string name="http_error_501">Not implemented</string>
+    <string name="http_error_502">Bad gateway</string>
+    <string name="http_error_503">Service unavailable</string>
+    <string name="http_error_504">Gateway timed out</string>
+
+
+
 
 
 

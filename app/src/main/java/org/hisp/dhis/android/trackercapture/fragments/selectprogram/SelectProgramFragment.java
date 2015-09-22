@@ -32,6 +32,7 @@ package org.hisp.dhis.android.trackercapture.fragments.selectprogram;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -51,6 +52,7 @@ import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.sdk.events.OnRowClick;
 import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
+import org.hisp.dhis.android.sdk.persistence.models.BaseSerializableModel;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceItemRow;
 import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
 import org.hisp.dhis.android.sdk.events.UiEvent;
@@ -65,10 +67,12 @@ import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.fragments.enrollment.EnrollmentDataEntryFragment;
 import org.hisp.dhis.android.trackercapture.fragments.programoverview.ProgramOverviewFragment;
+import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.ItemStatusDialogFragment;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.QueryTrackedEntityInstancesDialogFragment;
 import org.hisp.dhis.android.trackercapture.fragments.upcomingevents.UpcomingEventsFragment;
 import org.hisp.dhis.android.trackercapture.ui.adapters.TrackedEntityInstanceAdapter;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnTrackedEntityInstanceColumnClick;
+import org.hisp.dhis.android.trackercapture.utils.NetworkUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -151,7 +155,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
 
             mNavigationHandler.switchFragment(fragment, ProgramOverviewFragment.CLASS_TAG, true);
         } else {
-            UiUtils.showStatusDialog(getChildFragmentManager(), eventClick.getItem());
+            showStatusDialog(eventClick.getItem());
         }
     }
 
@@ -184,6 +188,11 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     private static final void showQueryTrackedEntityInstancesDialog(FragmentManager fragmentManager, String orgUnit, String program) {
         QueryTrackedEntityInstancesDialogFragment dialog = QueryTrackedEntityInstancesDialogFragment.newInstance(program, orgUnit);
         dialog.show(fragmentManager);
+    }
+    public void showStatusDialog(BaseSerializableModel model) {
+
+        ItemStatusDialogFragment fragment = ItemStatusDialogFragment.newInstance(model);
+        fragment.show(getChildFragmentManager());
     }
 
     protected void handleViews(int level) {
@@ -356,10 +365,8 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
         }
         else if(item.getTitle().toString().equals(getResources().getString(org.hisp.dhis.android.sdk.R.string.delete)))
         {
-
             if( !(itemRow.getStatus().equals(OnRowClick.ITEM_STATUS.SENT))) // if not sent to server, present dialog to user
             {
-
                 UiUtils.showConfirmDialog(getActivity(), getActivity().getString(R.string.confirm),
                         getActivity().getString(R.string.warning_delete_unsent_tei),
                         getActivity().getString(R.string.delete), getActivity().getString(R.string.cancel),
@@ -377,13 +384,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
                 //if sent to server, be able to soft delete without annoying the user
                 itemRow.getTrackedEntityInstance().delete();
             }
-
-
-
         }
-
-
-
         return true;
     }
 }

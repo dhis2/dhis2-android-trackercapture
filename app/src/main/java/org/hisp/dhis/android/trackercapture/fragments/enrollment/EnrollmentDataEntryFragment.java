@@ -180,7 +180,7 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
                 public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                     LocalDate date = new LocalDate(year, monthOfYear + 1, dayOfMonth);
                     String newValue = date.toString(DateUtils.DATE_PATTERN);
-                    ((TextView) view.findViewById(R.id.date_picker_edit_text)).setText(newValue);
+                    datePickerEditText.setText(newValue);
                     form.getEnrollment().setDateOfEnrollment(newValue);
                     onRowValueChanged(null);
                 }
@@ -212,7 +212,7 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
                 public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                     LocalDate date = new LocalDate(year, monthOfYear + 1, dayOfMonth);
                     String newValue = date.toString(DateUtils.DATE_PATTERN);
-                    ((TextView) view.findViewById(R.id.date_picker_edit_text)).setText(newValue);
+                    datePickerEditText.setText(newValue);
                     form.getEnrollment().setDateOfIncident(newValue);
                     onRowValueChanged(null);
                 }

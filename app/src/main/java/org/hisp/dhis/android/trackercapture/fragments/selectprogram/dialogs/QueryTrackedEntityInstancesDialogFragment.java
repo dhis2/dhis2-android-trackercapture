@@ -168,13 +168,15 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
         mListView.setAdapter(mAdapter);
 
         mFilter.addTextChangedListener(new AbsTextWatcher() {
-            @Override public void afterTextChanged(Editable s) {
+            @Override
+            public void afterTextChanged(Editable s) {
                 mForm.setQueryString(s.toString());
             }
         });
 
         closeDialogButton.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
+            @Override
+            public void onClick(View v) {
                 dismiss();
             }
         });
@@ -185,8 +187,7 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState)
-    {
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         Bundle argumentsBundle = new Bundle();
         argumentsBundle.putBundle(EXTRA_ARGUMENTS, getArguments());
@@ -217,16 +218,14 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
     public void onLoadFinished(Loader<QueryTrackedEntityInstancesDialogFragmentForm> loader, QueryTrackedEntityInstancesDialogFragmentForm data) {
 
         Log.d(TAG, "load finished");
-        if (loader.getId() == LOADER_ID && isAdded())
-        {
+        if (loader.getId() == LOADER_ID && isAdded()) {
             mListView.setVisibility(View.VISIBLE);
 
             mForm = data;
 
-            if(mForm.getDataEntryRows() != null)
-            {
+            if (mForm.getDataEntryRows() != null) {
                 //setEditableDataEntryRows(false);
-                if(getArguments().getBoolean(EXTRA_DETAILED)) {
+                if (getArguments().getBoolean(EXTRA_DETAILED)) {
                     mAdapter.swapData(mForm.getDataEntryRows());
                 }
             }
@@ -243,11 +242,11 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
     {
         String message = "";
 
-        if(eventClick.getRow() instanceof CoordinatesRow)
+        if (eventClick.getRow() instanceof CoordinatesRow)
             message = getResources().getString(R.string.detailed_info_coordinate_row);
-        else if(eventClick.getRow() instanceof StatusRow)
+        else if (eventClick.getRow() instanceof StatusRow)
             message = getResources().getString(R.string.detailed_info_status_row);
-        else if(eventClick.getRow() instanceof IndicatorRow)
+        else if (eventClick.getRow() instanceof IndicatorRow)
             message = ""; // need to change ProgramIndicator to extend BaseValue for this to work
         else         // rest of the rows can either be of data element or tracked entity instance attribute
             message = eventClick.getRow().getDescription();
@@ -266,7 +265,7 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
     public void toggleDetailedSearch(View v) {
         FloatingActionButton button = (FloatingActionButton) v;
         boolean current = getArguments().getBoolean(EXTRA_DETAILED);
-        if(current) {
+        if (current) {
             button.setImageResource(R.drawable.ic_new);
             mAdapter.swapData(null);
         } else {
@@ -317,17 +316,18 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
 
     @Override
     public void onClick(View v) {
-        if(v.getId() == R.id.load_dialog_button) {
+        if (v.getId() == R.id.load_dialog_button) {
             dismiss();
             runQuery();
-        } else if(v.getId() == org.hisp.dhis.android.trackercapture.R.id.detailed_search_button) {
+        } else if (v.getId() == org.hisp.dhis.android.trackercapture.R.id.detailed_search_button) {
             toggleDetailedSearch(v);
         }
     }
 
     public void runQuery() {
         final List<TrackedEntityAttributeValue> searchValues = new ArrayList<>();
-        if(mForm!=null && mForm.getTrackedEntityAttributeValues()!=null) {
+        if (mForm != null && mForm.getTrackedEntityAttributeValues() != null &&
+                mForm.getOrganisationUnit() != null && mForm.getProgram() != null) {
             for (TrackedEntityAttributeValue value : mForm.getTrackedEntityAttributeValues()) {
                 searchValues.add(value);
             }
@@ -344,9 +344,10 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
 
     /**
      * Queries the server for TrackedEntityInstances and shows a Dialog containing the results
+     *
      * @param orgUnit
      * @param program can be null
-     * @param params can be null
+     * @param params  can be null
      */
     public static void queryTrackedEntityInstances(final FragmentManager fragmentManager, final String orgUnit, final String program, final String queryString, final TrackedEntityAttributeValue... params)
             throws APIException {

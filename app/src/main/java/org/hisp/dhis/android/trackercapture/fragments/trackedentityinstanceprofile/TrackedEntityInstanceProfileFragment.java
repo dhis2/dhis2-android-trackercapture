@@ -117,7 +117,7 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
         return super.onOptionsItemSelected(menuItem);
     }
 
-    @Override
+
     public void doBack() {
         if(edit)
         {

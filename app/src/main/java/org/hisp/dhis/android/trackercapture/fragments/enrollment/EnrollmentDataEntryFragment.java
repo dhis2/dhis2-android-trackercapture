@@ -75,8 +75,6 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     private static final String PROGRAM_ID = "extra:ProgramId";
     private static final String TRACKEDENTITYINSTANCE_ID = "extra:TrackedEntityInstanceId";
     private EnrollmentDataEntryFragmentForm form;
-    private View enrollmentDatePicker;
-    private View incidentDatePicker;
     private SaveThread saveThread;
 
     public static EnrollmentDataEntryFragment newInstance(String unitId, String programId) {
@@ -117,12 +115,6 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        enrollmentDatePicker = LayoutInflater.from(getActivity())
-                .inflate(R.layout.fragment_data_entry_date_picker, listView, false);
-        incidentDatePicker = LayoutInflater.from(getActivity())
-                .inflate(R.layout.fragment_data_entry_date_picker, listView, false);
-        listView.addHeaderView(enrollmentDatePicker);
-        listView.addHeaderView(incidentDatePicker);
     }
 
     @Override
@@ -154,103 +146,12 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             form = data;
 
             if (data.getProgram() != null) {
-                attachEnrollmentDatePicker();
-                attachIncidentDatePicker();
             }
 
             if(data.getDataEntryRows() != null && !data.getDataEntryRows().isEmpty())
             {
                 listViewAdapter.swapData(data.getDataEntryRows());
             }
-        }
-    }
-
-    private void attachEnrollmentDatePicker() {
-        if (form != null && isAdded()) {
-            final EditText datePickerEditText = (EditText) enrollmentDatePicker
-                    .findViewById(R.id.date_picker_edit_text);
-            View.OnClickListener onClearDateListener = new View.OnClickListener() {
-                @Override public void onClick(View v) {
-                    datePickerEditText.setText(EMPTY_FIELD);
-                    form.getEnrollment().setDateOfEnrollment(EMPTY_FIELD);
-                }
-            };
-            DatePickerDialog.OnDateSetListener onDateSetListener = new DatePickerDialog.OnDateSetListener() {
-                @Override
-                public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                    LocalDate date = new LocalDate(year, monthOfYear + 1, dayOfMonth);
-                    String newValue = date.toString(DateUtils.DATE_PATTERN);
-                    datePickerEditText.setText(newValue);
-                    form.getEnrollment().setDateOfEnrollment(newValue);
-                    onRowValueChanged(null);
-                }
-            };
-            String reportDateDescription = form.getProgram().getDateOfEnrollmentDescription()== null ?
-                    getString(R.string.report_date) : form.getProgram().getDateOfEnrollmentDescription();
-            String value = null;
-            if (form.getEnrollment() != null && form.getEnrollment().getDateOfEnrollment() != null) {
-                DateTime date = DateTime.parse(form.getEnrollment().getDateOfEnrollment());
-                String newValue = date.toString(DateUtils.DATE_PATTERN);
-                datePickerEditText.setText(newValue);
-            }
-            setDatePicker(enrollmentDatePicker, reportDateDescription, value, onClearDateListener, onDateSetListener);
-        }
-    }
-
-    private void attachIncidentDatePicker() {
-        if (form != null && isAdded()) {
-            final EditText datePickerEditText = (EditText) incidentDatePicker
-                    .findViewById(R.id.date_picker_edit_text);
-            View.OnClickListener onClearDateListener = new View.OnClickListener() {
-                @Override public void onClick(View v) {
-                    datePickerEditText.setText(EMPTY_FIELD);
-                    form.getEnrollment().setDateOfIncident(EMPTY_FIELD);
-                }
-            };
-            DatePickerDialog.OnDateSetListener onDateSetListener = new DatePickerDialog.OnDateSetListener() {
-                @Override
-                public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                    LocalDate date = new LocalDate(year, monthOfYear + 1, dayOfMonth);
-                    String newValue = date.toString(DateUtils.DATE_PATTERN);
-                    datePickerEditText.setText(newValue);
-                    form.getEnrollment().setDateOfIncident(newValue);
-                    onRowValueChanged(null);
-                }
-            };
-            String reportDateDescription = form.getProgram().getDateOfIncidentDescription()== null ?
-                    getString(R.string.report_date) : form.getProgram().getDateOfIncidentDescription();
-            String value = null;
-            if (form.getEnrollment() != null && form.getEnrollment().getDateOfIncident() != null) {
-                DateTime date = DateTime.parse(form.getEnrollment().getDateOfIncident());
-                value = date.toString(DateUtils.DATE_PATTERN);
-            }
-            setDatePicker(incidentDatePicker, reportDateDescription, value, onClearDateListener, onDateSetListener);
-        }
-    }
-
-    private void setDatePicker(View datePicker, String labelValue, String dateValue, View.OnClickListener clearDateListener, final DatePickerDialog.OnDateSetListener onDateSetListener) {
-        final TextView label = (TextView) datePicker
-                .findViewById(R.id.text_label);
-        final EditText datePickerEditText = (EditText) datePicker
-                .findViewById(R.id.date_picker_edit_text);
-        final ImageButton clearDateButton = (ImageButton) datePicker
-                .findViewById(R.id.clear_edit_text);
-        clearDateButton.setOnClickListener(clearDateListener);
-        datePickerEditText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                LocalDate currentDate = new LocalDate();
-                DatePickerDialog picker = new DatePickerDialog(getActivity(),onDateSetListener
-                        , currentDate.getYear(),
-                        currentDate.getMonthOfYear() - 1,
-                        currentDate.getDayOfMonth());
-                picker.getDatePicker().setMaxDate(DateTime.now().getMillis());
-                picker.show();
-            }
-        });
-        label.setText(labelValue);
-        if(dateValue!=null) {
-            datePickerEditText.setText(dateValue);
         }
     }
 

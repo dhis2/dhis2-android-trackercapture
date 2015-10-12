@@ -62,6 +62,7 @@ import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
+import org.hisp.dhis.android.sdk.persistence.models.BaseSerializableModel;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
@@ -697,7 +698,8 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     @Subscribe
     public void onItemClick(OnProgramStageEventClick eventClick) {
         if (eventClick.isHasPressedFailedButton()) {
-            UiUtils.showStatusDialog(getChildFragmentManager(), eventClick.getItem());
+            if(eventClick.getEvent() != null)
+                showStatusDialog(eventClick.getEvent());
         } else {
             showDataEntryFragment(eventClick.getEvent(), eventClick.getEvent().getProgramStageId());
         }
@@ -939,7 +941,8 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
                 break;
             }
             case R.id.enrollmentstatus: {
-                showStatusDialog();
+                if(mForm != null && mForm.getEnrollment() != null)
+                    showStatusDialog(mForm.getEnrollment());
                 break;
             }
             case R.id.addrelationshipbutton: {
@@ -956,9 +959,9 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         adapter.swapData(null);
     }
 
-    public void showStatusDialog() {
+    public void showStatusDialog(BaseSerializableModel model) {
 
-        ItemStatusDialogFragment fragment = ItemStatusDialogFragment.newInstance(mForm.getEnrollment());
+        ItemStatusDialogFragment fragment = ItemStatusDialogFragment.newInstance(model);
         fragment.show(getChildFragmentManager());
     }
 

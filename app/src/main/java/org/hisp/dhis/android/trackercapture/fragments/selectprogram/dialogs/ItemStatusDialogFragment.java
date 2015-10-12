@@ -30,6 +30,10 @@ public class ItemStatusDialogFragment extends org.hisp.dhis.android.sdk.ui.dialo
         } else if (item instanceof Enrollment) {
             args.putString(EXTRA_TYPE, FailedItem.ENROLLMENT);
         }
+        else if(item instanceof Event)
+        {
+            args.putString(EXTRA_TYPE, FailedItem.EVENT);
+        }
 
         dialogFragment.setArguments(args);
         return dialogFragment;
@@ -43,6 +47,11 @@ public class ItemStatusDialogFragment extends org.hisp.dhis.android.sdk.ui.dialo
         } else if(item instanceof Enrollment) {
             Enrollment enrollment = (Enrollment) item;
             sendEnrollment(enrollment);
+        }
+        else if(item instanceof Event)
+        {
+            Event event = (Event) item;
+            sendEvent(event);
         }
     }
     public static void sendTrackedEntityInstance(final TrackedEntityInstance trackedEntityInstance) {

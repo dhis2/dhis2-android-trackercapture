@@ -248,6 +248,10 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
         if (mForm == null ) {
             return;
         }
+        saveThread.schedule();
+    }
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
     }
 
     @Override

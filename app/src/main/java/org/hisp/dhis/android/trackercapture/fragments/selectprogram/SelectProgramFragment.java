@@ -64,6 +64,7 @@ import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceIt
 import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
 import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
+import org.hisp.dhis.android.sdk.utils.api.ProgramType;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.fragments.enrollment.EnrollmentDataEntryFragment;
 import org.hisp.dhis.android.trackercapture.fragments.programoverview.ProgramOverviewFragment;
@@ -109,11 +110,9 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     }
 
     @Override
-    protected Program.ProgramType[] getProgramTypes() {
-        return new Program.ProgramType[] {
-                Program.ProgramType.MULTIPLE_EVENTS_WITH_REGISTRATION,
-                Program.ProgramType.SINGLE_EVENT_WITH_REGISTRATION,
-                Program.ProgramType.WITH_REGISTRATION
+    protected ProgramType[] getProgramTypes() {
+        return new ProgramType[] {
+                ProgramType.WITH_REGISTRATION
         };
     }
 

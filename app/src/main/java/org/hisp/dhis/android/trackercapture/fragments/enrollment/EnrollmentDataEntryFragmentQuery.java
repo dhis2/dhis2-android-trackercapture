@@ -6,7 +6,6 @@ import android.util.Log;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
-import org.hisp.dhis.android.sdk.persistence.models.DataElement;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.OptionSet;
 import org.hisp.dhis.android.sdk.persistence.models.OrganisationUnit;
@@ -17,7 +16,6 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.AutoCompleteRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.CheckBoxRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowTypes;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DatePickerRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EditTextRow;
@@ -82,10 +80,10 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
         List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = mProgram.getProgramTrackedEntityAttributes();
         List<Row> dataEntryRows = new ArrayList<>();
 
-        dataEntryRows.add(new EnrollmentDatePickerRow(currentEnrollment.getProgram().getDateOfEnrollmentDescription(), currentEnrollment, currentEnrollment.getDateOfEnrollment(),null));
+        dataEntryRows.add(new EnrollmentDatePickerRow(currentEnrollment.getProgram().getEnrollmentDateLabel(), currentEnrollment, currentEnrollment.getEnrollmentDate(),null));
 
         if(currentEnrollment.getProgram().getDisplayIncidentDate())
-            dataEntryRows.add(new EnrollmentDatePickerRow(currentEnrollment.getProgram().getDateOfIncidentDescription(),currentEnrollment, null, currentEnrollment.getDateOfIncident()));
+            dataEntryRows.add(new EnrollmentDatePickerRow(currentEnrollment.getProgram().getIncidentDateLabel(),currentEnrollment, null, currentEnrollment.getIncidentDate()));
 
 
         for (ProgramTrackedEntityAttribute ptea : programTrackedEntityAttributes) {

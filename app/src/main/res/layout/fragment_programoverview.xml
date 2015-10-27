@@ -36,6 +36,11 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_to_refresh_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
     <ListView
         android:id="@+id/listview"
         android:layout_width="match_parent"
@@ -44,5 +49,6 @@
         android:padding="8dp"
         android:cacheColorHint="@color/transparent"
         android:scrollbarStyle="outsideOverlay"/>
+    </android.support.v4.widget.SwipeRefreshLayout>
 
 </LinearLayout>

@@ -30,11 +30,13 @@
 package org.hisp.dhis.android.trackercapture.fragments.programoverview;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -54,12 +56,17 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
+import org.hisp.dhis.android.sdk.controllers.DhisController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
+import org.hisp.dhis.android.sdk.events.UiEvent;
+import org.hisp.dhis.android.sdk.job.JobExecutor;
+import org.hisp.dhis.android.sdk.job.NetworkJob;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.BaseSerializableModel;
@@ -75,6 +82,7 @@ import org.hisp.dhis.android.sdk.persistence.models.RelationshipType;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
+import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
 import org.hisp.dhis.android.sdk.ui.activities.INavigationHandler;
 import org.hisp.dhis.android.sdk.ui.dialogs.ProgramDialogFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.eventdataentry.EventDataEntryFragment;
@@ -108,7 +116,7 @@ import java.util.Map;
 public class ProgramOverviewFragment extends Fragment implements View.OnClickListener,
         AdapterView.OnItemClickListener,
         ProgramDialogFragment.OnOptionSelectedListener,
-        LoaderManager.LoaderCallbacks<ProgramOverviewFragmentForm>, AdapterView.OnItemSelectedListener {
+        LoaderManager.LoaderCallbacks<ProgramOverviewFragmentForm>, AdapterView.OnItemSelectedListener, SwipeRefreshLayout.OnRefreshListener {
 
     public static final String CLASS_TAG = ProgramOverviewFragment.class.getSimpleName();
     private static final String STATE = "state:UpcomingEventsFragment";
@@ -124,6 +132,8 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     private ListView listView;
     private ProgressBar mProgressBar;
     private ProgramStageAdapter adapter;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+
 
     private View mSpinnerContainer;
     private Spinner mSpinner;
@@ -242,6 +252,10 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         View header = getLayoutInflater(savedInstanceState).inflate(
                 R.layout.fragment_programoverview_header, listView, false
         );
+
+        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(org.hisp.dhis.android.sdk.R.id.swipe_to_refresh_layout);
+        mSwipeRefreshLayout.setColorSchemeResources(org.hisp.dhis.android.sdk.R.color.Green, org.hisp.dhis.android.sdk.R.color.Blue, org.hisp.dhis.android.sdk.R.color.orange);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
 
         relationshipsLinearLayout = (LinearLayout) header.findViewById(R.id.relationships_linearlayout);
         newRelationshipButton = (Button) header.findViewById(R.id.addrelationshipbutton);
@@ -459,6 +473,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         if (LOADER_ID == loader.getId()) {
             mForm = data;
             mProgressBar.setVisibility(View.GONE);
+            setRefreshing(false);
 
             mSpinner.setSelection(getSpinnerIndex(mState.getProgramName()));
 
@@ -697,7 +712,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     @Subscribe
     public void onItemClick(OnProgramStageEventClick eventClick) {
         if (eventClick.isHasPressedFailedButton()) {
-            if(eventClick.getEvent() != null)
+            if (eventClick.getEvent() != null)
                 showStatusDialog(eventClick.getEvent());
         } else {
             showDataEntryFragment(eventClick.getEvent(), eventClick.getEvent().getProgramStageId());
@@ -938,7 +953,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
                 break;
             }
             case R.id.enrollmentstatus: {
-                if(mForm != null && mForm.getEnrollment() != null)
+                if (mForm != null && mForm.getEnrollment() != null)
                     showStatusDialog(mForm.getEnrollment());
                 break;
             }
@@ -999,5 +1014,64 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
                 break;
             }
         }
+    }
+
+    @Override
+    public void onRefresh() {
+        if (isAdded()) {
+            Context context = getActivity().getBaseContext();
+            Toast.makeText(context, getString(org.hisp.dhis.android.sdk.R.string.syncing), Toast.LENGTH_SHORT).show();
+            synchronize();
+        }
+    }
+
+    protected void setRefreshing(final boolean refreshing) {
+        /* workaround for bug in android support v4 library */
+        if (mSwipeRefreshLayout.isRefreshing() != refreshing) {
+            mSwipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshLayout.setRefreshing(refreshing);
+                }
+            });
+        }
+    }
+
+    @Subscribe
+    public void onReceivedUiEvent(UiEvent uiEvent) {
+        if (uiEvent.getEventType().equals(UiEvent.UiEventType.SYNCING_START)) {
+            setRefreshing(true);
+        } else if (uiEvent.getEventType().equals(UiEvent.UiEventType.SYNCING_END)) {
+            setRefreshing(false);
+        }
+    }
+
+    public void synchronize() {
+        sendTrackedEntityInstance(mForm.getTrackedEntityInstance());
+        sendEnrollment(mForm.getEnrollment());
+    }
+
+
+    public void sendTrackedEntityInstance(final TrackedEntityInstance trackedEntityInstance) {
+        JobExecutor.enqueueJob(new NetworkJob<Object>(0,
+                ResourceType.TRACKEDENTITYINSTANCE) {
+            @Override
+            public Object execute() {
+                TrackerController.sendTrackedEntityInstanceChanges(DhisController.getInstance().getDhisApi(), trackedEntityInstance, true);
+                return new Object();
+            }
+        });
+    }
+
+    public void sendEnrollment(final Enrollment enrollment) {
+        JobExecutor.enqueueJob(new NetworkJob<Object>(0,
+                ResourceType.ENROLLMENT) {
+
+            @Override
+            public Object execute() {
+                TrackerController.sendEnrollmentChanges(DhisController.getInstance().getDhisApi(), enrollment, true);
+                return new Object();
+            }
+        });
     }
 }

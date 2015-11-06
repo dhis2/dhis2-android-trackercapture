@@ -119,7 +119,9 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
             if(tei == null) {
                 failedItem.delete();
             } else {
-                failedEventIds.add(tei.getTrackedEntityInstance());
+                if(failedItem.getHttpStatusCode()>=0) {
+                    failedEventIds.add(tei.getTrackedEntityInstance());
+                }
             }
         }
 

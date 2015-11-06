@@ -497,8 +497,9 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
                 incidentDateLabel.setText(data.getIncidentDateLabel());
                 incidentDateValue.setText(data.getIncidentDateValue());
             }
+            FailedItem failedItem = TrackerController.getFailedItem(FailedItem.ENROLLMENT, mForm.getEnrollment().getLocalId());
 
-            if (TrackerController.getFailedItem(FailedItem.ENROLLMENT, mForm.getEnrollment().getLocalId()) != null) {
+            if (failedItem != null && failedItem.getHttpStatusCode() >= 0) {
                 enrollmentServerStatus.setImageResource(R.drawable.ic_event_error);
             } else if (!mForm.getEnrollment().isFromServer()) {
                 enrollmentServerStatus.setImageResource(R.drawable.ic_offline);
@@ -571,7 +572,9 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
                 } else if (row instanceof ProgramStageEventRow) {
                     final ProgramStageEventRow eventRow = (ProgramStageEventRow) row;
 
-                    if (TrackerController.getFailedItem(FailedItem.EVENT, eventRow.getEvent().getLocalId()) != null) {
+                    FailedItem failedItem1 = TrackerController.getFailedItem(FailedItem.EVENT, eventRow.getEvent().getLocalId());
+
+                    if (failedItem1 != null && failedItem1.getHttpStatusCode() >= 0) {
                         eventRow.setHasFailed(true);
                         eventRow.setMessage(failedEvents.get(eventRow.getEvent().getLocalId()).getErrorMessage());
                     } else if (eventRow.getEvent().isFromServer()) {

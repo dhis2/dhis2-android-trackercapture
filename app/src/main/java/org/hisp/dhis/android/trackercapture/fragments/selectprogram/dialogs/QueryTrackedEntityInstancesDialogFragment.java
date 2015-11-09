@@ -28,10 +28,15 @@
 
 package org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -71,6 +76,7 @@ import org.hisp.dhis.android.sdk.ui.dialogs.QueryTrackedEntityInstancesResultDia
 import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,6 +92,7 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
     private DataValueAdapter mAdapter;
     private ListView mListView;
     private int mDialogId;
+    private FragmentActivity activity = null;
 
     private static final String EXTRA_PROGRAM = "extra:trackedEntityAttributes";
     private static final String EXTRA_ORGUNIT = "extra:orgUnit";
@@ -335,7 +342,7 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
         new Thread() {
             @Override
             public void run() {
-                queryTrackedEntityInstances(getFragmentManager(),
+                queryTrackedEntityInstances(getChildFragmentManager(),
                         mForm.getOrganisationUnit(), mForm.getProgram(),
                         mForm.getQueryString(), searchValues.toArray(new TrackedEntityAttributeValue[]{}));
             }
@@ -349,7 +356,7 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
      * @param program can be null
      * @param params  can be null
      */
-    public static void queryTrackedEntityInstances(final FragmentManager fragmentManager, final String orgUnit, final String program, final String queryString, final TrackedEntityAttributeValue... params)
+    public void queryTrackedEntityInstances(final FragmentManager fragmentManager, final String orgUnit, final String program, final String queryString, final TrackedEntityAttributeValue... params)
             throws APIException {
         JobExecutor.enqueueJob(new NetworkJob<Object>(1,
                 null) {
@@ -365,8 +372,26 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
         });
     }
 
-    public static void showTrackedEntityInstanceQueryResultDialog(FragmentManager fragmentManager, List<TrackedEntityInstance> trackedEntityInstances, String orgUnit) {
-        QueryTrackedEntityInstancesResultDialogFragment dialog = QueryTrackedEntityInstancesResultDialogFragment.newInstance(trackedEntityInstances, orgUnit);
-        dialog.show(fragmentManager);
+    public void showTrackedEntityInstanceQueryResultDialog(FragmentManager fragmentManager, final List<TrackedEntityInstance> trackedEntityInstances, final String orgUnit) {
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                QueryTrackedEntityInstancesResultDialogFragment dialog = QueryTrackedEntityInstancesResultDialogFragment.newInstance(trackedEntityInstances, orgUnit);
+                if(activity!=null) {
+                    dialog.show(activity.getSupportFragmentManager());
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        if(activity!=null) {
+            if(activity instanceof FragmentActivity) {
+                this.activity = (FragmentActivity) activity;
+            }
+        }
     }
 }

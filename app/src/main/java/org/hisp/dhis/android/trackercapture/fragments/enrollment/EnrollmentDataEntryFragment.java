@@ -26,44 +26,30 @@
 
 package org.hisp.dhis.android.trackercapture.fragments.enrollment;
 
-import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.DatePicker;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.TextView;
 
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.sdk.R;
-import org.hisp.dhis.android.sdk.controllers.DhisService;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EventDatePickerRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnDetailedInfoButtonClick;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.HideLoadingDialogEvent;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.RefreshListViewEvent;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.RowValueChangedEvent;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.SaveThread;
-import org.hisp.dhis.android.sdk.utils.support.DateUtils;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -176,9 +162,9 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             return errors;
         }
 
-        if (isEmpty(form.getEnrollment().getDateOfEnrollment())) {
-            String dateOfEnrollmentDescription = form.getProgram().getDateOfEnrollmentDescription() == null ?
-                    getString(R.string.report_date) : form.getProgram().getDateOfEnrollmentDescription();
+        if (isEmpty(form.getEnrollment().getEnrollmentDate())) {
+            String dateOfEnrollmentDescription = form.getProgram().getEnrollmentDateLabel() == null ?
+                    getString(R.string.report_date) : form.getProgram().getEnrollmentDateLabel();
             errors.add(dateOfEnrollmentDescription);
         }
 
@@ -202,7 +188,7 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             return false;
         }
 
-        if (isEmpty(form.getEnrollment().getDateOfEnrollment())) {
+        if (isEmpty(form.getEnrollment().getEnrollmentDate())) {
             return false;
         }
 

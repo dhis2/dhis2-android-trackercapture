@@ -90,6 +90,7 @@ import org.hisp.dhis.android.sdk.ui.fragments.settings.SettingsFragment;
 import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.sdk.ui.views.FontTextView;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
+import org.hisp.dhis.android.sdk.utils.api.ProgramType;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.fragments.enrollment.EnrollmentDataEntryFragment;
 import org.hisp.dhis.android.trackercapture.fragments.enrollmentdate.EnrollmentDateFragment;
@@ -318,9 +319,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         attachSpinner();
         mSpinnerAdapter.swapData(MetaDataController.getProgramsForOrganisationUnit
                 (fragmentArguments.getString(ORG_UNIT_ID),
-                        Program.ProgramType.MULTIPLE_EVENTS_WITH_REGISTRATION,
-                        Program.ProgramType.SINGLE_EVENT_WITH_REGISTRATION,
-                        Program.ProgramType.WITH_REGISTRATION));
+                        ProgramType.WITH_REGISTRATION));
 
         onRestoreState(true);
     }
@@ -862,9 +861,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
             case R.id.select_program: {
                 ProgramDialogFragment fragment = ProgramDialogFragment
                         .newInstance(this, mState.getOrgUnitId(),
-                                Program.ProgramType.MULTIPLE_EVENTS_WITH_REGISTRATION,
-                                Program.ProgramType.SINGLE_EVENT_WITH_REGISTRATION,
-                                Program.ProgramType.WITH_REGISTRATION);
+                                ProgramType.WITH_REGISTRATION);
                 fragment.show(getChildFragmentManager());
                 break;
             }

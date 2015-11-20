@@ -49,6 +49,9 @@ import android.widget.AdapterView;
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
+import org.hisp.dhis.android.sdk.controllers.DhisController;
+import org.hisp.dhis.android.sdk.controllers.DhisService;
+import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.events.OnRowClick;
 import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
 import org.hisp.dhis.android.sdk.events.UiEvent;
@@ -371,7 +374,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                itemRow.getTrackedEntityInstance().delete();
+                                performSoftDeleteOfTrackedEntityInstance(itemRow.getTrackedEntityInstance());
                                 dialog.dismiss();
                             }
                         });
@@ -379,9 +382,31 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
             else
             {
                 //if sent to server, be able to soft delete without annoying the user
-                itemRow.getTrackedEntityInstance().delete();
+                performSoftDeleteOfTrackedEntityInstance(itemRow.getTrackedEntityInstance());
             }
         }
         return true;
+    }
+
+    public void performSoftDeleteOfTrackedEntityInstance(TrackedEntityInstance trackedEntityInstance) {
+        List<Enrollment> enrollments = TrackerController.getEnrollments(mState.getProgramId(), trackedEntityInstance);
+        Enrollment activeEnrollment = null;
+        for(Enrollment enrollment : enrollments) {
+            if(Enrollment.ACTIVE.equals(enrollment.getStatus())) {
+                activeEnrollment = enrollment;
+            }
+        }
+
+        if(activeEnrollment != null) {
+            List<Event> eventsForActiveEnrollment = TrackerController.getEventsByEnrollment(activeEnrollment.getLocalId());
+
+            if(eventsForActiveEnrollment != null) {
+                for(Event event : eventsForActiveEnrollment) {
+                    event.delete();
+                }
+            }
+
+            activeEnrollment.delete();
+        }
     }
 }

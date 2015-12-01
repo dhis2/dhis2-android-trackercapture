@@ -132,6 +132,7 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             form = data;
 
             if (data.getProgram() != null) {
+                getActionBarToolbar().setTitle(form.getProgram().getName());
             }
 
             if(data.getDataEntryRows() != null && !data.getDataEntryRows().isEmpty())

@@ -22,6 +22,7 @@ import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowTypes;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DatePickerRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EditTextRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EnrollmentDatePickerRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.IncidentDatePickerRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.RadioButtonsRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 
@@ -84,7 +85,7 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
         dataEntryRows.add(new EnrollmentDatePickerRow(currentEnrollment.getProgram().getDateOfEnrollmentDescription(), currentEnrollment, currentEnrollment.getDateOfEnrollment()));
 
         if(currentEnrollment.getProgram().getDisplayIncidentDate())
-            dataEntryRows.add(new EnrollmentDatePickerRow(currentEnrollment.getProgram().getDateOfIncidentDescription(),currentEnrollment, currentEnrollment.getDateOfIncident()));
+            dataEntryRows.add(new IncidentDatePickerRow(currentEnrollment.getProgram().getDateOfIncidentDescription(),currentEnrollment, currentEnrollment.getDateOfIncident()));
 
 
         for (ProgramTrackedEntityAttribute ptea : programTrackedEntityAttributes) {

@@ -63,9 +63,6 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
         List<String> attributesToShow = new ArrayList<>();
         TrackedEntityInstanceColumnNamesRow columnNames = new TrackedEntityInstanceColumnNamesRow();
 
-        if(selectedProgram.getTrackedEntity() != null)
-            columnNames.setmTitle(selectedProgram.getTrackedEntity().getName());
-
         for (ProgramTrackedEntityAttribute attribute : attributes) {
             if (attribute.getDisplayInList() && attributesToShow.size() < 3) {
                 attributesToShow.add(attribute.getTrackedEntityAttributeId());
@@ -135,6 +132,11 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
         fragmentForm.setEventRowList(teiRows);
         fragmentForm.setProgram(selectedProgram);
         fragmentForm.setColumnNames(columnNames);
+
+        if(selectedProgram.getTrackedEntity() != null) {
+            columnNames.setmTitle(selectedProgram.getTrackedEntity().getName() + "("  + (  teiRows.size() - 1)  + ")" );
+        }
+
         return fragmentForm;
     }
 

@@ -1029,7 +1029,6 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
 
     public void synchronize() {
         sendTrackedEntityInstance(mForm.getTrackedEntityInstance());
-        sendEnrollment(mForm.getEnrollment());
     }
 
 
@@ -1039,18 +1038,6 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
             @Override
             public Object execute() {
                 TrackerController.sendTrackedEntityInstanceChanges(DhisController.getInstance().getDhisApi(), trackedEntityInstance, true);
-                return new Object();
-            }
-        });
-    }
-
-    public void sendEnrollment(final Enrollment enrollment) {
-        JobExecutor.enqueueJob(new NetworkJob<Object>(0,
-                ResourceType.ENROLLMENT) {
-
-            @Override
-            public Object execute() {
-                TrackerController.sendEnrollmentChanges(DhisController.getInstance().getDhisApi(), enrollment, true);
                 return new Object();
             }
         });

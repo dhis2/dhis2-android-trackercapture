@@ -6,6 +6,7 @@ import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EnrollmentDatePickerRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.IncidentDatePickerRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 
 import java.util.ArrayList;
@@ -36,7 +37,7 @@ public class EnrollmentDateFragmentQuery implements Query<EnrollmentDateFragment
 
         if(enrollment.getProgram().getDisplayIncidentDate())
         {
-            dataEntryRows.add(new EnrollmentDatePickerRow(enrollment.getProgram().getDateOfIncidentDescription(),enrollment, enrollment.getDateOfIncident()));
+            dataEntryRows.add(new IncidentDatePickerRow(enrollment.getProgram().getDateOfIncidentDescription(),enrollment, enrollment.getDateOfIncident()));
         }
 
         fragmentForm.setEnrollment(enrollment);

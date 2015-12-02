@@ -8,8 +8,8 @@ android {
         applicationId "org.hisp.dhis.android.trackercapture"
         minSdkVersion 15
         targetSdkVersion 21
-        versionCode 13
-        versionName "0.2.8-2.20"
+        versionCode 14
+        versionName "0.2.9-2.20"
     }
     buildTypes {
         release {

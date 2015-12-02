@@ -196,10 +196,6 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
-        if (activity instanceof AppCompatActivity) {
-            getActionBar().setDisplayShowTitleEnabled(false);
-        }
-
         if (activity instanceof INavigationHandler) {
             mNavigationHandler = (INavigationHandler) activity;
         } else {
@@ -209,14 +205,6 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
 
     @Override
     public void onDetach() {
-        super.onDetach();
-
-        if (getActivity() != null &&
-                getActivity() instanceof AppCompatActivity) {
-            getActionBar().setDisplayShowTitleEnabled(true);
-            getActionBar().setDisplayHomeAsUpEnabled(false);
-            getActionBar().setHomeButtonEnabled(false);
-        }
 
         // we need to nullify reference
         // to parent activity in order not to leak it
@@ -227,10 +215,19 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         // we need to nullify reference
         // to parent activity in order not to leak it
         mNavigationHandler = null;
+
+        super.onDetach();
     }
 
     @Override
     public void onDestroyView() {
+        if (getActivity() != null &&
+                getActivity() instanceof AppCompatActivity) {
+            getActionBar().setDisplayShowTitleEnabled(true);
+            getActionBar().setDisplayHomeAsUpEnabled(false);
+            getActionBar().setHomeButtonEnabled(false);
+        }
+
         detachSpinner();
         super.onDestroyView();
     }
@@ -248,6 +245,13 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
+
+        if(getActivity() instanceof AppCompatActivity) {
+            getActionBar().setDisplayShowTitleEnabled(false);
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+            getActionBar().setHomeButtonEnabled(true);
+        }
+
         listView = (ListView) view.findViewById(R.id.listview);
         View header = getLayoutInflater(savedInstanceState).inflate(
                 R.layout.fragment_programoverview_header, listView, false
@@ -348,6 +352,10 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         if (id == R.id.action_settings) {
             mNavigationHandler.switchFragment(
                     new SettingsFragment(), SettingsFragment.TAG, true);
+        }
+        else if (id == android.R.id.home) {
+            getFragmentManager().popBackStack();
+            return true;
         }
 
         return super.onOptionsItemSelected(item);

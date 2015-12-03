@@ -37,10 +37,12 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.text.Editable;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -152,8 +154,9 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
         mListView.setOnItemClickListener(this);
 
         mFilter.addTextChangedListener(new AbsTextWatcher() {
-            @Override public void afterTextChanged(Editable s) {
-                mAdapter.getFilter().filter(TrackedEntityInstanceAdapter.FILTER_ALL_ATTRIBUTES + s.toString());
+            @Override
+            public void afterTextChanged(Editable s) {
+                mAdapter.getFilter().filter(TrackedEntityInstanceAdapter.FILTER_SEARCH + s.toString());
             }
         });
 

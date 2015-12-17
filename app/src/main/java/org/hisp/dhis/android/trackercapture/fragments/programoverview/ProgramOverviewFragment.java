@@ -550,6 +550,15 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
                     if (stageRow.getProgramStage().getRepeatable()) {
                         stageRow.setButtonListener(this);
                     }
+                    else
+                    {
+                        if(stageRow.getEventRows().size() < 1) { // if stage is not autogen and not repeatable, allow user to create exactly one event
+                            stageRow.setButtonListener(this);
+                        }
+                        if(stageRow.getProgramStage().getAutoGenerateEvent()) {
+                            stageRow.setButtonListener(this);
+                        }
+                    }
 
                 } else if (row instanceof ProgramStageEventRow) {
                     final ProgramStageEventRow eventRow = (ProgramStageEventRow) row;

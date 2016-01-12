@@ -37,8 +37,10 @@ import com.squareup.otto.Subscribe;
 import org.hisp.dhis.android.sdk.R;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
+import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
+import org.hisp.dhis.android.sdk.ui.adapters.SectionAdapter;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnDetailedInfoButtonClick;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.HideLoadingDialogEvent;
@@ -59,22 +61,35 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     private static final String EMPTY_FIELD = "";
     private static final String ORG_UNIT_ID = "extra:orgUnitId";
     private static final String PROGRAM_ID = "extra:ProgramId";
+    private static final String ENROLLMENT_DATE = "extra:enrollmentDate";
+    private static final String INCIDENT_DATE = "extra:incidentDate";
     private static final String TRACKEDENTITYINSTANCE_ID = "extra:TrackedEntityInstanceId";
     private EnrollmentDataEntryFragmentForm form;
     private SaveThread saveThread;
+    private Map<String, List<ProgramRule>> programRulesForTrackedEntityAttributes;
+    private RulesEvaluatorBufferThread rulesEvaluatorBufferThread;
 
-    public static EnrollmentDataEntryFragment newInstance(String unitId, String programId) {
+    public EnrollmentDataEntryFragment() {
+        setProgramRuleFragmentHelper(new EnrollmentDataEntryRuleHelper(this));
+    }
+
+    public static EnrollmentDataEntryFragment newInstance(String unitId, String programId, String enrollmentDate, String incidentDate) {
         EnrollmentDataEntryFragment fragment = new EnrollmentDataEntryFragment();
         Bundle args = new Bundle();
+        args.putString(ENROLLMENT_DATE, enrollmentDate);
+        args.putString(INCIDENT_DATE, incidentDate);
+        args.putString(ORG_UNIT_ID, unitId);
         args.putString(ORG_UNIT_ID, unitId);
         args.putString(PROGRAM_ID, programId);
         fragment.setArguments(args);
         return fragment;
     }
 
-    public static EnrollmentDataEntryFragment newInstance(String unitId, String programId, long trackedEntityInstanceId) {
+    public static EnrollmentDataEntryFragment newInstance(String unitId, String programId, long trackedEntityInstanceId, String enrollmentDate, String incidentDate) {
         EnrollmentDataEntryFragment fragment = new EnrollmentDataEntryFragment();
         Bundle args = new Bundle();
+        args.putString(ENROLLMENT_DATE, enrollmentDate);
+        args.putString(INCIDENT_DATE, incidentDate);
         args.putString(ORG_UNIT_ID, unitId);
         args.putString(PROGRAM_ID, programId);
         args.putLong(TRACKEDENTITYINSTANCE_ID, trackedEntityInstanceId);
@@ -89,13 +104,21 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             saveThread = new SaveThread();
             saveThread.start();
         }
+        rulesEvaluatorBufferThread = new RulesEvaluatorBufferThread(this);
+        rulesEvaluatorBufferThread.start();
         saveThread.init(this);
     }
 
     @Override
     public void onDestroy() {
+        rulesEvaluatorBufferThread.kill();
         saveThread.kill();
         super.onDestroy();
+    }
+
+    @Override
+    public SectionAdapter getSpinnerAdapter() {
+        return null;
     }
 
     @Override
@@ -113,11 +136,13 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             Bundle fragmentArguments = args.getBundle(EXTRA_ARGUMENTS);
             String orgUnitId = fragmentArguments.getString(ORG_UNIT_ID);
             String programId = fragmentArguments.getString(PROGRAM_ID);
+            String enrollmentDate = fragmentArguments.getString(ENROLLMENT_DATE);
+            String incidentDate = fragmentArguments.getString(INCIDENT_DATE);
             long trackedEntityInstance = fragmentArguments.getLong(TRACKEDENTITYINSTANCE_ID, -1);
 
             return new DbLoader<>(
                     getActivity().getBaseContext(), modelsToTrack, new EnrollmentDataEntryFragmentQuery(
-                    orgUnitId,programId, trackedEntityInstance )
+                    orgUnitId,programId, trackedEntityInstance, enrollmentDate, incidentDate)
             );
         }
         return null;
@@ -139,6 +164,17 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             {
                 listViewAdapter.swapData(data.getDataEntryRows());
             }
+            initiateEvaluateProgramRules();
+        }
+    }
+
+    /**
+     * Schedules evaluation and updating of views based on ProgramRules in a thread.
+     * This is used to avoid stacking up calls to evaluateAndApplyProgramRules
+     */
+    public void initiateEvaluateProgramRules() {
+        if(rulesEvaluatorThread!=null) {
+            rulesEvaluatorThread.schedule();
         }
     }
 
@@ -220,6 +256,7 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
      * returns true if the enrollment was successfully saved
      * @return
      */
+    @Override
     protected void save() {
         if (form != null && form.getTrackedEntityInstance() != null) {
             if (form.getTrackedEntityInstance().getLocalId() < 0) {
@@ -234,9 +271,26 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
         }
     }
 
+    private void evaluateRules(String trackedEntityAttribute) {
+        if (trackedEntityAttribute == null || form == null) {
+            return;
+        }
+        if(hasRules(trackedEntityAttribute)) {
+            rulesEvaluatorBufferThread.trigger();
+        }
+    }
+
+    private boolean hasRules(String trackedEntityAttribute) {
+        if(programRulesForTrackedEntityAttributes==null) {
+            return false;
+        }
+        return programRulesForTrackedEntityAttributes.containsKey(trackedEntityAttribute);
+    }
+
     @Subscribe
     public void onRowValueChanged(final RowValueChangedEvent event) {
         super.onRowValueChanged(event);
+        evaluateRules(event.getId());
         saveThread.schedule();
     }
 
@@ -254,5 +308,29 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     @Subscribe
     public void onHideLoadingDialog(HideLoadingDialogEvent event) {
         super.onHideLoadingDialog(event);
+    }
+
+    public SaveThread getSaveThread() {
+        return saveThread;
+    }
+
+    public void setSaveThread(SaveThread saveThread) {
+        this.saveThread = saveThread;
+    }
+
+    public EnrollmentDataEntryFragmentForm getForm() {
+        return form;
+    }
+
+    public void setForm(EnrollmentDataEntryFragmentForm form) {
+        this.form = form;
+    }
+
+    public Map<String, List<ProgramRule>> getProgramRulesForTrackedEntityAttributes() {
+        return programRulesForTrackedEntityAttributes;
+    }
+
+    public void setProgramRulesForTrackedEntityAttributes(Map<String, List<ProgramRule>> programRulesForTrackedEntityAttributes) {
+        this.programRulesForTrackedEntityAttributes = programRulesForTrackedEntityAttributes;
     }
 }

@@ -1,27 +1,23 @@
 package org.hisp.dhis.android.trackercapture.fragments.enrollment;
 
-import org.hisp.dhis.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.IndicatorRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by erling on 5/12/15.
- */
 class EnrollmentDataEntryFragmentForm
 {
     private Enrollment enrollment;
     private Program program;
     private TrackedEntityInstance trackedEntityInstance;
     private OrganisationUnit organisationUnit;
-    private Map<String, DataValue> dataValues;
+    private Map<String, TrackedEntityAttributeValue> trackedEntityAttributeValueMap;
     private Map<String, String> dataElementNames;
     private List<IndicatorRow> indicatorRows;
     private List<Row> dataEntryRows;
@@ -66,13 +62,19 @@ class EnrollmentDataEntryFragmentForm
         this.dataElementNames = dataElementNames;
     }
 
-
-
     public TrackedEntityInstance getTrackedEntityInstance() {
         return trackedEntityInstance;
     }
 
     public void setTrackedEntityInstance(TrackedEntityInstance trackedEntityInstance) {
         this.trackedEntityInstance = trackedEntityInstance;
+    }
+
+    public Map<String, TrackedEntityAttributeValue> getTrackedEntityAttributeValueMap() {
+        return trackedEntityAttributeValueMap;
+    }
+
+    public void setTrackedEntityAttributeValueMap(Map<String, TrackedEntityAttributeValue> trackedEntityAttributeValueMap) {
+        this.trackedEntityAttributeValueMap = trackedEntityAttributeValueMap;
     }
 }

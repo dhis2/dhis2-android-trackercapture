@@ -1,6 +1,5 @@
 package org.hisp.dhis.android.trackercapture.ui.rows.programoverview;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,10 +13,6 @@ import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.utils.Utils;
 import org.hisp.dhis.android.sdk.utils.support.DateUtils;
 import org.joda.time.LocalDate;
-
-/**
- * @author Simen Skogly Russnes on 13.05.15.
- */
 
 public class ProgramStageEventRow implements ProgramStageRow {
 
@@ -39,7 +34,7 @@ public class ProgramStageEventRow implements ProgramStageRow {
     public View getView(LayoutInflater inflater, View convertView, ViewGroup container) {
         View view;
         TextView orgUnit;
-        TextView eventDate;
+        TextView eventDateTextView;
         ImageButton statusButton = null;
 
         if (convertView != null && convertView.getTag() instanceof EventViewHolder) {
@@ -48,11 +43,10 @@ public class ProgramStageEventRow implements ProgramStageRow {
         } else {
             View root = inflater.inflate(org.hisp.dhis.android.sdk.R.layout.eventlayout, container, false);
             orgUnit = (TextView) root.findViewById(org.hisp.dhis.android.sdk.R.id.organisationunit);
-            eventDate = (TextView) root.findViewById(org.hisp.dhis.android.sdk.R.id.date);
+            eventDateTextView = (TextView) root.findViewById(org.hisp.dhis.android.sdk.R.id.date);
             statusButton = (ImageButton) root.findViewById(org.hisp.dhis.android.sdk.R.id.statusButton);
 
-
-            holder = new EventViewHolder(orgUnit, eventDate, statusButton, new OnProgramStageEventInternalClickListener());
+            holder = new EventViewHolder(orgUnit, eventDateTextView, statusButton, new OnProgramStageEventInternalClickListener());
 
             root.findViewById(org.hisp.dhis.android.sdk.R.id.eventbackground).setOnClickListener(holder.listener);
 
@@ -60,10 +54,8 @@ public class ProgramStageEventRow implements ProgramStageRow {
             view = root;
         }
 
-        if(holder.statusButton != null)
-        {
-            if (hasFailed())
-            {
+        if(holder.statusButton != null) {
+            if (hasFailed()) {
                 holder.statusButton.setEnabled(true);
                 holder.statusButton.setVisibility(View.VISIBLE);
                 holder.statusButton.setBackgroundResource(org.hisp.dhis.android.sdk.R.drawable.ic_event_error);
@@ -71,10 +63,7 @@ public class ProgramStageEventRow implements ProgramStageRow {
                 holder.listener.setStatusButton(statusButton);
                 holder.listener.setStatus(OnRowClick.ITEM_STATUS.ERROR);
                 holder.statusButton.setOnClickListener(holder.listener);
-
-            }
-            else if (!isSynchronized())
-            {
+            } else if (!isSynchronized()) {
                 holder.statusButton.setEnabled(true);
                 holder.statusButton.setVisibility(View.VISIBLE);
                 holder.statusButton.setBackgroundResource(org.hisp.dhis.android.sdk.R.drawable.ic_offline);
@@ -82,10 +71,7 @@ public class ProgramStageEventRow implements ProgramStageRow {
                 holder.listener.setStatusButton(statusButton);
                 holder.listener.setStatus(OnRowClick.ITEM_STATUS.OFFLINE);
                 holder.statusButton.setOnClickListener(holder.listener);
-
-            }
-            else if (isSynchronized())
-            {
+            } else if (isSynchronized()) {
                 holder.statusButton.setEnabled(true);
                 holder.statusButton.setVisibility(View.VISIBLE);
                 holder.statusButton.setBackgroundResource(org.hisp.dhis.android.sdk.R.drawable.ic_from_server);
@@ -93,7 +79,6 @@ public class ProgramStageEventRow implements ProgramStageRow {
                 holder.listener.setStatusButton(statusButton);
                 holder.listener.setStatus(OnRowClick.ITEM_STATUS.SENT);
                 holder.statusButton.setOnClickListener(holder.listener);
-
             }
         }
 
@@ -105,10 +90,10 @@ public class ProgramStageEventRow implements ProgramStageRow {
             holder.orgUnit.setText("");
         }
         String date="";
-        if(event.getDueDate()!=null) {
-            date = event.getDueDate();
-        } else {
+        if(event.getEventDate()!=null) {
             date = event.getEventDate();
+        } else {
+            date = event.getDueDate();
         }
         if(date!=null) {
             date = Utils.removeTimeFromDateString(date);
@@ -116,33 +101,37 @@ public class ProgramStageEventRow implements ProgramStageRow {
             date = "";
         }
         holder.date.setText(date);
+        LocalDate eventDate = null;
+        if(event.getEventDate() != null) {
+            eventDate = new LocalDate(DateUtils.parseDate(event.getEventDate()));
+        }
         LocalDate dueDate = new LocalDate(DateUtils.parseDate(event.getDueDate()));
         LocalDate now = new LocalDate(DateUtils.parseDate(DateUtils.getMediumDateString()));
-        int color = org.hisp.dhis.android.sdk.R.color.stage_skipped;
-        if(event.getStatus().equals(Event.STATUS_COMPLETED)) {
-            color = org.hisp.dhis.android.sdk.R.color.stage_completed;
-        } else if (event.getStatus().equals(Event.STATUS_SKIPPED)) {
-            color = org.hisp.dhis.android.sdk.R.color.stage_skipped;
-        } else if (event.getStatus().equals(Event.STATUS_ACTIVE)) {
-            if (now.isBefore(dueDate) || now.isEqual(dueDate)) {
-                color = org.hisp.dhis.android.sdk.R.color.stage_executed;
-            } else {
-                color = org.hisp.dhis.android.sdk.R.color.stage_overdue;
-            }
-        } else if (event.getStatus().equals(Event.STATUS_FUTURE_VISIT)) {
-            if (now.isBefore(dueDate) || now.isEqual(dueDate)) {
-                color = org.hisp.dhis.android.sdk.R.color.stage_ontime;
-            } else {
-                color = org.hisp.dhis.android.sdk.R.color.stage_overdue;
-            }
-        }
+        int color = getStatusColor(eventDate, dueDate, now);
+
         view.findViewById(org.hisp.dhis.android.sdk.R.id.eventbackground).
                 setBackgroundColor(inflater.getContext().getResources().getColor(color));
 
         return view;
     }
 
-
+    private int getStatusColor(LocalDate eventDate, LocalDate dueDate, LocalDate now) {
+        int color;
+        if(event.getStatus().equals(Event.STATUS_COMPLETED)) {
+            color = org.hisp.dhis.android.sdk.R.color.stage_completed;
+        } else if (event.getStatus().equals(Event.STATUS_SKIPPED)) {
+            color = org.hisp.dhis.android.sdk.R.color.stage_skipped;
+        } else {
+            if(eventDate != null) {
+                color = org.hisp.dhis.android.sdk.R.color.stage_executed;
+            } else if(dueDate.isBefore(now)) {
+                color = org.hisp.dhis.android.sdk.R.color.stage_overdue;
+            } else if (true){
+                color = org.hisp.dhis.android.sdk.R.color.stage_ontime;
+            }
+        }
+        return color;
+    }
 
     private static class EventViewHolder {
         public final TextView orgUnit;
@@ -209,8 +198,7 @@ public class ProgramStageEventRow implements ProgramStageRow {
         return message;
     }
 
-    private static class OnProgramStageEventInternalClickListener implements View.OnClickListener
-    {
+    private static class OnProgramStageEventInternalClickListener implements View.OnClickListener {
         private Event event;
         private ImageButton statusButton;
         private String message;
@@ -233,16 +221,11 @@ public class ProgramStageEventRow implements ProgramStageRow {
         }
 
         @Override
-        public void onClick(View view)
-        {
-            if(view.getId() == org.hisp.dhis.android.sdk.R.id.eventbackground)
-            {
+        public void onClick(View view) {
+            if(view.getId() == org.hisp.dhis.android.sdk.R.id.eventbackground) {
                 Dhis2Application.getEventBus().post(new OnProgramStageEventClick(event, statusButton,false, "", status));
-            }
-            else if(view.getId() == org.hisp.dhis.android.sdk.R.id.statusButton)
-            {
+            } else if(view.getId() == org.hisp.dhis.android.sdk.R.id.statusButton) {
                 Dhis2Application.getEventBus().post(new OnProgramStageEventClick(event, statusButton, true, message, status));
-
             }
         }
     }

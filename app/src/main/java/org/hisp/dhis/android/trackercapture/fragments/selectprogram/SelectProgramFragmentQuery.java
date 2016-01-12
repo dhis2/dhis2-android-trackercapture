@@ -45,6 +45,7 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
 
         // create a list of EventItems
         Program selectedProgram = MetaDataController.getProgram(mProgramId);
+        fragmentForm.setProgram(selectedProgram);
         if (selectedProgram == null || isListEmpty(selectedProgram.getProgramStages())) {
             return fragmentForm;
         }
@@ -130,7 +131,6 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
         }
 
         fragmentForm.setEventRowList(teiRows);
-        fragmentForm.setProgram(selectedProgram);
         fragmentForm.setColumnNames(columnNames);
 
         if(selectedProgram.getTrackedEntity() != null) {
@@ -185,5 +185,4 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
     private static <T> boolean isListEmpty(List<T> items) {
         return items == null || items.isEmpty();
     }
-
 }

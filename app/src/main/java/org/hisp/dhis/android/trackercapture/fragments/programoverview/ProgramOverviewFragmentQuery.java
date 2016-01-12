@@ -34,10 +34,13 @@ import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
+import org.hisp.dhis.android.sdk.persistence.models.ProgramIndicator;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.IndicatorRow;
 import org.hisp.dhis.android.sdk.utils.Utils;
+import org.hisp.dhis.android.sdk.utils.services.ProgramIndicatorService;
 import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.ProgramStageEventRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.ProgramStageLabelRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.ProgramStageRow;
@@ -63,6 +66,12 @@ class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm>
         ProgramOverviewFragmentForm programOverviewFragmentForm = new ProgramOverviewFragmentForm();
         Program program = MetaDataController.getProgram(mProgramId);
         TrackedEntityInstance trackedEntityInstance = TrackerController.getTrackedEntityInstance(mTrackedEntityInstanceId);
+
+        programOverviewFragmentForm.setProgram(program);
+        programOverviewFragmentForm.setTrackedEntityInstance(trackedEntityInstance);
+        programOverviewFragmentForm.setDateOfEnrollmentLabel(program.getEnrollmentDateLabel());
+        programOverviewFragmentForm.setIncidentDateLabel(program.getIncidentDateLabel());
+
         List<Enrollment> enrollments = TrackerController.getEnrollments(mProgramId, trackedEntityInstance);
         Enrollment activeEnrollment = null;
         if(enrollments!=null) {
@@ -72,17 +81,12 @@ class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm>
                 }
             }
         }
-        if(activeEnrollment==null) {
+        if (activeEnrollment==null) {
             return programOverviewFragmentForm;
         }
 
         programOverviewFragmentForm.setEnrollment(activeEnrollment);
-        programOverviewFragmentForm.setProgram(program);
-        programOverviewFragmentForm.setTrackedEntityInstance(trackedEntityInstance);
-
-        programOverviewFragmentForm.setDateOfEnrollmentLabel(program.getEnrollmentDateLabel());
         programOverviewFragmentForm.setDateOfEnrollmentValue(Utils.removeTimeFromDateString(activeEnrollment.getEnrollmentDate()));
-        programOverviewFragmentForm.setIncidentDateLabel(program.getIncidentDateLabel());
         programOverviewFragmentForm.setIncidentDateValue(Utils.removeTimeFromDateString(activeEnrollment.getIncidentDate()));
         List<TrackedEntityAttributeValue> attributeValues = activeEnrollment.getAttributes();
         if(attributeValues!=null) {
@@ -102,6 +106,16 @@ class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm>
 
         List<ProgramStageRow> programStageRows = getProgramStageRows(activeEnrollment);
         programOverviewFragmentForm.setProgramStageRows(programStageRows);
+
+        List<ProgramIndicator> programIndicators = programOverviewFragmentForm.getProgram().getProgramIndicators();
+        programOverviewFragmentForm.setProgramIndicatorRows(new HashMap<ProgramIndicator, IndicatorRow>());
+        if(programIndicators != null ) {
+            for(ProgramIndicator programIndicator : programIndicators) {
+                String value = ProgramIndicatorService.getProgramIndicatorValue(programOverviewFragmentForm.getEnrollment(), programIndicator);
+                IndicatorRow indicatorRow = new IndicatorRow(programIndicator, value);
+                programOverviewFragmentForm.getProgramIndicatorRows().put(programIndicator, indicatorRow);
+            }
+        }
         return programOverviewFragmentForm;
     }
 

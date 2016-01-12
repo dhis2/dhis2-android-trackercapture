@@ -33,7 +33,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -75,6 +74,7 @@ import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
+import org.hisp.dhis.android.sdk.persistence.models.ProgramRuleAction;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.Relationship;
@@ -84,17 +84,23 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
 import org.hisp.dhis.android.sdk.ui.activities.INavigationHandler;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.IndicatorRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.KeyValueRow;
 import org.hisp.dhis.android.sdk.ui.dialogs.ProgramDialogFragment;
+import org.hisp.dhis.android.sdk.ui.fragments.common.AbsProgramRuleFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.eventdataentry.EventDataEntryFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.settings.SettingsFragment;
 import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.sdk.ui.views.FontTextView;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.sdk.utils.api.ProgramType;
+import org.hisp.dhis.android.sdk.utils.services.ProgramRuleService;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.fragments.enrollment.EnrollmentDataEntryFragment;
 import org.hisp.dhis.android.trackercapture.fragments.enrollmentdate.EnrollmentDateFragment;
 import org.hisp.dhis.android.trackercapture.fragments.programoverview.registerrelationshipdialogfragment.RegisterRelationshipDialogFragment;
+import org.hisp.dhis.android.trackercapture.fragments.selectprogram.EnrollmentDateSetterHelper;
+import org.hisp.dhis.android.trackercapture.fragments.selectprogram.IEnroller;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.ItemStatusDialogFragment;
 import org.hisp.dhis.android.trackercapture.fragments.trackedentityinstanceprofile.TrackedEntityInstanceProfileFragment;
 import org.hisp.dhis.android.trackercapture.ui.adapters.ProgramAdapter;
@@ -103,6 +109,7 @@ import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.OnProgramSta
 import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.ProgramStageEventRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.ProgramStageLabelRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.ProgramStageRow;
+import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -110,13 +117,10 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-/**
- * @author Simen Skogly Russnes on 20.02.15.
- */
-public class ProgramOverviewFragment extends Fragment implements View.OnClickListener,
+public class ProgramOverviewFragment extends AbsProgramRuleFragment implements View.OnClickListener,
         AdapterView.OnItemClickListener,
         ProgramDialogFragment.OnOptionSelectedListener,
-        LoaderManager.LoaderCallbacks<ProgramOverviewFragmentForm>, AdapterView.OnItemSelectedListener, SwipeRefreshLayout.OnRefreshListener {
+        LoaderManager.LoaderCallbacks<ProgramOverviewFragmentForm>, AdapterView.OnItemSelectedListener, SwipeRefreshLayout.OnRefreshListener, IEnroller {
 
     public static final String CLASS_TAG = ProgramOverviewFragment.class.getSimpleName();
     private static final String STATE = "state:UpcomingEventsFragment";
@@ -134,7 +138,6 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     private ProgramStageAdapter adapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
-
     private View mSpinnerContainer;
     private Spinner mSpinner;
     private ProgramAdapter mSpinnerAdapter;
@@ -150,6 +153,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
 
     private CardView profileCardView;
     private CardView enrollmentCardview;
+    private CardView programIndicatorCardView;
 
     private ImageButton followupButton;
     private ImageButton profileButton;
@@ -169,6 +173,10 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
     private ProgramOverviewFragmentForm mForm;
 
     private INavigationHandler mNavigationHandler;
+
+    public ProgramOverviewFragment() {
+        setProgramRuleFragmentHelper(new ProgramOverviewRuleHelper(this));
+    }
 
     public static ProgramOverviewFragment newInstance(String orgUnitId, String programId, long trackedEntityInstanceId) {
         ProgramOverviewFragment fragment = new ProgramOverviewFragment();
@@ -281,6 +289,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         incidentDateValue = (TextView) header.findViewById(R.id.dateOfIncidentValue);
         profileCardView = (CardView) header.findViewById(R.id.profile_cardview);
         enrollmentCardview = (CardView) header.findViewById(R.id.enrollment_cardview);
+        programIndicatorCardView = (CardView) header.findViewById(R.id.programindicators_cardview);
 
         completeButton = (Button) header.findViewById(R.id.complete);
         terminateButton = (Button) header.findViewById(R.id.terminate);
@@ -306,7 +315,6 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         attribute2Value = (TextView) header.findViewById(R.id.headerItem2value);
 
         Bundle fragmentArguments = getArguments();
-
 
         if (savedInstanceState != null &&
                 savedInstanceState.getParcelable(STATE) != null) {
@@ -421,14 +429,12 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
             mSpinnerAdapter = new ProgramAdapter(inflater);
 
             mSpinner = (Spinner) mSpinnerContainer.findViewById(org.hisp.dhis.android.sdk.R.id.toolbar_spinner);
-//            mSpinner.setOnItemSelectedListener(this);
             mSpinner.setAdapter(mSpinnerAdapter);
             mSpinner.post(new Runnable() {
                 public void run() {
                     mSpinner.setOnItemSelectedListener(ProgramOverviewFragment.this);
                 }
             });
-//            mSpinner.setSelection(getSpinnerIndex(MetaDataController.getProgram(getArguments().getString(PROGRAM_ID)).getName()));
         }
     }
 
@@ -491,7 +497,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
             } else {
                 enrollmentLayout.setVisibility(View.VISIBLE);
                 missingEnrollmentLayout.setVisibility(View.GONE);
-                profileCardView.setClickable(true); //is set to false when TEI doesn't have an applicable enrollment
+                profileCardView.setClickable(true); //is set to false when TEI doesn't have an applicable enrollment. todo why?
                 profileButton.setClickable(true);
             }
             enrollmentDateLabel.setText(data.getDateOfEnrollmentLabel());
@@ -569,6 +575,15 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
                 }
             }
             setRelationships(getLayoutInflater(getArguments().getBundle(EXTRA_SAVED_INSTANCE_STATE)));
+
+            LinearLayout programIndicatorLayout = (LinearLayout) programIndicatorCardView.findViewById(R.id.programindicatorlayout);
+            programIndicatorLayout.removeAllViews();
+            for(IndicatorRow indicatorRow : mForm.getProgramIndicatorRows().values()) {
+                View view = indicatorRow.getView(getChildFragmentManager(), getLayoutInflater(getArguments()), null, programIndicatorLayout);
+                programIndicatorLayout.addView(view);
+            }
+
+            evaluateAndApplyProgramRules();
             adapter.swapData(data.getProgramStageRows());
         }
     }
@@ -792,8 +807,26 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         }
     }
 
-    public void enroll() {
-        EnrollmentDataEntryFragment enrollmentDataEntryFragment = EnrollmentDataEntryFragment.newInstance(mState.getOrgUnitId(), mState.getProgramId(), mState.getTrackedEntityInstanceId());
+    private void createEnrollment() {
+        EnrollmentDateSetterHelper.createEnrollment(mForm.getTrackedEntityInstance(), this, getActivity(), mForm.getProgram().
+                        getDisplayIncidentDate(), mForm.getProgram().getSelectEnrollmentDatesInFuture(),
+                mForm.getProgram().getSelectIncidentDatesInFuture(), mForm.getProgram().getEnrollmentDateLabel(),
+                mForm.getProgram().getIncidentDateLabel());
+    }
+
+    @Override
+    public void showEnrollmentFragment(TrackedEntityInstance trackedEntityInstance, DateTime enrollmentDate, DateTime incidentDate) {
+        String enrollmentDateString = enrollmentDate.toString();
+        String incidentDateString = null;
+        if(incidentDate != null) {
+            incidentDateString = incidentDate.toString();
+        }
+        EnrollmentDataEntryFragment enrollmentDataEntryFragment;
+        if(trackedEntityInstance == null) {
+            enrollmentDataEntryFragment = EnrollmentDataEntryFragment.newInstance(mState.getOrgUnitId(), mState.getProgramId(), enrollmentDateString, incidentDateString);
+        } else {
+            enrollmentDataEntryFragment = EnrollmentDataEntryFragment.newInstance(mState.getOrgUnitId(), mState.getProgramId(), trackedEntityInstance.getLocalId(), enrollmentDateString, incidentDateString);
+        }
         mNavigationHandler.switchFragment(enrollmentDataEntryFragment, EnrollmentDataEntryFragment.class.getName(), true);
     }
 
@@ -806,7 +839,6 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
             fragment = EventDataEntryFragment.newInstanceWithEnrollment(args.getString(ORG_UNIT_ID), args.getString(PROGRAM_ID), programStage,
                     event.getLocalEnrollmentId(), event.getLocalId());
         }
-
         mNavigationHandler.switchFragment(fragment, ProgramOverviewFragment.CLASS_TAG, true);
     }
 
@@ -824,9 +856,9 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
      */
     public void setCompleted() {
         completeButton.setEnabled(false);
-        completeButton.setAlpha(0x40);
+        completeButton.setAlpha(0.2f);
         terminateButton.setEnabled(false);
-        terminateButton.setAlpha(0x40);
+        terminateButton.setAlpha(0.2f);
         followupButton.setEnabled(false);
         followupButton.setAlpha(0x40);
     }
@@ -926,7 +958,7 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
             }
 
             case R.id.newenrollmentbutton: {
-                enroll();
+                createEnrollment();
                 break;
             }
 
@@ -978,6 +1010,14 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
         if (mForm == null || mForm.getTrackedEntityInstance() == null) return;
         RegisterRelationshipDialogFragment fragment = RegisterRelationshipDialogFragment.newInstance(mForm.getTrackedEntityInstance().getLocalId());
         fragment.show(getChildFragmentManager(), CLASS_TAG);
+    }
+
+    void displayKeyValuePair(ProgramRuleAction programRuleAction) {
+        LinearLayout programIndicatorLayout = (LinearLayout) programIndicatorCardView.findViewById(R.id.programindicatorlayout);
+        KeyValueRow keyValueRow = new KeyValueRow(programRuleAction.getContent(), ProgramRuleService.getCalculatedConditionValue(programRuleAction.getData()));
+        View view = keyValueRow.getView(getChildFragmentManager(), getLayoutInflater(getArguments()), null, programIndicatorLayout);
+        view.findViewById(R.id.detailed_info_button_layout).setVisibility(View.GONE);
+        programIndicatorLayout.addView(view);
     }
 
     @Override
@@ -1046,5 +1086,13 @@ public class ProgramOverviewFragment extends Fragment implements View.OnClickLis
                 return new Object();
             }
         });
+    }
+
+    public ProgramOverviewFragmentForm getForm() {
+        return mForm;
+    }
+
+    public void setForm(ProgramOverviewFragmentForm mForm) {
+        this.mForm = mForm;
     }
 }

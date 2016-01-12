@@ -2,7 +2,6 @@ package org.hisp.dhis.android.trackercapture.fragments.enrollmentdate;
 
 import android.os.Bundle;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -13,6 +12,7 @@ import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
+import org.hisp.dhis.android.sdk.ui.adapters.SectionAdapter;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.RowValueChangedEvent;
@@ -22,10 +22,9 @@ import org.hisp.dhis.android.trackercapture.R;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
+@Deprecated
 /**
- * Created by erling on 7/16/15.
+ * @deprecated Use EnrollmentFragment instead to avoid having fragments doing the same thing
  */
 public class EnrollmentDateFragment extends DataEntryFragment<EnrollmentDateFragmentForm>
 {
@@ -46,7 +45,6 @@ public class EnrollmentDateFragment extends DataEntryFragment<EnrollmentDateFrag
         fragment.setArguments(args);
         return fragment;
     }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -78,7 +76,6 @@ public class EnrollmentDateFragment extends DataEntryFragment<EnrollmentDateFrag
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
     {
         inflater.inflate(org.hisp.dhis.android.sdk.R.menu.menu_data_entry, menu);
-        Log.d(TAG, "onCreateOptionsMenu");
 
         final MenuItem editFormButton = menu.findItem(org.hisp.dhis.android.sdk.R.id.action_new_event);
 
@@ -109,31 +106,18 @@ public class EnrollmentDateFragment extends DataEntryFragment<EnrollmentDateFrag
         return true;
     }
 
-    public void flagDataChanged(boolean changed)
-    {
-        edit = changed;
-    }
 
 
 
-
-
-
-    public void setEditableDataEntryRows(boolean editable)
-    {
+    public void setEditableDataEntryRows(boolean editable) {
         List<Row> rows = new ArrayList<>(mForm.getDataEntryRows());
         listViewAdapter.swapData(null);
-        if(editable)
-        {
-            for(Row row : rows)
-            {
+        if(editable) {
+            for(Row row : rows) {
                 row.setEditable(true);
             }
-        }
-        else
-        {
-            for(Row row : rows)
-            {
+        } else {
+            for(Row row : rows) {
                 row.setEditable(false);
             }
         }
@@ -144,13 +128,17 @@ public class EnrollmentDateFragment extends DataEntryFragment<EnrollmentDateFrag
 
     @Subscribe
     public void onRowValueChanged(final RowValueChangedEvent event) {
-        Log.d(TAG, "onRowValueChanged");
         flagDataChanged(true);
         if (mForm == null ) {
             return;
         }
         save();
 
+    }
+
+    @Override
+    public SectionAdapter getSpinnerAdapter() {
+        return null;
     }
 
     @Override

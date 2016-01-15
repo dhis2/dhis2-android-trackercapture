@@ -148,6 +148,7 @@ public class EnrollmentDateSetterHelper {
                         incidentDate = incidentDate.withYear(dp.getYear());
                         incidentDate = incidentDate.withMonthOfYear(dp.getMonth() + 1);
                         incidentDate = incidentDate.withDayOfMonth(dp.getDayOfMonth());
+                        showEnrollmentFragment();
                     }
                 });
         incidentDatePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel",

@@ -49,14 +49,27 @@ import java.util.List;
 
 public class EnrollmentDataEntryRuleHelper implements IProgramRuleFragmentHelper {
 
-    private final EnrollmentDataEntryFragment enrollmentDataEntryFragment;
+    private EnrollmentDataEntryFragment enrollmentDataEntryFragment;
+    private ArrayList<String> programRuleValidationErrors;
 
     public EnrollmentDataEntryRuleHelper(EnrollmentDataEntryFragment enrollmentDataEntryFragment) {
         this.enrollmentDataEntryFragment = enrollmentDataEntryFragment;
+        this.programRuleValidationErrors = new ArrayList<>();
+    }
+
+    @Override
+    public ArrayList<String> getProgramRuleValidationErrors() {
+        return programRuleValidationErrors;
+    }
+
+    @Override
+    public void recycle() {
+        enrollmentDataEntryFragment = null;
     }
 
     @Override
     public void initiateEvaluateProgramRules() {
+        programRuleValidationErrors.clear();
         enrollmentDataEntryFragment.initiateEvaluateProgramRules();
     }
 
@@ -182,7 +195,14 @@ public class EnrollmentDataEntryRuleHelper implements IProgramRuleFragmentHelper
 
     @Override
     public void applyShowErrorRuleAction(ProgramRuleAction programRuleAction) {
-        //todo: implement
+        String uid = programRuleAction.getDataElement();
+        if(uid == null) {
+            uid = programRuleAction.getTrackedEntityAttribute();
+        }
+        enrollmentDataEntryFragment.getListViewAdapter().showErrorOnIndex(uid, programRuleAction.getContent());
+        if(!programRuleValidationErrors.contains(programRuleAction.getContent())) {
+            programRuleValidationErrors.add(programRuleAction.getContent());
+        }
     }
 
 

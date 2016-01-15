@@ -46,6 +46,7 @@ class EnrollmentDataEntryFragmentForm
     private Program program;
     private TrackedEntityInstance trackedEntityInstance;
     private OrganisationUnit organisationUnit;
+
     private Map<String, TrackedEntityAttributeValue> trackedEntityAttributeValueMap;
     private Map<String, String> dataElementNames;
     private List<IndicatorRow> indicatorRows;

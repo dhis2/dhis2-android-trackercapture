@@ -104,8 +104,9 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
     @Override
     public void onBackPressed() {
         if (mBackPressedListener != null) {
-            mBackPressedListener.doBack();
-            return;
+            if(!mBackPressedListener.doBack()) {
+                return;
+            }
         }
 
         if (getSupportFragmentManager().getBackStackEntryCount() > 1) {
@@ -140,12 +141,12 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
 
             transaction
                     .setCustomAnimations(R.anim.open_enter, R.anim.open_exit)
-                    .replace(R.id.fragment_container, fragment);
-            if (addToBackStack) {
-                transaction = transaction
-                        .addToBackStack(fragmentTag);
+                    .replace(R.id.fragment_container, fragment, fragmentTag);
+            transaction = transaction
+                    .addToBackStack(fragmentTag);
+            if (!addToBackStack) {
+                getSupportFragmentManager().popBackStack();
             }
-
             transaction.commitAllowingStateLoss();
         }
     }

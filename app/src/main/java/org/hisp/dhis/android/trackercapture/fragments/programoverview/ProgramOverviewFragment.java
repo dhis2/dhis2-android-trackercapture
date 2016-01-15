@@ -86,6 +86,8 @@ import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
 import org.hisp.dhis.android.sdk.ui.activities.INavigationHandler;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.IndicatorRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.KeyValueRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.NonEditableTextViewRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.PlainTextRow;
 import org.hisp.dhis.android.sdk.ui.dialogs.ProgramDialogFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.common.AbsProgramRuleFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.eventdataentry.EventDataEntryFragment;
@@ -247,13 +249,18 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     }
 
     @Override
+    public void onDestroy() {
+        getProgramRuleFragmentHelper().recycle();
+        super.onDestroy();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_programoverview, container, false);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-
         if(getActivity() instanceof AppCompatActivity) {
             getActionBar().setDisplayShowTitleEnabled(false);
             getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -303,7 +310,6 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         profileCardView.setOnClickListener(this);
         enrollmentServerStatus.setOnClickListener(this);
         enrollmentLayout.setOnClickListener(this);
-
 
         missingEnrollmentLayout = (LinearLayout) header.findViewById(R.id.missingenrollmentlayout);
         newEnrollmentButton = (FloatingActionButton) header.findViewById(R.id.newenrollmentbutton);
@@ -432,7 +438,9 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             mSpinner.setAdapter(mSpinnerAdapter);
             mSpinner.post(new Runnable() {
                 public void run() {
-                    mSpinner.setOnItemSelectedListener(ProgramOverviewFragment.this);
+                    if(mSpinner != null) {
+                        mSpinner.setOnItemSelectedListener(ProgramOverviewFragment.this);
+                    }
                 }
             });
         }
@@ -587,6 +595,10 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
 
             LinearLayout programIndicatorLayout = (LinearLayout) programIndicatorCardView.findViewById(R.id.programindicatorlayout);
             programIndicatorLayout.removeAllViews();
+            FlowLayout keyValueLayout = (FlowLayout) programIndicatorCardView.findViewById(R.id.keyvaluelayout);
+            keyValueLayout.removeAllViews();
+            LinearLayout displayTextLayout = (LinearLayout) programIndicatorCardView.findViewById(R.id.textlayout);
+            displayTextLayout.removeAllViews();
             for(IndicatorRow indicatorRow : mForm.getProgramIndicatorRows().values()) {
                 View view = indicatorRow.getView(getChildFragmentManager(), getLayoutInflater(getArguments()), null, programIndicatorLayout);
                 programIndicatorLayout.addView(view);
@@ -999,7 +1011,6 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     }
 
     public void showStatusDialog(BaseSerializableModel model) {
-
         ItemStatusDialogFragment fragment = ItemStatusDialogFragment.newInstance(model);
         fragment.show(getChildFragmentManager());
     }
@@ -1022,9 +1033,19 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     }
 
     void displayKeyValuePair(ProgramRuleAction programRuleAction) {
-        LinearLayout programIndicatorLayout = (LinearLayout) programIndicatorCardView.findViewById(R.id.programindicatorlayout);
-        KeyValueRow keyValueRow = new KeyValueRow(programRuleAction.getContent(), ProgramRuleService.getCalculatedConditionValue(programRuleAction.getData()));
-        View view = keyValueRow.getView(getChildFragmentManager(), getLayoutInflater(getArguments()), null, programIndicatorLayout);
+        FlowLayout programIndicatorLayout = (FlowLayout) programIndicatorCardView.findViewById(R.id.keyvaluelayout);
+        KeyValueView keyValueView = new KeyValueView(programRuleAction.getContent(), ProgramRuleService.getCalculatedConditionValue(programRuleAction.getData()));
+        FlowLayout.LayoutParams layoutParams = new FlowLayout.LayoutParams(10, 10);
+        View view = keyValueView.getView(getLayoutInflater(getArguments()), programIndicatorLayout);
+        view.setLayoutParams(layoutParams);
+        programIndicatorLayout.addView(view);
+    }
+
+    void displayText(ProgramRuleAction programRuleAction) {
+        LinearLayout programIndicatorLayout = (LinearLayout) programIndicatorCardView.findViewById(R.id.textlayout);
+        PlainTextRow textRow = new PlainTextRow(ProgramRuleService.getCalculatedConditionValue(programRuleAction.getData()));
+        View view = textRow.getView(getChildFragmentManager(), getLayoutInflater(getArguments()), null, programIndicatorLayout);
+        view.findViewById(R.id.text_label).setVisibility(View.GONE);
         view.findViewById(R.id.detailed_info_button_layout).setVisibility(View.GONE);
         programIndicatorLayout.addView(view);
     }

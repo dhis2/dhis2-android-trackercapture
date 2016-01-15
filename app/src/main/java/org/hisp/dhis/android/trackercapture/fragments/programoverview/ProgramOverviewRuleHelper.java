@@ -52,13 +52,23 @@ class ProgramOverviewRuleHelper implements IProgramRuleFragmentHelper {
     }
 
     @Override
-    public void initiateEvaluateProgramRules() {
+    public ArrayList<String> getProgramRuleValidationErrors() {
+        return null;
+    }
 
+    @Override
+    public void recycle() {
+        programOverviewFragment = null;
+    }
+
+    @Override
+    public void initiateEvaluateProgramRules() {
+        //do nothing
     }
 
     @Override
     public void mapFieldsToRulesAndIndicators() {
-
+        //do nothing
     }
 
     @Override
@@ -88,12 +98,12 @@ class ProgramOverviewRuleHelper implements IProgramRuleFragmentHelper {
 
     @Override
     public void applyShowWarningRuleAction(ProgramRuleAction programRuleAction) {
-
+        //do nothing
     }
 
     @Override
     public void applyShowErrorRuleAction(ProgramRuleAction programRuleAction) {
-
+        //do nothing
     }
 
     @Override
@@ -103,7 +113,7 @@ class ProgramOverviewRuleHelper implements IProgramRuleFragmentHelper {
 
     @Override
     public void applyCreateEventRuleAction(ProgramRuleAction programRuleAction) {
-
+        //do nothing
     }
 
     @Override
@@ -113,7 +123,7 @@ class ProgramOverviewRuleHelper implements IProgramRuleFragmentHelper {
 
     @Override
     public void applyDisplayTextRuleAction(ProgramRuleAction programRuleAction) {
-
+        programOverviewFragment.displayText(programRuleAction);
     }
 
     @Override

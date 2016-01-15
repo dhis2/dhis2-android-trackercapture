@@ -307,6 +307,11 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
         flagDataChanged(false);
     }
 
+    @Override
+    protected void proceed() {
+
+    }
+
     @Subscribe
     public void onDetailedInfoClick(OnDetailedInfoButtonClick eventClick) {
         super.onShowDetailedInfo(eventClick);

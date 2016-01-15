@@ -194,6 +194,11 @@ public class EnrollmentDateFragment extends DataEntryFragment<EnrollmentDateFrag
     }
 
     @Override
+    protected void proceed() {
+
+    }
+
+    @Override
     public void onLoadFinished(Loader<EnrollmentDateFragmentForm> loader, EnrollmentDateFragmentForm data)
     {
         mForm = data;

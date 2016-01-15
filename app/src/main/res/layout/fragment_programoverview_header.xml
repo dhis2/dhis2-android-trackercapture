@@ -362,6 +362,21 @@
             <LinearLayout
                 android:id="@+id/programindicatorlayout"
                 android:padding="6dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+            </LinearLayout>
+
+            <org.hisp.dhis.android.trackercapture.fragments.programoverview.FlowLayout
+                android:id="@+id/keyvaluelayout"
+                android:padding="6dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            </org.hisp.dhis.android.trackercapture.fragments.programoverview.FlowLayout>
+
+            <LinearLayout
+                android:id="@+id/textlayout"
+                android:padding="6dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">

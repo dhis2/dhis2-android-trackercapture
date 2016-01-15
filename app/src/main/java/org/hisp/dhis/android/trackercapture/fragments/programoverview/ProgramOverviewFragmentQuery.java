@@ -75,6 +75,9 @@ class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm>
         programOverviewFragmentForm.setDateOfEnrollmentLabel(program.getEnrollmentDateLabel());
         programOverviewFragmentForm.setIncidentDateLabel(program.getIncidentDateLabel());
 
+        if(trackedEntityInstance == null) {
+            return programOverviewFragmentForm;
+        }
         List<Enrollment> enrollments = TrackerController.getEnrollments(mProgramId, trackedEntityInstance);
         Enrollment activeEnrollment = null;
         if(enrollments!=null) {

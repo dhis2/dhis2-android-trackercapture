@@ -78,7 +78,6 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     private EnrollmentDataEntryFragmentForm form;
     private SaveThread saveThread;
     private Map<String, List<ProgramRule>> programRulesForTrackedEntityAttributes;
-    private RulesEvaluatorBufferThread rulesEvaluatorBufferThread;
 
     //the enrollment before anything is changed, used to backtrack
     private Enrollment originalEnrollment;
@@ -126,8 +125,6 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             saveThread = new SaveThread();
             saveThread.start();
         }
-        rulesEvaluatorBufferThread = new RulesEvaluatorBufferThread(this);
-        rulesEvaluatorBufferThread.start();
         saveThread.init(this);
     }
 
@@ -139,7 +136,6 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
 
     @Override
     public void onDestroy() {
-        rulesEvaluatorBufferThread.kill();
         saveThread.kill();
         super.onDestroy();
     }
@@ -351,7 +347,7 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             return;
         }
         if(hasRules(trackedEntityAttribute)) {
-            rulesEvaluatorBufferThread.trigger();
+            initiateEvaluateProgramRules();
         }
     }
 

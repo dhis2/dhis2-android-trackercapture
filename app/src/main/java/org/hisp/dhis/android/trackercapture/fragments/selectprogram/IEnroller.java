@@ -27,62 +27,15 @@
  *
  */
 
-package org.hisp.dhis.android.trackercapture.ui.adapters;
+package org.hisp.dhis.android.trackercapture.fragments.selectprogram;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
+import org.joda.time.DateTime;
 
-import org.hisp.dhis.android.sdk.ui.adapters.AbsAdapter;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
-import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.EventRowType;
-
-public class UpcomingEventAdapter extends AbsAdapter<EventRow> {
-
-    public UpcomingEventAdapter(LayoutInflater inflater) {
-        super(inflater);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        if (getData() != null) {
-            return getData().get(position).getId();
-        } else {
-            return -1;
-        }
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        if (getData() != null) {
-            return getData().get(position).getView(getInflater(), convertView, parent);
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public boolean areAllItemsEnabled() {
-        return false;
-    }
-
-    @Override
-    public boolean isEnabled(int position) {
-        return getData() != null && getData().get(position).isEnabled();
-    }
-
-    @Override
-    public int getViewTypeCount() {
-        return EventRowType.values().length;
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        if (getData() != null) {
-            return getData().get(position).getViewType();
-        } else {
-            return 0;
-        }
-    }
+/**
+ * Interface to be implemented to be used by {@link EnrollmentDateSetterHelper} for triggering
+ * enrollment creation
+ */
+public interface IEnroller {
+    void showEnrollmentFragment(TrackedEntityInstance trackedEntityInstance, DateTime enrollmentDate, DateTime incidentDate);
 }
-

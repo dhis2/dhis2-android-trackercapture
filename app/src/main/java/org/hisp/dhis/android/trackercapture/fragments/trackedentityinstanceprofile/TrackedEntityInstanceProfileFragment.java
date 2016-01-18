@@ -1,9 +1,39 @@
+/*
+ *  Copyright (c) 2016, University of Oslo
+ *  * All rights reserved.
+ *  *
+ *  * Redistribution and use in source and binary forms, with or without
+ *  * modification, are permitted provided that the following conditions are met:
+ *  * Redistributions of source code must retain the above copyright notice, this
+ *  * list of conditions and the following disclaimer.
+ *  *
+ *  * Redistributions in binary form must reproduce the above copyright notice,
+ *  * this list of conditions and the following disclaimer in the documentation
+ *  * and/or other materials provided with the distribution.
+ *  * Neither the name of the HISP project nor the names of its contributors may
+ *  * be used to endorse or promote products derived from this software without
+ *  * specific prior written permission.
+ *  *
+ *  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ *  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ *  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ *  * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ *  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
 package org.hisp.dhis.android.trackercapture.fragments.trackedentityinstanceprofile;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
 
 
+import android.support.v4.app.Fragment;
 import android.support.v4.content.Loader;
 
 import android.util.Log;
@@ -17,6 +47,12 @@ import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.sdk.controllers.DhisController;
+import org.hisp.dhis.android.sdk.persistence.models.DataValue;
+import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
+import org.hisp.dhis.android.sdk.persistence.models.Event;
+import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
+import org.hisp.dhis.android.sdk.persistence.models.ProgramRuleAction;
+import org.hisp.dhis.android.sdk.ui.adapters.SectionAdapter;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnDetailedInfoButtonClick;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.DataEntryFragment;
@@ -51,12 +87,10 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
     private TrackedEntityInstanceProfileFragmentForm mForm;
     private SaveThread saveThread;
 
-    public TrackedEntityInstanceProfileFragment()
-    {
+    public TrackedEntityInstanceProfileFragment() {
     }
 
-    public static TrackedEntityInstanceProfileFragment newInstance(long mTrackedEntityInstanceId, String mProgramId)
-    {
+    public static TrackedEntityInstanceProfileFragment newInstance(long mTrackedEntityInstanceId, String mProgramId) {
         TrackedEntityInstanceProfileFragment fragment = new TrackedEntityInstanceProfileFragment();
         Bundle fragmentArgs = new Bundle();
         fragmentArgs.putLong(TRACKEDENTITYINSTANCE_ID, mTrackedEntityInstanceId);
@@ -68,8 +102,7 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if(saveThread == null || saveThread.isKilled()) {
             saveThread = new SaveThread();
@@ -103,9 +136,7 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
             doBack();
             return true;
         }
-        else if (menuItem.getItemId() == org.hisp.dhis.android.sdk.R.id.action_new_event)
-        {
-
+        else if (menuItem.getItemId() == org.hisp.dhis.android.sdk.R.id.action_new_event) {
             if (editableDataEntryRows) {
                 setEditableDataEntryRows(false);
             } else {
@@ -119,8 +150,7 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
 
 
     public void doBack() {
-        if(edit)
-        {
+        if(edit) {
             UiUtils.showConfirmDialog(getActivity(),
                     getString(org.hisp.dhis.android.sdk.R.string.discard), getString(org.hisp.dhis.android.sdk.R.string.discard_confirm_changes),
                     getString(org.hisp.dhis.android.sdk.R.string.save_and_close),
@@ -148,13 +178,10 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
                             dialog.dismiss();
                         }
                     });
-        }
-        else
-        {
+        } else {
             onDetach();
             getFragmentManager().popBackStack();
         }
-
     }
 
     @Override
@@ -192,43 +219,34 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
 
     @Override
     public void onLoadFinished(Loader<TrackedEntityInstanceProfileFragmentForm> loader, TrackedEntityInstanceProfileFragmentForm data) {
-
-        if (loader.getId() == LOADER_ID && isAdded())
-        {
+        if (loader.getId() == LOADER_ID && isAdded()) {
             progressBar.setVisibility(View.GONE);
             listView.setVisibility(View.VISIBLE);
 
             mForm = data;
 
-            if(mForm.getDataEntryRows() != null)
-            {
+            if(mForm.getDataEntryRows() != null) {
                 setEditableDataEntryRows(false);
             }
         }
     }
 
     @Override
-    public void onLoaderReset(Loader<TrackedEntityInstanceProfileFragmentForm> loader)
-    {
-        if (listViewAdapter != null)
+    public void onLoaderReset(Loader<TrackedEntityInstanceProfileFragmentForm> loader) {
+        if (listViewAdapter != null) {
             listViewAdapter.swapData(null);
+        }
     }
 
-    public void setEditableDataEntryRows(boolean editable)
-    {
+    public void setEditableDataEntryRows(boolean editable) {
         List<Row> rows = new ArrayList<>(mForm.getDataEntryRows());
         listViewAdapter.swapData(null);
-        if(editable)
-        {
-            for(Row row : rows)
-            {
+        if(editable) {
+            for(Row row : rows) {
                 row.setEditable(true);
             }
-        }
-        else
-        {
-            for(Row row : rows)
-            {
+        } else {
+            for(Row row : rows) {
                 row.setEditable(false);
             }
         }
@@ -236,6 +254,9 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
         listViewAdapter.swapData(rows);
         listView.setAdapter(listViewAdapter);
     }
+
+
+
     public void flagDataChanged(boolean changed)
     {
         edit = changed;
@@ -243,13 +264,18 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
 
     @Subscribe
     public void onRowValueChanged(final RowValueChangedEvent event) {
-        Log.d(TAG, "onRowValueChanged");
         flagDataChanged(true);
         if (mForm == null ) {
             return;
         }
         saveThread.schedule();
     }
+
+    @Override
+    public SectionAdapter getSpinnerAdapter() {
+        return null;
+    }
+
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
     }
@@ -265,29 +291,29 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
     }
 
     @Override
-    protected void save()
-    {
-        if(!edit) // if rows are not edited
+    protected void save() {
+        if(!edit) {// if rows are not edited
             return;
+        }
 
-        if(mForm!=null && isAdded() && mForm.getTrackedEntityInstance() != null )
-        {
-            for(TrackedEntityAttributeValue val : mForm.getTrackedEntityAttributeValues())
+        if(mForm!=null && isAdded() && mForm.getTrackedEntityInstance() != null ) {
+            for(TrackedEntityAttributeValue val : mForm.getTrackedEntityAttributeValues()) {
                 val.save();
-
+            }
             mForm.getTrackedEntityInstance().setFromServer(false);
             mForm.getTrackedEntityInstance().save();
-
-
         }
 
         flagDataChanged(false);
+    }
+
+    @Override
+    protected void proceed() {
 
     }
 
     @Subscribe
-    public void onDetailedInfoClick(OnDetailedInfoButtonClick eventClick)
-    {
+    public void onDetailedInfoClick(OnDetailedInfoButtonClick eventClick) {
         super.onShowDetailedInfo(eventClick);
     }
 

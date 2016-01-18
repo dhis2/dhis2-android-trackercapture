@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2015, University of Oslo
+ *  Copyright (c) 2016, University of Oslo
  *  * All rights reserved.
  *  *
  *  * Redistribution and use in source and binary forms, with or without
@@ -47,10 +47,8 @@ import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.OrganisationUnit;
-import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.ui.adapters.AbsAdapter;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DatePickerRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
 import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
@@ -114,8 +112,8 @@ public class UpcomingEventsFragment extends SelectProgramFragment implements Ada
         startDate.setValue(DateUtils.getMediumDateString());
         endDate = new DataValue();
         endDate.setValue(new LocalDate(DateUtils.getMediumDateString()).plusYears(1).toString());
-        DatePickerRow startDatePicker = new DatePickerRow(getString(R.string.startdate), startDate);
-        DatePickerRow endDatePicker = new DatePickerRow(getString(R.string.enddate), endDate);
+        DatePickerRow startDatePicker = new DatePickerRow(getString(R.string.startdate), false, null, startDate, true);
+        DatePickerRow endDatePicker = new DatePickerRow(getString(R.string.enddate), false, null, endDate, true);
         LinearLayout dateFilterContainer = (LinearLayout) header.findViewById(R.id.datefilterlayout);
         View view1 = startDatePicker.getView(getFragmentManager(), getActivity().getLayoutInflater(), null, dateFilterContainer);
         view1.setLayoutParams(new TableLayout.LayoutParams(0, TableLayout.LayoutParams.WRAP_CONTENT, 1f));

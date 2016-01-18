@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ * Copyright (c) 2016, University of Oslo
   ~  * All rights reserved.
   ~  *
@@ -28,26 +27,37 @@
   ~  */
   -->
 
-<set
-    xmlns:android="http://schemas.android.com/apk/res/android" 
-    android:background="#ff000000" 
-    android:shareInterpolator="false" 
-    android:fillBefore="false" 
-    android:fillAfter="true" 
-    android:zAdjustment="normal" 
-    android:fillEnabled="true">
-    <alpha 
-        android:interpolator="@anim/decelerate_quint" 
-        android:duration="@integer/activity_anim_duration" 
-        android:fromAlpha="1.0" 
-        android:toAlpha="0.2" />
-    <scale 
-        android:interpolator="@anim/decelerate_quint" 
-        android:duration="@integer/activity_anim_duration" 
-        android:pivotX="50.0%p" 
-        android:pivotY="50.0%p" 
-        android:fromXScale="1.0" 
-        android:toXScale="0.9" 
-        android:fromYScale="1.0" 
-        android:toYScale="0.9" />
-</set>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@drawable/rounded_corner"
+    android:layout_width="wrap_content"
+    android:padding="5dp"
+    android:layout_margin="5dp"
+    android:layout_height="wrap_content">
+
+    <org.hisp.dhis.android.sdk.ui.views.FontTextView
+        android:id="@+id/label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="4dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:textSize="@dimen/medium_text_size"
+        app:font="@string/condensed_font_name"/>
+
+    <org.hisp.dhis.android.sdk.ui.views.FontTextView
+        android:id="@+id/value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="6dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:textSize="@dimen/medium_text_size"
+        android:paddingTop="11dp"
+        android:paddingBottom="11dp"
+        app:font="@string/light_font_name"/>
+
+</LinearLayout>

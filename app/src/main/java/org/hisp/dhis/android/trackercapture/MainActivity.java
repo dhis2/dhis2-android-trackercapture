@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2015, University of Oslo
+ *  Copyright (c) 2016, University of Oslo
  *  * All rights reserved.
  *  *
  *  * Redistribution and use in source and binary forms, with or without
@@ -104,8 +104,9 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
     @Override
     public void onBackPressed() {
         if (mBackPressedListener != null) {
-            mBackPressedListener.doBack();
-            return;
+            if(!mBackPressedListener.doBack()) {
+                return;
+            }
         }
 
         if (getSupportFragmentManager().getBackStackEntryCount() > 1) {
@@ -140,12 +141,12 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
 
             transaction
                     .setCustomAnimations(R.anim.open_enter, R.anim.open_exit)
-                    .replace(R.id.fragment_container, fragment);
-            if (addToBackStack) {
-                transaction = transaction
-                        .addToBackStack(fragmentTag);
+                    .replace(R.id.fragment_container, fragment, fragmentTag);
+            transaction = transaction
+                    .addToBackStack(fragmentTag);
+            if (!addToBackStack) {
+                getSupportFragmentManager().popBackStack();
             }
-
             transaction.commitAllowingStateLoss();
         }
     }

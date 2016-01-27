@@ -36,6 +36,9 @@ import com.raizlabs.android.dbflow.sql.language.Select;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.events.OnRowClick;
+import org.hisp.dhis.android.sdk.persistence.models.DataElement;
+import org.hisp.dhis.android.sdk.persistence.models.OptionSet;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceColumnNamesRow;
 import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
@@ -132,10 +135,10 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
             }
         }
 
-        List<Option> options = new Select().from(Option.class).queryList();
-        Map<String, String> codeToName = new HashMap<>();
-        for (Option option : options) {
-            codeToName.put(option.getCode(), option.getName());
+        List<TrackedEntityAttribute> trackedEntityAttributes = new Select().from(TrackedEntityAttribute.class).queryList();
+        Map<String, TrackedEntityAttribute> trackedEntityAttributeMap = new HashMap<>();
+        for(TrackedEntityAttribute trackedEntityAttribute : trackedEntityAttributes) {
+            trackedEntityAttributeMap.put(trackedEntityAttribute.getUid(), trackedEntityAttribute);
         }
 
         List<FailedItem> failedEvents = TrackerController.getFailedItems(FailedItem.TRACKEDENTITYINSTANCE);
@@ -156,7 +159,7 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
             if (trackedEntityInstance == null) continue;
             teiRows.add(createTrackedEntityInstanceItem(context,
                     trackedEntityInstance, attributesToShow, attributes,
-                    codeToName, failedEventIds));
+                    trackedEntityAttributeMap, failedEventIds));
         }
 
         fragmentForm.setEventRowList(teiRows);
@@ -171,7 +174,7 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
 
     private EventRow createTrackedEntityInstanceItem(Context context, TrackedEntityInstance trackedEntityInstance,
                                                                          List<String> attributesToShow, List<ProgramTrackedEntityAttribute> attributes,
-                                                                         Map<String, String> codeToName,
+                                                                         Map<String, TrackedEntityAttribute> trackedEntityAttributeMap,
                                                                          Set<String> failedEventIds) {
         TrackedEntityInstanceItemRow trackedEntityInstanceItemRow = new TrackedEntityInstanceItemRow(context);
         trackedEntityInstanceItemRow.setTrackedEntityInstance(trackedEntityInstance);
@@ -187,24 +190,41 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
         for (int i = 0; i < attributesToShow.size(); i++) {
             if (i > attributesToShow.size()) break;
 
-            String attribute = attributesToShow.get(i);
-            if (attribute != null) {
-                TrackedEntityAttributeValue teav = TrackerController.getTrackedEntityAttributeValue(attribute, trackedEntityInstance.getLocalId());
-                String code;
-                if (teav == null) {
-                    code = "";
-                } else {
-                    code = teav.getValue();
+            String attributeUid = attributesToShow.get(i);
+            if (attributeUid != null) {
+                TrackedEntityAttributeValue teav = TrackerController.getTrackedEntityAttributeValue(attributeUid, trackedEntityInstance.getLocalId());
+
+                TrackedEntityAttribute trackedEntityAttribute = trackedEntityAttributeMap.get(attributeUid);
+                if (teav == null || trackedEntityAttribute == null) {
+                    continue;
                 }
 
-                String name = codeToName.get(code) == null ? code : codeToName.get(code);
+                String value = teav.getValue();
+                if(trackedEntityAttribute.isOptionSetValue()) {
+                    if(trackedEntityAttribute.getOptionSet() == null) {
+                        continue;
+                    }
+                    OptionSet optionSet = MetaDataController.getOptionSet(trackedEntityAttribute.getOptionSet());
+                    if(optionSet == null) {
+                        continue;
+                    }
+                    List<Option> options = MetaDataController.getOptions(optionSet.getUid());
+                    if(options == null) {
+                        continue;
+                    }
+                    for(Option option : options) {
+                        if(option.getCode().equals(value)) {
+                            value = option.getName();
+                        }
+                    }
+                }
 
                 if (i == 0) {
-                    trackedEntityInstanceItemRow.setFirstItem(name);
+                    trackedEntityInstanceItemRow.setFirstItem(value);
                 } else if (i == 1) {
-                    trackedEntityInstanceItemRow.setSecondItem(name);
+                    trackedEntityInstanceItemRow.setSecondItem(value);
                 } else if (i == 2) {
-                    trackedEntityInstanceItemRow.setThirdItem(name);
+                    trackedEntityInstanceItemRow.setThirdItem(value);
                 }
             }
         }

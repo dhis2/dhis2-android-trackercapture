@@ -1,6 +1,8 @@
 # dhis2-android-trackercapture
 Android application for DHIS 2 for tracking of persons and things.
 
+The refactored version of Tracker Capture, utilizing our new SDK is on the roadmap to be finished by 1st May 2016
+
 Get the APK from the release page:
 
 https://github.com/dhis2/dhis2-android-trackercapture/releases

@@ -962,8 +962,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 UiUtils.showConfirmDialog(getActivity(),
                         getString(R.string.terminate),
                         getString(R.string.confirm_terminate_enrollment),
-                        getString(R.string.terminate),
-                        getString(R.string.cancel),
+                        getString(R.string.yes),
+                        getString(R.string.no),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {

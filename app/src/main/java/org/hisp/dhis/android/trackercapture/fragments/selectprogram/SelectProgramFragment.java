@@ -31,6 +31,7 @@ package org.hisp.dhis.android.trackercapture.fragments.selectprogram;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
@@ -246,6 +247,8 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
             InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
         }
+
+
         return true;
     }
 
@@ -253,6 +256,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     public boolean onQueryTextChange(String newText) {
         Log.d(TAG, newText);
         ( ( TrackedEntityInstanceAdapter ) mAdapter ).getFilter().filter(TrackedEntityInstanceAdapter.FILTER_SEARCH + newText);
+
         return true;
     }
 
@@ -328,6 +332,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
 
     @Override
     public boolean onMenuItemActionExpand(MenuItem item) {
+        Log.d(TAG, "onMenuItemActionExpand");
         return true; //return true to expand
     }
 

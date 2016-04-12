@@ -37,6 +37,9 @@ import android.widget.Filter;
 import android.widget.Filterable;
 
 import org.hisp.dhis.android.sdk.events.OnRowClick;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.adapters.AbsAdapter;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceColumnNamesRow;
@@ -159,16 +162,27 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<EventRow> implement
                     for (int i = 0, l = allRows.size(); i < l; i++) {
                         EventRow row = allRows.get(i);
                         if ( row != null && row instanceof TrackedEntityInstanceItemRow ) {
+                            TrackedEntityInstanceItemRow trackedEntityInstanceItemRow = (TrackedEntityInstanceItemRow) row;
+                            List<TrackedEntityAttributeValue> trackedEntityAttributeValues =
+                                    trackedEntityInstanceItemRow.getTrackedEntityInstance().getAttributes();
 
-                            if ( ( (TrackedEntityInstanceItemRow) row ).getmFirstItem() != null)
-                                if ( ( (TrackedEntityInstanceItemRow) row ).getmFirstItem().toLowerCase().contains(constraint))
+                            for(TrackedEntityAttributeValue trackedEntityAttributeValue : trackedEntityAttributeValues) {
+
+                                if( trackedEntityAttributeValue.getValue() != null &&
+                                        trackedEntityAttributeValue.getValue().toLowerCase().contains(constraint)) {
                                     filteredItems.add(row);
-                                else if ( ( (TrackedEntityInstanceItemRow) row ).getmSecondItem() != null)
-                                    if ( ( (TrackedEntityInstanceItemRow) row ).getmSecondItem().toLowerCase().contains(constraint))
-                                        filteredItems.add(row);
-                                    else if ( ( (TrackedEntityInstanceItemRow) row ).getmThirdItem() != null)
-                                        if ( ( (TrackedEntityInstanceItemRow) row ).getmThirdItem().toLowerCase().contains(constraint))
-                                            filteredItems.add(row);
+                                    break;
+                                }
+                            }
+//                            if ( trackedEntityInstanceItemRow.getmFirstItem() != null)
+//                                if ( trackedEntityInstanceItemRow.getmFirstItem().toLowerCase().contains(constraint))
+//                                    filteredItems.add(row);
+//                                else if ( trackedEntityInstanceItemRow.getmSecondItem() != null)
+//                                    if ( trackedEntityInstanceItemRow.getmSecondItem().toLowerCase().contains(constraint))
+//                                        filteredItems.add(row);
+//                                    else if ( trackedEntityInstanceItemRow.getmThirdItem() != null)
+//                                        if ( trackedEntityInstanceItemRow.getmThirdItem().toLowerCase().contains(constraint))
+//                                            filteredItems.add(row);
                         } else {
                             if (row instanceof TrackedEntityInstanceColumnNamesRow)
                                 filteredItems.add(row);
@@ -278,6 +292,14 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<EventRow> implement
             else
             {
                 filteredRows = (ArrayList<EventRow>) results.values;
+
+                for(EventRow eventRow : filteredRows) {
+                    if(eventRow instanceof TrackedEntityInstanceColumnNamesRow) {
+                        TrackedEntityInstanceColumnNamesRow row = (TrackedEntityInstanceColumnNamesRow) eventRow;
+                        row.setTitle(row.getTrackedEntity() + "(" + (filteredRows.size() - 1) +")");
+                        break;
+                    }
+                }
                 swapData(filteredRows);
             }
         }

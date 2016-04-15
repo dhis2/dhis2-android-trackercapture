@@ -79,7 +79,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragment
-        implements SearchView.OnQueryTextListener, SearchView.OnFocusChangeListener,
+        implements SearchView.OnQueryTextListener, SearchView.OnFocusChangeListener, SearchView.OnCloseListener,
         MenuItemCompat.OnActionExpandListener, LoaderManager.LoaderCallbacks<SelectProgramFragmentForm>, IEnroller{
     public static final String TAG = SelectProgramFragment.class.getSimpleName();
 
@@ -127,6 +127,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
         MenuItemCompat.setOnActionExpandListener(item, this);
         searchView.setOnQueryTextListener(this);
         searchView.setOnQueryTextFocusChangeListener(this);
+        searchView.setOnCloseListener(this);
     }
 
     @Override
@@ -263,7 +264,9 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     @Override
     public void onFocusChange(View view, boolean hasFocus) {
         if(view instanceof SearchView) {
-            if(!hasFocus) {
+            SearchView searchView = (SearchView) view;
+
+            if(searchView.getQuery().length() == 0) {
                 ( ( TrackedEntityInstanceAdapter ) mAdapter ).getFilter().filter(""); //show all rows
             }
         }
@@ -404,5 +407,11 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
 
             activeEnrollment.delete();
         }
+    }
+
+    @Override
+    public boolean onClose() {
+        ( ( TrackedEntityInstanceAdapter ) mAdapter ).getFilter().filter(""); //show all rows
+        return false;
     }
 }

@@ -50,15 +50,7 @@ android {
     lintOptions {
         disable 'RtlSymmetry', 'RtlHardcoded'
     }
-}
 
-dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(':..:dhis2-android-sdk:app')
-}
-
-
-android {
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES.txt'
         exclude 'META-INF/LICENSE.txt'
@@ -71,4 +63,8 @@ android {
         exclude 'META-INF/dependencies.txt'
         exclude 'META-INF/LGPL2.1'
     }
+}
+
+dependencies {
+    compile project(':core')
 }

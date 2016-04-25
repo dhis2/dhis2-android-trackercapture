@@ -113,8 +113,6 @@ public class LocalSearchResultFragmentFormQuery implements Query<LocalSearchResu
 
             for(TrackedEntityAttributeValue trackedEntityAttributeValue : teiAttributeValues) {
 
-                String s = attributeValueMap.get(trackedEntityAttributeValue.getTrackedEntityAttributeId()).toLowerCase();
-
                 if(attributeValueMap.get(trackedEntityAttributeValue.getTrackedEntityAttributeId()) != null &&
                         attributeValueMap.get(trackedEntityAttributeValue.getTrackedEntityAttributeId()).toLowerCase()
                         .contains(trackedEntityAttributeValue.getValue().toLowerCase())) {

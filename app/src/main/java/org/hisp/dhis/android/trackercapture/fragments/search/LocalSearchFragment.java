@@ -1,6 +1,7 @@
 package org.hisp.dhis.android.trackercapture.fragments.search;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -17,7 +18,9 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 import com.raizlabs.android.dbflow.structure.Model;
+import com.squareup.otto.Subscribe;
 
+import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
@@ -27,6 +30,11 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.activities.INavigationHandler;
 import org.hisp.dhis.android.sdk.ui.adapters.DataValueAdapter;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.CoordinatesRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.IndicatorRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.StatusRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnDetailedInfoButtonClick;
+import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.R;
 
 import java.util.ArrayList;
@@ -66,7 +74,44 @@ public class LocalSearchFragment extends Fragment implements LoaderManager.Loade
 
     setHasOptionsMenu(true);
 
-}
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Dhis2Application.getEventBus().unregister(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Dhis2Application.getEventBus().register(this);
+    }
+
+    @Subscribe
+    public void onShowDetailedInfo(OnDetailedInfoButtonClick eventClick) // may re-use code from DataEntryFragment
+    {
+        String message = "";
+
+        if (eventClick.getRow() instanceof CoordinatesRow)
+            message = getResources().getString(org.hisp.dhis.android.sdk.R.string.detailed_info_coordinate_row);
+        else if (eventClick.getRow() instanceof StatusRow)
+            message = getResources().getString(org.hisp.dhis.android.sdk.R.string.detailed_info_status_row);
+        else if (eventClick.getRow() instanceof IndicatorRow)
+            message = ""; // need to change ProgramIndicator to extend BaseValue for this to work
+        else         // rest of the rows can either be of data element or tracked entity instance attribute
+            message = eventClick.getRow().getDescription();
+
+        UiUtils.showConfirmDialog(getActivity(),
+                getResources().getString(org.hisp.dhis.android.sdk.R.string.detailed_info_dataelement),
+                message, getResources().getString(org.hisp.dhis.android.sdk.R.string.ok_option),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int i) {
+                        dialog.dismiss();
+                    }
+                });
+    }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {

@@ -37,6 +37,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -69,6 +71,7 @@ import org.hisp.dhis.android.sdk.utils.api.ProgramType;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.fragments.enrollment.EnrollmentDataEntryFragment;
 import org.hisp.dhis.android.trackercapture.fragments.programoverview.ProgramOverviewFragment;
+import org.hisp.dhis.android.trackercapture.fragments.search.LocalSearchFragment;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.ItemStatusDialogFragment;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.QueryTrackedEntityInstancesDialogFragment;
 import org.hisp.dhis.android.trackercapture.fragments.upcomingevents.UpcomingEventsFragment;
@@ -86,6 +89,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     private FloatingActionButton mRegisterEventButton;
     private FloatingActionButton mQueryTrackedEntityInstancesButton;
     private FloatingActionButton mUpcomingEventsButton;
+    private FloatingActionButton mLocalSearchButton;
     private SelectProgramFragmentForm mForm;
 
     @Override
@@ -95,19 +99,30 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
 
     @Override
     protected View getListViewHeader(Bundle savedInstanceState) {
+
+        if(getActivity() instanceof AppCompatActivity) {
+            getActionBar().setDisplayShowTitleEnabled(true);
+            getActionBar().setDisplayHomeAsUpEnabled(false);
+            getActionBar().setHomeButtonEnabled(false);
+        }
+
         View header = getLayoutInflater(savedInstanceState).inflate(
                 R.layout.fragment_select_program_header, mListView, false
         );
         mRegisterEventButton = (FloatingActionButton) header.findViewById(R.id.register_new_event);
         mQueryTrackedEntityInstancesButton = (FloatingActionButton) header.findViewById(R.id.query_trackedentityinstances_button);
         mUpcomingEventsButton = (FloatingActionButton) header.findViewById(R.id.upcoming_events_button);
+        mLocalSearchButton = (FloatingActionButton) header.findViewById(R.id.local_search_button);
+
         mRegisterEventButton.setOnClickListener(this);
         mQueryTrackedEntityInstancesButton.setOnClickListener(this);
         mUpcomingEventsButton.setOnClickListener(this);
+        mLocalSearchButton.setOnClickListener(this);
 
         mRegisterEventButton.hide();
         mUpcomingEventsButton.hide();
         mQueryTrackedEntityInstancesButton.hide();
+        mLocalSearchButton.hide();
         return header;
     }
 
@@ -180,6 +195,11 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
                 showQueryTrackedEntityInstancesDialog(getChildFragmentManager(), mState.getOrgUnitId(), mState.getProgramId());
                 break;
             }
+            case R.id.local_search_button: {
+                LocalSearchFragment searchFragment = LocalSearchFragment.newInstance(mState.getOrgUnitId(), mState.getProgramId());
+                mNavigationHandler.switchFragment(searchFragment, LocalSearchFragment.class.getSimpleName(), true);
+                break;
+            }
         }
     }
 
@@ -221,11 +241,13 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
                 mRegisterEventButton.hide();
                 mUpcomingEventsButton.hide();
                 mQueryTrackedEntityInstancesButton.hide();
+                mLocalSearchButton.hide();
                 break;
             case 1:
                 mRegisterEventButton.show();
                 mUpcomingEventsButton.show();
                 mQueryTrackedEntityInstancesButton.show();
+                mLocalSearchButton.show();
         }
     }
 
@@ -413,5 +435,14 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     public boolean onClose() {
         ( ( TrackedEntityInstanceAdapter ) mAdapter ).getFilter().filter(""); //show all rows
         return false;
+    }
+
+    private ActionBar getActionBar() {
+        if (getActivity() != null &&
+                getActivity() instanceof AppCompatActivity) {
+            return ((AppCompatActivity) getActivity()).getSupportActionBar();
+        } else {
+            throw new IllegalArgumentException("Fragment should be attached to ActionBarActivity");
+        }
     }
 }

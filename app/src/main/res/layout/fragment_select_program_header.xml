@@ -72,6 +72,13 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:src="@drawable/ic_menu_find_mtrl_alpha" />
+        <org.hisp.dhis.android.sdk.ui.views.FloatingActionButton
+            android:id="@+id/local_search_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:src="@drawable/ic_menu_paste_holo_dark" />
+
 
         </LinearLayout>
 

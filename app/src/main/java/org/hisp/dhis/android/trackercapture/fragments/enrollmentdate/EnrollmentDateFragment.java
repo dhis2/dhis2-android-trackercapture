@@ -161,6 +161,7 @@ public class EnrollmentDateFragment extends DataEntryFragment<EnrollmentDateFrag
         if (mForm == null ) {
             return;
         }
+        edit = true;
         save();
 
     }
@@ -190,7 +191,9 @@ public class EnrollmentDateFragment extends DataEntryFragment<EnrollmentDateFrag
         {
             mForm.getEnrollment().setFromServer(false);
             mForm.getEnrollment().save();
+
         }
+        edit = false;
     }
 
     @Override

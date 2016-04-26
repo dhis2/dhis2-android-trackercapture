@@ -138,8 +138,10 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_select_program, menu);
         MenuItem item = menu.findItem(R.id.action_search);
+
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
         MenuItemCompat.setOnActionExpandListener(item, this);
+
         searchView.setOnQueryTextListener(this);
         searchView.setOnQueryTextFocusChangeListener(this);
         searchView.setOnCloseListener(this);
@@ -241,13 +243,13 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
                 mRegisterEventButton.hide();
                 mUpcomingEventsButton.hide();
                 mQueryTrackedEntityInstancesButton.hide();
-                mLocalSearchButton.hide();
+                //mLocalSearchButton.hide();
                 break;
             case 1:
                 mRegisterEventButton.show();
                 mUpcomingEventsButton.show();
                 mQueryTrackedEntityInstancesButton.show();
-                mLocalSearchButton.show();
+                //mLocalSearchButton.show();
         }
     }
 

@@ -243,13 +243,13 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
                 mRegisterEventButton.hide();
                 mUpcomingEventsButton.hide();
                 mQueryTrackedEntityInstancesButton.hide();
-                //mLocalSearchButton.hide();
+                mLocalSearchButton.hide();
                 break;
             case 1:
                 mRegisterEventButton.show();
                 mUpcomingEventsButton.show();
                 mQueryTrackedEntityInstancesButton.show();
-                //mLocalSearchButton.show();
+                mLocalSearchButton.show();
         }
     }
 

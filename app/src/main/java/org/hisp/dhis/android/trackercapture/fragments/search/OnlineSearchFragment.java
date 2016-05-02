@@ -1,33 +1,4 @@
-/*
- *  Copyright (c) 2016, University of Oslo
- *  * All rights reserved.
- *  *
- *  * Redistribution and use in source and binary forms, with or without
- *  * modification, are permitted provided that the following conditions are met:
- *  * Redistributions of source code must retain the above copyright notice, this
- *  * list of conditions and the following disclaimer.
- *  *
- *  * Redistributions in binary form must reproduce the above copyright notice,
- *  * this list of conditions and the following disclaimer in the documentation
- *  * and/or other materials provided with the distribution.
- *  * Neither the name of the HISP project nor the names of its contributors may
- *  * be used to endorse or promote products derived from this software without
- *  * specific prior written permission.
- *  *
- *  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- *  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
- *  * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- *  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- */
-
-package org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs;
+package org.hisp.dhis.android.trackercapture.fragments.search;
 
 import android.app.Activity;
 import android.content.Context;
@@ -35,7 +6,6 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -44,9 +14,11 @@ import android.support.v4.content.Loader;
 import android.text.Editable;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -56,7 +28,6 @@ import android.widget.TextView;
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
-import org.hisp.dhis.android.sdk.R;
 import org.hisp.dhis.android.sdk.controllers.DhisController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.events.UiEvent;
@@ -67,6 +38,7 @@ import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
+import org.hisp.dhis.android.sdk.ui.activities.INavigationHandler;
 import org.hisp.dhis.android.sdk.ui.adapters.DataValueAdapter;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.AbsTextWatcher;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.CoordinatesRow;
@@ -76,24 +48,24 @@ import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnDetailedInfoButtonCli
 import org.hisp.dhis.android.sdk.ui.dialogs.QueryTrackedEntityInstancesResultDialogFragment;
 import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
+import org.hisp.dhis.android.trackercapture.R;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
-        implements View.OnClickListener, LoaderManager.LoaderCallbacks<QueryTrackedEntityInstancesDialogFragmentForm> {
-    private static final String TAG = QueryTrackedEntityInstancesDialogFragment.class.getSimpleName();
+public class OnlineSearchFragment extends Fragment implements View.OnClickListener, LoaderManager.LoaderCallbacks<OnlineSearchFragmentForm> {
+    public static final String TAG = OnlineSearchFragment.class.getSimpleName();
 
     private static final int LOADER_ID = 956401;
 
-    private QueryTrackedEntityInstancesDialogFragmentForm mForm;
+    private OnlineSearchFragmentForm mForm;
     private EditText mFilter;
     private TextView mDialogLabel;
     private DataValueAdapter mAdapter;
     private ListView mListView;
     private int mDialogId;
     private FragmentActivity activity = null;
+    protected INavigationHandler mNavigationHandler;
 
     private static final String EXTRA_PROGRAM = "extra:trackedEntityAttributes";
     private static final String EXTRA_ORGUNIT = "extra:orgUnit";
@@ -101,8 +73,8 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
     private static final String EXTRA_ARGUMENTS = "extra:Arguments";
     private static final String EXTRA_SAVED_INSTANCE_STATE = "extra:savedInstanceState";
 
-    public static QueryTrackedEntityInstancesDialogFragment newInstance(String program, String orgUnit) {
-        QueryTrackedEntityInstancesDialogFragment dialogFragment = new QueryTrackedEntityInstancesDialogFragment();
+    public static OnlineSearchFragment newInstance(String program, String orgUnit) {
+        OnlineSearchFragment dialogFragment = new OnlineSearchFragment();
         Bundle args = new Bundle();
 
         args.putString(EXTRA_ORGUNIT, orgUnit);
@@ -123,11 +95,28 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setStyle(DialogFragment.STYLE_NO_TITLE,
-                R.style.Theme_AppCompat_Light_Dialog);
-
+        setHasOptionsMenu(true);
     }
 
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_online_search, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_load_to_device) {
+            runQuery();
+        }
+        else if(id == R.id.action_close) {
+            getFragmentManager().popBackStack();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
     @Override
     public void onPause() {
         super.onPause();
@@ -143,15 +132,15 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
     @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+        // getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
-        return inflater.inflate(R.layout.dialog_fragment_teiqueryresult, container, false);
+        return inflater.inflate(org.hisp.dhis.android.sdk.R.layout.dialog_fragment_teiqueryresult, container, false);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         mListView = (ListView) view
-                .findViewById(R.id.simple_listview);
+                .findViewById(org.hisp.dhis.android.sdk.R.id.simple_listview);
 
         View header = getLayoutInflater(savedInstanceState).inflate(
                 org.hisp.dhis.android.trackercapture.R.layout.fragmentdialog_querytei_header, mListView, false
@@ -161,13 +150,13 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
         mListView.addHeaderView(header, TAG, false);
 
         //ImageView loadDialogButton = (ImageView) view
-          //      .findViewById(R.id.load_dialog_button);
+          //      .findViewById(org.hisp.dhis.android.sdk.R.id.load_dialog_button);
         ImageView closeDialogButton = (ImageView) view
-                .findViewById(R.id.close_dialog_button);
+                .findViewById(org.hisp.dhis.android.sdk.R.id.close_dialog_button);
         mFilter = (EditText) view
-                .findViewById(R.id.filter_options);
+                .findViewById(org.hisp.dhis.android.sdk.R.id.filter_options);
         mDialogLabel = (TextView) view
-                .findViewById(R.id.dialog_label);
+                .findViewById(org.hisp.dhis.android.sdk.R.id.dialog_label);
         InputMethodManager imm = (InputMethodManager)
                 getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mFilter.getWindowToken(), 0);
@@ -182,16 +171,16 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
             }
         });
 
-        closeDialogButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dismiss();
-            }
-        });
+        //closeDialogButton.setOnClickListener(new View.OnClickListener() {
+          //  @Override
+            //public void onClick(View v) {
+                // dismiss();
+            //}
+        //});
 
         //loadDialogButton.setOnClickListener(this);
 
-        setDialogLabel(R.string.query_tracked_entity_instances);
+        setDialogLabel(org.hisp.dhis.android.sdk.R.string.query_tracked_entity_instances);
     }
 
     @Override
@@ -204,7 +193,7 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
     }
 
     @Override
-    public Loader<QueryTrackedEntityInstancesDialogFragmentForm> onCreateLoader(int id, Bundle args) {
+    public Loader<OnlineSearchFragmentForm> onCreateLoader(int id, Bundle args) {
         if (LOADER_ID == id && isAdded()) {
             // Adding Tables for tracking here is dangerous (since MetaData updates in background
             // can trigger reload of values from db which will reset all fields).
@@ -215,7 +204,7 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
             String orgUnitId = fragmentArguments.getString(EXTRA_ORGUNIT);
 
             return new DbLoader<>(
-                    getActivity().getBaseContext(), modelsToTrack, new QueryTrackedEntityInstancesDialogFragmentQuery(
+                    getActivity().getBaseContext(), modelsToTrack, new OnlineSearchFragmentQuery(
                     orgUnitId, programId)
             );
         }
@@ -223,7 +212,7 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
     }
 
     @Override
-    public void onLoadFinished(Loader<QueryTrackedEntityInstancesDialogFragmentForm> loader, QueryTrackedEntityInstancesDialogFragmentForm data) {
+    public void onLoadFinished(Loader<OnlineSearchFragmentForm> loader, OnlineSearchFragmentForm data) {
 
         Log.d(TAG, "load finished");
         if (loader.getId() == LOADER_ID && isAdded()) {
@@ -241,7 +230,7 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
     }
 
     @Override
-    public void onLoaderReset(Loader<QueryTrackedEntityInstancesDialogFragmentForm> loader) {
+    public void onLoaderReset(Loader<OnlineSearchFragmentForm> loader) {
 
     }
 
@@ -251,17 +240,17 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
         String message = "";
 
         if (eventClick.getRow() instanceof CoordinatesRow)
-            message = getResources().getString(R.string.detailed_info_coordinate_row);
+            message = getResources().getString(org.hisp.dhis.android.sdk.R.string.detailed_info_coordinate_row);
         else if (eventClick.getRow() instanceof StatusRow)
-            message = getResources().getString(R.string.detailed_info_status_row);
+            message = getResources().getString(org.hisp.dhis.android.sdk.R.string.detailed_info_status_row);
         else if (eventClick.getRow() instanceof IndicatorRow)
             message = ""; // need to change ProgramIndicator to extend BaseValue for this to work
         else         // rest of the rows can either be of data element or tracked entity instance attribute
             message = eventClick.getRow().getDescription();
 
         UiUtils.showConfirmDialog(getActivity(),
-                getResources().getString(R.string.detailed_info_dataelement),
-                message, getResources().getString(R.string.ok_option),
+                getResources().getString(org.hisp.dhis.android.sdk.R.string.detailed_info_dataelement),
+                message, getResources().getString(org.hisp.dhis.android.sdk.R.string.ok_option),
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int i) {
@@ -274,10 +263,10 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
         FloatingActionButton button = (FloatingActionButton) v;
         boolean current = getArguments().getBoolean(EXTRA_DETAILED);
         if (current) {
-            button.setImageResource(R.drawable.ic_new);
+            button.setImageResource(org.hisp.dhis.android.sdk.R.drawable.ic_new);
             mAdapter.swapData(null);
         } else {
-            button.setImageResource(R.drawable.ic_delete);
+            button.setImageResource(org.hisp.dhis.android.sdk.R.drawable.ic_delete);
             mAdapter.swapData(mForm.getDataEntryRows());
         }
         getArguments().putBoolean(EXTRA_DETAILED, !current);
@@ -318,15 +307,10 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
         return mAdapter;
     }
 
-    public void show(FragmentManager fragmentManager) {
-        show(fragmentManager, TAG);
-    }
-
     @Override
     public void onClick(View v) {
-        //if (v.getId() == R.id.load_dialog_button) {
-          //  dismiss();
-            //runQuery();
+        //if (v.getId() == org.hisp.dhis.android.sdk.R.id.load_dialog_button) {
+          //  runQuery();
         //} else
             if (v.getId() == org.hisp.dhis.android.trackercapture.R.id.detailed_search_button) {
             toggleDetailedSearch(v);
@@ -368,10 +352,16 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
                 Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_START));
                 List<TrackedEntityInstance> trackedEntityInstancesQueryResult = TrackerController.queryTrackedEntityInstancesDataFromServer(DhisController.getInstance().getDhisApi(), orgUnit, program, queryString, params);
                 Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_END));
-                showTrackedEntityInstanceQueryResultDialog(fragmentManager, trackedEntityInstancesQueryResult, orgUnit);
+                // showTrackedEntityInstanceQueryResultDialog(fragmentManager, trackedEntityInstancesQueryResult, orgUnit);
+                showOnlineSearchResultFragment(trackedEntityInstancesQueryResult, orgUnit);
                 return new Object();
             }
         });
+    }
+
+    public void showOnlineSearchResultFragment(final List<TrackedEntityInstance> trackedEntityInstances, final String orgUnit) {
+        OnlineSearchResultFragment onlineSearchResultFragment = OnlineSearchResultFragment.newInstance(trackedEntityInstances, orgUnit);
+        mNavigationHandler.switchFragment(onlineSearchResultFragment, OnlineSearchResultFragment.TAG, false);
     }
 
     public void showTrackedEntityInstanceQueryResultDialog(FragmentManager fragmentManager, final List<TrackedEntityInstance> trackedEntityInstances, final String orgUnit) {
@@ -395,5 +385,11 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
                 this.activity = (FragmentActivity) activity;
             }
         }
+        if (activity instanceof INavigationHandler) {
+            mNavigationHandler = (INavigationHandler) activity;
+        } else {
+            throw new IllegalArgumentException("Activity must implement INavigationHandler interface");
+        }
     }
+
 }

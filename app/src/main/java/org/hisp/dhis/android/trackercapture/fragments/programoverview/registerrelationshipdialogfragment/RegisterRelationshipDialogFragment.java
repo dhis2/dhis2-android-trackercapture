@@ -137,8 +137,8 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
         mRelationshipTypeButton.setOnClickListener(this);
         mProgressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
 
-        ImageView registerDialogButton = (ImageView) view
-                .findViewById(R.id.load_dialog_button);
+        //ImageView registerDialogButton = (ImageView) view
+               // .findViewById(R.id.load_dialog_button);
         ImageView closeDialogButton = (ImageView) view
                 .findViewById(R.id.close_dialog_button);
         mTrackedEntityInstanceLabel = (FontTextView) view.findViewById(org.hisp.dhis.android.trackercapture.R.id.tei_label);
@@ -168,7 +168,7 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
         closeDialogButton.setOnClickListener(this);
 
         //registerDialogButton.setOnClickListener(this);
-        registerDialogButton.setVisibility(View.GONE);
+        //registerDialogButton.setVisibility(View.GONE);
 
         setDialogLabel(org.hisp.dhis.android.trackercapture.R.string.register_relationship);
     }

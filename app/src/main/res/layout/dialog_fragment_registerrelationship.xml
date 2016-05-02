@@ -56,7 +56,7 @@
             android:textColor="@color/white"
             android:textSize="19sp"
             app:font="@string/condensed_font_name"/>
-
+<!--
         <ImageView
             android:id="@+id/load_dialog_button"
             android:layout_width="56dp"
@@ -67,6 +67,7 @@
             android:contentDescription="@string/description"
             android:padding="8dp"
             android:src="@drawable/ic_post"/>
+            -->
 
 
         <ImageView

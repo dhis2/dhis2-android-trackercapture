@@ -72,6 +72,7 @@ import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.fragments.enrollment.EnrollmentDataEntryFragment;
 import org.hisp.dhis.android.trackercapture.fragments.programoverview.ProgramOverviewFragment;
 import org.hisp.dhis.android.trackercapture.fragments.search.LocalSearchFragment;
+import org.hisp.dhis.android.trackercapture.fragments.search.OnlineSearchFragment;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.ItemStatusDialogFragment;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.QueryTrackedEntityInstancesDialogFragment;
 import org.hisp.dhis.android.trackercapture.fragments.upcomingevents.UpcomingEventsFragment;
@@ -194,7 +195,8 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
                 break;
             }
             case R.id.query_trackedentityinstances_button: {
-                showQueryTrackedEntityInstancesDialog(getChildFragmentManager(), mState.getOrgUnitId(), mState.getProgramId());
+                showOnlineSearchFragment(mState.getOrgUnitId(), mState.getProgramId());
+                //showQueryTrackedEntityInstancesDialog(getChildFragmentManager(), mState.getOrgUnitId(), mState.getProgramId());
                 break;
             }
             case R.id.local_search_button: {
@@ -230,6 +232,11 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     private static final void showQueryTrackedEntityInstancesDialog(FragmentManager fragmentManager, String orgUnit, String program) {
         QueryTrackedEntityInstancesDialogFragment dialog = QueryTrackedEntityInstancesDialogFragment.newInstance(program, orgUnit);
         dialog.show(fragmentManager);
+    }
+
+    private final void showOnlineSearchFragment(String orgUnit, String program) {
+        OnlineSearchFragment onlineSearchFragment = OnlineSearchFragment.newInstance(program,orgUnit);
+        mNavigationHandler.switchFragment(onlineSearchFragment, OnlineSearchFragment.TAG, true);
     }
     public void showStatusDialog(BaseSerializableModel model) {
         ItemStatusDialogFragment fragment = ItemStatusDialogFragment.newInstance(model);

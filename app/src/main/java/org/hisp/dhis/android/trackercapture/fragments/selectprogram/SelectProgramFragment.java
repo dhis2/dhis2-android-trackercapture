@@ -48,6 +48,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.TextView;
 
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
@@ -92,6 +93,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     private FloatingActionButton mUpcomingEventsButton;
     private FloatingActionButton mLocalSearchButton;
     private SelectProgramFragmentForm mForm;
+    protected TextView noRowsTextView;
 
     @Override
     protected TrackedEntityInstanceAdapter getAdapter(Bundle savedInstanceState) {
@@ -114,6 +116,8 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
         mQueryTrackedEntityInstancesButton = (FloatingActionButton) header.findViewById(R.id.query_trackedentityinstances_button);
         mUpcomingEventsButton = (FloatingActionButton) header.findViewById(R.id.upcoming_events_button);
         mLocalSearchButton = (FloatingActionButton) header.findViewById(R.id.local_search_button);
+        noRowsTextView = (TextView) header.findViewById(R.id.textview_no_items);
+        noRowsTextView.setText(getString(R.string.specify_search_criteria));
 
         mRegisterEventButton.setOnClickListener(this);
         mQueryTrackedEntityInstancesButton.setOnClickListener(this);
@@ -124,6 +128,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
         mUpcomingEventsButton.hide();
         mQueryTrackedEntityInstancesButton.hide();
         mLocalSearchButton.hide();
+        noRowsTextView.setVisibility(View.GONE);
         return header;
     }
 
@@ -267,6 +272,14 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
             mForm = data;
             ( ( TrackedEntityInstanceAdapter ) mAdapter).setData(data.getEventRowList());
             mAdapter.swapData(data.getEventRowList());
+
+            if(!data.getProgram().isDisplayFrontPageList()) {
+                // if no rows is selected - let the user know
+                noRowsTextView.setVisibility(View.VISIBLE);
+            }
+            else {
+                noRowsTextView.setVisibility(View.GONE);
+            }
         }
     }
 

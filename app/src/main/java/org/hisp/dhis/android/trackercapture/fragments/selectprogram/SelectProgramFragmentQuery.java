@@ -39,6 +39,7 @@ import org.hisp.dhis.android.sdk.events.OnRowClick;
 import org.hisp.dhis.android.sdk.persistence.models.DataElement;
 import org.hisp.dhis.android.sdk.persistence.models.OptionSet;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventItemRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceColumnNamesRow;
 import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
@@ -113,6 +114,11 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
             }
         }
         teiRows.add(columnNames);
+
+
+        if(!selectedProgram.isDisplayFrontPageList()) {
+            return fragmentForm; // we don't want to show any values in the list, only header row
+        }
 
         List<Enrollment> enrollments = TrackerController.getEnrollments(
                 mProgramId, mOrgUnitId);

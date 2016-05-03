@@ -91,5 +91,8 @@
         android:layout_marginBottom="28dp"
         android:layout_gravity="center_horizontal"
         android:indeterminate="true" />
-
+    <TextView
+               android:id="@+id/textview_no_items"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content" />
 </LinearLayout>

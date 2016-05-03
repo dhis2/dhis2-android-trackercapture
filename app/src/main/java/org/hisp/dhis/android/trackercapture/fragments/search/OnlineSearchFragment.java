@@ -157,9 +157,10 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
                 .findViewById(org.hisp.dhis.android.sdk.R.id.filter_options);
         mDialogLabel = (TextView) view
                 .findViewById(org.hisp.dhis.android.sdk.R.id.dialog_label);
-        InputMethodManager imm = (InputMethodManager)
-                getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(mFilter.getWindowToken(), 0);
+//        InputMethodManager imm = (InputMethodManager)
+//                getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+//        imm.hideSoftInputFromWindow(mFilter.getWindowToken(), 0);
+        UiUtils.hideKeyboard(getActivity());
 
         mAdapter = new DataValueAdapter(getChildFragmentManager(), getActivity().getLayoutInflater());
         mListView.setAdapter(mAdapter);

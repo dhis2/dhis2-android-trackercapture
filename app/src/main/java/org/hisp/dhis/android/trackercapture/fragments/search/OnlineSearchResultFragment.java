@@ -42,6 +42,7 @@ import org.hisp.dhis.android.sdk.ui.adapters.rows.AbsTextWatcher;
 import org.hisp.dhis.android.sdk.ui.dialogs.QueryTrackedEntityInstancesResultDialogAdapter;
 import org.hisp.dhis.android.sdk.ui.fragments.progressdialog.ProgressDialogFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.settings.SettingsFragment;
+import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.R;
 
 import java.util.ArrayList;
@@ -144,9 +145,10 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
                 .findViewById(org.hisp.dhis.android.sdk.R.id.filter_options);
         mDialogLabel = (TextView) view
                 .findViewById(org.hisp.dhis.android.sdk.R.id.dialog_label);
-        InputMethodManager imm = (InputMethodManager)
-                getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(mFilter.getWindowToken(), 0);
+//        InputMethodManager imm = (InputMethodManager)
+//                getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+//        imm.hideSoftInputFromWindow(mFilter.getWindowToken(), 0);
+        UiUtils.hideKeyboard(getActivity());
 
         mAdapter = new QueryTrackedEntityInstancesResultDialogAdapter(LayoutInflater.from(getActivity()), getSelectedTrackedEntityInstances());
         mListView.setAdapter(mAdapter);
@@ -301,13 +303,13 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
     }
 
     public void initiateLoading() {
-        Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_START));
         Log.d(TAG, "loading: " + getSelectedTrackedEntityInstances().size());
         JobExecutor.enqueueJob(new NetworkJob<Object>(0,
                 ResourceType.TRACKEDENTITYINSTANCE) {
 
             @Override
             public Object execute() throws APIException {
+                Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_START));
                 TrackerController.getTrackedEntityInstancesDataFromServer(DhisController.getInstance().getDhisApi(), getSelectedTrackedEntityInstances(), true);
                 Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_END));
                 return new Object();

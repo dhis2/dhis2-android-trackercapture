@@ -113,13 +113,26 @@ public class LocalSearchResultFragmentFormQuery implements Query<LocalSearchResu
 
             for(TrackedEntityAttributeValue trackedEntityAttributeValue : teiAttributeValues) {
 
-                if(attributeValueMap.get(trackedEntityAttributeValue.getTrackedEntityAttributeId()) != null &&
-                        attributeValueMap.get(trackedEntityAttributeValue.getTrackedEntityAttributeId()).toLowerCase()
-                        .contains(trackedEntityAttributeValue.getValue().toLowerCase())) {
-                    numberOfHits++;
+//                if(attributeValueMap.get(trackedEntityAttributeValue.getTrackedEntityAttributeId()) != null &&
+//                        attributeValueMap.get(trackedEntityAttributeValue.getTrackedEntityAttributeId()).toLowerCase()
+//                        .contains(trackedEntityAttributeValue.getValue().toLowerCase())) {
 
-                    if(!trackedEntityInstancesToShow.contains(tei) && numberOfHits == hitsRequired) {
-                        trackedEntityInstancesToShow.add(tei);
+                    if(attributeValueMap.get(trackedEntityAttributeValue.getTrackedEntityAttributeId()) != null) {
+                        String searchVal = attributeValueMap.get(trackedEntityAttributeValue.getTrackedEntityAttributeId()).toLowerCase();
+                        String searchHit = "";
+                        if(trackedEntityAttributeValue.getValue() != null) {
+                            searchHit = trackedEntityAttributeValue.getValue().toLowerCase();
+                        }
+
+//                        if(attributeValueMap.get(trackedEntityAttributeValue.getTrackedEntityAttributeId()).toLowerCase()
+//                                    .contains(trackedEntityAttributeValue.getValue().toLowerCase())) {
+                        if(!searchVal.isEmpty() && searchHit.contains(searchVal)) {
+                            numberOfHits++;
+
+
+                            if (!trackedEntityInstancesToShow.contains(tei) && numberOfHits == hitsRequired) {
+                                trackedEntityInstancesToShow.add(tei);
+                            }
                     }
                 }
             }

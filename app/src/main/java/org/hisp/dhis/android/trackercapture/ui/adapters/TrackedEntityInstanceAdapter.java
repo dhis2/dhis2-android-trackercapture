@@ -163,26 +163,26 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<EventRow> implement
                         EventRow row = allRows.get(i);
                         if ( row != null && row instanceof TrackedEntityInstanceItemRow ) {
                             TrackedEntityInstanceItemRow trackedEntityInstanceItemRow = (TrackedEntityInstanceItemRow) row;
-                            List<TrackedEntityAttributeValue> trackedEntityAttributeValues =
-                                    trackedEntityInstanceItemRow.getTrackedEntityInstance().getAttributes();
-
-                            for(TrackedEntityAttributeValue trackedEntityAttributeValue : trackedEntityAttributeValues) {
-
-                                if( trackedEntityAttributeValue.getValue() != null &&
-                                        trackedEntityAttributeValue.getValue().toLowerCase().contains(constraint)) {
-                                    filteredItems.add(row);
-                                    break;
-                                }
-                            }
-//                            if ( trackedEntityInstanceItemRow.getmFirstItem() != null)
-//                                if ( trackedEntityInstanceItemRow.getmFirstItem().toLowerCase().contains(constraint))
+//                            List<TrackedEntityAttributeValue> trackedEntityAttributeValues =
+//                                    trackedEntityInstanceItemRow.getTrackedEntityInstance().getAttributes();
+//
+//                            for(TrackedEntityAttributeValue trackedEntityAttributeValue : trackedEntityAttributeValues) {
+//
+//                                if( trackedEntityAttributeValue.getValue() != null &&
+//                                        trackedEntityAttributeValue.getValue().toLowerCase().contains(constraint)) {
 //                                    filteredItems.add(row);
-//                                else if ( trackedEntityInstanceItemRow.getmSecondItem() != null)
-//                                    if ( trackedEntityInstanceItemRow.getmSecondItem().toLowerCase().contains(constraint))
-//                                        filteredItems.add(row);
-//                                    else if ( trackedEntityInstanceItemRow.getmThirdItem() != null)
-//                                        if ( trackedEntityInstanceItemRow.getmThirdItem().toLowerCase().contains(constraint))
-//                                            filteredItems.add(row);
+//                                    break;
+//                                }
+//                            }
+                            if ( trackedEntityInstanceItemRow.getmFirstItem() != null)
+                                if ( trackedEntityInstanceItemRow.getmFirstItem().toLowerCase().contains(constraint))
+                                    filteredItems.add(row);
+                                else if ( trackedEntityInstanceItemRow.getmSecondItem() != null)
+                                    if ( trackedEntityInstanceItemRow.getmSecondItem().toLowerCase().contains(constraint))
+                                        filteredItems.add(row);
+                                    else if ( trackedEntityInstanceItemRow.getmThirdItem() != null)
+                                        if ( trackedEntityInstanceItemRow.getmThirdItem().toLowerCase().contains(constraint))
+                                            filteredItems.add(row);
                         } else {
                             if (row instanceof TrackedEntityInstanceColumnNamesRow)
                                 filteredItems.add(row);

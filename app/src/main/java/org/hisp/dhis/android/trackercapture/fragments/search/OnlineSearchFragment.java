@@ -11,6 +11,8 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -114,6 +116,9 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
         else if(id == R.id.action_close) {
             getFragmentManager().popBackStack();
         }
+        else if (id == android.R.id.home) {
+            getFragmentManager().popBackStack();
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -145,9 +150,17 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
         View header = getLayoutInflater(savedInstanceState).inflate(
                 org.hisp.dhis.android.trackercapture.R.layout.fragmentdialog_querytei_header, mListView, false
         );
+
+        if(getActivity() instanceof AppCompatActivity) {
+            getActionBar().setDisplayShowTitleEnabled(true);
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+            getActionBar().setHomeButtonEnabled(true);
+        }
+
         FloatingActionButton detailedSearchButton = (FloatingActionButton) header.findViewById(org.hisp.dhis.android.trackercapture.R.id.detailed_search_button);
         detailedSearchButton.setOnClickListener(this);
         mListView.addHeaderView(header, TAG, false);
+
 
         //ImageView loadDialogButton = (ImageView) view
           //      .findViewById(org.hisp.dhis.android.sdk.R.id.load_dialog_button);
@@ -181,7 +194,15 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
 
         //loadDialogButton.setOnClickListener(this);
 
-        setDialogLabel(org.hisp.dhis.android.sdk.R.string.query_tracked_entity_instances);
+    }
+
+    private ActionBar getActionBar() {
+        if (getActivity() != null &&
+                getActivity() instanceof AppCompatActivity) {
+            return ((AppCompatActivity) getActivity()).getSupportActionBar();
+        } else {
+            throw new IllegalArgumentException("Fragment should be attached to ActionBarActivity");
+        }
     }
 
     @Override
@@ -326,12 +347,13 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
                 searchValues.add(value);
             }
         }
+        final boolean detailedSearch = getArguments().getBoolean(EXTRA_DETAILED);
         new Thread() {
             @Override
             public void run() {
                 queryTrackedEntityInstances(getChildFragmentManager(),
                         mForm.getOrganisationUnit(), mForm.getProgram(),
-                        mForm.getQueryString(), searchValues.toArray(new TrackedEntityAttributeValue[]{}));
+                        mForm.getQueryString(), detailedSearch, searchValues.toArray(new TrackedEntityAttributeValue[]{}));
             }
         }.start();
     }
@@ -343,7 +365,7 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
      * @param program can be null
      * @param params  can be null
      */
-    public void queryTrackedEntityInstances(final FragmentManager fragmentManager, final String orgUnit, final String program, final String queryString, final TrackedEntityAttributeValue... params)
+    public void queryTrackedEntityInstances(final FragmentManager fragmentManager, final String orgUnit, final String program, final String queryString, final boolean detailedSearch, final TrackedEntityAttributeValue... params)
             throws APIException {
         JobExecutor.enqueueJob(new NetworkJob<Object>(1,
                 null) {
@@ -351,7 +373,13 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
             @Override
             public Object execute() throws APIException {
                 Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_START));
-                List<TrackedEntityInstance> trackedEntityInstancesQueryResult = TrackerController.queryTrackedEntityInstancesDataFromServer(DhisController.getInstance().getDhisApi(), orgUnit, program, queryString, params);
+                List<TrackedEntityInstance> trackedEntityInstancesQueryResult = null;
+                if(detailedSearch) {
+                    trackedEntityInstancesQueryResult = TrackerController.queryTrackedEntityInstancesDataFromAllAccessibleOrgUnits(DhisController.getInstance().getDhisApi(), orgUnit, program, queryString, detailedSearch, params);
+                }
+                else {
+                    trackedEntityInstancesQueryResult = TrackerController.queryTrackedEntityInstancesDataFromServer(DhisController.getInstance().getDhisApi(), orgUnit, program, queryString, params);
+                }
                 Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_END));
                 // showTrackedEntityInstanceQueryResultDialog(fragmentManager, trackedEntityInstancesQueryResult, orgUnit);
                 showOnlineSearchResultFragment(trackedEntityInstancesQueryResult, orgUnit);

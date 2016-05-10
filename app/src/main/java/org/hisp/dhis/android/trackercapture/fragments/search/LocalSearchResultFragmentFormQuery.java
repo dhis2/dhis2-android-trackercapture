@@ -74,9 +74,8 @@ public class LocalSearchResultFragmentFormQuery implements Query<LocalSearchResu
         }
 
         eventRows.add(columnNames);
-        List<Enrollment> enrollmentsToShow = new ArrayList<>();
-        List<Enrollment> enrollments = TrackerController.getEnrollments(
-                programId, orgUnitId);
+        List<Enrollment> enrollments = TrackerController.getEnrollmentsForProgram(
+                programId);
         List<Long> trackedEntityInstanceIds = new ArrayList<>();
         if (isListEmpty(enrollments)) {
             return form;

@@ -120,6 +120,9 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
         else if(id == R.id.action_close) {
             getFragmentManager().popBackStack();
         }
+        else if (id == android.R.id.home) {
+            getFragmentManager().popBackStack();
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -136,6 +139,12 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
     public void onViewCreated(View view, Bundle savedInstanceState) {
         mListView = (ListView) view
                 .findViewById(org.hisp.dhis.android.sdk.R.id.simple_listview);
+
+        if(getActivity() instanceof AppCompatActivity) {
+            getActionBar().setDisplayShowTitleEnabled(true);
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+            getActionBar().setHomeButtonEnabled(true);
+        }
         //ImageView loadDialogButton = (ImageView) view
           //      .findViewById(org.hisp.dhis.android.sdk.R.id.load_dialog_button);
         //loadDialogButton.setImageResource(org.hisp.dhis.android.sdk.R.drawable.ic_download);

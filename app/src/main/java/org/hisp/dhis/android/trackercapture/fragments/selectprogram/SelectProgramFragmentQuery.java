@@ -37,6 +37,7 @@ import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.events.OnRowClick;
 import org.hisp.dhis.android.sdk.persistence.models.DataElement;
+import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.OptionSet;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventItemRow;
@@ -117,11 +118,20 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
 
 
         if(!selectedProgram.isDisplayFrontPageList()) {
-            return fragmentForm; // we don't want to show any values in the list, only header row
+            return fragmentForm; // we don't want to show any values or any list header
         }
 
         List<Enrollment> enrollments = TrackerController.getEnrollments(
                 mProgramId, mOrgUnitId);
+        List<Event> eventsForOrgUnit = TrackerController.getEventsThatHasEnrollments(mOrgUnitId,mProgramId);
+        List<Enrollment> enrollmentsToShow = new ArrayList<>();
+        Map<String,Enrollment> enrollmentMap = new HashMap<>();
+        for (Event event : eventsForOrgUnit) {
+            if(!enrollmentMap.containsKey(event.getEnrollment())) {
+                enrollmentMap.put(event.getEnrollment(), TrackerController.getEnrollment(event.getEnrollment()));
+            }
+        }
+
         List<Long> trackedEntityInstanceIds = new ArrayList<>();
         if (isListEmpty(enrollments)) {
             return fragmentForm;

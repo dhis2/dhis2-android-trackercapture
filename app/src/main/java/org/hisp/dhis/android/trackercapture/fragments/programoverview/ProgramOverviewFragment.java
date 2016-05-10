@@ -569,7 +569,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                     }
                     else
                     {
-                        if(stageRow.getEventRows().size() < 1 && !stageRow.getProgramStage().getAutoGenerateEvent()) { // if stage is not autogen and not repeatable, allow user to create exactly one event
+                        if(stageRow.getEventRows().size() < 1) { // if stage is not autogen and not repeatable, allow user to create exactly one event
                             stageRow.setButtonListener(this);
                         }
                         if(stageRow.getProgramStage().getAllowGenerateNextVisit()) {

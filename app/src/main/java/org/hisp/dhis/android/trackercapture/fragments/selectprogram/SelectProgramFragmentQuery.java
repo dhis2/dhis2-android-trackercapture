@@ -121,8 +121,8 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
             return fragmentForm; // we don't want to show any values or any list header
         }
 
-        List<Enrollment> enrollments = TrackerController.getEnrollments(
-                mProgramId, mOrgUnitId);
+//        List<Enrollment> enrollments = TrackerController.getEnrollments(
+//                mProgramId, mOrgUnitId);
         List<Event> eventsForOrgUnit = TrackerController.getEventsThatHasEnrollments(mOrgUnitId,mProgramId);
         List<Enrollment> enrollmentsToShow = new ArrayList<>();
         Map<String,Enrollment> enrollmentMap = new HashMap<>();
@@ -132,11 +132,13 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
             }
         }
 
+        enrollmentsToShow.addAll(enrollmentMap.values());
+
         List<Long> trackedEntityInstanceIds = new ArrayList<>();
-        if (isListEmpty(enrollments)) {
+        if (isListEmpty(enrollmentsToShow)) { //enrollments
             return fragmentForm;
         } else {
-            for (Enrollment enrollment : enrollments) {
+            for (Enrollment enrollment : enrollmentsToShow) { // enrollments
                 if (enrollment.getLocalTrackedEntityInstanceId() > 0) {
                     if (!trackedEntityInstanceIds.contains(enrollment.getLocalTrackedEntityInstanceId()))
                         trackedEntityInstanceIds.add(enrollment.getLocalTrackedEntityInstanceId());

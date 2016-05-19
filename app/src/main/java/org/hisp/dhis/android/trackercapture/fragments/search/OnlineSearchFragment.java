@@ -51,6 +51,7 @@ import org.hisp.dhis.android.sdk.ui.dialogs.QueryTrackedEntityInstancesResultDia
 import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.R;
+import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,13 +68,13 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
     private ListView mListView;
     private int mDialogId;
     private FragmentActivity activity = null;
-    protected INavigationHandler mNavigationHandler;
+//    protected INavigationHandler mNavigationHandler;
 
-    private static final String EXTRA_PROGRAM = "extra:trackedEntityAttributes";
-    private static final String EXTRA_ORGUNIT = "extra:orgUnit";
-    private static final String EXTRA_DETAILED = "extra:detailed";
-    private static final String EXTRA_ARGUMENTS = "extra:Arguments";
-    private static final String EXTRA_SAVED_INSTANCE_STATE = "extra:savedInstanceState";
+    public static final String EXTRA_PROGRAM = "extra:trackedEntityAttributes";
+    public static final String EXTRA_ORGUNIT = "extra:orgUnit";
+    public static final String EXTRA_DETAILED = "extra:detailed";
+    public static final String EXTRA_ARGUMENTS = "extra:Arguments";
+    public static final String EXTRA_SAVED_INSTANCE_STATE = "extra:savedInstanceState";
 
     public static OnlineSearchFragment newInstance(String program, String orgUnit) {
         OnlineSearchFragment dialogFragment = new OnlineSearchFragment();
@@ -113,11 +114,8 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
         if (id == R.id.action_load_to_device) {
             runQuery();
         }
-        else if(id == R.id.action_close) {
-            getFragmentManager().popBackStack();
-        }
         else if (id == android.R.id.home) {
-            getFragmentManager().popBackStack();
+            getActivity().finish();
         }
 
         return super.onOptionsItemSelected(item);
@@ -164,8 +162,8 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
 
         //ImageView loadDialogButton = (ImageView) view
           //      .findViewById(org.hisp.dhis.android.sdk.R.id.load_dialog_button);
-        ImageView closeDialogButton = (ImageView) view
-                .findViewById(org.hisp.dhis.android.sdk.R.id.close_dialog_button);
+//        ImageView closeDialogButton = (ImageView) view
+//                .findViewById(org.hisp.dhis.android.sdk.R.id.close_dialog_button);
         mFilter = (EditText) view
                 .findViewById(org.hisp.dhis.android.sdk.R.id.filter_options);
         mDialogLabel = (TextView) view
@@ -390,7 +388,8 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
 
     public void showOnlineSearchResultFragment(final List<TrackedEntityInstance> trackedEntityInstances, final String orgUnit) {
         OnlineSearchResultFragment onlineSearchResultFragment = OnlineSearchResultFragment.newInstance(trackedEntityInstances, orgUnit);
-        mNavigationHandler.switchFragment(onlineSearchResultFragment, OnlineSearchResultFragment.TAG, false);
+        HolderActivity.navigateToOnlineSearchResultFragment(getActivity(),trackedEntityInstances, orgUnit);
+//        mNavigationHandler.switchFragment(onlineSearchResultFragment, OnlineSearchResultFragment.TAG, false);
     }
 
     public void showTrackedEntityInstanceQueryResultDialog(FragmentManager fragmentManager, final List<TrackedEntityInstance> trackedEntityInstances, final String orgUnit) {
@@ -414,11 +413,11 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
                 this.activity = (FragmentActivity) activity;
             }
         }
-        if (activity instanceof INavigationHandler) {
-            mNavigationHandler = (INavigationHandler) activity;
-        } else {
-            throw new IllegalArgumentException("Activity must implement INavigationHandler interface");
-        }
+//        if (activity instanceof INavigationHandler) {
+//            mNavigationHandler = (INavigationHandler) activity;
+//        } else {
+//            throw new IllegalArgumentException("Activity must implement INavigationHandler interface");
+//        }
     }
 
 }

@@ -7,10 +7,4 @@
         android:icon="@drawable/ic_search_server"
         app:showAsAction="ifRoom|collapseActionView"
         />
-
-    <item android:id="@+id/action_close"
-        android:title="@string/cancel"
-        android:icon="@drawable/ic_cancel"
-        app:showAsAction="ifRoom|collapseActionView"
-        />
 </menu>

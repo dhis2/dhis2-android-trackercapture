@@ -36,6 +36,7 @@ import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.StatusRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnDetailedInfoButtonClick;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.R;
+import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,7 +52,7 @@ public class LocalSearchFragment extends Fragment implements LoaderManager.Loade
     private ListView trackedEntityAttributeListView;
     private LocalSearchFragmentForm mForm;
     private DataValueAdapter mAdapter;
-    private INavigationHandler navigationHandler;
+//    private INavigationHandler navigationHandler;
 
 
     public static LocalSearchFragment newInstance(String orgUnitId, String programId) {
@@ -127,11 +128,14 @@ public class LocalSearchFragment extends Fragment implements LoaderManager.Loade
             buildQuery();
             LocalSearchResultFragment fragment = LocalSearchResultFragment.newInstance(
                     mForm.getOrganisationUnitId(), mForm.getProgram(), mForm.getAttributeValues());
-            navigationHandler.switchFragment(
-                    fragment, fragment.getClass().getSimpleName(), true);
+            HolderActivity.navigateToLocalSearchResultFragment(getActivity(),
+                    mForm.getOrganisationUnitId(),
+                    mForm.getProgram(), mForm.getAttributeValues());
+//            navigationHandler.switchFragment(
+//                    fragment, fragment.getClass().getSimpleName(), true);
         }
         else if (id == android.R.id.home) {
-            getFragmentManager().popBackStack();
+            getActivity().finish();
             return true;
         }
 
@@ -212,12 +216,12 @@ public class LocalSearchFragment extends Fragment implements LoaderManager.Loade
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        if (activity instanceof INavigationHandler) {
-            navigationHandler = (INavigationHandler) activity;
-        } else {
-            throw new IllegalArgumentException("Activity must " +
-                    "implement INavigationHandler interface");
-        }
+//        if (activity instanceof INavigationHandler) {
+////            navigationHandler = (INavigationHandler) activity;
+//        } else {
+//            throw new IllegalArgumentException("Activity must " +
+//                    "implement INavigationHandler interface");
+//        }
     }
 
     @Override

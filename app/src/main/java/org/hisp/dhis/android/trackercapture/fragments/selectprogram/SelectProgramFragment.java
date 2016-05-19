@@ -31,15 +31,14 @@ package org.hisp.dhis.android.trackercapture.fragments.selectprogram;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -70,13 +69,9 @@ import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.sdk.utils.api.ProgramType;
 import org.hisp.dhis.android.trackercapture.R;
-import org.hisp.dhis.android.trackercapture.fragments.enrollment.EnrollmentDataEntryFragment;
-import org.hisp.dhis.android.trackercapture.fragments.programoverview.ProgramOverviewFragment;
-import org.hisp.dhis.android.trackercapture.fragments.search.LocalSearchFragment;
-import org.hisp.dhis.android.trackercapture.fragments.search.OnlineSearchFragment;
+import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.ItemStatusDialogFragment;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.QueryTrackedEntityInstancesDialogFragment;
-import org.hisp.dhis.android.trackercapture.fragments.upcomingevents.UpcomingEventsFragment;
 import org.hisp.dhis.android.trackercapture.ui.adapters.TrackedEntityInstanceAdapter;
 import org.joda.time.DateTime;
 
@@ -104,9 +99,14 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     protected View getListViewHeader(Bundle savedInstanceState) {
 
         if(getActivity() instanceof AppCompatActivity) {
-            getActionBar().setDisplayShowTitleEnabled(true);
-            getActionBar().setDisplayHomeAsUpEnabled(false);
-            getActionBar().setHomeButtonEnabled(false);
+            Toolbar toolbar = getParentToolbar();
+            ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                   toggleNavigationDrawer();
+                }
+            });
         }
 
         View header = getLayoutInflater(savedInstanceState).inflate(
@@ -171,12 +171,8 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     @Subscribe
     public void onItemClick(OnTrackerItemClick eventClick) {
         if (eventClick.isOnDescriptionClick()) {
-
-            ProgramOverviewFragment fragment = ProgramOverviewFragment.
-                    newInstance(mState.getOrgUnitId(), mState.getProgramId(),
-                            eventClick.getItem().getLocalId());
-
-            mNavigationHandler.switchFragment(fragment, ProgramOverviewFragment.CLASS_TAG, true);
+            HolderActivity.navigateToProgramOverviewFragment(getActivity(), mState.getOrgUnitId(), mState.getProgramId(),
+                    eventClick.getItem().getLocalId());
         } else {
             showStatusDialog(eventClick.getItem());
         }
@@ -195,18 +191,15 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
                 break;
             }
             case R.id.upcoming_events_button: {
-                UpcomingEventsFragment fragment = new UpcomingEventsFragment();
-                mNavigationHandler.switchFragment(fragment, UpcomingEventsFragment.class.getName(), true);
+                HolderActivity.navigateToUpcomingEventsFragment(getActivity());
                 break;
             }
             case R.id.query_trackedentityinstances_button: {
                 showOnlineSearchFragment(mState.getOrgUnitId(), mState.getProgramId());
-                //showQueryTrackedEntityInstancesDialog(getChildFragmentManager(), mState.getOrgUnitId(), mState.getProgramId());
                 break;
             }
             case R.id.local_search_button: {
-                LocalSearchFragment searchFragment = LocalSearchFragment.newInstance(mState.getOrgUnitId(), mState.getProgramId());
-                mNavigationHandler.switchFragment(searchFragment, LocalSearchFragment.class.getSimpleName(), true);
+                HolderActivity.navigateToLocalSearchFragment(getActivity(), mState.getOrgUnitId(), mState.getProgramId());
                 break;
             }
         }
@@ -225,13 +218,14 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
         if(incidentDate != null) {
             incidentDateString = incidentDate.toString();
         }
-        EnrollmentDataEntryFragment enrollmentDataEntryFragment;
         if(trackedEntityInstance == null) {
-            enrollmentDataEntryFragment = EnrollmentDataEntryFragment.newInstance(mState.getOrgUnitId(), mState.getProgramId(), enrollmentDateString, incidentDateString);
+            HolderActivity.navigateToEnrollmentDataEntryFragment(getActivity(), mState.getOrgUnitId(), mState.getProgramId(), enrollmentDateString, incidentDateString);
+
         } else {
-            enrollmentDataEntryFragment = EnrollmentDataEntryFragment.newInstance(mState.getOrgUnitId(), mState.getProgramId(), trackedEntityInstance.getLocalId(), enrollmentDateString, incidentDateString);
+            HolderActivity.navigateToEnrollmentDataEntryFragment(getActivity(), mState.getOrgUnitId(), mState.getProgramId(),trackedEntityInstance.getLocalId(), enrollmentDateString, incidentDateString);
+
         }
-        mNavigationHandler.switchFragment(enrollmentDataEntryFragment, EnrollmentDataEntryFragment.class.getName(), true);
+
     }
 
     private static final void showQueryTrackedEntityInstancesDialog(FragmentManager fragmentManager, String orgUnit, String program) {
@@ -240,8 +234,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     }
 
     private final void showOnlineSearchFragment(String orgUnit, String program) {
-        OnlineSearchFragment onlineSearchFragment = OnlineSearchFragment.newInstance(program,orgUnit);
-        mNavigationHandler.switchFragment(onlineSearchFragment, OnlineSearchFragment.TAG, true);
+        HolderActivity.navigateToOnlineSearchFragment(getActivity(), program, orgUnit);
     }
     public void showStatusDialog(BaseSerializableModel model) {
         ItemStatusDialogFragment fragment = ItemStatusDialogFragment.newInstance(model);
@@ -405,10 +398,8 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
 
 
         if(item.getTitle().toString().equals(getResources().getString(org.hisp.dhis.android.sdk.R.string.go_to_programoverview_fragment))) {
-            mNavigationHandler.switchFragment(
-                    ProgramOverviewFragment.newInstance(
-                            mState.getOrgUnitId(), mState.getProgramId(), itemRow.getTrackedEntityInstance().getLocalId()),
-                    TAG, true);
+            HolderActivity.navigateToProgramOverviewFragment(getActivity(),
+                            mState.getOrgUnitId(), mState.getProgramId(), itemRow.getTrackedEntityInstance().getLocalId());
         } else if(item.getTitle().toString().equals(getResources().getString(org.hisp.dhis.android.sdk.R.string.delete))) {
             // if not sent to server, present dialog to user
             if( !(itemRow.getStatus().equals(OnRowClick.ITEM_STATUS.SENT))) {
@@ -457,14 +448,5 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     public boolean onClose() {
         ( ( TrackedEntityInstanceAdapter ) mAdapter ).getFilter().filter(""); //show all rows
         return false;
-    }
-
-    private ActionBar getActionBar() {
-        if (getActivity() != null &&
-                getActivity() instanceof AppCompatActivity) {
-            return ((AppCompatActivity) getActivity()).getSupportActionBar();
-        } else {
-            throw new IllegalArgumentException("Fragment should be attached to ActionBarActivity");
-        }
     }
 }

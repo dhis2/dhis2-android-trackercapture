@@ -37,6 +37,7 @@ import org.hisp.dhis.android.sdk.ui.activities.INavigationHandler;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceItemRow;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.R;
+import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
 import org.hisp.dhis.android.trackercapture.fragments.programoverview.ProgramOverviewFragment;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.ItemStatusDialogFragment;
 import org.hisp.dhis.android.trackercapture.ui.adapters.TrackedEntityInstanceAdapter;
@@ -57,7 +58,7 @@ public class LocalSearchResultFragment extends Fragment implements LoaderManager
     private final int LOADER_ID = 1112222111;
     private LocalSearchResultFragmentForm mForm;
     private ProgressBar progressBar;
-    private INavigationHandler navigationHandler;
+//    private INavigationHandler navigationHandler;
 
     public static LocalSearchResultFragment newInstance(String orgUnitId, String programId, HashMap<String,String> attributeValueMap) {
         LocalSearchResultFragment fragment = new LocalSearchResultFragment();
@@ -92,7 +93,7 @@ public class LocalSearchResultFragment extends Fragment implements LoaderManager
         int id = item.getItemId();
 
         if (id == android.R.id.home) {
-            getFragmentManager().popBackStack();
+            getActivity().finish();
             return true;
         }
 
@@ -136,10 +137,8 @@ public class LocalSearchResultFragment extends Fragment implements LoaderManager
 
 
         if(item.getTitle().toString().equals(getResources().getString(org.hisp.dhis.android.sdk.R.string.go_to_programoverview_fragment))) {
-            navigationHandler.switchFragment(
-                    ProgramOverviewFragment.newInstance(
-                            orgUnitId, programId, itemRow.getTrackedEntityInstance().getLocalId()),
-                    this.getClass().getSimpleName(), false);
+            HolderActivity.navigateToProgramOverviewFragment(getActivity(),
+                            orgUnitId, programId, itemRow.getTrackedEntityInstance().getLocalId());
         } else if(item.getTitle().toString().equals(getResources().getString(org.hisp.dhis.android.sdk.R.string.delete))) {
             // if not sent to server, present dialog to user
             if( !(itemRow.getStatus().equals(OnRowClick.ITEM_STATUS.SENT))) {
@@ -239,11 +238,10 @@ public class LocalSearchResultFragment extends Fragment implements LoaderManager
     public void onItemClick(OnTrackerItemClick eventClick) {
         if (eventClick.isOnDescriptionClick()) {
 
-            ProgramOverviewFragment fragment = ProgramOverviewFragment.
-                    newInstance(orgUnitId, programId,
+            HolderActivity.navigateToProgramOverviewFragment(getActivity(),orgUnitId, programId,
                             eventClick.getItem().getLocalId());
 
-            navigationHandler.switchFragment(fragment, ProgramOverviewFragment.CLASS_TAG, true);
+//            navigationHandler.switchFragment(fragment, ProgramOverviewFragment.CLASS_TAG, true);
         } else {
             showStatusDialog(eventClick.getItem());
         }
@@ -272,12 +270,12 @@ public class LocalSearchResultFragment extends Fragment implements LoaderManager
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
-        if (activity instanceof INavigationHandler) {
-            navigationHandler = (INavigationHandler) activity;
-        } else {
-            throw new IllegalArgumentException("Activity must " +
-                    "implement INavigationHandler interface");
-        }
+//        if (activity instanceof INavigationHandler) {
+//            navigationHandler = (INavigationHandler) activity;
+//        } else {
+//            throw new IllegalArgumentException("Activity must " +
+//                    "implement INavigationHandler interface");
+//        }
     }
 
     @Override
@@ -285,7 +283,7 @@ public class LocalSearchResultFragment extends Fragment implements LoaderManager
         super.onDetach();
         // we need to nullify reference
         // to parent activity in order not to leak it
-        navigationHandler = null;
+//        navigationHandler = null;
     }
 
 

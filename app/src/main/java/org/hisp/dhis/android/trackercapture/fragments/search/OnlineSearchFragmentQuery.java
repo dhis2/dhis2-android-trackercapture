@@ -56,6 +56,10 @@ public class OnlineSearchFragmentQuery implements Query<OnlineSearchFragmentForm
             value.setTrackedEntityAttributeId(trackedEntityAttribute.getUid());
             values.add(value);
 
+            if(ptea.getMandatory()) {
+                ptea.setMandatory(!ptea.getMandatory()); // HACK to skip mandatory fields in search form
+            }
+
             Row row = createDataEntryView(ptea, trackedEntityAttribute, value);
             dataEntryRows.add(row);
         }

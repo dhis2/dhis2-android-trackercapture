@@ -32,6 +32,8 @@ package org.hisp.dhis.android.trackercapture.fragments.upcomingevents;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
@@ -55,6 +57,7 @@ import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.sdk.utils.api.ProgramType;
 import org.hisp.dhis.android.sdk.utils.support.DateUtils;
 import org.hisp.dhis.android.trackercapture.R;
+import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
 import org.hisp.dhis.android.trackercapture.fragments.programoverview.ProgramOverviewFragment;
 import org.hisp.dhis.android.trackercapture.ui.adapters.UpcomingEventAdapter;
 import org.joda.time.LocalDate;
@@ -86,6 +89,18 @@ public class UpcomingEventsFragment extends SelectProgramFragment implements Ada
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == android.R.id.home) {
+            getActivity().finish();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public boolean onContextItemSelected(MenuItem item) {
         return false;
     }
@@ -95,6 +110,12 @@ public class UpcomingEventsFragment extends SelectProgramFragment implements Ada
     }
 
     protected View getListViewHeader(Bundle savedInstanceState) {
+        if(getActivity() instanceof AppCompatActivity) {
+            getActionBar().setDisplayShowTitleEnabled(true);
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+            getActionBar().setHomeButtonEnabled(true);
+        }
+
         View header = getLayoutInflater(savedInstanceState).inflate(
                 R.layout.fragment_upcomingevents_header, mListView, false
         );
@@ -148,12 +169,11 @@ public class UpcomingEventsFragment extends SelectProgramFragment implements Ada
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Event event = TrackerController.getEvent(id);
-        ProgramOverviewFragment fragment = ProgramOverviewFragment.
-                newInstance(mState.getOrgUnitId(), mState.getProgramId(),
-                        TrackerController.getEnrollment
-                                (event.getLocalEnrollmentId()).getLocalTrackedEntityInstanceId());
 
-        mNavigationHandler.switchFragment(fragment, ProgramOverviewFragment.CLASS_TAG, true);
+
+        HolderActivity.navigateToProgramOverviewFragment(getActivity(),mState.getOrgUnitId(), mState.getProgramId(),
+                TrackerController.getEnrollment
+                        (event.getLocalEnrollmentId()).getLocalTrackedEntityInstanceId());
     }
 
     @Override
@@ -178,6 +198,15 @@ public class UpcomingEventsFragment extends SelectProgramFragment implements Ada
                 break;
             case 1:
                 mQueryButton.show();
+        }
+    }
+
+    private ActionBar getActionBar() {
+        if (getActivity() != null &&
+                getActivity() instanceof AppCompatActivity) {
+            return ((AppCompatActivity) getActivity()).getSupportActionBar();
+        } else {
+            throw new IllegalArgumentException("Fragment should be attached to ActionBarActivity");
         }
     }
 }

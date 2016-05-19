@@ -100,6 +100,7 @@ import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.sdk.utils.api.ProgramType;
 import org.hisp.dhis.android.sdk.utils.services.ProgramRuleService;
 import org.hisp.dhis.android.trackercapture.R;
+import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
 import org.hisp.dhis.android.trackercapture.fragments.enrollment.EnrollmentDataEntryFragment;
 import org.hisp.dhis.android.trackercapture.fragments.enrollmentdate.EnrollmentDateFragment;
 import org.hisp.dhis.android.trackercapture.fragments.programoverview.registerrelationshipdialogfragment.RegisterRelationshipDialogFragment;
@@ -177,8 +178,6 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     private ProgramOverviewFragmentState mState;
     private ProgramOverviewFragmentForm mForm;
 
-    private INavigationHandler mNavigationHandler;
-
     public ProgramOverviewFragment() {
         setProgramRuleFragmentHelper(new ProgramOverviewRuleHelper(this));
     }
@@ -209,26 +208,10 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
-        if (activity instanceof INavigationHandler) {
-            mNavigationHandler = (INavigationHandler) activity;
-        } else {
-            throw new IllegalArgumentException("Activity must implement INavigationHandler interface");
-        }
     }
 
     @Override
     public void onDetach() {
-
-        // we need to nullify reference
-        // to parent activity in order not to leak it
-        if (getActivity() != null &&
-                getActivity() instanceof INavigationHandler) {
-            ((INavigationHandler) getActivity()).setBackPressedListener(null);
-        }
-        // we need to nullify reference
-        // to parent activity in order not to leak it
-        mNavigationHandler = null;
-
         super.onDetach();
     }
 
@@ -360,18 +343,14 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.menu_main, menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            mNavigationHandler.switchFragment(
-                    new SettingsFragment(), SettingsFragment.TAG, true);
-        }
-        else if (id == android.R.id.home) {
-            getFragmentManager().popBackStack();
+
+        if (id == android.R.id.home) {
+            getActivity().finish();
             return true;
         }
 
@@ -700,7 +679,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                                 ProgramOverviewFragment fragment = ProgramOverviewFragment.
                                         newInstance(getArguments().getString(ORG_UNIT_ID),
                                                 getArguments().getString(PROGRAM_ID), relative.getLocalId());
-                                mNavigationHandler.switchFragment(fragment, CLASS_TAG, true);
+//                                mNavigationHandler.switchFragment(fragment, CLASS_TAG, true);
                             }
                         }
                     });
@@ -845,25 +824,21 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         if(incidentDate != null) {
             incidentDateString = incidentDate.toString();
         }
-        EnrollmentDataEntryFragment enrollmentDataEntryFragment;
         if(trackedEntityInstance == null) {
-            enrollmentDataEntryFragment = EnrollmentDataEntryFragment.newInstance(mState.getOrgUnitId(), mState.getProgramId(), enrollmentDateString, incidentDateString);
+            HolderActivity.navigateToEnrollmentDataEntryFragment(getActivity(), mState.getOrgUnitId(), mState.getProgramId(), enrollmentDateString, incidentDateString);
         } else {
-            enrollmentDataEntryFragment = EnrollmentDataEntryFragment.newInstance(mState.getOrgUnitId(), mState.getProgramId(), trackedEntityInstance.getLocalId(), enrollmentDateString, incidentDateString);
+            HolderActivity.navigateToEnrollmentDataEntryFragment(getActivity(), mState.getOrgUnitId(), mState.getProgramId(),trackedEntityInstance.getLocalId(), enrollmentDateString, incidentDateString);
         }
-        mNavigationHandler.switchFragment(enrollmentDataEntryFragment, EnrollmentDataEntryFragment.class.getName(), true);
     }
 
     public void showDataEntryFragment(Event event, String programStage) {
         Bundle args = getArguments();
-        EventDataEntryFragment fragment;
         if (event == null) {
-            fragment = EventDataEntryFragment.newInstanceWithEnrollment(args.getString(ORG_UNIT_ID), args.getString(PROGRAM_ID), programStage, mForm.getEnrollment().getLocalId());
+            HolderActivity.navigateToDataEntryFragment(getActivity(),args.getString(ORG_UNIT_ID), args.getString(PROGRAM_ID), programStage, mForm.getEnrollment().getLocalId());
         } else {
-            fragment = EventDataEntryFragment.newInstanceWithEnrollment(args.getString(ORG_UNIT_ID), args.getString(PROGRAM_ID), programStage,
+            HolderActivity.navigateToDataEntryFragment(getActivity(),args.getString(ORG_UNIT_ID), args.getString(PROGRAM_ID), programStage,
                     event.getLocalEnrollmentId(), event.getLocalId());
         }
-        mNavigationHandler.switchFragment(fragment, ProgramOverviewFragment.CLASS_TAG, true);
     }
 
     public void completeEnrollment() {
@@ -1019,14 +994,12 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     }
 
     private void editEnrollmentDates() {
-        EnrollmentDateFragment fragment = EnrollmentDateFragment.newInstance(mForm.getEnrollment().getLocalId());
-        mNavigationHandler.switchFragment(fragment, EnrollmentDateFragment.TAG, true);
+        HolderActivity.navigateToEnrollmentDateFragment(getActivity(),mForm.getEnrollment().getLocalId());
     }
 
     private void editTrackedEntityInstanceProfile() {
-        TrackedEntityInstanceProfileFragment fragment = TrackedEntityInstanceProfileFragment.newInstance(getArguments().
+        HolderActivity.navigateToTrackedEntityInstanceProfileFragment(getActivity(),getArguments().
                 getLong(TRACKEDENTITYINSTANCE_ID), getArguments().getString(PROGRAM_ID));
-        mNavigationHandler.switchFragment(fragment, TrackedEntityInstanceProfileFragment.TAG, true);
     }
 
     private void showAddRelationshipFragment() {

@@ -37,6 +37,7 @@
     <string name="registered_events">Registered events</string>
     <string name="register_relationship">Register relationship</string>
     <string name="new_event">New event</string>
+    <string name="enroll">Enroll</string>
 
     <string name="is">is</string>
     <string name="please_enter">Please enter</string>

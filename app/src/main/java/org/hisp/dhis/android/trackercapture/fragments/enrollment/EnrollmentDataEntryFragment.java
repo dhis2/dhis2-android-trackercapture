@@ -33,7 +33,8 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
-import android.util.Log;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 
@@ -58,6 +59,7 @@ import org.hisp.dhis.android.sdk.ui.fragments.dataentry.RefreshListViewEvent;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.RowValueChangedEvent;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.SaveThread;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
+import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
 import org.hisp.dhis.android.trackercapture.fragments.programoverview.ProgramOverviewFragment;
 
 import java.util.ArrayList;
@@ -70,11 +72,11 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDataEntryFragmentForm> implements OnBackPressedListener {
     public static final String TAG = EnrollmentDataEntryFragment.class.getSimpleName();
     private static final String EMPTY_FIELD = "";
-    private static final String ORG_UNIT_ID = "extra:orgUnitId";
-    private static final String PROGRAM_ID = "extra:ProgramId";
-    private static final String ENROLLMENT_DATE = "extra:enrollmentDate";
-    private static final String INCIDENT_DATE = "extra:incidentDate";
-    private static final String TRACKEDENTITYINSTANCE_ID = "extra:TrackedEntityInstanceId";
+    public static final String ORG_UNIT_ID = "extra:orgUnitId";
+    public static final String PROGRAM_ID = "extra:ProgramId";
+    public static final String ENROLLMENT_DATE = "extra:enrollmentDate";
+    public static final String INCIDENT_DATE = "extra:incidentDate";
+    public static final String TRACKEDENTITYINSTANCE_ID = "extra:TrackedEntityInstanceId";
     private EnrollmentDataEntryFragmentForm form;
     private SaveThread saveThread;
     private Map<String, List<ProgramRule>> programRulesForTrackedEntityAttributes;
@@ -131,7 +133,7 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        navigationHandler.setBackPressedListener(this);
+
     }
 
     @Override
@@ -195,7 +197,9 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             }
 
             if (data.getProgram() != null) {
-                getActionBarToolbar().setTitle(form.getProgram().getName());
+                getActionBar().setTitle(form.getProgram().getName());
+//                getSupportActionBar().setTitle(form.getProgram().getName());
+//                getParentToolbar().setTitle(form.getProgram().getName());
             }
 
             if(data.getDataEntryRows() != null && !data.getDataEntryRows().isEmpty())
@@ -321,14 +325,15 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     }
 
     private void showProgramOverviewFragment() {
-        boolean fragmentPopped = getFragmentManager().popBackStackImmediate(ProgramOverviewFragment.CLASS_TAG, 0);
-        if(!fragmentPopped) {
-            navigationHandler.setBackPressedListener(null);
-            navigationHandler.switchFragment(
-                    ProgramOverviewFragment.newInstance(
-                            form.getOrganisationUnit().getId(), form.getProgram().getUid(), form.getTrackedEntityInstance().getLocalId()),
-                    ProgramOverviewFragment.CLASS_TAG, false);
-        }
+        HolderActivity.navigateToProgramOverviewFragment(getActivity(), form.getOrganisationUnit().getId(), form.getProgram().getUid(), form.getTrackedEntityInstance().getLocalId());
+//        boolean fragmentPopped = getFragmentManager().popBackStackImmediate(ProgramOverviewFragment.CLASS_TAG, 0);
+//        if(!fragmentPopped) {
+//            navigationHandler.setBackPressedListener(null);
+//            navigationHandler.switchFragment(
+//                    ProgramOverviewFragment.newInstance(
+//                            form.getOrganisationUnit().getId(), form.getProgram().getUid(), form.getTrackedEntityInstance().getLocalId()),
+//                    ProgramOverviewFragment.CLASS_TAG, false);
+//        }
     }
 
     private boolean validate() {
@@ -414,8 +419,9 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
                     public void onClick(DialogInterface dialog, int which) {
                         //discard
                         discardChanges();
-                        navigationHandler.setBackPressedListener(null);
-                        navigationHandler.onBackPressed();
+                        getActivity().finish();
+//                        navigationHandler.setBackPressedListener(null);
+//                        navigationHandler.onBackPressed();
                     }
                 }, new DialogInterface.OnClickListener() {
                     @Override
@@ -509,4 +515,6 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             return true;
         }
     }
+
+
 }

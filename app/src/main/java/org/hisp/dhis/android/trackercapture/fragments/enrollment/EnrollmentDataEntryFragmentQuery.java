@@ -40,6 +40,7 @@ import org.hisp.dhis.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeGeneratedValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.AutoCompleteRow;
@@ -121,6 +122,19 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
             if (value != null) {
                 trackedEntityAttributeValues.add(value);
             }
+            else {
+                TrackedEntityAttribute trackedEntityAttribute = MetaDataController.getTrackedEntityAttribute(ptea.getTrackedEntityAttributeId());
+                if(trackedEntityAttribute.isGenerated()) {
+                    TrackedEntityAttributeGeneratedValue trackedEntityAttributeGeneratedValue =
+                            MetaDataController.getTrackedEntityAttributeGeneratedValue(ptea.getTrackedEntityAttribute());
+
+                    TrackedEntityAttributeValue trackedEntityAttributeValue = new TrackedEntityAttributeValue();
+                    trackedEntityAttributeValue.setTrackedEntityAttributeId(ptea.getTrackedEntityAttribute().getUid());
+                    trackedEntityAttributeValue.setTrackedEntityInstanceId(currentTrackedEntityInstance.getUid());
+                    trackedEntityAttributeValue.setValue(trackedEntityAttributeGeneratedValue.getValue());
+                    trackedEntityAttributeValues.add(trackedEntityAttributeValue);
+                }
+            }
         }
         currentEnrollment.setAttributes(trackedEntityAttributeValues);
         for (int i = 0; i < programTrackedEntityAttributes.size(); i++) {
@@ -184,6 +198,12 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
         } else {
             row = new EditTextRow(trackedEntityAttributeName, programTrackedEntityAttribute.getMandatory(), null, dataValue, DataEntryRowTypes.LONG_TEXT);
         }
+
+        if(trackedEntityAttribute.isGenerated()) { // if row is generated, we won't allow user to edit data
+            row.setEditable(false);
+            row.setShouldNeverBeEdited(true); // should never be editable
+        }
+
         return row;
     }
 }

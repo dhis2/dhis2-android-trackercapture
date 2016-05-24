@@ -96,8 +96,8 @@ public class ProgramStageEventRow implements ProgramStageRow {
             } else if (!isSynchronized()) {
                 holder.statusButton.setEnabled(true);
                 holder.statusButton.setVisibility(View.VISIBLE);
-                holder.statusButton.setBackgroundResource(org.hisp.dhis.android.sdk.R.drawable.ic_offline);
-                holder.statusButton.setTag(org.hisp.dhis.android.sdk.R.drawable.ic_offline);
+                holder.statusButton.setBackgroundResource(org.hisp.dhis.android.sdk.R.drawable.ic_legacy_offline);
+                holder.statusButton.setTag(org.hisp.dhis.android.sdk.R.drawable.ic_legacy_offline);
                 holder.listener.setStatusButton(statusButton);
                 holder.listener.setStatus(OnRowClick.ITEM_STATUS.OFFLINE);
                 holder.statusButton.setOnClickListener(holder.listener);

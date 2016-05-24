@@ -148,6 +148,13 @@ public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedE
         } else {
             row = new EditTextRow(trackedEntityAttributeName, false, null, dataValue, DataEntryRowTypes.LONG_TEXT);
         }
+
+        row.setEditable(false); // default in profile fragment is that user shouldn't be able to edit
+
+        // If row is generated then it should never be editable.
+        if(trackedEntityAttribute.isGenerated()) {
+            row.setShouldNeverBeEdited(true);
+        }
         return row;
     }
 }

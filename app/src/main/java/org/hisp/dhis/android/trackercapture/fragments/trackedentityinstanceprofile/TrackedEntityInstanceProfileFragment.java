@@ -227,9 +227,7 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
 
             mForm = data;
 
-            if(mForm.getDataEntryRows() != null) {
-                setEditableDataEntryRows(false);
-            }
+            listViewAdapter.swapData(mForm.getDataEntryRows());
         }
     }
 
@@ -245,11 +243,16 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
         listViewAdapter.swapData(null);
         if(editable) {
             for(Row row : rows) {
-                row.setEditable(true);
+                if(!row.isShouldNeverBeEdited()) {
+                    row.setEditable(true);
+                }
+
             }
         } else {
             for(Row row : rows) {
-                row.setEditable(false);
+                if(!row.isShouldNeverBeEdited()) {
+                    row.setEditable(false);
+                }
             }
         }
         listView.setAdapter(null);

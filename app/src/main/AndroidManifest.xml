@@ -68,7 +68,7 @@
             android:windowSoftInputMode="adjustPan" >
         </activity>
         <activity android:name=".activities.HolderActivity"
-            android:windowSoftInputMode="adjustPan">
+            android:windowSoftInputMode="adjustPan|stateHidden">
 
         </activity>
 

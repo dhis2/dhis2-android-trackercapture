@@ -6,10 +6,4 @@
         android:icon="@drawable/ic_download"
         app:showAsAction="ifRoom|collapseActionView"
         />
-
-    <item android:id="@+id/action_close"
-        android:title="@string/cancel"
-        android:icon="@drawable/ic_cancel"
-        app:showAsAction="ifRoom|collapseActionView"
-        />
 </menu>

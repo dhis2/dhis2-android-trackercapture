@@ -125,9 +125,6 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
             initiateLoading();
             getActivity().finish();
         }
-        else if(id == R.id.action_close) {
-            getActivity().finish();
-        }
         else if (id == android.R.id.home) {
             getActivity().finish();
         }
@@ -138,8 +135,6 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
     @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-       // getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-
         return inflater.inflate(org.hisp.dhis.android.sdk.R.layout.dialog_fragment_teiqueryresult, container, false);
     }
 

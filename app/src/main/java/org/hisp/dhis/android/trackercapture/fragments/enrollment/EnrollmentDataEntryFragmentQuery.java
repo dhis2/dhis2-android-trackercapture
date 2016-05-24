@@ -128,11 +128,16 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
                     TrackedEntityAttributeGeneratedValue trackedEntityAttributeGeneratedValue =
                             MetaDataController.getTrackedEntityAttributeGeneratedValue(ptea.getTrackedEntityAttribute());
 
-                    TrackedEntityAttributeValue trackedEntityAttributeValue = new TrackedEntityAttributeValue();
-                    trackedEntityAttributeValue.setTrackedEntityAttributeId(ptea.getTrackedEntityAttribute().getUid());
-                    trackedEntityAttributeValue.setTrackedEntityInstanceId(currentTrackedEntityInstance.getUid());
-                    trackedEntityAttributeValue.setValue(trackedEntityAttributeGeneratedValue.getValue());
-                    trackedEntityAttributeValues.add(trackedEntityAttributeValue);
+                    if(trackedEntityAttributeGeneratedValue != null) {
+                        TrackedEntityAttributeValue trackedEntityAttributeValue = new TrackedEntityAttributeValue();
+                        trackedEntityAttributeValue.setTrackedEntityAttributeId(ptea.getTrackedEntityAttribute().getUid());
+                        trackedEntityAttributeValue.setTrackedEntityInstanceId(currentTrackedEntityInstance.getUid());
+                        trackedEntityAttributeValue.setValue(trackedEntityAttributeGeneratedValue.getValue());
+                        trackedEntityAttributeValues.add(trackedEntityAttributeValue);
+                    }
+                    else {
+                        mForm.setOutOfTrackedEntityAttributeGeneratedValues(true);
+                    }
                 }
             }
         }

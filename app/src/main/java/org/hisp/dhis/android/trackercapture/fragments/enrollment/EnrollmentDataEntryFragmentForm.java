@@ -51,6 +51,7 @@ class EnrollmentDataEntryFragmentForm
     private Map<String, String> dataElementNames;
     private List<IndicatorRow> indicatorRows;
     private List<Row> dataEntryRows;
+    private boolean outOfTrackedEntityAttributeGeneratedValues;
 
     public List<Row> getDataEntryRows() {
         return dataEntryRows;
@@ -107,4 +108,14 @@ class EnrollmentDataEntryFragmentForm
     public void setTrackedEntityAttributeValueMap(Map<String, TrackedEntityAttributeValue> trackedEntityAttributeValueMap) {
         this.trackedEntityAttributeValueMap = trackedEntityAttributeValueMap;
     }
+
+    public void setOutOfTrackedEntityAttributeGeneratedValues(boolean outOfTrackedEntityAttributeGeneratedValues) {
+        this.outOfTrackedEntityAttributeGeneratedValues = outOfTrackedEntityAttributeGeneratedValues;
+    }
+
+    public boolean isOutOfTrackedEntityAttributeGeneratedValues() {
+        return outOfTrackedEntityAttributeGeneratedValues;
+    }
+
+
 }

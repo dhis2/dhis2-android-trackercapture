@@ -29,12 +29,11 @@
 
 package org.hisp.dhis.android.trackercapture.fragments.enrollment;
 
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 
@@ -43,15 +42,18 @@ import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.sdk.R;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeGeneratedValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.ui.adapters.SectionAdapter;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnDetailedInfoButtonClick;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.HideLoadingDialogEvent;
@@ -60,7 +62,6 @@ import org.hisp.dhis.android.sdk.ui.fragments.dataentry.RowValueChangedEvent;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.SaveThread;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
-import org.hisp.dhis.android.trackercapture.fragments.programoverview.ProgramOverviewFragment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -131,12 +132,6 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-    }
-
-    @Override
     public void onDestroy() {
         saveThread.kill();
         super.onDestroy();
@@ -150,6 +145,12 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        if (getActivity() instanceof AppCompatActivity) {
+            getActionBar().setDisplayShowTitleEnabled(true);
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+            getActionBar().setHomeButtonEnabled(true);
+        }
     }
 
     @Override
@@ -202,10 +203,21 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
 //                getParentToolbar().setTitle(form.getProgram().getName());
             }
 
-            if(data.getDataEntryRows() != null && !data.getDataEntryRows().isEmpty())
-            {
+            if(form.isOutOfTrackedEntityAttributeGeneratedValues()) {
+                for(Row row : form.getDataEntryRows()) {
+                    row.setEditable(false);
+                }
+                UiUtils.showErrorDialog(getActivity(), getString(R.string.error_message), getString(R.string.out_of_generated_ids), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        getActivity().finish();
+                    }
+                });
+            }
+            if(data.getDataEntryRows() != null && !data.getDataEntryRows().isEmpty()) {
                 listViewAdapter.swapData(data.getDataEntryRows());
             }
+
             initiateEvaluateProgramRules();
         }
     }
@@ -309,6 +321,7 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             for(Event event : form.getEnrollment().getEvents()) {
                 event.setFromServer(true);
             }
+
             form.getEnrollment().setLocalTrackedEntityInstanceId(form.getTrackedEntityInstance().getLocalId());
             form.getEnrollment().setFromServer(true); //setting from server true to avoid sending to server before we finish editing
             form.getEnrollment().save();
@@ -326,14 +339,6 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
 
     private void showProgramOverviewFragment() {
         HolderActivity.navigateToProgramOverviewFragment(getActivity(), form.getOrganisationUnit().getId(), form.getProgram().getUid(), form.getTrackedEntityInstance().getLocalId());
-//        boolean fragmentPopped = getFragmentManager().popBackStackImmediate(ProgramOverviewFragment.CLASS_TAG, 0);
-//        if(!fragmentPopped) {
-//            navigationHandler.setBackPressedListener(null);
-//            navigationHandler.switchFragment(
-//                    ProgramOverviewFragment.newInstance(
-//                            form.getOrganisationUnit().getId(), form.getProgram().getUid(), form.getTrackedEntityInstance().getLocalId()),
-//                    ProgramOverviewFragment.CLASS_TAG, false);
-//        }
     }
 
     private boolean validate() {
@@ -420,8 +425,6 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
                         //discard
                         discardChanges();
                         getActivity().finish();
-//                        navigationHandler.setBackPressedListener(null);
-//                        navigationHandler.onBackPressed();
                     }
                 }, new DialogInterface.OnClickListener() {
                     @Override
@@ -443,6 +446,17 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
         for(Event event : form.getEnrollment().getEvents()) {
             event.setFromServer(false);
             event.save();
+        }
+
+        for(ProgramTrackedEntityAttribute ptea : form.getProgram().getProgramTrackedEntityAttributes()) {
+            if(ptea.getTrackedEntityAttribute().isGenerated()) {
+                TrackedEntityAttributeValue attributeValue = TrackerController
+                        .getTrackedEntityAttributeValue(ptea.getTrackedEntityAttributeId(), form.getTrackedEntityInstance().getUid());
+
+                TrackedEntityAttributeGeneratedValue trackedEntityAttributeGeneratedValue = MetaDataController.getTrackedEntityAttributeGeneratedValue(attributeValue.getValue());
+
+                trackedEntityAttributeGeneratedValue.delete();
+            }
         }
     }
 
@@ -516,5 +530,22 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
         }
     }
 
+    @Override
+    public boolean onBackPressed() {
+        if(checkIfDataHasBeenEdited()) {
+            showConfirmDiscardDialog();
+            return false;
+        } else {
+            return super.onBackPressed();
+        }
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        if (menuItem.getItemId() == android.R.id.home) {
+            showConfirmDiscardDialog();
+            return true;
+        }
+        return super.onOptionsItemSelected(menuItem);
+    }
 }

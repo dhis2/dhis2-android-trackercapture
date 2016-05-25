@@ -209,4 +209,9 @@ public class UpcomingEventsFragment extends SelectProgramFragment implements Ada
             throw new IllegalArgumentException("Fragment should be attached to ActionBarActivity");
         }
     }
+
+    @Override
+    public void stateChanged() {
+        // stub
+    }
 }

@@ -268,6 +268,8 @@ public class HolderActivity extends AbsHomeActivity {
         intent.putExtra(OnlineSearchResultFragment.EXTRA_TRACKEDENTITYINSTANCESSELECTED, parameterSerializible1);
         intent.putExtra(OnlineSearchResultFragment.EXTRA_TRACKEDENTITYINSTANCESLIST, parameterSerializible2);
         intent.putExtra(ARG_TYPE, ARG_TYPE_ONLINESEARCHRESULTFRAGMENT);
+        intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NO_HISTORY); // we don't want to keep it to backstack
+
 //
 //        Bundle args = new Bundle();
 //        Parcel parcel1 = Parcel.obtain();

@@ -1,5 +1,6 @@
 package org.hisp.dhis.android.trackercapture.fragments.search;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
@@ -41,6 +42,7 @@ import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
+import org.hisp.dhis.android.sdk.ui.activities.SynchronisationHandler;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.AbsTextWatcher;
 import org.hisp.dhis.android.sdk.ui.dialogs.QueryTrackedEntityInstancesResultDialogAdapter;
 import org.hisp.dhis.android.sdk.ui.fragments.progressdialog.ProgressDialogFragment;
@@ -64,6 +66,9 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
     private ProgressDialogFragment progressDialogFragment;
     private Button mSelectAllButton;
     private ListView mListView;
+    private List<TrackedEntityInstance> downloadedTrackedEntityInstances;
+    private List<Enrollment> downloadedEnrollments;
+
 
     public static final String EXTRA_TRACKEDENTITYINSTANCESLIST = "extra:trackedEntityInstances";
     public static final String EXTRA_TRACKEDENTITYINSTANCESSELECTED = "extra:trackedEntityInstancesSelected";
@@ -122,8 +127,11 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_load_to_device) {
-            initiateLoading();
+            Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_START));
+            Activity activity = getActivity();
             getActivity().finish();
+            initiateLoading(activity);
+
         }
         else if (id == android.R.id.home) {
             getActivity().finish();
@@ -302,17 +310,47 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
         }
     }
 
-    public void initiateLoading() {
+    /**
+     * This method will initate the loading of tracked entity instances from server.
+     * When it is done it will either display ProgramOverviewFragment if only one TEI and one Enrollment
+     * is downloaded
+     */
+    public void initiateLoading(final Activity activity) {
         Log.d(TAG, "loading: " + getSelectedTrackedEntityInstances().size());
+        downloadedTrackedEntityInstances = new ArrayList<>();
+        downloadedEnrollments = new ArrayList<>();
 
         JobExecutor.enqueueJob(new NetworkJob<Object>(0,
                 ResourceType.TRACKEDENTITYINSTANCE) {
 
             @Override
             public Object execute() throws APIException {
-                Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_START));
-                TrackerController.getTrackedEntityInstancesDataFromServer(DhisController.getInstance().getDhisApi(), getSelectedTrackedEntityInstances(), true);
+
+//                SynchronisationHandler.getInstance().changeState(true);
+
+                downloadedTrackedEntityInstances.addAll(TrackerController.getTrackedEntityInstancesDataFromServer(DhisController.getInstance().getDhisApi(), getSelectedTrackedEntityInstances(), false));
+
+                for (TrackedEntityInstance tei : downloadedTrackedEntityInstances) {
+                    downloadedEnrollments.addAll(TrackerController.getEnrollmentDataFromServer(DhisController.getInstance().getDhisApi(), tei));
+                }
+
+
+                if (downloadedTrackedEntityInstances != null && downloadedTrackedEntityInstances.size() == 1) {
+                    if (downloadedEnrollments != null && downloadedEnrollments.size() == 1) {
+                        TrackedEntityInstance trackedEntityInstance = downloadedTrackedEntityInstances.get(0);
+                        Enrollment enrollment = downloadedEnrollments.get(0);
+
+                        HolderActivity.navigateToProgramOverviewFragment(activity,
+                                enrollment.getOrgUnit(),
+                                enrollment.getProgram().getUid(),
+                                trackedEntityInstance.getLocalId());
+                    }
+                }
+
+
+
                 Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_END));
+//                SynchronisationHandler.getInstance().changeState(false);
                 return new Object();
             }
         });

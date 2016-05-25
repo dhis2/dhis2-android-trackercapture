@@ -57,14 +57,11 @@ import org.hisp.dhis.client.sdk.ui.fragments.WrapperFragment;
 import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
 
-public class MainActivity extends AbsHomeActivity implements INavigationHandler {
+public class MainActivity extends AbsHomeActivity {
     public final static String TAG = MainActivity.class.getSimpleName();
-    private OnBackPressedListener mBackPressedListener;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//         setContentView(R.layout.activity_main);
 
         LoadingController.enableLoading(this, ResourceType.ASSIGNEDPROGRAMS);
         LoadingController.enableLoading(this, ResourceType.OPTIONSETS);
@@ -76,12 +73,8 @@ public class MainActivity extends AbsHomeActivity implements INavigationHandler 
         LoadingController.enableLoading(this, ResourceType.RELATIONSHIPTYPES);
         Dhis2Application.bus.register(this);
 
-
         PeriodicSynchronizerController.activatePeriodicSynchronizer(this);
         setUpNavigationView(savedInstanceState);
-
-
-
     }
 
     private void setUpNavigationView(Bundle savedInstanceState) {
@@ -154,35 +147,9 @@ public class MainActivity extends AbsHomeActivity implements INavigationHandler 
     }
 
     @Override
-    public void switchFragment(Fragment fragment, String tag, boolean addToBackStack) {
-        if (fragment != null) {
-            FragmentTransaction transaction =
-                    getSupportFragmentManager().beginTransaction();
-
-            transaction
-                    .setCustomAnimations(R.anim.open_enter, R.anim.open_exit)
-                    .replace(R.id.content_frame, fragment, tag);
-            transaction = transaction
-                    .addToBackStack(tag);
-            if (!addToBackStack) {
-                getSupportFragmentManager().popBackStack();
-            }
-            transaction.commitAllowingStateLoss();
-        }
-    }
-
-    @Override
-    public void setBackPressedListener(OnBackPressedListener backPressedListener) {
-        mBackPressedListener = backPressedListener;
-    }
-
-    @Override
     public void onDrawerOpened(View drawerView) {
         super.onDrawerOpened(drawerView);
         String lastSynced = DhisController.getInstance().getSyncDateWrapper().getLastSyncedString();
         setSynchronizedMessage(lastSynced);
-
     }
-
-
 }

@@ -62,6 +62,7 @@ import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
+import org.hisp.dhis.android.sdk.ui.activities.SynchronisationHandler;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnTrackedEntityInstanceColumnClick;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceItemRow;
 import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
@@ -449,4 +450,10 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
         ( ( TrackedEntityInstanceAdapter ) mAdapter ).getFilter().filter(""); //show all rows
         return false;
     }
+
+    @Override
+    public void stateChanged() {
+        super.stateChanged();
+    }
+
 }

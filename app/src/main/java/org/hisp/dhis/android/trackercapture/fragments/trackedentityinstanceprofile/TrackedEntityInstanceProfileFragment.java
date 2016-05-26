@@ -111,6 +111,13 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
         saveThread.init(this);
         setHasOptionsMenu(true);
         editableDataEntryRows = false;
+
+        getActionBar().setDisplayShowTitleEnabled(false);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
+
+        getActionBar().setTitle(getString(R.string.profile));
+
     }
 
     @Override

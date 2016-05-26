@@ -2,12 +2,10 @@ package org.hisp.dhis.android.trackercapture.fragments.search;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -18,12 +16,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -33,20 +29,17 @@ import org.hisp.dhis.android.sdk.controllers.DhisController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.events.LoadingMessageEvent;
 import org.hisp.dhis.android.sdk.events.UiEvent;
-import org.hisp.dhis.android.sdk.job.Job;
 import org.hisp.dhis.android.sdk.job.JobExecutor;
 import org.hisp.dhis.android.sdk.job.NetworkJob;
 import org.hisp.dhis.android.sdk.network.APIException;
-import org.hisp.dhis.android.sdk.network.ResponseHolder;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
-import org.hisp.dhis.android.sdk.ui.activities.SynchronisationHandler;
+import org.hisp.dhis.android.sdk.ui.activities.SynchronisationStateHandler;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.AbsTextWatcher;
 import org.hisp.dhis.android.sdk.ui.dialogs.QueryTrackedEntityInstancesResultDialogAdapter;
 import org.hisp.dhis.android.sdk.ui.fragments.progressdialog.ProgressDialogFragment;
-import org.hisp.dhis.android.sdk.ui.fragments.settings.SettingsFragment;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
@@ -54,7 +47,6 @@ import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class OnlineSearchResultFragment extends Fragment implements AdapterView.OnItemClickListener, View.OnClickListener {
     public static final String TAG = OnlineSearchResultFragment.class.getSimpleName();
@@ -87,23 +79,18 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
         args.putString(EXTRA_ORGUNIT, orgUnit);
         args.putBoolean(EXTRA_SELECTALL, false);
         dialogFragment.setArguments(args);
-        Dhis2Application.getEventBus().register(dialogFragment);
         return dialogFragment;
     }
 
     private List<TrackedEntityInstance> getTrackedEntityInstances() {
         ParameterSerializible parameterSerializible = (ParameterSerializible) getArguments().getSerializable(EXTRA_TRACKEDENTITYINSTANCESSELECTED);
         List<TrackedEntityInstance> trackedEntityInstances = parameterSerializible.getTrackedEntityInstances();
-//        ParameterParcelable parameterParcelable = getArguments().getParcelable(EXTRA_TRACKEDENTITYINSTANCESLIST);
-//        List<TrackedEntityInstance> trackedEntityInstances = parameterParcelable.getTrackedEntityInstances();
         return trackedEntityInstances;
     }
 
     private List<TrackedEntityInstance> getSelectedTrackedEntityInstances() {
         ParameterSerializible parameterSerializible = (ParameterSerializible) getArguments().getSerializable(EXTRA_TRACKEDENTITYINSTANCESLIST);
         List<TrackedEntityInstance> trackedEntityInstances = parameterSerializible.getTrackedEntityInstances();
-//        ParameterParcelable parameterParcelable = getArguments().getParcelable(EXTRA_TRACKEDENTITYINSTANCESSELECTED);
-//        List<TrackedEntityInstance> trackedEntityInstances = parameterParcelable.getTrackedEntityInstances();
         return trackedEntityInstances;
     }
 
@@ -127,10 +114,10 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_load_to_device) {
-            Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_START));
             Activity activity = getActivity();
             getActivity().finish();
             initiateLoading(activity);
+
 
         }
         else if (id == android.R.id.home) {
@@ -181,9 +168,6 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
         if(selectall) {
             mSelectAllButton.setText(getString(org.hisp.dhis.android.sdk.R.string.deselect_all));
         }
-
-
-
 
         getAdapter().swapData(getTrackedEntityInstances());
     }
@@ -237,18 +221,8 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
         return mAdapter;
     }
 
-    public void show(FragmentManager fragmentManager) {
-        if(fragmentManager != null) {
-            //show(fragmentManager, TAG);
-        }
-    }
-
     @Override
     public void onClick(View v) {
-        //if(v.getId() == org.hisp.dhis.android.sdk.R.id.load_dialog_button) {
-           // initiateLoading();
-          //  getFragmentManager().popBackStack();
-        //} else
         if(v.getId() == org.hisp.dhis.android.sdk.R.id.teiqueryresult_selectall) {
             toggleSelectAll();
         }
@@ -256,15 +230,15 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
 
     public void toggleSelectAll() {
         Bundle arguments = getArguments();
-        boolean selectall = arguments.getBoolean(EXTRA_SELECTALL);
-        if(selectall) {
+        boolean selectAll = arguments.getBoolean(EXTRA_SELECTALL);
+        if(selectAll) {
             mSelectAllButton.setText(getText(org.hisp.dhis.android.sdk.R.string.select_all));
             deselectAll();
         } else {
             mSelectAllButton.setText(getText(org.hisp.dhis.android.sdk.R.string.deselect_all));
             selectAll();
         }
-        arguments.putBoolean(EXTRA_SELECTALL, !selectall);
+        arguments.putBoolean(EXTRA_SELECTALL, !selectAll);
     }
 
     public void selectAll() {
@@ -319,15 +293,18 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
         Log.d(TAG, "loading: " + getSelectedTrackedEntityInstances().size());
         downloadedTrackedEntityInstances = new ArrayList<>();
         downloadedEnrollments = new ArrayList<>();
-
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_START));
+            }
+        });
         JobExecutor.enqueueJob(new NetworkJob<Object>(0,
                 ResourceType.TRACKEDENTITYINSTANCE) {
 
             @Override
             public Object execute() throws APIException {
-
-//                SynchronisationHandler.getInstance().changeState(true);
-
+                SynchronisationStateHandler.getInstance().changeState(true);
                 downloadedTrackedEntityInstances.addAll(TrackerController.getTrackedEntityInstancesDataFromServer(DhisController.getInstance().getDhisApi(), getSelectedTrackedEntityInstances(), false));
 
                 for (TrackedEntityInstance tei : downloadedTrackedEntityInstances) {
@@ -347,10 +324,8 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
                     }
                 }
 
-
-
                 Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_END));
-//                SynchronisationHandler.getInstance().changeState(false);
+                SynchronisationStateHandler.getInstance().changeState(false);
                 return new Object();
             }
         });
@@ -421,5 +396,17 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
         } else {
             throw new IllegalArgumentException("Fragment should be attached to ActionBarActivity");
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Dhis2Application.getEventBus().register(this);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Dhis2Application.getEventBus().unregister(this);
     }
 }

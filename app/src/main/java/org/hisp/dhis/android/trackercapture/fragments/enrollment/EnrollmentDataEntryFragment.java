@@ -199,15 +199,13 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
 
             if (data.getProgram() != null) {
                 getActionBar().setTitle(form.getProgram().getName());
-//                getSupportActionBar().setTitle(form.getProgram().getName());
-//                getParentToolbar().setTitle(form.getProgram().getName());
             }
 
             if(form.isOutOfTrackedEntityAttributeGeneratedValues()) {
                 for(Row row : form.getDataEntryRows()) {
                     row.setEditable(false);
                 }
-                UiUtils.showErrorDialog(getActivity(), getString(R.string.error_message), getString(R.string.out_of_generated_ids), new DialogInterface.OnClickListener() {
+                UiUtils.showErrorDialog(getActivity(), getString(R.string.error_message), getString(org.hisp.dhis.android.trackercapture.R.string.out_of_generated_ids), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         getActivity().finish();
@@ -318,8 +316,10 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
                 form.getTrackedEntityInstance().setFromServer(true);
                 form.getTrackedEntityInstance().save();
             }
-            for(Event event : form.getEnrollment().getEvents()) {
-                event.setFromServer(true);
+            if(form.getEnrollment().getEvents() != null) {
+                for (Event event : form.getEnrollment().getEvents()) {
+                    event.setFromServer(true);
+                }
             }
 
             form.getEnrollment().setLocalTrackedEntityInstanceId(form.getTrackedEntityInstance().getLocalId());
@@ -334,6 +334,7 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
         if(validate()) {
             confirmSave();
             showProgramOverviewFragment();
+            getActivity().finish();
         }
     }
 
@@ -443,9 +444,11 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
         form.getEnrollment().setFromServer(false);
         form.getTrackedEntityInstance().save();
         form.getEnrollment().save();
-        for(Event event : form.getEnrollment().getEvents()) {
-            event.setFromServer(false);
-            event.save();
+        if(form.getEnrollment().getEvents() != null) {
+            for(Event event : form.getEnrollment().getEvents()) {
+                event.setFromServer(false);
+                event.save();
+            }
         }
 
         for(ProgramTrackedEntityAttribute ptea : form.getProgram().getProgramTrackedEntityAttributes()) {

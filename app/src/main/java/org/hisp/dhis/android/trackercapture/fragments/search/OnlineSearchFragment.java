@@ -1,13 +1,8 @@
 package org.hisp.dhis.android.trackercapture.fragments.search;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -21,9 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -40,14 +33,12 @@ import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
-import org.hisp.dhis.android.sdk.ui.activities.INavigationHandler;
 import org.hisp.dhis.android.sdk.ui.adapters.DataValueAdapter;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.AbsTextWatcher;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.CoordinatesRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.IndicatorRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.StatusRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnDetailedInfoButtonClick;
-import org.hisp.dhis.android.sdk.ui.dialogs.QueryTrackedEntityInstancesResultDialogFragment;
 import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.R;
@@ -67,8 +58,6 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
     private DataValueAdapter mAdapter;
     private ListView mListView;
     private int mDialogId;
-    private FragmentActivity activity = null;
-//    protected INavigationHandler mNavigationHandler;
 
     public static final String EXTRA_PROGRAM = "extra:trackedEntityAttributes";
     public static final String EXTRA_ORGUNIT = "extra:orgUnit";
@@ -135,8 +124,6 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
     @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        // getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-
         return inflater.inflate(org.hisp.dhis.android.sdk.R.layout.dialog_fragment_teiqueryresult, container, false);
     }
 
@@ -160,17 +147,11 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
         mListView.addHeaderView(header, TAG, false);
 
 
-        //ImageView loadDialogButton = (ImageView) view
-          //      .findViewById(org.hisp.dhis.android.sdk.R.id.load_dialog_button);
-//        ImageView closeDialogButton = (ImageView) view
-//                .findViewById(org.hisp.dhis.android.sdk.R.id.close_dialog_button);
+
         mFilter = (EditText) view
                 .findViewById(org.hisp.dhis.android.sdk.R.id.filter_options);
         mDialogLabel = (TextView) view
                 .findViewById(org.hisp.dhis.android.sdk.R.id.dialog_label);
-//        InputMethodManager imm = (InputMethodManager)
-//                getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-//        imm.hideSoftInputFromWindow(mFilter.getWindowToken(), 0);
         UiUtils.hideKeyboard(getActivity());
 
         mAdapter = new DataValueAdapter(getChildFragmentManager(), getActivity().getLayoutInflater());
@@ -182,16 +163,6 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
                 mForm.setQueryString(s.toString());
             }
         });
-
-        //closeDialogButton.setOnClickListener(new View.OnClickListener() {
-          //  @Override
-            //public void onClick(View v) {
-                // dismiss();
-            //}
-        //});
-
-        //loadDialogButton.setOnClickListener(this);
-
     }
 
     private ActionBar getActionBar() {
@@ -241,7 +212,6 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
             mForm = data;
 
             if (mForm.getDataEntryRows() != null) {
-                //setEditableDataEntryRows(false);
                 if (getArguments().getBoolean(EXTRA_DETAILED)) {
                     mAdapter.swapData(mForm.getDataEntryRows());
                 }
@@ -286,7 +256,7 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
             button.setImageResource(org.hisp.dhis.android.sdk.R.drawable.ic_new);
             mAdapter.swapData(null);
         } else {
-            button.setImageResource(org.hisp.dhis.android.sdk.R.drawable.ic_delete);
+            button.setImageResource(org.hisp.dhis.android.trackercapture.R.drawable.ic_close_dialog);
             mAdapter.swapData(mForm.getDataEntryRows());
         }
         getArguments().putBoolean(EXTRA_DETAILED, !current);
@@ -329,10 +299,8 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
 
     @Override
     public void onClick(View v) {
-        //if (v.getId() == org.hisp.dhis.android.sdk.R.id.load_dialog_button) {
-          //  runQuery();
-        //} else
-            if (v.getId() == org.hisp.dhis.android.trackercapture.R.id.detailed_search_button) {
+
+        if (v.getId() == org.hisp.dhis.android.trackercapture.R.id.detailed_search_button) {
             toggleDetailedSearch(v);
         }
     }
@@ -389,35 +357,8 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
     public void showOnlineSearchResultFragment(final List<TrackedEntityInstance> trackedEntityInstances, final String orgUnit) {
         OnlineSearchResultFragment onlineSearchResultFragment = OnlineSearchResultFragment.newInstance(trackedEntityInstances, orgUnit);
         HolderActivity.navigateToOnlineSearchResultFragment(getActivity(),trackedEntityInstances, orgUnit);
-//        mNavigationHandler.switchFragment(onlineSearchResultFragment, OnlineSearchResultFragment.TAG, false);
-    }
 
-    public void showTrackedEntityInstanceQueryResultDialog(FragmentManager fragmentManager, final List<TrackedEntityInstance> trackedEntityInstances, final String orgUnit) {
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                QueryTrackedEntityInstancesResultDialogFragment dialog = QueryTrackedEntityInstancesResultDialogFragment.newInstance(trackedEntityInstances, orgUnit);
-                if(activity!=null) {
-                    dialog.show(activity.getSupportFragmentManager());
-                }
-            }
-        });
+        //after running query which will navigate to new activity, we want to close this activity
+        getActivity().finish();
     }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        if(activity!=null) {
-            if(activity instanceof FragmentActivity) {
-                this.activity = (FragmentActivity) activity;
-            }
-        }
-//        if (activity instanceof INavigationHandler) {
-//            mNavigationHandler = (INavigationHandler) activity;
-//        } else {
-//            throw new IllegalArgumentException("Activity must implement INavigationHandler interface");
-//        }
-    }
-
 }

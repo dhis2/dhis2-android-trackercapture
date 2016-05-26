@@ -169,7 +169,7 @@ public class HolderActivity extends AbsHomeActivity {
         intent.putExtra(EnrollmentDataEntryFragment.INCIDENT_DATE, dateOfIncident);
         intent.putExtra(ARG_TYPE, ARG_TYPE_ENROLLMENTFRAGMENT);
 
-        intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NO_HISTORY); // we don't want to keep it to backstack
+//        intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NO_HISTORY); // we don't want to keep it to backstack
         activity.startActivity(intent);
 
     }
@@ -184,7 +184,7 @@ public class HolderActivity extends AbsHomeActivity {
         intent.putExtra(EnrollmentDataEntryFragment.INCIDENT_DATE, dateOfIncident);
         intent.putExtra(ARG_TYPE, ARG_TYPE_ENROLLMENTFRAGMENT);
 
-        intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NO_HISTORY); // we don't want to keep it to backstack
+//        intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NO_HISTORY); // we don't want to keep it to backstack
         activity.startActivity(intent);
 
     }
@@ -252,7 +252,7 @@ public class HolderActivity extends AbsHomeActivity {
         intent.putExtra(OnlineSearchFragment.EXTRA_PROGRAM, programId);
         intent.putExtra(OnlineSearchFragment.EXTRA_ORGUNIT, orgUnitId);
         intent.putExtra(ARG_TYPE, ARG_TYPE_ONLINESEARCHFRAGMENT);
-        intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NO_HISTORY); // we don't want to keep it to backstack
+//        intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NO_HISTORY); // we don't want to keep it to backstack
         activity.startActivity(intent);
     }
 
@@ -268,7 +268,7 @@ public class HolderActivity extends AbsHomeActivity {
         intent.putExtra(OnlineSearchResultFragment.EXTRA_TRACKEDENTITYINSTANCESSELECTED, parameterSerializible1);
         intent.putExtra(OnlineSearchResultFragment.EXTRA_TRACKEDENTITYINSTANCESLIST, parameterSerializible2);
         intent.putExtra(ARG_TYPE, ARG_TYPE_ONLINESEARCHRESULTFRAGMENT);
-        intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NO_HISTORY); // we don't want to keep it to backstack
+//        intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NO_HISTORY); // we don't want to keep it to backstack
 
 //
 //        Bundle args = new Bundle();

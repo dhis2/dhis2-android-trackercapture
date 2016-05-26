@@ -29,10 +29,10 @@
 
 package org.hisp.dhis.android.trackercapture;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -42,15 +42,11 @@ import org.hisp.dhis.android.sdk.controllers.LoadingController;
 import org.hisp.dhis.android.sdk.controllers.PeriodicSynchronizerController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
-import org.hisp.dhis.android.sdk.persistence.models.User;
 import org.hisp.dhis.android.sdk.persistence.models.UserAccount;
 import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
-import org.hisp.dhis.android.sdk.ui.activities.INavigationHandler;
-import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.ui.fragments.settings.SettingsFragment;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.SelectProgramFragment;
-import org.hisp.dhis.android.sdk.services.SyncDateWrapper;
 import org.hisp.dhis.client.sdk.ui.activities.AbsHomeActivity;
 import org.hisp.dhis.client.sdk.ui.fragments.WrapperFragment;
 
@@ -62,6 +58,13 @@ public class MainActivity extends AbsHomeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if ((getIntent().getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {
+            // Activity was brought to front and not created,
+            // Thus finishing this will get us to the last viewed activity
+            finish();
+            return;
+        }
 
         LoadingController.enableLoading(this, ResourceType.ASSIGNEDPROGRAMS);
         LoadingController.enableLoading(this, ResourceType.OPTIONSETS);

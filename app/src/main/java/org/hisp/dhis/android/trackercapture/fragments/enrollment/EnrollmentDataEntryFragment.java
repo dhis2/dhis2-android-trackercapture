@@ -216,7 +216,10 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
                 listViewAdapter.swapData(data.getDataEntryRows());
             }
 
-            initiateEvaluateProgramRules();
+
+            if(data.getProgram().getProgramRules() != null && !data.getProgram().getProgramRules().isEmpty()) {
+                initiateEvaluateProgramRules();
+            }
         }
     }
 

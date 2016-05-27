@@ -81,7 +81,7 @@ public class MainActivity extends AbsHomeActivity {
     }
 
     private void setUpNavigationView(Bundle savedInstanceState) {
-        getNavigationView().getMenu().removeItem(R.id.drawer_item_profile);
+        removeMenuItem(R.id.drawer_item_profile);
         addMenuItem(11, R.drawable.ic_add, R.string.enroll);
         if (savedInstanceState == null) {
             onNavigationItemSelected(getNavigationView().getMenu()

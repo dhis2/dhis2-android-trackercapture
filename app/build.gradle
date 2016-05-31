@@ -28,6 +28,7 @@
  */
 
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
 
 android {
 //    compileSdkVersion rootProject.ext.configuration.compileSdkVersion
@@ -79,4 +80,7 @@ android {
 dependencies {
     compile project(':core')
     compile project(':ui')
+    compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
+        transitive = true;
+    }
 }

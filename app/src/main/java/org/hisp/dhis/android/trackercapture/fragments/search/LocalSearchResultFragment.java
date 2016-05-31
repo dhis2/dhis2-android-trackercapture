@@ -58,7 +58,6 @@ public class LocalSearchResultFragment extends Fragment implements LoaderManager
     private final int LOADER_ID = 1112222111;
     private LocalSearchResultFragmentForm mForm;
     private ProgressBar progressBar;
-//    private INavigationHandler navigationHandler;
 
     public static LocalSearchResultFragment newInstance(String orgUnitId, String programId, HashMap<String,String> attributeValueMap) {
         LocalSearchResultFragment fragment = new LocalSearchResultFragment();
@@ -97,7 +96,6 @@ public class LocalSearchResultFragment extends Fragment implements LoaderManager
             return true;
         }
 
-
         return super.onOptionsItemSelected(item);
     }
     @Override
@@ -133,8 +131,6 @@ public class LocalSearchResultFragment extends Fragment implements LoaderManager
                 (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
 
         final TrackedEntityInstanceItemRow itemRow = (TrackedEntityInstanceItemRow) searchResultsListView.getItemAtPosition(info.position);
-
-
 
         if(item.getTitle().toString().equals(getResources().getString(org.hisp.dhis.android.sdk.R.string.go_to_programoverview_fragment))) {
             HolderActivity.navigateToProgramOverviewFragment(getActivity(),
@@ -240,22 +236,12 @@ public class LocalSearchResultFragment extends Fragment implements LoaderManager
 
             HolderActivity.navigateToProgramOverviewFragment(getActivity(),orgUnitId, programId,
                             eventClick.getItem().getLocalId());
-
-//            navigationHandler.switchFragment(fragment, ProgramOverviewFragment.CLASS_TAG, true);
         } else {
             showStatusDialog(eventClick.getItem());
         }
     }
 
 
-    @Subscribe /* it doesn't seem that this subscribe works. Inheriting class will have to */
-    public void onReceivedUiEvent(UiEvent uiEvent) {
-        if(uiEvent.getEventType().equals(UiEvent.UiEventType.SYNCING_START)) {
-            //setRefreshing(true);
-        } else if(uiEvent.getEventType().equals(UiEvent.UiEventType.SYNCING_END)) {
-            //setRefreshing(false);
-        }
-    }
     public void showStatusDialog(BaseSerializableModel model) {
         ItemStatusDialogFragment fragment = ItemStatusDialogFragment.newInstance(model);
         fragment.show(getChildFragmentManager());
@@ -265,27 +251,4 @@ public class LocalSearchResultFragment extends Fragment implements LoaderManager
     public void onLoaderReset(Loader<LocalSearchResultFragmentForm> loader) {
 
     }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-//        if (activity instanceof INavigationHandler) {
-//            navigationHandler = (INavigationHandler) activity;
-//        } else {
-//            throw new IllegalArgumentException("Activity must " +
-//                    "implement INavigationHandler interface");
-//        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        // we need to nullify reference
-        // to parent activity in order not to leak it
-//        navigationHandler = null;
-    }
-
-
-
 }

@@ -305,10 +305,17 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
             @Override
             public Object execute() throws APIException {
                 SynchronisationStateHandler.getInstance().changeState(true);
-                downloadedTrackedEntityInstances.addAll(TrackerController.getTrackedEntityInstancesDataFromServer(DhisController.getInstance().getDhisApi(), getSelectedTrackedEntityInstances(), false));
+                List<TrackedEntityInstance> trackedEntityInstances = TrackerController.getTrackedEntityInstancesDataFromServer(DhisController.getInstance().getDhisApi(), getSelectedTrackedEntityInstances(), false);
+
+                if(trackedEntityInstances != null) {
+                    downloadedTrackedEntityInstances.addAll(trackedEntityInstances);
+                }
 
                 for (TrackedEntityInstance tei : downloadedTrackedEntityInstances) {
-                    downloadedEnrollments.addAll(TrackerController.getEnrollmentDataFromServer(DhisController.getInstance().getDhisApi(), tei));
+                    List<Enrollment> enrollments = TrackerController.getEnrollmentDataFromServer(DhisController.getInstance().getDhisApi(), tei);
+                    if(enrollments != null) {
+                        downloadedEnrollments.addAll(enrollments);
+                    }
                 }
 
 

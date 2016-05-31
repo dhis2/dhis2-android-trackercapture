@@ -10,6 +10,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -46,7 +47,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class LocalSearchResultFragment extends Fragment implements LoaderManager.LoaderCallbacks<LocalSearchResultFragmentForm> {
+public class LocalSearchResultFragment extends Fragment implements LoaderManager.LoaderCallbacks<LocalSearchResultFragmentForm>,
+                                                                    View.OnClickListener{
     public static final String EXTRA_PROGRAM = "extra:ProgramId";
     public static final String EXTRA_ORGUNIT = "extra:OrgUnitId";
     public static final String EXTRA_ATTRIBUTEVALUEMAP = "extra:AttributeValueMap";
@@ -58,6 +60,7 @@ public class LocalSearchResultFragment extends Fragment implements LoaderManager
     private final int LOADER_ID = 1112222111;
     private LocalSearchResultFragmentForm mForm;
     private ProgressBar progressBar;
+    private CardView cardView;
 
     public static LocalSearchResultFragment newInstance(String orgUnitId, String programId, HashMap<String,String> attributeValueMap) {
         LocalSearchResultFragment fragment = new LocalSearchResultFragment();
@@ -109,10 +112,13 @@ public class LocalSearchResultFragment extends Fragment implements LoaderManager
         }
         searchResultsListView = (ListView) view.findViewById(R.id.listview_search_results);
         progressBar = (ProgressBar) view.findViewById(R.id.local_search_progressbar);
+        cardView = (CardView) view.findViewById(R.id.search_online_cardview);
 
         mAdapter = new TrackedEntityInstanceAdapter(getLayoutInflater(savedInstanceState));
         searchResultsListView.setAdapter(mAdapter);
         progressBar.setVisibility(View.VISIBLE);
+        cardView.setVisibility(View.GONE);
+        cardView.setOnClickListener(this);
     }
 
 
@@ -250,5 +256,18 @@ public class LocalSearchResultFragment extends Fragment implements LoaderManager
     @Override
     public void onLoaderReset(Loader<LocalSearchResultFragmentForm> loader) {
 
+    }
+
+    public void searchOnline() {
+
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.search_online_cardview: {
+                searchOnline();
+            }
+        }
     }
 }

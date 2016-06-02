@@ -206,10 +206,12 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     }
 
     private void createEnrollment() {
-        EnrollmentDateSetterHelper.createEnrollment(this, getActivity(), mForm.getProgram().
-                getDisplayIncidentDate(), mForm.getProgram().getSelectEnrollmentDatesInFuture(),
-                mForm.getProgram().getSelectIncidentDatesInFuture(), mForm.getProgram().getEnrollmentDateLabel(),
-                mForm.getProgram().getIncidentDateLabel());
+        if(mForm != null && mForm.getProgram() != null) {
+            EnrollmentDateSetterHelper.createEnrollment(this, getActivity(), mForm.getProgram().
+                            getDisplayIncidentDate(), mForm.getProgram().getSelectEnrollmentDatesInFuture(),
+                    mForm.getProgram().getSelectIncidentDatesInFuture(), mForm.getProgram().getEnrollmentDateLabel(),
+                    mForm.getProgram().getIncidentDateLabel());
+        }
     }
 
     public void showEnrollmentFragment(TrackedEntityInstance trackedEntityInstance, DateTime enrollmentDate, DateTime incidentDate) {

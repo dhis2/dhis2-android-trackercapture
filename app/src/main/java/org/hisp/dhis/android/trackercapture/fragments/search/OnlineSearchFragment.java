@@ -160,7 +160,9 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
         mFilter.addTextChangedListener(new AbsTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
-                mForm.setQueryString(s.toString());
+                if(mForm != null) {
+                    mForm.setQueryString(s.toString());
+                }
             }
         });
     }
@@ -257,7 +259,11 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
             mAdapter.swapData(null);
         } else {
             button.setImageResource(org.hisp.dhis.android.trackercapture.R.drawable.ic_close_dialog);
-            mAdapter.swapData(mForm.getDataEntryRows());
+
+            if(mForm != null && mForm.getDataEntryRows() != null) {
+                mAdapter.swapData(mForm.getDataEntryRows());
+            }
+
         }
         getArguments().putBoolean(EXTRA_DETAILED, !current);
     }
@@ -355,10 +361,6 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
     }
 
     public void showOnlineSearchResultFragment(final List<TrackedEntityInstance> trackedEntityInstances, final String orgUnit) {
-        OnlineSearchResultFragment onlineSearchResultFragment = OnlineSearchResultFragment.newInstance(trackedEntityInstances, orgUnit);
         HolderActivity.navigateToOnlineSearchResultFragment(getActivity(),trackedEntityInstances, orgUnit);
-
-        //after running query which will navigate to new activity, we want to close this activity
-        getActivity().finish();
     }
 }

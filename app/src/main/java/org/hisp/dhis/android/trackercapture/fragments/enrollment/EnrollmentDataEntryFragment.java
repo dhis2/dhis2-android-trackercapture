@@ -460,8 +460,15 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
                         .getTrackedEntityAttributeValue(ptea.getTrackedEntityAttributeId(), form.getTrackedEntityInstance().getUid());
 
                 TrackedEntityAttributeGeneratedValue trackedEntityAttributeGeneratedValue = MetaDataController.getTrackedEntityAttributeGeneratedValue(attributeValue.getValue());
-
-                trackedEntityAttributeGeneratedValue.delete();
+                if(trackedEntityAttributeGeneratedValue != null) {
+                    trackedEntityAttributeGeneratedValue.delete();
+                }
+                else {
+                    trackedEntityAttributeGeneratedValue = MetaDataController.getTrackedEntityAttributeGeneratedValue(ptea.getTrackedEntityAttributeId());
+                    if(trackedEntityAttributeGeneratedValue != null) {
+                        trackedEntityAttributeGeneratedValue.delete();
+                    }
+                }
             }
         }
     }
@@ -505,6 +512,10 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     }
 
     private boolean checkIfDataHasBeenEdited() {
+        if(form == null || form.getEnrollment() == null) {
+            return false;
+        }
+
         if(originalEnrollment != null && !originalEnrollment.equals(form.getEnrollment())) {
             return true;
         }

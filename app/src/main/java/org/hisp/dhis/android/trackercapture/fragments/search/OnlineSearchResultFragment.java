@@ -102,6 +102,8 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        downloadedEnrollments = new ArrayList<>();
+        downloadedTrackedEntityInstances = new ArrayList<>();
     }
 
     @Override
@@ -305,22 +307,42 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
             @Override
             public Object execute() throws APIException {
                 SynchronisationStateHandler.getInstance().changeState(true);
-                downloadedTrackedEntityInstances.addAll(TrackerController.getTrackedEntityInstancesDataFromServer(DhisController.getInstance().getDhisApi(), getSelectedTrackedEntityInstances(), false));
+                List<TrackedEntityInstance> trackedEntityInstances = TrackerController.getTrackedEntityInstancesDataFromServer(DhisController.getInstance().getDhisApi(), getSelectedTrackedEntityInstances(), false);
+
+                if(trackedEntityInstances != null) {
+                    if(downloadedTrackedEntityInstances == null) {
+                        downloadedTrackedEntityInstances = new ArrayList<>();
+                    }
+                    downloadedTrackedEntityInstances.addAll(trackedEntityInstances);
+                }
 
                 for (TrackedEntityInstance tei : downloadedTrackedEntityInstances) {
-                    downloadedEnrollments.addAll(TrackerController.getEnrollmentDataFromServer(DhisController.getInstance().getDhisApi(), tei));
+                    List<Enrollment> enrollments = TrackerController.getEnrollmentDataFromServer(DhisController.getInstance().getDhisApi(), tei);
+                    if(enrollments != null) {
+                        if(downloadedEnrollments == null) {
+                            downloadedEnrollments = new ArrayList<>();
+                        }
+                        downloadedEnrollments.addAll(enrollments);
+                    }
                 }
 
 
                 if (downloadedTrackedEntityInstances != null && downloadedTrackedEntityInstances.size() == 1) {
                     if (downloadedEnrollments != null && downloadedEnrollments.size() == 1) {
-                        TrackedEntityInstance trackedEntityInstance = downloadedTrackedEntityInstances.get(0);
-                        Enrollment enrollment = downloadedEnrollments.get(0);
+                        final TrackedEntityInstance trackedEntityInstance = downloadedTrackedEntityInstances.get(0);
+                        final Enrollment enrollment = downloadedEnrollments.get(0);
 
-                        HolderActivity.navigateToProgramOverviewFragment(activity,
-                                enrollment.getOrgUnit(),
-                                enrollment.getProgram().getUid(),
-                                trackedEntityInstance.getLocalId());
+
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                HolderActivity.navigateToProgramOverviewFragment(activity,
+                                        enrollment.getOrgUnit(),
+                                        enrollment.getProgram().getUid(),
+                                        trackedEntityInstance.getLocalId());
+                            }
+                        });
+
                     }
                 }
 

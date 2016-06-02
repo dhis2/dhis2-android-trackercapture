@@ -60,6 +60,7 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
     private ListView mListView;
     private List<TrackedEntityInstance> downloadedTrackedEntityInstances;
     private List<Enrollment> downloadedEnrollments;
+    private String orgUnitId;
 
 
     public static final String EXTRA_TRACKEDENTITYINSTANCESLIST = "extra:trackedEntityInstances";
@@ -170,6 +171,8 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
         if(selectall) {
             mSelectAllButton.setText(getString(org.hisp.dhis.android.sdk.R.string.deselect_all));
         }
+
+        orgUnitId = getArguments().getString(EXTRA_ORGUNIT);
 
         getAdapter().swapData(getTrackedEntityInstances());
     }
@@ -337,7 +340,7 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
                             @Override
                             public void run() {
                                 HolderActivity.navigateToProgramOverviewFragment(activity,
-                                        enrollment.getOrgUnit(),
+                                        orgUnitId,
                                         enrollment.getProgram().getUid(),
                                         trackedEntityInstance.getLocalId());
                             }

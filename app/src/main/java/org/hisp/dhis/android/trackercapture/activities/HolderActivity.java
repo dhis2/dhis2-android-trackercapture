@@ -252,7 +252,7 @@ public class HolderActivity extends AbsHomeActivity {
         intent.putExtra(OnlineSearchFragment.EXTRA_PROGRAM, programId);
         intent.putExtra(OnlineSearchFragment.EXTRA_ORGUNIT, orgUnitId);
         intent.putExtra(ARG_TYPE, ARG_TYPE_ONLINESEARCHFRAGMENT);
-//        intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NO_HISTORY); // we don't want to keep it to backstack
+        intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NO_HISTORY); // we don't want to keep it to backstack
         activity.startActivity(intent);
     }
 
@@ -268,23 +268,7 @@ public class HolderActivity extends AbsHomeActivity {
         intent.putExtra(OnlineSearchResultFragment.EXTRA_TRACKEDENTITYINSTANCESSELECTED, parameterSerializible1);
         intent.putExtra(OnlineSearchResultFragment.EXTRA_TRACKEDENTITYINSTANCESLIST, parameterSerializible2);
         intent.putExtra(ARG_TYPE, ARG_TYPE_ONLINESEARCHRESULTFRAGMENT);
-//        intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NO_HISTORY); // we don't want to keep it to backstack
-
-//
-//        Bundle args = new Bundle();
-//        Parcel parcel1 = Parcel.obtain();
-//        ParameterParcelable parcelable1 = new ParameterParcelable(trackedEntityInstances);
-//        parcelable1.writeToParcel(parcel1, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
-//        Parcel parcel2 = Parcel.obtain();
-//        ParameterParcelable parcelable2 = new ParameterParcelable(new ArrayList<TrackedEntityInstance>());
-//        parcelable2.writeToParcel(parcel2, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
-//        args.putParcelable(OnlineSearchResultFragment.EXTRA_TRACKEDENTITYINSTANCESSELECTED, parcelable2);
-//        args.putParcelable(OnlineSearchResultFragment.EXTRA_TRACKEDENTITYINSTANCESLIST, parcelable1);
-//        args.putString(OnlineSearchResultFragment.EXTRA_ORGUNIT, orgUnit);
-//        args.putBoolean(OnlineSearchResultFragment.EXTRA_SELECTALL, false);
-//        args.putString(ARG_TYPE, ARG_TYPE_ONLINESEARCHRESULTFRAGMENT);
-//        intent.putExtras(args);
-
+        intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NO_HISTORY); // we don't want to keep it to backstack
 
         activity.startActivity(intent);
 

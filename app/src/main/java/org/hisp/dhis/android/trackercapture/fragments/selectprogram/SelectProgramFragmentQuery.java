@@ -139,9 +139,11 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
             return fragmentForm;
         } else {
             for (Enrollment enrollment : enrollmentsToShow) { // enrollments
-                if (enrollment.getLocalTrackedEntityInstanceId() > 0) {
-                    if (!trackedEntityInstanceIds.contains(enrollment.getLocalTrackedEntityInstanceId()))
-                        trackedEntityInstanceIds.add(enrollment.getLocalTrackedEntityInstanceId());
+                if (enrollment != null) {
+                    if (enrollment.getLocalTrackedEntityInstanceId() > 0) {
+                        if (!trackedEntityInstanceIds.contains(enrollment.getLocalTrackedEntityInstanceId()))
+                            trackedEntityInstanceIds.add(enrollment.getLocalTrackedEntityInstanceId());
+                    }
                 }
             }
         }

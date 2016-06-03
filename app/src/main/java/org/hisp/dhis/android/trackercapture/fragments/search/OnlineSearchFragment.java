@@ -354,13 +354,13 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
                 }
                 Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_END));
                 // showTrackedEntityInstanceQueryResultDialog(fragmentManager, trackedEntityInstancesQueryResult, orgUnit);
-                showOnlineSearchResultFragment(trackedEntityInstancesQueryResult, orgUnit);
+                showOnlineSearchResultFragment(trackedEntityInstancesQueryResult, orgUnit, program);
                 return new Object();
             }
         });
     }
 
-    public void showOnlineSearchResultFragment(final List<TrackedEntityInstance> trackedEntityInstances, final String orgUnit) {
-        HolderActivity.navigateToOnlineSearchResultFragment(getActivity(),trackedEntityInstances, orgUnit);
+    public void showOnlineSearchResultFragment(final List<TrackedEntityInstance> trackedEntityInstances, final String orgUnit, final String programId) {
+        HolderActivity.navigateToOnlineSearchResultFragment(getActivity(),trackedEntityInstances, orgUnit, programId);
     }
 }

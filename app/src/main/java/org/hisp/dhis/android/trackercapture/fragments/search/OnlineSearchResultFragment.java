@@ -26,6 +26,7 @@ import android.widget.TextView;
 import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.sdk.controllers.DhisController;
+import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.events.LoadingMessageEvent;
 import org.hisp.dhis.android.sdk.events.UiEvent;
@@ -34,6 +35,10 @@ import org.hisp.dhis.android.sdk.job.NetworkJob;
 import org.hisp.dhis.android.sdk.network.APIException;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
+import org.hisp.dhis.android.sdk.persistence.models.Program;
+import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
 import org.hisp.dhis.android.sdk.ui.activities.SynchronisationStateHandler;
@@ -46,10 +51,13 @@ import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class OnlineSearchResultFragment extends Fragment implements AdapterView.OnItemClickListener, View.OnClickListener {
     public static final String TAG = OnlineSearchResultFragment.class.getSimpleName();
+
 
     private EditText mFilter;
     private TextView mDialogLabel;
@@ -60,12 +68,15 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
     private ListView mListView;
     private List<TrackedEntityInstance> downloadedTrackedEntityInstances;
     private List<Enrollment> downloadedEnrollments;
-
+    private String orgUnitId;
+    private String programId;
+    private Map<String,ProgramTrackedEntityAttribute> programTrackedEntityAttributeMap;
 
     public static final String EXTRA_TRACKEDENTITYINSTANCESLIST = "extra:trackedEntityInstances";
     public static final String EXTRA_TRACKEDENTITYINSTANCESSELECTED = "extra:trackedEntityInstancesSelected";
     public static final String EXTRA_ORGUNIT = "extra:orgUnit";
     public static final String EXTRA_SELECTALL = "extra:selectAll";
+    public static final String EXTRA_PROGRAM = "extra:Program";
 
     public static OnlineSearchResultFragment newInstance(List<TrackedEntityInstance> trackedEntityInstances, String orgUnit) {
         OnlineSearchResultFragment dialogFragment = new OnlineSearchResultFragment();
@@ -145,7 +156,9 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
             getActionBar().setDisplayHomeAsUpEnabled(true);
             getActionBar().setHomeButtonEnabled(true);
         }
-
+        programId = getArguments().getString(EXTRA_PROGRAM);
+        orgUnitId = getArguments().getString(EXTRA_ORGUNIT);
+        Program selectedProgram = MetaDataController.getProgram(programId);
         mFilter = (EditText) view
                 .findViewById(org.hisp.dhis.android.sdk.R.id.filter_options);
         mDialogLabel = (TextView) view
@@ -153,7 +166,14 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
 
         UiUtils.hideKeyboard(getActivity());
 
-        mAdapter = new QueryTrackedEntityInstancesResultDialogAdapter(LayoutInflater.from(getActivity()), getSelectedTrackedEntityInstances());
+        if(savedInstanceState == null) {
+            programTrackedEntityAttributeMap = new HashMap<>();
+            programTrackedEntityAttributeMap = getProgramTrackedEntityAttributes(selectedProgram);
+        }
+        else {
+        }
+
+        mAdapter = new QueryTrackedEntityInstancesResultDialogAdapter(LayoutInflater.from(getActivity()), getSelectedTrackedEntityInstances(), programTrackedEntityAttributeMap);
         mListView.setAdapter(mAdapter);
         mListView.setOnItemClickListener(this);
 
@@ -171,7 +191,18 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
             mSelectAllButton.setText(getString(org.hisp.dhis.android.sdk.R.string.deselect_all));
         }
 
+
+
         getAdapter().swapData(getTrackedEntityInstances());
+    }
+
+    private Map<String, ProgramTrackedEntityAttribute> getProgramTrackedEntityAttributes(Program selectedProgram) {
+        List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = selectedProgram.getProgramTrackedEntityAttributes();
+        Map<String, ProgramTrackedEntityAttribute> attributeMap = new HashMap<>();
+        for(ProgramTrackedEntityAttribute programTrackedEntityAttribute : programTrackedEntityAttributes) {
+            attributeMap.put(programTrackedEntityAttribute.getTrackedEntityAttributeId(), programTrackedEntityAttribute);
+        }
+        return attributeMap;
     }
 
     @Override
@@ -337,7 +368,7 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
                             @Override
                             public void run() {
                                 HolderActivity.navigateToProgramOverviewFragment(activity,
-                                        enrollment.getOrgUnit(),
+                                        orgUnitId,
                                         enrollment.getProgram().getUid(),
                                         trackedEntityInstance.getLocalId());
                             }

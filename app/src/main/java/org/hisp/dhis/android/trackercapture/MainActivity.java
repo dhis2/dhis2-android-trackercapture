@@ -46,6 +46,7 @@ import org.hisp.dhis.android.sdk.persistence.models.UserAccount;
 import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
 import org.hisp.dhis.android.sdk.ui.fragments.settings.SettingsFragment;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
+import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.SelectProgramFragment;
 import org.hisp.dhis.client.sdk.ui.activities.AbsHomeActivity;
 import org.hisp.dhis.client.sdk.ui.fragments.WrapperFragment;
@@ -55,6 +56,18 @@ import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
 public class MainActivity extends AbsHomeActivity {
     public final static String TAG = MainActivity.class.getSimpleName();
+
+    private static final String APPS_DASHBOARD_PACKAGE =
+            "org.hisp.dhis.android.dashboard";
+    private static final String APPS_DATA_CAPTURE_PACKAGE =
+            "org.dhis2.mobile";
+    private static final String APPS_EVENT_CAPTURE_PACKAGE =
+            "org.hisp.dhis.android.eventcapture";
+    private static final String APPS_TRACKER_CAPTURE_PACKAGE =
+            "org.hisp.dhis.android.trackercapture";
+    private static final String APPS_TRACKER_CAPTURE_REPORTS_PACKAGE =
+            "org.hispindia.bidtrackerreports";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,8 +130,9 @@ public class MainActivity extends AbsHomeActivity {
     @NonNull
     @Override
     protected Fragment getSettingsFragment() {
-        return WrapperFragment.newInstance(SettingsFragment.class,
-                getString(R.string.drawer_item_settings));
+        return new Fragment();
+//        return WrapperFragment.newInstance(SettingsFragment.class,
+//                getString(R.string.drawer_item_settings));
     }
 
     @Override
@@ -154,5 +168,44 @@ public class MainActivity extends AbsHomeActivity {
         super.onDrawerOpened(drawerView);
         String lastSynced = DhisController.getInstance().getSyncDateWrapper().getLastSyncedString();
         setSynchronizedMessage(lastSynced);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(MenuItem menuItem) {
+        boolean isSelected = false;
+        int menuItemId = menuItem.getItemId();
+
+        if (menuItemId == org.hisp.dhis.client.sdk.ui.R.id.drawer_item_dashboard) {
+            isSelected = openApp(APPS_DASHBOARD_PACKAGE);
+        } else if (menuItemId == org.hisp.dhis.client.sdk.ui.R.id.drawer_item_data_capture) {
+            isSelected = openApp(APPS_DATA_CAPTURE_PACKAGE);
+        } else if (menuItemId == org.hisp.dhis.client.sdk.ui.R.id.drawer_item_event_capture) {
+            isSelected = openApp(APPS_EVENT_CAPTURE_PACKAGE);
+        } else if (menuItemId == org.hisp.dhis.client.sdk.ui.R.id.drawer_item_tracker_capture) {
+            isSelected = openApp(APPS_TRACKER_CAPTURE_PACKAGE);
+        } else if (menuItemId == org.hisp.dhis.client.sdk.ui.R.id.drawer_item_tracker_capture_reports) {
+            isSelected = openApp(APPS_TRACKER_CAPTURE_REPORTS_PACKAGE);
+        } else if (menuItemId == org.hisp.dhis.client.sdk.ui.R.id.drawer_item_profile) {
+            attachFragmentDelayed(getProfileFragment());
+            isSelected = true;
+        } else if (menuItemId == org.hisp.dhis.client.sdk.ui.R.id.drawer_item_settings) {
+            HolderActivity.navigateToSettingsFragment(this);
+            isSelected = true;
+        }
+        /*else if (menuItemId == R.id.drawer_item_help) {
+            attachFragment(getHelpFragment());
+            isSelected = true;
+        } else if (menuItemId == R.id.drawer_item_about) {
+            attachFragment(getAboutFragment());
+            isSelected = true;
+        }*/
+
+        isSelected = onItemSelected(menuItem) || isSelected;
+        if (isSelected) {
+            getNavigationView().setCheckedItem(menuItemId);
+            getDrawerLayout().closeDrawers();
+        }
+
+        return isSelected;
     }
 }

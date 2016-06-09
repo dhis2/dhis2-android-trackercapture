@@ -205,7 +205,9 @@ public class HolderActivity extends AbsHomeActivity {
     }
 
 
-    public static void navigateToDataEntryFragment(Activity activity, String orgUnitId, String programId, String programStageId, long localEnrollmentId, long eventId) {
+    public static void navigateToDataEntryFragment(Activity activity, String orgUnitId,
+                                                   String programId, String programStageId,
+                                                   long localEnrollmentId, long eventId) {
         Intent intent = new Intent(activity, HolderActivity.class);
         intent.putExtra(EventDataEntryFragment.ORG_UNIT_ID, orgUnitId);
         intent.putExtra(EventDataEntryFragment.PROGRAM_ID, programId);

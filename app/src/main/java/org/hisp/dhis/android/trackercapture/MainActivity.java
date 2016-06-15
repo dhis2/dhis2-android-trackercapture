@@ -103,19 +103,24 @@ public class MainActivity extends AbsHomeActivity {
 
         UserAccount userAccount = MetaDataController.getUserAccount();
         String name = "";
-        if (!isEmpty(userAccount.getFirstName()) &&
-                !isEmpty(userAccount.getSurname())) {
-            name = String.valueOf(userAccount.getFirstName().charAt(0)) +
-                    String.valueOf(userAccount.getSurname().charAt(0));
-        } else if (userAccount.getDisplayName() != null &&
-                userAccount.getDisplayName().length() > 1) {
-            name = String.valueOf(userAccount.getDisplayName().charAt(0)) +
-                    String.valueOf(userAccount.getDisplayName().charAt(1));
+        if(userAccount != null) {
+            if (!isEmpty(userAccount.getFirstName()) &&
+                    !isEmpty(userAccount.getSurname())) {
+                name = String.valueOf(userAccount.getFirstName().charAt(0)) +
+                        String.valueOf(userAccount.getSurname().charAt(0));
+            } else if (userAccount.getDisplayName() != null &&
+                    userAccount.getDisplayName().length() > 1) {
+                name = String.valueOf(userAccount.getDisplayName().charAt(0)) +
+                        String.valueOf(userAccount.getDisplayName().charAt(1));
+            }
+
+            getUsernameTextView().setText(userAccount.getDisplayName());
+            getUserInfoTextView().setText(userAccount.getEmail());
         }
 
-        getUsernameTextView().setText(userAccount.getDisplayName());
-        getUserInfoTextView().setText(userAccount.getEmail());
         getUsernameLetterTextView().setText(name);
+
+
 
     }
 

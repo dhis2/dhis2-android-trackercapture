@@ -745,7 +745,12 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                     TrackedEntityAttribute attribute1 = selectedProgram.getProgramTrackedEntityAttributes().get(0).getTrackedEntityAttribute();
                     attribute1Label.setText(attribute1.getName());
                     TrackedEntityAttributeValue attribute1Val = TrackerController.getTrackedEntityAttributeValue(attribute1.getUid(), trackedEntityInstance.getLocalId());
-                    attribute1Value.setText(attribute1Val.getValue());
+                    if(attribute1Val != null) {
+                        attribute1Value.setText(attribute1Val.getValue());
+                    }
+                    else {
+                        attribute1Value.setText("");
+                    }
                 } else {
                     attribute1Label.setText("");
                     attribute1Value.setText("");
@@ -756,7 +761,12 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                     TrackedEntityAttributeValue attribute2Val = TrackerController.getTrackedEntityAttributeValue(attribute2.getUid(), trackedEntityInstance.getLocalId());
 
                     attribute2Label.setText(attribute2.getName());
-                    attribute2Value.setText(attribute2Val.getValue());
+                    if(attribute2Val != null) {
+                        attribute2Value.setText(attribute2Val.getValue());
+                    }
+                    else {
+                        attribute2Value.setText("");
+                    }
                 } else {
                     attribute2Label.setText("");
                     attribute2Value.setText("");

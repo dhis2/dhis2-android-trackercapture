@@ -1,0 +1,114 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.neenbedankt.android-apt'
+apply plugin: 'io.fabric'
+
+def cfg = rootProject.ext.configuration
+def libs = rootProject.ext.libraries
+
+android {
+    compileSdkVersion cfg.compileSdkVersion
+    buildToolsVersion cfg.buildToolsVersion
+
+    defaultConfig {
+        applicationId cfg.package
+        minSdkVersion cfg.minSdkVersion
+        targetSdkVersion cfg.targetSdkVersion
+        versionCode cfg.versionCode
+        versionName cfg.versionName
+
+        multiDexEnabled true
+        //for gradle plugin 1.5: Vector Drawables
+        generatedDensities = []
+    }
+
+    aaptOptions {
+        additionalParameters "--no-version-vectors"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    buildTypes {
+        debug {
+            buildConfigField "String", "SERVER_URL", '"https://play.dhis2.org/demo"'
+            buildConfigField "String", "USERNAME", '"admin"'
+            buildConfigField "String", "PASSWORD", '"district"'
+
+            // reading fabric.properties file from current directory
+            Properties properties = new Properties()
+            properties.load(file("fabric.properties").newDataInputStream())
+
+            // merging api key into manifest
+            manifestPlaceholders = [fabric_api_key: properties.getProperty('apiKey')]
+
+            // disabling crashlytics for debug builds
+            ext.enableCrashlytics = false
+        }
+        release {
+            buildConfigField "String", "SERVER_URL", '""'
+            buildConfigField "String", "USERNAME", '""'
+            buildConfigField "String", "PASSWORD", '""'
+
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            shrinkResources true
+
+            // reading fabric.properties file from current directory
+            Properties properties = new Properties()
+            properties.load(file("fabric.properties").newDataInputStream())
+
+            // merging api key into manifest
+            manifestPlaceholders = [fabric_api_key: properties.getProperty('apiKey')]
+
+            // enabling crashlytics for debug builds
+            ext.enableCrashlytics = true
+        }
+    }
+
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+    }
+
+    dexOptions {
+        javaMaxHeapSize "2g"
+    }
+}
+
+dependencies {
+    // Local
+    compile project(":core-rules")
+    compile project(":ui-bindings")
+
+
+    // Dependencies for testing
+    testCompile "junit:junit:${libs.jUnitVersion}"
+
+    // Google
+    compile "com.android.support:appcompat-v7:${libs.supportVersion}"
+
+    // Dagger dependencies
+    provided "com.google.dagger:dagger-compiler:${libs.dagger}"
+    apt "com.google.dagger:dagger-compiler:${libs.dagger}"
+    compile "com.google.dagger:dagger:${libs.dagger}"
+
+    // Smooth progress bar:
+    compile "com.github.castorflex.smoothprogressbar:library:${libs.smoothProgressBarVersion}"
+
+    // Square/Jake Wharton
+    compile "com.jakewharton.timber:timber:${libs.timberVersion}"
+    compile "com.squareup.okhttp3:logging-interceptor:${libs.okhttpVersion}"
+
+    // Fabric
+    compile("com.crashlytics.sdk.android:crashlytics:${libs.crashlyticsVersion}@aar") {
+        transitive = true;
+    }
+
+    // Multidex:
+    compile "com.android.support:multidex:${libs.multidex}"
+}

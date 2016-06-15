@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">DHIS2 Tracker Capture</string>
+
+    <string name="drawer_item_placeholder">Items</string>
+    <string name="placeholder">Something important goes here</string>
+</resources>

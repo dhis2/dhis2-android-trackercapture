@@ -1,0 +1,8 @@
+include ':app', ':core', ':core-android', ':core-rules', ':models', ':ui', ':ui-bindings', ':utils'
+project(':core').projectDir = new File(settingsDir, '../dhis2-android-sdk/core')
+project(':core-android').projectDir = new File(settingsDir, '../dhis2-android-sdk/core-android')
+project(':core-rules').projectDir = new File(settingsDir, '../dhis2-android-sdk/core-rules')
+project(':models').projectDir = new File(settingsDir, '../dhis2-android-sdk/models')
+project(':ui').projectDir = new File(settingsDir, '../dhis2-android-sdk/ui')
+project(':ui-bindings').projectDir = new File(settingsDir, '../dhis2-android-sdk/ui-bindings')
+project(':utils').projectDir = new File(settingsDir, '../dhis2-android-sdk/utils')

@@ -320,14 +320,11 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
             }
         }
         final boolean detailedSearch = getArguments().getBoolean(EXTRA_DETAILED);
-        new Thread() {
-            @Override
-            public void run() {
-                queryTrackedEntityInstances(getChildFragmentManager(),
-                        mForm.getOrganisationUnit(), mForm.getProgram(),
-                        mForm.getQueryString(), detailedSearch, searchValues.toArray(new TrackedEntityAttributeValue[]{}));
-            }
-        }.start();
+
+        queryTrackedEntityInstances(getChildFragmentManager(),
+            mForm.getOrganisationUnit(), mForm.getProgram(),
+            mForm.getQueryString(), detailedSearch, searchValues.toArray(new TrackedEntityAttributeValue[]{}));
+
     }
 
     /**

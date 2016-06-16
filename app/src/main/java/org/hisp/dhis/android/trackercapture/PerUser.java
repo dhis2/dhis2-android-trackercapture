@@ -26,23 +26,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.app;
+package org.hisp.dhis.android.trackercapture;
 
-import javax.inject.Singleton;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-import dagger.Component;
+import javax.inject.Scope;
 
-@Singleton
-@Component(
-        modules = {
-                AppModule.class
-        }
-)
-public interface AppComponent {
-
-    //------------------------------------------------------------------------
-    // Sub-modules
-    //------------------------------------------------------------------------
-
-    UserComponent plus(UserModule userModule);
+@Scope
+@Retention(RetentionPolicy.RUNTIME)
+public @interface PerUser {
 }

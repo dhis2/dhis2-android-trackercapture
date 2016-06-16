@@ -1,4 +1,4 @@
-package org.hisp.dhis.android.app;
+package org.hisp.dhis.android.trackercapture;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

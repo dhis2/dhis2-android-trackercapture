@@ -26,7 +26,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.app;
+package org.hisp.dhis.android.trackercapture;
 
 import android.app.Application;
 import android.content.Context;
@@ -64,6 +64,7 @@ public class AppModule implements DefaultAppModule {
 
     @Provides
     @Singleton
+    @Override
     public Logger providesLogger() {
         return new LoggerImpl();
     }

@@ -26,7 +26,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.app;
+package org.hisp.dhis.android.trackercapture;
+
+import org.hisp.dhis.android.trackercapture.sync.SyncAdapter;
+import org.hisp.dhis.android.trackercapture.views.SelectorFragment;
 
 import dagger.Subcomponent;
 
@@ -47,5 +50,8 @@ public interface UserComponent {
     // Injection targets
     //------------------------------------------------------------------------
     // TODO specify injection targets
+
+    void inject(SyncAdapter syncAdapter);
+    void inject(SelectorFragment selectorFragment);
 }
 

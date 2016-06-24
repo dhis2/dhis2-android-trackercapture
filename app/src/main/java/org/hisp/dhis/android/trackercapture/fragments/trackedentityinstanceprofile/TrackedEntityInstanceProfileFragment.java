@@ -102,6 +102,17 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
     }
 
     @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        getActionBar().setDisplayShowTitleEnabled(false);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
+
+        getActionBar().setTitle(getString(R.string.profile));
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if(saveThread == null || saveThread.isKilled()) {
@@ -112,11 +123,6 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
         setHasOptionsMenu(true);
         editableDataEntryRows = false;
 
-        getActionBar().setDisplayShowTitleEnabled(false);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
-
-        getActionBar().setTitle(getString(R.string.profile));
 
     }
 

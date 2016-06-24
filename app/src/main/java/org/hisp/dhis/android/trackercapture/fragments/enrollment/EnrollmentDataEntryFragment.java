@@ -313,23 +313,8 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
      */
     @Override
     protected void save() {
-        if (form != null && form.getTrackedEntityInstance() != null) {
-            if (form.getTrackedEntityInstance().getLocalId() < 0) {
-                //saving tei first to get auto-increment reference for enrollment
-                form.getTrackedEntityInstance().setFromServer(true);
-                form.getTrackedEntityInstance().save();
-            }
-            if(form.getEnrollment().getEvents() != null) {
-                for (Event event : form.getEnrollment().getEvents()) {
-                    event.setFromServer(true);
-                }
-            }
 
-            form.getEnrollment().setLocalTrackedEntityInstanceId(form.getTrackedEntityInstance().getLocalId());
-            form.getEnrollment().setFromServer(true); //setting from server true to avoid sending to server before we finish editing
-            form.getEnrollment().save();
-            flagDataChanged(false);
-        }
+//        }
     }
 
     @Override
@@ -443,16 +428,24 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
      * confirms that we want to save changes, which flags the data to be sent to server
      */
     private void confirmSave() {
-        form.getTrackedEntityInstance().setFromServer(false);
-        form.getEnrollment().setFromServer(false);
-        form.getTrackedEntityInstance().save();
-        form.getEnrollment().save();
-        if(form.getEnrollment().getEvents() != null) {
-            for(Event event : form.getEnrollment().getEvents()) {
-                event.setFromServer(false);
-                event.save();
+        if (form != null && form.getTrackedEntityInstance() != null) {
+            if (form.getTrackedEntityInstance().getLocalId() < 0) {
+                //saving tei first to get auto-increment reference for enrollment
+                form.getTrackedEntityInstance().setFromServer(false);
+                form.getTrackedEntityInstance().save();
             }
+            if(form.getEnrollment().getEvents() != null) {
+                for (Event event : form.getEnrollment().getEvents()) {
+                    event.setFromServer(false);
+                }
+            }
+
+            form.getEnrollment().setLocalTrackedEntityInstanceId(form.getTrackedEntityInstance().getLocalId());
+            form.getEnrollment().setFromServer(false); //setting from server true to avoid sending to server before we finish editing
+            form.getEnrollment().save();
+            flagDataChanged(false);
         }
+
 
         for(ProgramTrackedEntityAttribute ptea : form.getProgram().getProgramTrackedEntityAttributes()) {
             if(ptea.getTrackedEntityAttribute().isGenerated()) {

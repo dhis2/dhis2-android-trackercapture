@@ -54,8 +54,11 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceItemRow;
+import org.hisp.dhis.android.sdk.utils.comparators.EnrollmentDateComparator;
+import org.hisp.dhis.android.sdk.utils.comparators.EventDateComparator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -79,10 +82,12 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
 
         // create a list of EventItems
         Program selectedProgram = MetaDataController.getProgram(mProgramId);
-        fragmentForm.setProgram(selectedProgram);
+
         if (selectedProgram == null || isListEmpty(selectedProgram.getProgramStages())) {
             return fragmentForm;
         }
+
+        fragmentForm.setProgram(selectedProgram);
 
         // since this is single event its only 1 stage
         ProgramStage programStage = selectedProgram.getProgramStages().get(0);
@@ -133,7 +138,7 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
         }
 
         enrollmentsToShow.addAll(enrollmentMap.values());
-
+        Collections.sort(enrollmentsToShow, new EnrollmentDateComparator());
         List<Long> trackedEntityInstanceIds = new ArrayList<>();
         if (isListEmpty(enrollmentsToShow)) { //enrollments
             return fragmentForm;
@@ -141,8 +146,9 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
             for (Enrollment enrollment : enrollmentsToShow) { // enrollments
                 if (enrollment != null) {
                     if (enrollment.getLocalTrackedEntityInstanceId() > 0) {
-                        if (!trackedEntityInstanceIds.contains(enrollment.getLocalTrackedEntityInstanceId()))
+                        if (!trackedEntityInstanceIds.contains(enrollment.getLocalTrackedEntityInstanceId())) {
                             trackedEntityInstanceIds.add(enrollment.getLocalTrackedEntityInstanceId());
+                        }
                     }
                 }
             }

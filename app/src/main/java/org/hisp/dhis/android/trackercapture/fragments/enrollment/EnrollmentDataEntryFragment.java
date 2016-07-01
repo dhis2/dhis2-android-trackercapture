@@ -346,6 +346,7 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             return;
         }
         if(hasRules(trackedEntityAttribute)) {
+            getProgramRuleFragmentHelper().getProgramRuleValidationErrors().clear();
             initiateEvaluateProgramRules();
         }
     }
@@ -433,6 +434,7 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
                 //saving tei first to get auto-increment reference for enrollment
                 form.getTrackedEntityInstance().setFromServer(false);
                 form.getTrackedEntityInstance().save();
+
             }
             if(form.getEnrollment().getEvents() != null) {
                 for (Event event : form.getEnrollment().getEvents()) {
@@ -558,6 +560,4 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
         }
         return super.onOptionsItemSelected(menuItem);
     }
-
-
 }

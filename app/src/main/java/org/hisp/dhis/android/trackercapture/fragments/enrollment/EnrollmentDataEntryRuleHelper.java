@@ -201,7 +201,8 @@ public class EnrollmentDataEntryRuleHelper implements IProgramRuleFragmentHelper
         }
 //        enrollmentDataEntryFragment.getListViewAdapter().showErrorOnIndex(uid, programRuleAction.getContent());
         if(!programRuleValidationErrors.contains(programRuleAction.getContent())) {
-            programRuleValidationErrors.add(programRuleAction.getContent());
+            TrackedEntityAttributeValue value = getTrackedEntityAttributeValue(uid);
+            programRuleValidationErrors.add(programRuleAction.getContent() + " " + value.getValue());
         }
     }
 

@@ -52,6 +52,7 @@ import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramRuleAction;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.adapters.SectionAdapter;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnDetailedInfoButtonClick;
@@ -80,13 +81,14 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
     private static final String EXTRA_SAVED_INSTANCE_STATE = "extra:savedInstanceState";
 
     private static final int LOADER_ID = 95640;
+    private static final String TRACKEDENTITYINSTANCE_ORIGINAL = "extra:OriginalTEI";
 
     private boolean edit;
     private boolean editableDataEntryRows;
 
     private TrackedEntityInstanceProfileFragmentForm mForm;
     private SaveThread saveThread;
-
+    private TrackedEntityInstance originalTei;
     public TrackedEntityInstanceProfileFragment() {
     }
 
@@ -105,7 +107,7 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        getActionBar().setDisplayShowTitleEnabled(false);
+        getActionBar().setDisplayShowTitleEnabled(true);
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
 
@@ -122,7 +124,6 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
         saveThread.init(this);
         setHasOptionsMenu(true);
         editableDataEntryRows = false;
-
 
     }
 
@@ -156,6 +157,7 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
                 setEditableDataEntryRows(true);
             }
             editableDataEntryRows = !editableDataEntryRows;
+            proceed();
         }
 
         return super.onOptionsItemSelected(menuItem);
@@ -172,7 +174,7 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            save();
+                            proceed();
                             onDetach();
 //                            getFragmentManager().popBackStack();
                             DhisController.hasUnSynchronizedDatavalues = true;
@@ -230,6 +232,12 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
             );
         }
         return null;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable(TRACKEDENTITYINSTANCE_ORIGINAL, originalTei);
     }
 
     @Override
@@ -310,6 +318,11 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
 
     @Override
     protected void save() {
+
+    }
+
+    @Override
+    protected void proceed() {
         if(!edit) {// if rows are not edited
             return;
         }
@@ -323,11 +336,6 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
         }
 
         flagDataChanged(false);
-    }
-
-    @Override
-    protected void proceed() {
-
     }
 
     @Subscribe

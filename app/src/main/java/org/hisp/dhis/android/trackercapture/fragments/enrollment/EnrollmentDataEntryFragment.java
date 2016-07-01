@@ -346,6 +346,7 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             return;
         }
         if(hasRules(trackedEntityAttribute)) {
+            getProgramRuleFragmentHelper().getProgramRuleValidationErrors().clear();
             initiateEvaluateProgramRules();
         }
     }
@@ -558,6 +559,4 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
         }
         return super.onOptionsItemSelected(menuItem);
     }
-
-
 }

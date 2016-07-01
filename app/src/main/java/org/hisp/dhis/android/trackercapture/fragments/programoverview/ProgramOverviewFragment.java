@@ -494,7 +494,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             if (failedItem != null && failedItem.getHttpStatusCode() >= 0) {
                 enrollmentServerStatus.setImageResource(R.drawable.ic_event_error);
             } else if (!mForm.getEnrollment().isFromServer()) {
-                enrollmentServerStatus.setImageResource(R.drawable.ic_offline);
+                enrollmentServerStatus.setImageResource(R.drawable.ic_legacy_offline);
             } else {
                 enrollmentServerStatus.setImageResource(R.drawable.ic_from_server);
             }

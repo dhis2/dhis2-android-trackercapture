@@ -97,7 +97,10 @@ public class EnrollmentDateFragment extends DataEntryFragment<EnrollmentDateFrag
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        getActionBar().setDisplayShowTitleEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
+        getActionBar().setTitle(R.string.enrollment);
     }
 
 
@@ -201,6 +204,19 @@ public class EnrollmentDateFragment extends DataEntryFragment<EnrollmentDateFrag
     protected void proceed() {
 
     }
+
+    @Override
+    protected boolean goBack() {
+        if(isValid()) {
+            goBackToPreviousActivity();
+        }
+        return false;
+    }
+
+    private void goBackToPreviousActivity() {
+        getActivity().finish();
+    }
+
 
     @Override
     public void onLoadFinished(Loader<EnrollmentDateFragmentForm> loader, EnrollmentDateFragmentForm data)

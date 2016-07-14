@@ -338,7 +338,7 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
         flagDataChanged(false);
     }
 
-    @Override
+    //@Override
     protected boolean goBack() {
         doBack();
         return true;

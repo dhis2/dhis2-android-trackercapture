@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
@@ -281,21 +282,29 @@ public class HolderActivity extends AbsHomeActivity {
     }
 
     public static void navigateToOnlineSearchResultFragment(Activity activity, List<TrackedEntityInstance> trackedEntityInstances, String orgUnit, String program) {
-        Intent intent = new Intent(activity, HolderActivity.class);
+        try {
+            Intent intent = new Intent(activity, HolderActivity.class);
 
-        OnlineSearchResultFragment.ParameterSerializible parameterSerializible1 = new OnlineSearchResultFragment.ParameterSerializible(trackedEntityInstances);
-        OnlineSearchResultFragment.ParameterSerializible parameterSerializible2 = new OnlineSearchResultFragment.ParameterSerializible(new ArrayList<TrackedEntityInstance>());
+            OnlineSearchResultFragment.ParameterSerializible parameterSerializible1 =
+                    new OnlineSearchResultFragment.ParameterSerializible(trackedEntityInstances);
+            OnlineSearchResultFragment.ParameterSerializible parameterSerializible2 =
+                    new OnlineSearchResultFragment.ParameterSerializible(new ArrayList<TrackedEntityInstance>());
 
 
-        intent.putExtra(OnlineSearchResultFragment.EXTRA_ORGUNIT, orgUnit);
-        intent.putExtra(OnlineSearchResultFragment.EXTRA_SELECTALL, false);
-        intent.putExtra(OnlineSearchResultFragment.EXTRA_PROGRAM, program);
-        intent.putExtra(OnlineSearchResultFragment.EXTRA_TRACKEDENTITYINSTANCESSELECTED, parameterSerializible1);
-        intent.putExtra(OnlineSearchResultFragment.EXTRA_TRACKEDENTITYINSTANCESLIST, parameterSerializible2);
-        intent.putExtra(ARG_TYPE, ARG_TYPE_ONLINESEARCHRESULTFRAGMENT);
-        intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NO_HISTORY); // we don't want to keep it to backstack
+            intent.putExtra(OnlineSearchResultFragment.EXTRA_ORGUNIT, orgUnit);
+            intent.putExtra(OnlineSearchResultFragment.EXTRA_SELECTALL, false);
+            intent.putExtra(OnlineSearchResultFragment.EXTRA_PROGRAM, program);
+            intent.putExtra(OnlineSearchResultFragment.EXTRA_TRACKEDENTITYINSTANCESSELECTED, parameterSerializible1);
+            intent.putExtra(OnlineSearchResultFragment.EXTRA_TRACKEDENTITYINSTANCESLIST, parameterSerializible2);
+            intent.putExtra(ARG_TYPE, ARG_TYPE_ONLINESEARCHRESULTFRAGMENT);
+            intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NO_HISTORY); // we don't want to keep it to backstack
 
-        activity.startActivity(intent);
+            activity.startActivity(intent);
+        } catch (Exception e) {
+            if (activity != null) {
+                Toast.makeText(activity, R.string.generic_error, Toast.LENGTH_LONG).show();
+            }
+        }
 
     }
 

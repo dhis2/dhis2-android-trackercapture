@@ -31,12 +31,7 @@ package org.hisp.dhis.android.trackercapture.fragments.trackedentityinstanceprof
 
 import android.content.DialogInterface;
 import android.os.Bundle;
-
-
-import android.support.v4.app.Fragment;
 import android.support.v4.content.Loader;
-
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -47,19 +42,15 @@ import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.sdk.controllers.DhisController;
-import org.hisp.dhis.android.sdk.persistence.models.DataValue;
-import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
-import org.hisp.dhis.android.sdk.persistence.models.Event;
-import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
-import org.hisp.dhis.android.sdk.persistence.models.ProgramRuleAction;
+import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
+import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.ui.adapters.SectionAdapter;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnDetailedInfoButtonClick;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.RowValueChangedEvent;
-import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
-import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.SaveThread;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.R;
@@ -72,7 +63,7 @@ import java.util.List;
  * Created by erling on 5/18/15.
  */
 public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<TrackedEntityInstanceProfileFragmentForm>
-{
+        implements OnBackPressedListener {
     public static final String TAG = TrackedEntityInstanceProfileFragment.class.getName();
     public static final String TRACKEDENTITYINSTANCE_ID = "extra:TrackedEntityInstanceId";
     public static final String PROGRAM_ID = "extra:ProgramId";
@@ -89,6 +80,7 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
     private TrackedEntityInstanceProfileFragmentForm mForm;
     private SaveThread saveThread;
     private TrackedEntityInstance originalTei;
+
     public TrackedEntityInstanceProfileFragment() {
     }
 
@@ -117,7 +109,7 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(saveThread == null || saveThread.isKilled()) {
+        if (saveThread == null || saveThread.isKilled()) {
             saveThread = new SaveThread();
             saveThread.start();
         }
@@ -149,8 +141,7 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
         if (menuItem.getItemId() == android.R.id.home) {
             doBack();
             return true;
-        }
-        else if (menuItem.getItemId() == org.hisp.dhis.android.sdk.R.id.action_new_event) {
+        } else if (menuItem.getItemId() == org.hisp.dhis.android.sdk.R.id.action_new_event) {
             if (editableDataEntryRows) {
                 setEditableDataEntryRows(false);
             } else {
@@ -163,9 +154,9 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
         return super.onOptionsItemSelected(menuItem);
     }
 
-
-    public void doBack() {
-        if(edit) {
+    @Override
+    public boolean doBack() {
+        if (edit) {
             UiUtils.showConfirmDialog(getActivity(),
                     getString(org.hisp.dhis.android.sdk.R.string.discard), getString(org.hisp.dhis.android.sdk.R.string.discard_confirm_changes),
                     getString(org.hisp.dhis.android.sdk.R.string.save_and_close),
@@ -199,11 +190,11 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
             onDetach();
             getActivity().finish();
         }
+        return false;
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState)
-    {
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         Bundle argumentsBundle = new Bundle();
         argumentsBundle.putBundle(EXTRA_ARGUMENTS, getArguments());
@@ -262,16 +253,16 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
     public void setEditableDataEntryRows(boolean editable) {
         List<Row> rows = new ArrayList<>(mForm.getDataEntryRows());
         listViewAdapter.swapData(null);
-        if(editable) {
-            for(Row row : rows) {
-                if(!row.isShouldNeverBeEdited()) {
+        if (editable) {
+            for (Row row : rows) {
+                if (!row.isShouldNeverBeEdited()) {
                     row.setEditable(true);
                 }
 
             }
         } else {
-            for(Row row : rows) {
-                if(!row.isShouldNeverBeEdited()) {
+            for (Row row : rows) {
+                if (!row.isShouldNeverBeEdited()) {
                     row.setEditable(false);
                 }
             }
@@ -282,16 +273,14 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
     }
 
 
-
-    public void flagDataChanged(boolean changed)
-    {
+    public void flagDataChanged(boolean changed) {
         edit = changed;
     }
 
     @Subscribe
     public void onRowValueChanged(final RowValueChangedEvent event) {
         flagDataChanged(true);
-        if (mForm == null ) {
+        if (mForm == null) {
             return;
         }
         saveThread.schedule();
@@ -323,12 +312,12 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
 
     @Override
     protected void proceed() {
-        if(!edit) {// if rows are not edited
+        if (!edit) {// if rows are not edited
             return;
         }
 
-        if(mForm!=null && isAdded() && mForm.getTrackedEntityInstance() != null ) {
-            for(TrackedEntityAttributeValue val : mForm.getTrackedEntityAttributeValues()) {
+        if (mForm != null && isAdded() && mForm.getTrackedEntityInstance() != null) {
+            for (TrackedEntityAttributeValue val : mForm.getTrackedEntityAttributeValues()) {
                 val.save();
             }
             mForm.getTrackedEntityInstance().setFromServer(false);

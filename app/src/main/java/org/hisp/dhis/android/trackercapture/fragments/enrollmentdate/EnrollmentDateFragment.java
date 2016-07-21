@@ -206,6 +206,14 @@ public class EnrollmentDateFragment extends DataEntryFragment<EnrollmentDateFrag
     }
 
 
+    //@Override
+    protected boolean goBack() {
+        if(isValid()) {
+            goBackToPreviousActivity();
+        }
+        return false;
+    }
+
     private void goBackToPreviousActivity() {
         getActivity().finish();
     }

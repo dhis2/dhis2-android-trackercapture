@@ -65,7 +65,7 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
     private final String mProgramId;
     private final long mTrackedEntityInstanceId;
     private final String enrollmentDate;
-    private final String incidentDate;
+    private String incidentDate;
     private TrackedEntityInstance currentTrackedEntityInstance;
     private Enrollment currentEnrollment;
 
@@ -97,7 +97,9 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
         } else {
             currentTrackedEntityInstance = TrackerController.getTrackedEntityInstance(mTrackedEntityInstanceId);
         }
-
+        if(incidentDate == null) {
+            incidentDate = "";
+        }
         currentEnrollment = new Enrollment(mOrgUnitId, currentTrackedEntityInstance.getTrackedEntityInstance(), mProgram, enrollmentDate, incidentDate);
 
         mForm.setProgram(mProgram);

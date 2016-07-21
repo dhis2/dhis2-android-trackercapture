@@ -7,8 +7,10 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
+import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.ui.fragments.eventdataentry.EventDataEntryFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.settings.SettingsFragment;
 import org.hisp.dhis.android.trackercapture.R;
@@ -43,13 +45,24 @@ public class HolderActivity extends AbsHomeActivity {
     public static final String ARG_TYPE_ONLINESEARCHFRAGMENT = "arg:OnlineSearchFragment";
     public static final String ARG_TYPE_ONLINESEARCHRESULTFRAGMENT = "arg:OnlineSearchResultFragment";
     private static final String ARG_TYPE_UPCOMINGEVENTSFRAGMENT = "arg:UpcomingEventsFragment";
+    OnBackPressedListener onBackPressedListener;
 
+
+    @Override
+    public void onBackPressed() {
+        if (onBackPressedListener != null) {
+            if (onBackPressedListener.doBack()) {
+                super.onBackPressed();
+            }
+        } else {
+            super.onBackPressed();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_holder);
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -65,23 +78,27 @@ public class HolderActivity extends AbsHomeActivity {
         switch (argType) {
             case ARG_TYPE_ENROLLMENTFRAGMENT: {
                 EnrollmentDataEntryFragment fragment = new EnrollmentDataEntryFragment();
+                onBackPressedListener = fragment;
                 fragment.setArguments(getIntent().getExtras());
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
                 break;
             }
             case ARG_TYPE_PROGRAMOVERVIEWFRAGMENT: {
+                onBackPressedListener = null;
                 ProgramOverviewFragment fragment = new ProgramOverviewFragment();
                 fragment.setArguments(getIntent().getExtras());
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
                 break;
             }
             case ARG_TYPE_SETTINGSFRAGMENT: {
+                onBackPressedListener = null;
                 SettingsFragment settingsFragment = new SettingsFragment();
                 settingsFragment.setArguments(getIntent().getExtras());
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, settingsFragment).commit();
                 break;
             }
             case ARG_TYPE_DATAENTRYFRAGMENT: {
+                onBackPressedListener = null;
                 EventDataEntryFragment eventDataEntryFragment = new EventDataEntryFragment();
                 eventDataEntryFragment.setArguments(getIntent().getExtras());
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, eventDataEntryFragment).commit();
@@ -89,41 +106,48 @@ public class HolderActivity extends AbsHomeActivity {
             }
             case ARG_TYPE_TRACKEDENTITYINSTANCEPROFILE: {
                 TrackedEntityInstanceProfileFragment trackedEntityInstanceProfileFragment = new TrackedEntityInstanceProfileFragment();
+                onBackPressedListener = trackedEntityInstanceProfileFragment;
                 trackedEntityInstanceProfileFragment.setArguments(getIntent().getExtras());
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, trackedEntityInstanceProfileFragment).commit();
                 break;
             }
             case ARG_TYPE_ENROLLMENTDATEFRAGMENT: {
+                onBackPressedListener = null;
                 EnrollmentDateFragment enrollmentDateFragment = new EnrollmentDateFragment();
                 enrollmentDateFragment.setArguments(getIntent().getExtras());
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, enrollmentDateFragment).commit();
                 break;
             }
             case ARG_TYPE_ONLINESEARCHFRAGMENT: {
+                onBackPressedListener = null;
                 OnlineSearchFragment onlineSearchFragment = new OnlineSearchFragment();
                 onlineSearchFragment.setArguments(getIntent().getExtras());
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, onlineSearchFragment).commit();
                 break;
             }
             case ARG_TYPE_ONLINESEARCHRESULTFRAGMENT: {
+                onBackPressedListener = null;
                 OnlineSearchResultFragment onlineSearchResultFragment = new OnlineSearchResultFragment();
                 onlineSearchResultFragment.setArguments(getIntent().getExtras());
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, onlineSearchResultFragment).commit();
                 break;
             }
             case ARG_TYPE_LOCALSEARCHFRAGMENT: {
+                onBackPressedListener = null;
                 LocalSearchFragment localSearchFragment = new LocalSearchFragment();
                 localSearchFragment.setArguments(getIntent().getExtras());
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, localSearchFragment).commit();
                 break;
             }
             case ARG_TYPE_LOCALSEARCHRESULTFRAGMENT: {
+                onBackPressedListener = null;
                 LocalSearchResultFragment localSearchResultFragment = new LocalSearchResultFragment();
                 localSearchResultFragment.setArguments(getIntent().getExtras());
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, localSearchResultFragment).commit();
                 break;
             }
             case ARG_TYPE_UPCOMINGEVENTSFRAGMENT: {
+                onBackPressedListener = null;
                 UpcomingEventsFragment upcomingEventsFragment = new UpcomingEventsFragment();
                 upcomingEventsFragment.setArguments(getIntent().getExtras());
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, upcomingEventsFragment).commit();
@@ -173,6 +197,7 @@ public class HolderActivity extends AbsHomeActivity {
         activity.startActivity(intent);
 
     }
+
     public static void navigateToEnrollmentDataEntryFragment(Activity activity, String orgUnitId,
                                                              String programId,
                                                              String dateOfEnrollment,
@@ -233,7 +258,7 @@ public class HolderActivity extends AbsHomeActivity {
         activity.startActivity(intent);
     }
 
-    public static void navigateToDataEntryFragment(Activity activity,String orgUnitId, String programId, String programStageId,long localEnrollmentId) {
+    public static void navigateToDataEntryFragment(Activity activity, String orgUnitId, String programId, String programStageId, long localEnrollmentId) {
         Intent intent = new Intent(activity, HolderActivity.class);
         intent.putExtra(EventDataEntryFragment.ORG_UNIT_ID, orgUnitId);
         intent.putExtra(EventDataEntryFragment.PROGRAM_ID, programId);
@@ -259,25 +284,33 @@ public class HolderActivity extends AbsHomeActivity {
     }
 
     public static void navigateToOnlineSearchResultFragment(Activity activity, List<TrackedEntityInstance> trackedEntityInstances, String orgUnit, String program) {
-        Intent intent = new Intent(activity, HolderActivity.class);
+        try {
+            Intent intent = new Intent(activity, HolderActivity.class);
 
-        OnlineSearchResultFragment.ParameterSerializible parameterSerializible1 = new OnlineSearchResultFragment.ParameterSerializible(trackedEntityInstances);
-        OnlineSearchResultFragment.ParameterSerializible parameterSerializible2 = new OnlineSearchResultFragment.ParameterSerializible(new ArrayList<TrackedEntityInstance>());
+            OnlineSearchResultFragment.ParameterSerializible parameterSerializible1 =
+                    new OnlineSearchResultFragment.ParameterSerializible(trackedEntityInstances);
+            OnlineSearchResultFragment.ParameterSerializible parameterSerializible2 =
+                    new OnlineSearchResultFragment.ParameterSerializible(new ArrayList<TrackedEntityInstance>());
 
 
-        intent.putExtra(OnlineSearchResultFragment.EXTRA_ORGUNIT, orgUnit);
-        intent.putExtra(OnlineSearchResultFragment.EXTRA_SELECTALL, false);
-        intent.putExtra(OnlineSearchResultFragment.EXTRA_PROGRAM, program);
-        intent.putExtra(OnlineSearchResultFragment.EXTRA_TRACKEDENTITYINSTANCESSELECTED, parameterSerializible1);
-        intent.putExtra(OnlineSearchResultFragment.EXTRA_TRACKEDENTITYINSTANCESLIST, parameterSerializible2);
-        intent.putExtra(ARG_TYPE, ARG_TYPE_ONLINESEARCHRESULTFRAGMENT);
-        intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NO_HISTORY); // we don't want to keep it to backstack
+            intent.putExtra(OnlineSearchResultFragment.EXTRA_ORGUNIT, orgUnit);
+            intent.putExtra(OnlineSearchResultFragment.EXTRA_SELECTALL, false);
+            intent.putExtra(OnlineSearchResultFragment.EXTRA_PROGRAM, program);
+            intent.putExtra(OnlineSearchResultFragment.EXTRA_TRACKEDENTITYINSTANCESSELECTED, parameterSerializible1);
+            intent.putExtra(OnlineSearchResultFragment.EXTRA_TRACKEDENTITYINSTANCESLIST, parameterSerializible2);
+            intent.putExtra(ARG_TYPE, ARG_TYPE_ONLINESEARCHRESULTFRAGMENT);
+            intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NO_HISTORY); // we don't want to keep it to backstack
 
-        activity.startActivity(intent);
+            activity.startActivity(intent);
+        } catch (Exception e) {
+            if (activity != null) {
+                Toast.makeText(activity, R.string.generic_error, Toast.LENGTH_LONG).show();
+            }
+        }
 
     }
 
-    public static void navigateToLocalSearchFragment(Activity activity,String orgUnitId, String programId) {
+    public static void navigateToLocalSearchFragment(Activity activity, String orgUnitId, String programId) {
         Intent intent = new Intent(activity, HolderActivity.class);
         intent.putExtra(LocalSearchFragment.EXTRA_PROGRAM, programId);
         intent.putExtra(LocalSearchFragment.EXTRA_ORGUNIT, orgUnitId);
@@ -285,7 +318,7 @@ public class HolderActivity extends AbsHomeActivity {
         activity.startActivity(intent);
     }
 
-    public static void navigateToLocalSearchResultFragment(Activity activity,String organisationUnitId, String program, HashMap<String, String> attributeValues) {
+    public static void navigateToLocalSearchResultFragment(Activity activity, String organisationUnitId, String program, HashMap<String, String> attributeValues) {
         Intent intent = new Intent(activity, HolderActivity.class);
         intent.putExtra(LocalSearchResultFragment.EXTRA_ORGUNIT, organisationUnitId);
         intent.putExtra(LocalSearchResultFragment.EXTRA_PROGRAM, program);

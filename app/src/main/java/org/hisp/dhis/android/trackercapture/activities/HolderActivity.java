@@ -54,6 +54,8 @@ public class HolderActivity extends AbsHomeActivity {
             if (onBackPressedListener.doBack()) {
                 super.onBackPressed();
             }
+        } else {
+            super.onBackPressed();
         }
     }
 

@@ -84,8 +84,8 @@ public class HolderActivity extends AbsHomeActivity {
                 break;
             }
             case ARG_TYPE_PROGRAMOVERVIEWFRAGMENT: {
-                onBackPressedListener = null;
                 ProgramOverviewFragment fragment = new ProgramOverviewFragment();
+                onBackPressedListener = fragment;
                 fragment.setArguments(getIntent().getExtras());
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
                 break;

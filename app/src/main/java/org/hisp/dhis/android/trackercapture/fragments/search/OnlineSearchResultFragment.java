@@ -29,6 +29,7 @@ import org.hisp.dhis.android.sdk.controllers.DhisController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.events.LoadingMessageEvent;
+import org.hisp.dhis.android.sdk.events.OnTeiDownloadedEvent;
 import org.hisp.dhis.android.sdk.events.UiEvent;
 import org.hisp.dhis.android.sdk.job.JobExecutor;
 import org.hisp.dhis.android.sdk.job.NetworkJob;
@@ -37,8 +38,6 @@ import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
-import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
-import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
 import org.hisp.dhis.android.sdk.ui.activities.SynchronisationStateHandler;
@@ -70,7 +69,7 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
     private List<Enrollment> downloadedEnrollments;
     private String orgUnitId;
     private String programId;
-    private Map<String,ProgramTrackedEntityAttribute> programTrackedEntityAttributeMap;
+    private Map<String, ProgramTrackedEntityAttribute> programTrackedEntityAttributeMap;
 
     public static final String EXTRA_TRACKEDENTITYINSTANCESLIST = "extra:trackedEntityInstances";
     public static final String EXTRA_TRACKEDENTITYINSTANCESSELECTED = "extra:trackedEntityInstancesSelected";
@@ -85,7 +84,7 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
         ParameterSerializible parameterSerializible1 = new ParameterSerializible(trackedEntityInstances);
         ParameterSerializible parameterSerializible2 = new ParameterSerializible(new ArrayList<TrackedEntityInstance>());
         args.putSerializable(EXTRA_TRACKEDENTITYINSTANCESLIST, parameterSerializible1);
-        args.putSerializable(EXTRA_TRACKEDENTITYINSTANCESSELECTED,parameterSerializible2);
+        args.putSerializable(EXTRA_TRACKEDENTITYINSTANCESSELECTED, parameterSerializible2);
 
         args.putString(EXTRA_ORGUNIT, orgUnit);
         args.putBoolean(EXTRA_SELECTALL, false);
@@ -132,8 +131,7 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
             initiateLoading(activity);
 
 
-        }
-        else if (id == android.R.id.home) {
+        } else if (id == android.R.id.home) {
             getActivity().finish();
         }
 
@@ -151,7 +149,7 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
         mListView = (ListView) view
                 .findViewById(org.hisp.dhis.android.sdk.R.id.simple_listview);
 
-        if(getActivity() instanceof AppCompatActivity) {
+        if (getActivity() instanceof AppCompatActivity) {
             getActionBar().setDisplayShowTitleEnabled(true);
             getActionBar().setDisplayHomeAsUpEnabled(true);
             getActionBar().setHomeButtonEnabled(true);
@@ -166,11 +164,10 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
 
         UiUtils.hideKeyboard(getActivity());
 
-        if(savedInstanceState == null) {
+        if (savedInstanceState == null) {
             programTrackedEntityAttributeMap = new HashMap<>();
             programTrackedEntityAttributeMap = getProgramTrackedEntityAttributes(selectedProgram);
-        }
-        else {
+        } else {
         }
 
         mAdapter = new QueryTrackedEntityInstancesResultDialogAdapter(LayoutInflater.from(getActivity()), getSelectedTrackedEntityInstances(), programTrackedEntityAttributeMap);
@@ -178,7 +175,8 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
         mListView.setOnItemClickListener(this);
 
         mFilter.addTextChangedListener(new AbsTextWatcher() {
-            @Override public void afterTextChanged(Editable s) {
+            @Override
+            public void afterTextChanged(Editable s) {
                 mAdapter.getFilter().filter(s.toString());
             }
         });
@@ -187,10 +185,9 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
         mSelectAllButton.setOnClickListener(this);
         mSelectAllButton.setVisibility(View.VISIBLE);
         boolean selectall = getArguments().getBoolean(EXTRA_SELECTALL);
-        if(selectall) {
+        if (selectall) {
             mSelectAllButton.setText(getString(org.hisp.dhis.android.sdk.R.string.deselect_all));
         }
-
 
 
         getAdapter().swapData(getTrackedEntityInstances());
@@ -199,7 +196,7 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
     private Map<String, ProgramTrackedEntityAttribute> getProgramTrackedEntityAttributes(Program selectedProgram) {
         List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = selectedProgram.getProgramTrackedEntityAttributes();
         Map<String, ProgramTrackedEntityAttribute> attributeMap = new HashMap<>();
-        for(ProgramTrackedEntityAttribute programTrackedEntityAttribute : programTrackedEntityAttributes) {
+        for (ProgramTrackedEntityAttribute programTrackedEntityAttribute : programTrackedEntityAttributes) {
             attributeMap.put(programTrackedEntityAttribute.getTrackedEntityAttributeId(), programTrackedEntityAttribute);
         }
         return attributeMap;
@@ -210,7 +207,7 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
         TrackedEntityInstance value = mAdapter.getItem(position);
         List<TrackedEntityInstance> selected = getSelectedTrackedEntityInstances();
         CheckBox checkBox = (CheckBox) view.findViewById(org.hisp.dhis.android.sdk.R.id.checkBoxTeiQuery);
-        if(checkBox.isChecked()) {
+        if (checkBox.isChecked()) {
             selected.remove(value);
             checkBox.setChecked(false);
         } else {
@@ -256,7 +253,7 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
 
     @Override
     public void onClick(View v) {
-        if(v.getId() == org.hisp.dhis.android.sdk.R.id.teiqueryresult_selectall) {
+        if (v.getId() == org.hisp.dhis.android.sdk.R.id.teiqueryresult_selectall) {
             toggleSelectAll();
         }
     }
@@ -264,7 +261,7 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
     public void toggleSelectAll() {
         Bundle arguments = getArguments();
         boolean selectAll = arguments.getBoolean(EXTRA_SELECTALL);
-        if(selectAll) {
+        if (selectAll) {
             mSelectAllButton.setText(getText(org.hisp.dhis.android.sdk.R.string.select_all));
             deselectAll();
         } else {
@@ -280,7 +277,7 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
         selectedTrackedEntityInstances.clear();
         selectedTrackedEntityInstances.addAll(allTrackedEntityInstances);
         View view = null;
-        for(int i = 0; i<allTrackedEntityInstances.size(); i++) {
+        for (int i = 0; i < allTrackedEntityInstances.size(); i++) {
             view = mAdapter.getView(i, view, null);
             CheckBox checkBox = (CheckBox) view.findViewById(org.hisp.dhis.android.sdk.R.id.checkBoxTeiQuery);
             checkBox.setChecked(true);
@@ -293,7 +290,7 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
         List<TrackedEntityInstance> selectedTrackedEntityInstances = getSelectedTrackedEntityInstances();
         selectedTrackedEntityInstances.clear();
         View view = null;
-        for(int i = 0; i<allTrackedEntityInstances.size(); i++) {
+        for (int i = 0; i < allTrackedEntityInstances.size(); i++) {
             view = mAdapter.getView(i, view, null);
             CheckBox checkBox = (CheckBox) view.findViewById(org.hisp.dhis.android.sdk.R.id.checkBoxTeiQuery);
             checkBox.setChecked(false);
@@ -323,6 +320,11 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
      * is downloaded
      */
     public void initiateLoading(final Activity activity) {
+
+        Dhis2Application.getEventBus().post(
+                new OnTeiDownloadedEvent(OnTeiDownloadedEvent.EventType.START,
+                        getSelectedTrackedEntityInstances().size()));
+
         Log.d(TAG, "loading: " + getSelectedTrackedEntityInstances().size());
         downloadedTrackedEntityInstances = new ArrayList<>();
         downloadedEnrollments = new ArrayList<>();
@@ -332,6 +334,7 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
                 Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_START));
             }
         });
+
         JobExecutor.enqueueJob(new NetworkJob<Object>(0,
                 ResourceType.TRACKEDENTITYINSTANCE) {
 
@@ -340,8 +343,8 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
                 SynchronisationStateHandler.getInstance().changeState(true);
                 List<TrackedEntityInstance> trackedEntityInstances = TrackerController.getTrackedEntityInstancesDataFromServer(DhisController.getInstance().getDhisApi(), getSelectedTrackedEntityInstances(), false);
 
-                if(trackedEntityInstances != null) {
-                    if(downloadedTrackedEntityInstances == null) {
+                if (trackedEntityInstances != null) {
+                    if (downloadedTrackedEntityInstances == null) {
                         downloadedTrackedEntityInstances = new ArrayList<>();
                     }
                     downloadedTrackedEntityInstances.addAll(trackedEntityInstances);
@@ -349,8 +352,8 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
 
                 for (TrackedEntityInstance tei : downloadedTrackedEntityInstances) {
                     List<Enrollment> enrollments = TrackerController.getEnrollmentDataFromServer(DhisController.getInstance().getDhisApi(), tei);
-                    if(enrollments != null) {
-                        if(downloadedEnrollments == null) {
+                    if (enrollments != null) {
+                        if (downloadedEnrollments == null) {
                             downloadedEnrollments = new ArrayList<>();
                         }
                         downloadedEnrollments.addAll(enrollments);
@@ -376,8 +379,8 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
 
                     }
                 }
-
-                Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_END));
+                Dhis2Application.getEventBus().post(new OnTeiDownloadedEvent(OnTeiDownloadedEvent.EventType.END));
+                //Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_END));
                 SynchronisationStateHandler.getInstance().changeState(false);
                 return new Object();
             }
@@ -388,11 +391,12 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
     @Subscribe
     public void onLoadingMessageEvent(final LoadingMessageEvent event) {
         Log.d(TAG, "Message received" + event.message);
-        if(progressDialogFragment!=null && progressDialogFragment.getDialog() != null &&
+        if (progressDialogFragment != null && progressDialogFragment.getDialog() != null &&
                 progressDialogFragment.getDialog().isShowing()) {
             ((ProgressDialog) progressDialogFragment.getDialog()).setMessage(event.message);
         }
     }
+
     public static class ParameterSerializible implements Serializable {
         private List<TrackedEntityInstance> trackedEntityInstances;
 
@@ -404,9 +408,11 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
             return trackedEntityInstances;
         }
     }
+
     public static class ParameterParcelable implements Parcelable {
         public static final String TAG = ParameterParcelable.class.getSimpleName();
         private List<TrackedEntityInstance> trackedEntityInstances;
+
         public ParameterParcelable(List<TrackedEntityInstance> trackedEntityInstances) {
             Log.d(TAG, "parcelputting " + trackedEntityInstances.size());
             this.trackedEntityInstances = trackedEntityInstances;

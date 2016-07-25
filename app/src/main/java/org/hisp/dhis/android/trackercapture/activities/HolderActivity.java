@@ -98,8 +98,8 @@ public class HolderActivity extends AbsHomeActivity {
                 break;
             }
             case ARG_TYPE_DATAENTRYFRAGMENT: {
-                onBackPressedListener = null;
                 EventDataEntryFragment eventDataEntryFragment = new EventDataEntryFragment();
+                onBackPressedListener = eventDataEntryFragment;
                 eventDataEntryFragment.setArguments(getIntent().getExtras());
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, eventDataEntryFragment).commit();
                 break;
@@ -112,8 +112,8 @@ public class HolderActivity extends AbsHomeActivity {
                 break;
             }
             case ARG_TYPE_ENROLLMENTDATEFRAGMENT: {
-                onBackPressedListener = null;
                 EnrollmentDateFragment enrollmentDateFragment = new EnrollmentDateFragment();
+                onBackPressedListener = enrollmentDateFragment;
                 enrollmentDateFragment.setArguments(getIntent().getExtras());
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, enrollmentDateFragment).commit();
                 break;

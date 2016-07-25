@@ -26,3 +26,4 @@ build
 
 #Android
 *.apk
+fabric.properties

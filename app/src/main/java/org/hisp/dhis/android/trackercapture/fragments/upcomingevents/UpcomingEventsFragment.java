@@ -111,9 +111,9 @@ public class UpcomingEventsFragment extends SelectProgramFragment implements Ada
 
     protected View getListViewHeader(Bundle savedInstanceState) {
         if(getActivity() instanceof AppCompatActivity) {
-            getActionBar().setDisplayShowTitleEnabled(true);
             getActionBar().setDisplayHomeAsUpEnabled(true);
             getActionBar().setHomeButtonEnabled(true);
+            getActionBar().setTitle(getString(R.string.upcoming_events));
         }
 
         View header = getLayoutInflater(savedInstanceState).inflate(
@@ -132,9 +132,11 @@ public class UpcomingEventsFragment extends SelectProgramFragment implements Ada
         startDate = new DataValue();
         startDate.setValue(DateUtils.getMediumDateString());
         endDate = new DataValue();
-        endDate.setValue(new LocalDate(DateUtils.getMediumDateString()).plusYears(1).toString());
+        endDate.setValue(new LocalDate(DateUtils.getMediumDateString()).plusWeeks(1).toString());
         DatePickerRow startDatePicker = new DatePickerRow(getString(R.string.startdate), false, null, startDate, true);
+        startDatePicker.setHideDetailedInfoButton(true);
         DatePickerRow endDatePicker = new DatePickerRow(getString(R.string.enddate), false, null, endDate, true);
+        endDatePicker.setHideDetailedInfoButton(true);
         LinearLayout dateFilterContainer = (LinearLayout) header.findViewById(R.id.datefilterlayout);
         View view1 = startDatePicker.getView(getFragmentManager(), getActivity().getLayoutInflater(), null, dateFilterContainer);
         view1.setLayoutParams(new TableLayout.LayoutParams(0, TableLayout.LayoutParams.WRAP_CONTENT, 1f));

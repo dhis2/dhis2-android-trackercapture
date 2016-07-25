@@ -540,12 +540,8 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
 
     @Override
     public boolean onBackPressed() {
-        if (checkIfDataHasBeenEdited()) {
-            showConfirmDiscardDialog();
-            return false;
-        } else {
-            return super.onBackPressed();
-        }
+        showConfirmDiscardDialog();
+        return false;
     }
 
     @Override

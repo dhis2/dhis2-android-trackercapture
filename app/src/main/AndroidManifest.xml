@@ -68,7 +68,8 @@
             android:windowSoftInputMode="adjustPan" >
         </activity>
         <activity android:name=".activities.HolderActivity"
-            android:windowSoftInputMode="adjustPan|stateHidden">
+            android:windowSoftInputMode="adjustPan|stateHidden"
+            android:configChanges="orientation|keyboardHidden|screenSize">
 
         </activity>
 

@@ -59,6 +59,7 @@
             android:name="org.hisp.dhis.android.sdk.ui.activities.LoginActivity"
             android:theme="@style/LoginScreenTheme"
             android:configChanges="orientation|keyboardHidden|screenSize"
+            android:windowSoftInputMode="adjustResize"
             android:label="@string/app_name" >
         </activity>
         <activity

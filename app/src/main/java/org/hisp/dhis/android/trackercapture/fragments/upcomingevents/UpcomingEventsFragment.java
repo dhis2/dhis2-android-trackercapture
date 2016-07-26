@@ -142,6 +142,10 @@ public class UpcomingEventsFragment extends SelectProgramFragment implements Ada
         view1.setLayoutParams(new TableLayout.LayoutParams(0, TableLayout.LayoutParams.WRAP_CONTENT, 1f));
         View view2 = endDatePicker.getView(getFragmentManager(), getActivity().getLayoutInflater(), null, dateFilterContainer);
         view2.setLayoutParams(new TableLayout.LayoutParams(0, TableLayout.LayoutParams.WRAP_CONTENT, 1f));
+        View detailedInfoButton1 = view1.findViewById(R.id.detailed_info_button_layout);
+        View detailedInfoButton2 = view2.findViewById(R.id.detailed_info_button_layout);
+        detailedInfoButton1.setVisibility(View.GONE);
+        detailedInfoButton2.setVisibility(View.GONE);
         dateFilterContainer.addView(view1);
         dateFilterContainer.addView(view2);
         return header;

@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
@@ -102,13 +103,13 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
         int id = item.getItemId();
         if (id == R.id.action_load_to_device) {
             runQuery();
-        }
-        else if (id == android.R.id.home) {
+        } else if (id == android.R.id.home) {
             getActivity().finish();
         }
 
         return super.onOptionsItemSelected(item);
     }
+
     @Override
     public void onPause() {
         super.onPause();
@@ -136,7 +137,7 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
                 org.hisp.dhis.android.trackercapture.R.layout.fragmentdialog_querytei_header, mListView, false
         );
 
-        if(getActivity() instanceof AppCompatActivity) {
+        if (getActivity() instanceof AppCompatActivity) {
             getActionBar().setDisplayShowTitleEnabled(true);
             getActionBar().setDisplayHomeAsUpEnabled(true);
             getActionBar().setHomeButtonEnabled(true);
@@ -145,7 +146,6 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
         FloatingActionButton detailedSearchButton = (FloatingActionButton) header.findViewById(org.hisp.dhis.android.trackercapture.R.id.detailed_search_button);
         detailedSearchButton.setOnClickListener(this);
         mListView.addHeaderView(header, TAG, false);
-
 
 
         mFilter = (EditText) view
@@ -160,7 +160,7 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
         mFilter.addTextChangedListener(new AbsTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
-                if(mForm != null) {
+                if (mForm != null) {
                     mForm.setQueryString(s.toString());
                 }
             }
@@ -260,7 +260,7 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
         } else {
             button.setImageResource(org.hisp.dhis.android.trackercapture.R.drawable.ic_close_dialog);
 
-            if(mForm != null && mForm.getDataEntryRows() != null) {
+            if (mForm != null && mForm.getDataEntryRows() != null) {
                 mAdapter.swapData(mForm.getDataEntryRows());
             }
 
@@ -321,9 +321,15 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
         }
         final boolean detailedSearch = getArguments().getBoolean(EXTRA_DETAILED);
 
-        queryTrackedEntityInstances(getChildFragmentManager(),
-            mForm.getOrganisationUnit(), mForm.getProgram(),
-            mForm.getQueryString(), detailedSearch, searchValues.toArray(new TrackedEntityAttributeValue[]{}));
+        if (mForm != null) {
+
+            queryTrackedEntityInstances(getChildFragmentManager(),
+                    mForm.getOrganisationUnit(), mForm.getProgram(),
+                    mForm.getQueryString
+                            (), detailedSearch, searchValues.toArray(new TrackedEntityAttributeValue[]{}));
+        } else {
+            Toast.makeText(getContext(), "Form error. Please retry", Toast.LENGTH_SHORT).show();
+        }
 
     }
 
@@ -343,10 +349,9 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
             public Object execute() throws APIException {
                 Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_START));
                 List<TrackedEntityInstance> trackedEntityInstancesQueryResult = null;
-                if(detailedSearch) {
+                if (detailedSearch) {
                     trackedEntityInstancesQueryResult = TrackerController.queryTrackedEntityInstancesDataFromAllAccessibleOrgUnits(DhisController.getInstance().getDhisApi(), orgUnit, program, queryString, detailedSearch, params);
-                }
-                else {
+                } else {
                     trackedEntityInstancesQueryResult = TrackerController.queryTrackedEntityInstancesDataFromServer(DhisController.getInstance().getDhisApi(), orgUnit, program, queryString, params);
                 }
                 Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_END));
@@ -358,6 +363,6 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
     }
 
     public void showOnlineSearchResultFragment(final List<TrackedEntityInstance> trackedEntityInstances, final String orgUnit, final String programId) {
-        HolderActivity.navigateToOnlineSearchResultFragment(getActivity(),trackedEntityInstances, orgUnit, programId);
+        HolderActivity.navigateToOnlineSearchResultFragment(getActivity(), trackedEntityInstances, orgUnit, programId);
     }
 }

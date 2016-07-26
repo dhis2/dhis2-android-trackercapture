@@ -350,14 +350,18 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
                     downloadedTrackedEntityInstances.addAll(trackedEntityInstances);
                 }
 
-                for (TrackedEntityInstance tei : downloadedTrackedEntityInstances) {
-                    List<Enrollment> enrollments = TrackerController.getEnrollmentDataFromServer(DhisController.getInstance().getDhisApi(), tei);
+                for (int i = 0; i < downloadedTrackedEntityInstances.size(); i++) {
+                    List<Enrollment> enrollments = TrackerController.getEnrollmentDataFromServer(DhisController.getInstance().getDhisApi(), downloadedTrackedEntityInstances.get(i));
                     if (enrollments != null) {
                         if (downloadedEnrollments == null) {
                             downloadedEnrollments = new ArrayList<>();
                         }
                         downloadedEnrollments.addAll(enrollments);
                     }
+                    Dhis2Application.getEventBus().post(
+                            new OnTeiDownloadedEvent(OnTeiDownloadedEvent.EventType.UPDATE,
+                                    trackedEntityInstances.size(), (int) Math.ceil(
+                                    (downloadedTrackedEntityInstances.size() + i + 1) / 2.0)));
                 }
 
 
@@ -379,8 +383,10 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
 
                     }
                 }
-                Dhis2Application.getEventBus().post(new OnTeiDownloadedEvent(OnTeiDownloadedEvent.EventType.END));
-                //Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_END));
+                Dhis2Application.getEventBus().post(
+                        new OnTeiDownloadedEvent(OnTeiDownloadedEvent.EventType.END,
+                                getSelectedTrackedEntityInstances().size()));
+                Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_END));
                 SynchronisationStateHandler.getInstance().changeState(false);
                 return new Object();
             }

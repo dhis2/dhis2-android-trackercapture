@@ -32,7 +32,6 @@ package org.hisp.dhis.android.trackercapture.fragments.selectprogram;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -74,6 +73,7 @@ import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.ItemStatusDialogFragment;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.QueryTrackedEntityInstancesDialogFragment;
+import org.hisp.dhis.android.trackercapture.ui.DownloadEventSnackbar;
 import org.hisp.dhis.android.trackercapture.ui.adapters.TrackedEntityInstanceAdapter;
 import org.joda.time.DateTime;
 
@@ -91,7 +91,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     private FloatingActionButton mLocalSearchButton;
     private SelectProgramFragmentForm mForm;
     protected TextView noRowsTextView;
-    private Snackbar snackBar;
+    private DownloadEventSnackbar snackbar;
 
     @Override
     protected TrackedEntityInstanceAdapter getAdapter(Bundle savedInstanceState) {
@@ -238,6 +238,10 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
         dialog.show(fragmentManager);
     }
 
+    public final void showOnlineSearchFragment() {
+        showOnlineSearchFragment(mState.getOrgUnitId(), mState.getProgramId());
+    }
+
     private final void showOnlineSearchFragment(String orgUnit, String program) {
         HolderActivity.navigateToOnlineSearchFragment(getActivity(), program, orgUnit);
     }
@@ -375,24 +379,18 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
         }
     }
 
-
-    @SuppressWarnings("WrongConstant")
     @Subscribe
     public void onTeiDownloaded(OnTeiDownloadedEvent event) {
-        showSnackBar(event.getUserFriendlyMessage(), event.getMessageDuration());
-    }
-
-    private void showSnackBar(String message, int duration) {
-        if (snackBar == null) {
-            snackBar = Snackbar.make(getView(), message, duration);
-            snackBar.show();
-        } else {
-            snackBar.setText(message);
-            snackBar.setDuration(duration);
-            if (!snackBar.isShown()) {
-                snackBar.show();
-            }
+        if (getActivity() == null || !isAdded()) {
+            return;
         }
+
+        if (snackbar == null) {
+            snackbar = new DownloadEventSnackbar(this);
+        }
+
+        snackbar.show(event);
+
     }
 
     @Override

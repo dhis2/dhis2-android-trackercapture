@@ -275,8 +275,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
             mForm = data;
             ((TrackedEntityInstanceAdapter) mAdapter).setData(data.getEventRowList());
             mAdapter.swapData(data.getEventRowList());
-
-            if (!data.getProgram().isDisplayFrontPageList()) {
+            if (data.getProgram() != null && !data.getProgram().isDisplayFrontPageList()) {
                 // if no rows is selected - let the user know
                 noRowsTextView.setVisibility(View.VISIBLE);
             } else {

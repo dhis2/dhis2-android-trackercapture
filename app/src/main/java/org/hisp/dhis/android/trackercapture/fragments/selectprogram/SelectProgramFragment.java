@@ -183,6 +183,9 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
 
     @Subscribe
     public void onReceivedUiEvent(UiEvent uiEvent) {
+        if (uiEvent.getEventType() == UiEvent.UiEventType.SYNCING_END) {
+            getLoaderManager().restartLoader(LOADER_ID, getArguments(), this);
+        }
         super.onReceivedUiEvent(uiEvent);
     }
 

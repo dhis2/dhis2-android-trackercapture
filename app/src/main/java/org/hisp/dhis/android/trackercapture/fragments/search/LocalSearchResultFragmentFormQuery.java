@@ -107,35 +107,38 @@ public class LocalSearchResultFragmentFormQuery implements Query<LocalSearchResu
 
         List<TrackedEntityInstance> trackedEntityInstancesToShow = new ArrayList<>();
         for(TrackedEntityInstance tei : trackedEntityInstanceList) {
-            List<TrackedEntityAttributeValue> teiAttributeValues = tei.getAttributes();
-            int numberOfHits = 0;
+            if (tei != null) {
 
-            for(TrackedEntityAttributeValue trackedEntityAttributeValue : teiAttributeValues) {
+                List<TrackedEntityAttributeValue> teiAttributeValues = tei.getAttributes();
+                int numberOfHits = 0;
+
+                for (TrackedEntityAttributeValue trackedEntityAttributeValue : teiAttributeValues) {
 
 //                if(attributeValueMap.get(trackedEntityAttributeValue.getTrackedEntityAttributeId()) != null &&
 //                        attributeValueMap.get(trackedEntityAttributeValue.getTrackedEntityAttributeId()).toLowerCase()
 //                        .contains(trackedEntityAttributeValue.getValue().toLowerCase())) {
 
-                    if(attributeValueMap.get(trackedEntityAttributeValue.getTrackedEntityAttributeId()) != null) {
+                    if (attributeValueMap.get(trackedEntityAttributeValue.getTrackedEntityAttributeId()) != null) {
                         String searchVal = attributeValueMap.get(trackedEntityAttributeValue.getTrackedEntityAttributeId()).toLowerCase();
                         String searchHit = "";
-                        if(trackedEntityAttributeValue.getValue() != null) {
+                        if (trackedEntityAttributeValue.getValue() != null) {
                             searchHit = trackedEntityAttributeValue.getValue().toLowerCase();
                         }
 
 //                        if(attributeValueMap.get(trackedEntityAttributeValue.getTrackedEntityAttributeId()).toLowerCase()
 //                                    .contains(trackedEntityAttributeValue.getValue().toLowerCase())) {
-                        if(!searchVal.isEmpty() && searchHit.contains(searchVal)) {
+                        if (!searchVal.isEmpty() && searchHit.contains(searchVal)) {
                             numberOfHits++;
 
 
                             if (!trackedEntityInstancesToShow.contains(tei) && numberOfHits == hitsRequired) {
                                 trackedEntityInstancesToShow.add(tei);
                             }
+                        }
                     }
                 }
-            }
 
+            }
         }
 
         List<TrackedEntityAttribute> trackedEntityAttributes = new Select().from(TrackedEntityAttribute.class).queryList();

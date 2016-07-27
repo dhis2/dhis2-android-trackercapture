@@ -43,12 +43,14 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.IndicatorRow;
 import org.hisp.dhis.android.sdk.utils.Utils;
+import org.hisp.dhis.android.sdk.utils.comparators.EventDateComparator;
 import org.hisp.dhis.android.sdk.utils.services.ProgramIndicatorService;
 import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.ProgramStageEventRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.ProgramStageLabelRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.ProgramStageRow;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -142,7 +144,13 @@ class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm>
             List<Event> eventsForStage = eventsByStage.get(programStage.getUid());
             ProgramStageLabelRow labelRow = new ProgramStageLabelRow(programStage);
             rows.add(labelRow);
-            if(eventsForStage==null) continue;
+            if(eventsForStage==null) {
+                continue;
+            }
+            else {
+                EventDateComparator comparator = new EventDateComparator();
+                Collections.sort(eventsForStage, comparator);
+            }
             for(Event event: eventsForStage) {
                 ProgramStageEventRow row = new ProgramStageEventRow(event);
                 row.setLabelRow(labelRow);

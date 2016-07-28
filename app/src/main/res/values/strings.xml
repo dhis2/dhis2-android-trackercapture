@@ -78,6 +78,7 @@
 
     <string name="out_of_generated_ids">You are out of automatically generated IDs. Please synchronise to download new ones</string>
     <string name="generic_error">Error. Please retry</string>
+    <string name="re_open">Re-open</string>
 
 
 </resources>

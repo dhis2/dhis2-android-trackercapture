@@ -28,19 +28,18 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:nestedScrollingEnabled="false">
+    android:nestedScrollingEnabled="false"
+    android:orientation="vertical">
 
     <ProgressBar
         android:id="@+id/progress_bar"
         style="?android:attr/progressBarStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="28dp"
         android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="28dp"
         android:indeterminate="true" />
 
     <android.support.v7.widget.CardView
@@ -50,34 +49,49 @@
         android:layout_margin="4dp">
 
         <LinearLayout
-            android:visibility="gone"
             android:id="@+id/missingenrollmentlayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-                <TextView
-                    android:layout_margin="5dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="@dimen/medium_text_size"
-                    android:text="@string/no_active_enrollment"
-                    android:layout_gravity="center_horizontal" />
+            android:orientation="vertical"
+            android:visibility="gone">
 
-                <org.hisp.dhis.android.sdk.ui.views.FloatingActionButton
-                    android:id="@+id/newenrollmentbutton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:src="@drawable/ic_new"
-                    android:layout_gravity="center_horizontal" />
-            </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="5dp"
+                android:text="@string/no_active_enrollment"
+                android:textSize="@dimen/medium_text_size" />
+
+            <org.hisp.dhis.android.sdk.ui.views.FloatingActionButton
+                android:id="@+id/newenrollmentbutton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center"
+                android:src="@drawable/ic_new" />
+
+            <Button
+                android:id="@+id/re_open"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="16dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/rounded_imagebutton_orange"
+                android:padding="4dp"
+                android:text="@string/re_open" />
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/enrollmentLayout"
-            android:padding="6dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="6dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -88,24 +102,23 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textSize="@dimen/medium_text_size"
-                    android:text="@string/enrollment"/>
+                    android:text="@string/enrollment"
+                    android:textSize="@dimen/medium_text_size" />
 
                 <ImageView
+                    android:id="@+id/enrollmentstatus"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:id="@+id/enrollmentstatus"
-                    android:src="@drawable/ic_offline"
-                    android:layout_gravity="right" />
+                    android:layout_gravity="right"
+                    android:src="@drawable/ic_offline" />
 
             </LinearLayout>
-
 
 
             <View
                 android:layout_width="wrap_content"
                 android:layout_height="1dp"
-                android:background="@color/light_grey"/>
+                android:background="@color/light_grey" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -117,18 +130,19 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textSize="@dimen/small_text_size"
-                    android:text=""/>
+                    android:text=""
+                    android:textSize="@dimen/small_text_size" />
 
                 <TextView
                     android:id="@+id/dateOfEnrollmentValue"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textSize="@dimen/small_text_size"
-                    android:text=""/>
+                    android:text=""
+                    android:textSize="@dimen/small_text_size" />
 
             </LinearLayout>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -139,47 +153,49 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textSize="@dimen/small_text_size"
-                    android:text=""/>
+                    android:text=""
+                    android:textSize="@dimen/small_text_size" />
 
                 <TextView
                     android:id="@+id/dateOfIncidentValue"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textSize="@dimen/small_text_size"
-                    android:text=""/>
+                    android:text=""
+                    android:textSize="@dimen/small_text_size" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
+
                 <Button
-                    android:layout_margin="5dp"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
                     android:id="@+id/complete"
-                    android:text="@string/complete"
-                    android:background="@drawable/rounded_imagebutton_orange"/>
-                <Button
-                    android:text="@string/terminate"
-                    android:layout_margin="5dp"
                     android:layout_width="0dp"
                     android:layout_height="40dp"
+                    android:layout_margin="5dp"
                     android:layout_weight="1"
+                    android:background="@drawable/rounded_imagebutton_orange"
+                    android:text="@string/complete" />
+
+                <Button
                     android:id="@+id/terminate"
-                    android:background="@drawable/rounded_imagebutton_red"/>
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_margin="5dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/rounded_imagebutton_red"
+                    android:text="@string/terminate" />
 
                 <ImageButton
-                    android:layout_margin="5dp"
+                    android:id="@+id/followupButton"
                     android:layout_width="0dp"
                     android:layout_height="40dp"
+                    android:layout_margin="5dp"
                     android:layout_weight="0.4"
-                    android:id="@+id/followupButton"
-                    android:src="@drawable/ic_dialog_alert_holo_light"
-                    android:background="@drawable/rounded_imagebutton_gray" />
+                    android:background="@drawable/rounded_imagebutton_gray"
+                    android:src="@drawable/ic_dialog_alert_holo_light" />
             </LinearLayout>
 
 
@@ -194,10 +210,11 @@
         android:layout_margin="4dp">
 
         <LinearLayout
-            android:padding="6dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="6dp">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -206,23 +223,23 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="@dimen/medium_text_size"
-                    android:text="@string/profile"/>
+                    android:text="@string/profile"
+                    android:textSize="@dimen/medium_text_size" />
 
                 <ImageButton
                     android:id="@+id/profile_button"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_gravity="right"
-                    android:src="@drawable/ic_dataentry"
-                    android:background="@color/transparent"/>
+                    android:background="@color/transparent"
+                    android:src="@drawable/ic_dataentry" />
             </LinearLayout>
 
 
             <View
                 android:layout_width="wrap_content"
                 android:layout_height="1dp"
-                android:background="@color/light_grey"/>
+                android:background="@color/light_grey" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -234,18 +251,19 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textSize="@dimen/small_text_size"
-                    android:text=""/>
+                    android:text=""
+                    android:textSize="@dimen/small_text_size" />
 
                 <TextView
                     android:id="@+id/headerItem1value"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textSize="@dimen/small_text_size"
-                    android:text=""/>
+                    android:text=""
+                    android:textSize="@dimen/small_text_size" />
 
-                </LinearLayout>
+            </LinearLayout>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -256,22 +274,22 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textSize="@dimen/small_text_size"
-                    android:text=""/>
+                    android:text=""
+                    android:textSize="@dimen/small_text_size" />
 
                 <TextView
                     android:id="@+id/headerItem2value"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textSize="@dimen/small_text_size"
-                    android:text=""/>
+                    android:text=""
+                    android:textSize="@dimen/small_text_size" />
 
             </LinearLayout>
 
         </LinearLayout>
 
-        </android.support.v7.widget.CardView>
+    </android.support.v7.widget.CardView>
 
     <android.support.v7.widget.CardView
         android:id="@+id/relationships_cardview"
@@ -280,11 +298,11 @@
         android:layout_margin="4dp">
 
         <LinearLayout
-            android:padding="6dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/transparent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="6dp">
 
 
             <LinearLayout
@@ -296,31 +314,31 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="@dimen/medium_text_size"
                     android:layout_weight="1"
-                    android:text="@string/relationships"/>
+                    android:text="@string/relationships"
+                    android:textSize="@dimen/medium_text_size" />
 
                 <Button
                     android:id="@+id/addrelationshipbutton"
                     android:layout_width="wrap_content"
                     android:layout_height="30dp"
                     android:layout_gravity="right"
-                    android:text="@string/new_string"
-                    android:background="@drawable/transparent_selector" />
+                    android:background="@drawable/transparent_selector"
+                    android:text="@string/new_string" />
 
             </LinearLayout>
 
             <View
                 android:layout_width="wrap_content"
                 android:layout_height="1dp"
-                android:background="@color/light_grey"/>
+                android:background="@color/light_grey" />
 
             <LinearLayout
                 android:id="@+id/relationships_linearlayout"
-                android:padding="6dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:padding="6dp">
 
             </LinearLayout>
 
@@ -335,11 +353,11 @@
         android:layout_margin="4dp">
 
         <LinearLayout
-            android:padding="6dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/transparent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="6dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -350,37 +368,34 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="@dimen/medium_text_size"
-                    android:text="@string/indicators"/>
+                    android:text="@string/indicators"
+                    android:textSize="@dimen/medium_text_size" />
             </LinearLayout>
 
             <View
                 android:layout_width="wrap_content"
                 android:layout_height="1dp"
-                android:background="@color/light_grey"/>
+                android:background="@color/light_grey" />
 
             <LinearLayout
                 android:id="@+id/programindicatorlayout"
-                android:padding="6dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
-            </LinearLayout>
+                android:orientation="vertical"
+                android:padding="6dp"></LinearLayout>
 
             <org.hisp.dhis.android.trackercapture.fragments.programoverview.FlowLayout
                 android:id="@+id/keyvaluelayout"
-                android:padding="6dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-            </org.hisp.dhis.android.trackercapture.fragments.programoverview.FlowLayout>
+                android:layout_height="wrap_content"
+                android:padding="6dp"></org.hisp.dhis.android.trackercapture.fragments.programoverview.FlowLayout>
 
             <LinearLayout
                 android:id="@+id/textlayout"
-                android:padding="6dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
-            </LinearLayout>
+                android:orientation="vertical"
+                android:padding="6dp"></LinearLayout>
         </LinearLayout>
 
     </android.support.v7.widget.CardView>

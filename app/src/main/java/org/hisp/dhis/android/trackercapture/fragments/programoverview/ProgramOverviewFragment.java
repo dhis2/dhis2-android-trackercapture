@@ -92,6 +92,7 @@ import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.sdk.ui.views.FontTextView;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.sdk.utils.api.ProgramType;
+import org.hisp.dhis.android.sdk.utils.comparators.EnrollmentDateComparator;
 import org.hisp.dhis.android.sdk.utils.services.ProgramRuleService;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
@@ -108,6 +109,7 @@ import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.ProgramStage
 import org.joda.time.DateTime;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -157,6 +159,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     private ImageButton profileButton;
     private ImageView enrollmentServerStatus;
     private Button completeButton;
+    private Button reOpenButton;
     private Button terminateButton;
 
     private TextView attribute1Label;
@@ -277,10 +280,12 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         programIndicatorCardView = (CardView) header.findViewById(R.id.programindicators_cardview);
 
         completeButton = (Button) header.findViewById(R.id.complete);
+        reOpenButton = (Button) header.findViewById(R.id.re_open);
         terminateButton = (Button) header.findViewById(R.id.terminate);
         followupButton = (ImageButton) header.findViewById(R.id.followupButton);
         profileButton = (ImageButton) header.findViewById(R.id.profile_button);
         completeButton.setOnClickListener(this);
+        reOpenButton.setOnClickListener(this);
         terminateButton.setOnClickListener(this);
         followupButton.setOnClickListener(this);
         followupButton.setVisibility(View.GONE);
@@ -500,10 +505,6 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 enrollmentServerStatus.setImageResource(R.drawable.ic_legacy_offline);
             } else {
                 enrollmentServerStatus.setImageResource(R.drawable.ic_from_server);
-            }
-
-            if (mForm.getEnrollment().getStatus().equals(Enrollment.COMPLETED)) {
-                setCompleted();
             }
 
             if (mForm.getEnrollment().getStatus().equals(Enrollment.CANCELLED)) {
@@ -843,21 +844,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         mForm.getEnrollment().setStatus(Enrollment.COMPLETED);
         mForm.getEnrollment().setFromServer(false);
         mForm.getEnrollment().async().save();
-        setCompleted();
         clearViews();
-    }
-
-    /**
-     * Disables the ability to edit enrollment info
-     * Program stages can still be viewed but not changed.
-     */
-    public void setCompleted() {
-        completeButton.setEnabled(false);
-        completeButton.setAlpha(0.2f);
-        terminateButton.setEnabled(false);
-        terminateButton.setAlpha(0.2f);
-        followupButton.setEnabled(false);
-        followupButton.setAlpha(0x40);
     }
 
     public void terminateEnrollment() {
@@ -933,6 +920,13 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                         });
                 break;
             }
+            case R.id.re_open: {
+                Enrollment enrollment = getLastEnrollmentForTrackedEntityInstance();
+                enrollment.setStatus(Enrollment.ACTIVE);
+                enrollment.async().save();
+                refreshUi();
+                break;
+            }
 
             case R.id.terminate: {
                 UiUtils.showConfirmDialog(getActivity(),
@@ -980,6 +974,18 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 editEnrollmentDates();
             }
         }
+    }
+
+    private void refreshUi() {
+        getLoaderManager().restartLoader(LOADER_ID, getArguments(), this);
+    }
+
+    private Enrollment getLastEnrollmentForTrackedEntityInstance() {
+        List<Enrollment> enrollments = TrackerController.getEnrollments(mForm.getTrackedEntityInstance());
+        EnrollmentDateComparator comparator = new EnrollmentDateComparator();
+        Collections.reverseOrder(comparator);
+        Collections.sort(enrollments, comparator);
+        return enrollments.get(0);
     }
 
     private void clearViews() {

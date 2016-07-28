@@ -55,6 +55,7 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceItemRow;
 import org.hisp.dhis.android.sdk.utils.comparators.EnrollmentDateComparator;
+import org.hisp.dhis.android.sdk.utils.comparators.EnrollmentLocalIdComparator;
 import org.hisp.dhis.android.sdk.utils.comparators.EventDateComparator;
 
 import java.util.ArrayList;
@@ -138,7 +139,7 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
         }
 
         enrollmentsToShow.addAll(enrollmentMap.values());
-        Collections.sort(enrollmentsToShow, new EnrollmentDateComparator());
+        Collections.sort(enrollmentsToShow, new EnrollmentLocalIdComparator());
         List<Long> trackedEntityInstanceIds = new ArrayList<>();
         if (isListEmpty(enrollmentsToShow)) { //enrollments
             return fragmentForm;

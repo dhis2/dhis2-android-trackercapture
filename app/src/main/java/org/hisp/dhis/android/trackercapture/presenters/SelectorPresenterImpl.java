@@ -1,6 +1,7 @@
 package org.hisp.dhis.android.trackercapture.presenters;
 
 
+import org.hisp.dhis.android.trackercapture.SyncWrapper;
 import org.hisp.dhis.android.trackercapture.views.SelectorView;
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
@@ -14,10 +15,9 @@ import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramType;
-import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.ApiExceptionHandler;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.SessionPreferences;
-import org.hisp.dhis.client.sdk.ui.bindings.commons.SyncWrapper;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.SyncDateWrapper;
 import org.hisp.dhis.client.sdk.ui.bindings.views.View;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
@@ -50,12 +50,10 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     private final SyncWrapper syncWrapper;
     private final Logger logger;
 
-    private final SystemInfoPreferences systemInfoPreferences;
-
     private CompositeSubscription subscription;
-    private boolean attemptedToSync;
     private SelectorView selectorView;
     private boolean isSyncing;
+    private boolean hasSyncedBefore;
 
     public SelectorPresenterImpl(UserOrganisationUnitInteractor interactor,
                                  UserProgramInteractor userProgramInteractor,
@@ -66,7 +64,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                                  SyncDateWrapper syncDateWrapper,
                                  SyncWrapper syncWrapper,
                                  ApiExceptionHandler apiExceptionHandler,
-                                 Logger logger, SystemInfoPreferences systemInfoPreferences) {
+                                 Logger logger) {
         this.userOrganisationUnitInteractor = interactor;
         this.userProgramInteractor = userProgramInteractor;
         this.programStageInteractor = programStageInteractor;
@@ -77,10 +75,9 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         this.syncWrapper = syncWrapper;
         this.apiExceptionHandler = apiExceptionHandler;
         this.logger = logger;
-        this.systemInfoPreferences = systemInfoPreferences;
 
         this.subscription = new CompositeSubscription();
-        this.attemptedToSync = false;
+        this.hasSyncedBefore = false;
     }
 
 
@@ -104,7 +101,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
         // check if metadata was synced,
         // if not, syncMetaData it
-        if (!isSyncing && !attemptedToSync) {
+        if (!isSyncing && !hasSyncedBefore) {
             sync();
         }
 
@@ -149,12 +146,11 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         subscription.add(syncWrapper.syncMetaData()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<ProgramStageDataElement>>() {
+                .subscribe(new Action1<List<Program>>() {
                     @Override
-                    public void call(List<ProgramStageDataElement> stageDataElements) {
+                    public void call(List<Program> programs) {
                         isSyncing = false;
-                        attemptedToSync = true;
-                        syncDateWrapper.setLastSyncedNow();
+                        hasSyncedBefore = true;
 
                         if (selectorView != null) {
                             selectorView.hideProgressBar();
@@ -165,7 +161,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                     @Override
                     public void call(Throwable throwable) {
                         isSyncing = false;
-                        attemptedToSync = true;
+                        hasSyncedBefore = true;
                         if (selectorView != null) {
                             selectorView.hideProgressBar();
                         }
@@ -236,14 +232,18 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             selectorView.showNoOrganisationUnitsError();
         }
 
-        Picker rootPicker = Picker.create(chooseOrganisationUnit);
+        Picker rootPicker = new Picker.Builder()
+                .hint(chooseOrganisationUnit)
+                .build();
         for (String unitKey : organisationUnitMap.keySet()) {
-
-            // Creating organisation unit picker items
+            // creating organisation unit picker items
             OrganisationUnit organisationUnit = organisationUnitMap.get(unitKey);
-            Picker organisationUnitPicker = Picker.create(
-                    organisationUnit.getUId(), organisationUnit.getDisplayName(),
-                    chooseProgram, rootPicker);
+            Picker organisationUnitPicker = new Picker.Builder()
+                    .id(organisationUnit.getUId())
+                    .name(organisationUnit.getDisplayName())
+                    .hint(chooseProgram)
+                    .parent(rootPicker)
+                    .build();
 
             if (organisationUnit.getPrograms() != null && !organisationUnit.getPrograms().isEmpty()) {
                 for (Program program : organisationUnit.getPrograms()) {
@@ -251,8 +251,11 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
                     if (assignedProgram != null && ProgramType.WITH_REGISTRATION
                             .equals(assignedProgram.getProgramType())) {
-                        Picker programPicker = Picker.create(assignedProgram.getUId(),
-                                assignedProgram.getDisplayName(), organisationUnitPicker);
+                        Picker programPicker = new Picker.Builder()
+                                .id(assignedProgram.getUId())
+                                .name(assignedProgram.getDisplayName())
+                                .parent(organisationUnitPicker)
+                                .build();
                         organisationUnitPicker.addChild(programPicker);
                     }
                 }
@@ -260,7 +263,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             rootPicker.addChild(organisationUnitPicker);
         }
 
-        //Set saved selections or default ones :
+        // set saved selections or default ones:
         if (sessionPreferences.getSelectedPickerUid(0) != null) {
             traverseAndSetSavedSelection(rootPicker);
         } else {

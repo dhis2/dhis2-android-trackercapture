@@ -49,7 +49,6 @@ import org.hisp.dhis.client.sdk.android.trackedentity.TrackedEntityDataValueInte
 import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
 import org.hisp.dhis.client.sdk.core.common.network.Configuration;
 import org.hisp.dhis.client.sdk.ui.AppPreferences;
-import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.ApiExceptionHandler;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultAppAccountManager;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultAppAccountManagerImpl;
@@ -57,7 +56,7 @@ import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultNotificationHandler;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultNotificationHandlerImpl;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultUserModule;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.SessionPreferences;
-import org.hisp.dhis.client.sdk.ui.bindings.commons.SyncWrapper;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.SyncDateWrapper;
 import org.hisp.dhis.client.sdk.ui.bindings.presenters.HomePresenter;
 import org.hisp.dhis.client.sdk.ui.bindings.presenters.HomePresenterImpl;
 import org.hisp.dhis.client.sdk.ui.bindings.presenters.LauncherPresenter;
@@ -168,24 +167,6 @@ public class UserModule implements DefaultUserModule {
     public SettingsPresenter providesSettingsPresenter(
             AppPreferences appPreferences, DefaultAppAccountManager appAccountManager) {
         return new SettingsPresenterImpl(appPreferences, appAccountManager);
-    }
-
-    @Provides
-    @PerUser
-    public SelectorPresenter providesSelectorPresenter(
-            @Nullable UserOrganisationUnitInteractor userOrganisationUnitInteractor,
-            @Nullable UserProgramInteractor userProgramInteractor,
-            @Nullable ProgramStageInteractor programStageInteractor,
-            @Nullable ProgramStageDataElementInteractor programStageDataElementInteractor,
-            @Nullable EventInteractor eventInteractor,
-            SessionPreferences sessionPreferences,
-            SyncDateWrapper syncDateWrapper, SyncWrapper syncWrapper,
-            ApiExceptionHandler apiExceptionHandler, Logger logger) {
-        return new SelectorPresenterImpl(
-                userOrganisationUnitInteractor, userProgramInteractor,
-                programStageInteractor, programStageDataElementInteractor,
-                eventInteractor, sessionPreferences, syncDateWrapper, syncWrapper,
-                apiExceptionHandler, logger, null);
     }
 
     @Provides
@@ -327,18 +308,27 @@ public class UserModule implements DefaultUserModule {
     public SyncWrapper provideSyncWrapper(
             @Nullable UserOrganisationUnitInteractor userOrganisationUnitInteractor,
             @Nullable UserProgramInteractor userProgramInteractor,
-            @Nullable ProgramStageInteractor programStageInteractor,
-            @Nullable ProgramStageSectionInteractor programStageSectionInteractor,
-            @Nullable ProgramStageDataElementInteractor programStageDataElementInteractor,
-            @Nullable ProgramRuleInteractor programRuleInteractor,
-            @Nullable ProgramRuleActionInteractor programRuleActionInteractor,
-            @Nullable ProgramRuleVariableInteractor programRuleVariableInteractor,
-            @Nullable EventInteractor eventInteractor) {
+            @Nullable EventInteractor eventInteractor,
+            @Nullable SyncDateWrapper syncDateWrapper) {
 
-        return new SyncWrapper(
+        return new SyncWrapper(userOrganisationUnitInteractor, userProgramInteractor, eventInteractor, syncDateWrapper);
+    }
+
+    @Provides
+    @PerUser
+    public SelectorPresenter providesSelectorPresenter(
+            @Nullable UserOrganisationUnitInteractor userOrganisationUnitInteractor,
+            @Nullable UserProgramInteractor userProgramInteractor,
+            @Nullable ProgramStageInteractor programStageInteractor,
+            @Nullable ProgramStageDataElementInteractor programStageDataElementInteractor,
+            @Nullable EventInteractor eventInteractor,
+            SessionPreferences sessionPreferences,
+            SyncDateWrapper syncDateWrapper, SyncWrapper syncWrapper,
+            ApiExceptionHandler apiExceptionHandler, Logger logger) {
+        return new SelectorPresenterImpl(
                 userOrganisationUnitInteractor, userProgramInteractor,
-                programStageInteractor, programStageSectionInteractor,
-                programStageDataElementInteractor, programRuleInteractor,
-                programRuleActionInteractor, programRuleVariableInteractor, eventInteractor);
+                programStageInteractor, programStageDataElementInteractor,
+                eventInteractor, sessionPreferences, syncDateWrapper, syncWrapper,
+                apiExceptionHandler, logger);
     }
 }

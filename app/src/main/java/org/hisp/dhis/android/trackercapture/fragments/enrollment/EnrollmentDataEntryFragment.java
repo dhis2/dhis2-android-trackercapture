@@ -54,6 +54,7 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.ui.adapters.SectionAdapter;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.RunProgramRulesEvent;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnDetailedInfoButtonClick;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.HideLoadingDialogEvent;
@@ -365,6 +366,11 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
         super.onRowValueChanged(event);
         evaluateRules(event.getId());
         saveThread.schedule();
+    }
+
+    @Subscribe
+    public void onRunProgramRules(final RunProgramRulesEvent event) {
+        evaluateRules(event.getId());
     }
 
     @Subscribe

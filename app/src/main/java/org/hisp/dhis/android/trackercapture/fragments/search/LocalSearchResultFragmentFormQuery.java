@@ -127,6 +127,19 @@ public class LocalSearchResultFragmentFormQuery implements Query<LocalSearchResu
 
 //                        if(attributeValueMap.get(trackedEntityAttributeValue.getTrackedEntityAttributeId()).toLowerCase()
 //                                    .contains(trackedEntityAttributeValue.getValue().toLowerCase())) {
+
+                        // IF TEA has option set, use EXACT matching
+                        if(MetaDataController.getTrackedEntityAttribute(trackedEntityAttributeValue.getTrackedEntityAttributeId()).getOptionSet() != null) {
+                            if (!searchVal.isEmpty() && searchHit.equalsIgnoreCase(searchVal)) { //equalsIgnoreCase
+                                numberOfHits++;
+
+
+                                if (!trackedEntityInstancesToShow.contains(tei) && numberOfHits == hitsRequired) {
+                                    trackedEntityInstancesToShow.add(tei);
+                                }
+                            }
+                            continue;
+                        }
                         if (!searchVal.isEmpty() && searchHit.contains(searchVal)) {
                             numberOfHits++;
 

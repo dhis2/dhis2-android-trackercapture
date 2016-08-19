@@ -47,7 +47,9 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.ui.adapters.SectionAdapter;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EditTextRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.RunProgramRulesEvent;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnDetailedInfoButtonClick;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.RowValueChangedEvent;
@@ -283,8 +285,20 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
         if (mForm == null) {
             return;
         }
+
+        // do not run program rules for EditTextRows - DelayedDispatcher takes care of this
+        if (event.getRow() == null || !(event.getRow() instanceof EditTextRow)) {
+            // TODO running of program rules goes here
+        }
+
         saveThread.schedule();
     }
+
+    @Subscribe
+    public void onRunProgramRules(final RunProgramRulesEvent event) {
+        // TODO running of program rules goes here
+    }
+
 
     @Override
     public SectionAdapter getSpinnerAdapter() {

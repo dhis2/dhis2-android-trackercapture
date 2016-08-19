@@ -26,7 +26,6 @@ import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.sdk.controllers.DhisController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
-import org.hisp.dhis.android.sdk.events.UiEvent;
 import org.hisp.dhis.android.sdk.job.JobExecutor;
 import org.hisp.dhis.android.sdk.job.NetworkJob;
 import org.hisp.dhis.android.sdk.network.APIException;
@@ -59,6 +58,7 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
     private DataValueAdapter mAdapter;
     private ListView mListView;
     private int mDialogId;
+    private View progressBar;
 
     public static final String EXTRA_PROGRAM = "extra:trackedEntityAttributes";
     public static final String EXTRA_ORGUNIT = "extra:orgUnit";
@@ -102,6 +102,7 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_load_to_device) {
+            progressBar.setVisibility(View.VISIBLE);
             runQuery();
         } else if (id == android.R.id.home) {
             getActivity().finish();
@@ -165,6 +166,8 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
                 }
             }
         });
+
+        progressBar = view.findViewById(R.id.progress_bar);
     }
 
     private ActionBar getActionBar() {
@@ -323,14 +326,23 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
 
         if (mForm != null) {
 
-            queryTrackedEntityInstances(getChildFragmentManager(),
-                    mForm.getOrganisationUnit(), mForm.getProgram(),
-                    mForm.getQueryString
-                            (), detailedSearch, searchValues.toArray(new TrackedEntityAttributeValue[]{}));
+            try {
+                queryTrackedEntityInstances(getChildFragmentManager(),
+                        mForm.getOrganisationUnit(), mForm.getProgram(),
+                        mForm.getQueryString
+                                (), detailedSearch, searchValues.toArray(new TrackedEntityAttributeValue[]{}));
+            } catch (Exception e) {
+                showQueryError();
+            }
         } else {
-            Toast.makeText(getContext(), "Form error. Please retry", Toast.LENGTH_SHORT).show();
+            showQueryError();
         }
 
+    }
+
+    private void showQueryError() {
+        progressBar.setVisibility(View.INVISIBLE);
+        Toast.makeText(getContext(), "Error. Please retry", Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -342,19 +354,20 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
      */
     public void queryTrackedEntityInstances(final FragmentManager fragmentManager, final String orgUnit, final String program, final String queryString, final boolean detailedSearch, final TrackedEntityAttributeValue... params)
             throws APIException {
+
         JobExecutor.enqueueJob(new NetworkJob<Object>(1,
                 null) {
 
             @Override
             public Object execute() throws APIException {
-                Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_START));
+
                 List<TrackedEntityInstance> trackedEntityInstancesQueryResult = null;
                 if (detailedSearch) {
                     trackedEntityInstancesQueryResult = TrackerController.queryTrackedEntityInstancesDataFromAllAccessibleOrgUnits(DhisController.getInstance().getDhisApi(), orgUnit, program, queryString, detailedSearch, params);
                 } else {
                     trackedEntityInstancesQueryResult = TrackerController.queryTrackedEntityInstancesDataFromServer(DhisController.getInstance().getDhisApi(), orgUnit, program, queryString, params);
                 }
-                Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_END));
+
                 // showTrackedEntityInstanceQueryResultDialog(fragmentManager, trackedEntityInstancesQueryResult, orgUnit);
                 showOnlineSearchResultFragment(trackedEntityInstancesQueryResult, orgUnit, program);
                 return new Object();
@@ -363,6 +376,12 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
     }
 
     public void showOnlineSearchResultFragment(final List<TrackedEntityInstance> trackedEntityInstances, final String orgUnit, final String programId) {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setVisibility(View.INVISIBLE);
+            }
+        });
         HolderActivity.navigateToOnlineSearchResultFragment(getActivity(), trackedEntityInstances, orgUnit, programId);
     }
 }

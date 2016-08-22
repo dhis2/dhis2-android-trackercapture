@@ -47,6 +47,7 @@ import org.hisp.dhis.android.sdk.ui.fragments.progressdialog.ProgressDialogFragm
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
+import org.joda.time.DateTime;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -351,7 +352,7 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
                 }
 
                 for (int i = 0; i < downloadedTrackedEntityInstances.size(); i++) {
-                    List<Enrollment> enrollments = TrackerController.getEnrollmentDataFromServer(DhisController.getInstance().getDhisApi(), downloadedTrackedEntityInstances.get(i));
+                    List<Enrollment> enrollments = TrackerController.getEnrollmentDataFromServer(DhisController.getInstance().getDhisApi(), downloadedTrackedEntityInstances.get(i), null);
                     if (enrollments != null) {
                         if (downloadedEnrollments == null) {
                             downloadedEnrollments = new ArrayList<>();

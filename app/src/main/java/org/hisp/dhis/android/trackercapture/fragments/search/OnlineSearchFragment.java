@@ -380,8 +380,8 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
             @Override
             public void run() {
                 progressBar.setVisibility(View.INVISIBLE);
+                HolderActivity.navigateToOnlineSearchResultFragment(getActivity(), trackedEntityInstances, orgUnit, programId);
             }
         });
-        HolderActivity.navigateToOnlineSearchResultFragment(getActivity(), trackedEntityInstances, orgUnit, programId);
     }
 }

@@ -47,7 +47,7 @@ android {
             ext.enableCrashlytics = false
         }
         release {
-            buildConfigField "String", "SERVER_URL", '"https://"'
+            buildConfigField "String", "SERVER_URL", '""'
             buildConfigField "String", "USERNAME", '""'
             buildConfigField "String", "PASSWORD", '""'
 

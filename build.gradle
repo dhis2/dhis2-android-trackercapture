@@ -1,12 +1,12 @@
 ext {
     configuration = [
-            package          : "org.hisp.dhis.android.trackercapture",
+            package          : "org.hisp.dhis.android.skeleton",
             buildToolsVersion: "23.0.2",
             minSdkVersion    : 15,
             compileSdkVersion: 23,
             targetSdkVersion : 23,
             versionCode      : 21,
-            versionName      : "0.5.0.2"
+            versionName      : "0.0.1"
     ]
     libraries = [
             // dhis libs
@@ -64,7 +64,6 @@ allprojects {
             url 'https://maven.fabric.io/public'
         }
 
-        // We need JitPack's repository in order to compile DbFlow (3)
         maven {
             url "https://jitpack.io"
         }

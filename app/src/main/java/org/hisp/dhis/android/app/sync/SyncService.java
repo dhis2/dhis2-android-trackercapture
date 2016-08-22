@@ -1,4 +1,4 @@
-package org.hisp.dhis.android.trackercapture.sync;
+package org.hisp.dhis.android.app.sync;
 
 
 import android.app.Service;

@@ -26,32 +26,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.trackercapture;
+package org.hisp.dhis.android.app;
 
-import org.hisp.dhis.android.trackercapture.sync.SyncAdapter;
-import org.hisp.dhis.android.trackercapture.views.SelectorFragment;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-import dagger.Subcomponent;
+import javax.inject.Scope;
 
-@PerUser
-@Subcomponent(
-        modules = {
-                UserModule.class
-        }
-)
-public interface UserComponent {
-
-    //------------------------------------------------------------------------
-    // Sub-modules
-    //------------------------------------------------------------------------
-    // TODO add sub-modules here
-
-    //------------------------------------------------------------------------
-    // Injection targets
-    //------------------------------------------------------------------------
-    // TODO specify injection targets
-
-    void inject(SyncAdapter syncAdapter);
-    void inject(SelectorFragment selectorFragment);
+@Scope
+@Retention(RetentionPolicy.RUNTIME)
+public @interface PerUser {
 }
-

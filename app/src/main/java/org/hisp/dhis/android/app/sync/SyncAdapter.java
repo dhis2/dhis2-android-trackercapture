@@ -1,4 +1,4 @@
-package org.hisp.dhis.android.trackercapture.sync;
+package org.hisp.dhis.android.app.sync;
 
 import android.accounts.Account;
 import android.content.AbstractThreadedSyncAdapter;
@@ -8,7 +8,7 @@ import android.content.SyncResult;
 import android.os.Bundle;
 import android.util.Log;
 
-import org.hisp.dhis.android.trackercapture.TrackerCaptureApp;
+import org.hisp.dhis.android.app.App;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultNotificationHandler;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultSyncAdapter;
 
@@ -24,14 +24,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements DefaultS
         super(context, autoInitialize);
 
         //inject the notificationHandler:
-        ((TrackerCaptureApp) context.getApplicationContext()).getUserComponent().inject(this);
+        ((App) context.getApplicationContext()).getUserComponent().inject(this);
     }
 
     public SyncAdapter(Context context, boolean autoInitialize, boolean allowParallelSyncs) {
         super(context, autoInitialize, allowParallelSyncs);
 
         //inject the notificationHandler:
-        ((TrackerCaptureApp) context.getApplicationContext()).getUserComponent().inject(this);
+        ((App) context.getApplicationContext()).getUserComponent().inject(this);
     }
 
     @Override

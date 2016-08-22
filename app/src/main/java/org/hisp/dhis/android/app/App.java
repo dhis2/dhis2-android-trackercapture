@@ -26,7 +26,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.trackercapture;
+package org.hisp.dhis.android.app;
 
 import android.app.Application;
 import android.content.Context;
@@ -35,7 +35,7 @@ import android.support.multidex.MultiDex;
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
 
-import org.hisp.dhis.android.trackercapture.views.HomeActivity;
+import org.hisp.dhis.android.app.views.HomeActivity;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.android.api.utils.LoggerImpl;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultAppModule;
@@ -49,7 +49,7 @@ import io.fabric.sdk.android.Fabric;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 
-public final class TrackerCaptureApp extends Application {
+public final class App extends Application {
     private AppComponent appComponent;
     private UserComponent userComponent;
 
@@ -123,7 +123,6 @@ public final class TrackerCaptureApp extends Application {
             loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
 
             return new OkHttpClient.Builder()
-                    // .addNetworkInterceptor(new StethoInterceptor())
                     .addInterceptor(loggingInterceptor)
                     .build();
         }

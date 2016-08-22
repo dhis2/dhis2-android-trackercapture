@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.hisp.dhis.android.trackercapture">
+    package="org.hisp.dhis.android.app">
 
     <application
-        android:name=".TrackerCaptureApp"
+        android:name=".App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -18,7 +18,7 @@
 
         <activity android:name="org.hisp.dhis.client.sdk.ui.bindings.views.DefaultLoginActivity" />
         <activity
-            android:name="org.hisp.dhis.android.trackercapture.views.HomeActivity"
+            android:name=".views.HomeActivity"
             android:theme="@style/AppTheme.Main" />
 
         <meta-data
@@ -27,7 +27,7 @@
 
         <!-- Sync service : -->
         <service
-            android:name="org.hisp.dhis.android.trackercapture.sync.SyncService"
+            android:name=".sync.SyncService"
             android:exported="false">
 
             <intent-filter>

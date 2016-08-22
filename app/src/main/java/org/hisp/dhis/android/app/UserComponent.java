@@ -26,14 +26,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.trackercapture;
+package org.hisp.dhis.android.app;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import org.hisp.dhis.android.app.sync.SyncAdapter;
 
-import javax.inject.Scope;
+import dagger.Subcomponent;
 
-@Scope
-@Retention(RetentionPolicy.RUNTIME)
-public @interface PerUser {
+@PerUser
+@Subcomponent(
+        modules = {
+                UserModule.class
+        }
+)
+public interface UserComponent {
+
+    //------------------------------------------------------------------------
+    // Sub-modules
+    //------------------------------------------------------------------------
+
+    //------------------------------------------------------------------------
+    // Injection targets
+    //------------------------------------------------------------------------
+
+    void inject(SyncAdapter syncAdapter);
 }
+

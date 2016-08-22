@@ -26,7 +26,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.trackercapture;
+package org.hisp.dhis.android.app;
 
 import android.app.Application;
 import android.content.Context;
@@ -93,7 +93,8 @@ public class AppModule implements DefaultAppModule {
     @Provides
     @Singleton
     @Override
-    public SyncDateWrapper providesSyncDateWrapper(Context context, AppPreferences preferences, Logger logger) {
-        return new SyncDateWrapper(context, preferences);
+    public SyncDateWrapper providesSyncDateWrapper(
+            Context context, AppPreferences appPreferences, Logger logger) {
+        return new SyncDateWrapper(context, appPreferences);
     }
 }

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">dhis2-android-skeleton</string>
+    <string name="app_name">DHIS 2 Tracker Capture</string>
 
     <string name="drawer_item_placeholder">Items</string>
     <string name="placeholder">Something important goes here</string>

@@ -49,7 +49,7 @@ import io.fabric.sdk.android.Fabric;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 
-public final class App extends Application {
+public final class TrackerCaptureApp extends Application {
     private AppComponent appComponent;
     private UserComponent userComponent;
 

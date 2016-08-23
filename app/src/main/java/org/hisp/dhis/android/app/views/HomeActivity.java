@@ -31,7 +31,7 @@ public class HomeActivity extends DefaultHomeActivity {
         switch (item.getItemId()) {
             case DRAWER_ITEM_PLACEHOLDER_ID: {
                 attachFragment(WrapperFragment.newInstance(
-                        PlaceholderFragment.class, getString(R.string.drawer_item_placeholder)));
+                        SelectorFragment.class, getString(R.string.drawer_item_placeholder)));
                 break;
             }
         }

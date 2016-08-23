@@ -29,6 +29,8 @@
 package org.hisp.dhis.android.app;
 
 import org.hisp.dhis.android.app.sync.SyncAdapter;
+import org.hisp.dhis.android.app.views.SelectorFragment;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultAppAccountManager;
 
 import dagger.Subcomponent;
 
@@ -48,6 +50,10 @@ public interface UserComponent {
     // Injection targets
     //------------------------------------------------------------------------
 
+    void inject(SelectorFragment selectorFragment);
+
     void inject(SyncAdapter syncAdapter);
+
+    void inject(DefaultAppAccountManager appAccountManager);
 }
 

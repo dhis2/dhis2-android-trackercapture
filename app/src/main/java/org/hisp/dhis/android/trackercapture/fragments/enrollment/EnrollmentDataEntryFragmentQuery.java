@@ -97,6 +97,9 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
         } else {
             currentTrackedEntityInstance = TrackerController.getTrackedEntityInstance(mTrackedEntityInstanceId);
         }
+        if(incidentDate == null) {
+            incidentDate = "";
+        }
         currentEnrollment = new Enrollment(mOrgUnitId, currentTrackedEntityInstance.getTrackedEntityInstance(), mProgram, enrollmentDate, incidentDate);
 
         mForm.setProgram(mProgram);

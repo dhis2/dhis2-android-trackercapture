@@ -13,6 +13,7 @@ import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
 import org.hisp.dhis.client.sdk.models.enrollment.Enrollment;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
+import org.hisp.dhis.client.sdk.models.trackedentity.TrackedEntityAttributeValue;
 import org.hisp.dhis.client.sdk.ui.bindings.views.View;
 import org.hisp.dhis.client.sdk.ui.models.FormSection;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
@@ -194,30 +195,8 @@ public class EnrollmentFormPresenterImpl implements EnrollmentFormPresenter {
 
     @Override
     public boolean validateForm(final String enrollmentUid) {
-//        if (subscription != null && !subscription.isUnsubscribed()) {
-//            subscription.unsubscribe();
-//            subscription = null;
-//        }
-//
-//        subscription = new CompositeSubscription();
-//        subscription.add(enrollmentInteractor.get(enrollmentUid)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Action1<Enrollment>() {
-//                    @Override
-//                    public void call(Enrollment enrollment) {
-//                        isNull(enrollment, String.format("Enrollment with uid %s does not exist", enrollmentUid));
-//
-//                        enrollment.setStatus(enrollmentStatus);
-//
-//                        subscription.add(saveEnrollment(enrollment));
-//                    }
-//                }, new Action1<Throwable>() {
-//                    @Override
-//                    public void call(Throwable throwable) {
-//                        logger.e(TAG, null, throwable);
-//                    }
-//                }));
+       //rxRuleEngine.validateForm(getEnrollmentUid);
+
         return true;
     }
 

@@ -13,4 +13,13 @@
     <string name="latitude">Latitude</string>
     <string name="longitude">Longitude</string>
     <string name="option_confirm">Ok</string>
+    <string name="filter_title">Filter</string>
+    <string name="gps_no_coordinates">Cannot determine location.</string>
+    <string name="gps_permission_denied">Location permission is denied for this app.</string>
+    <string name="title_gps_disabled">Location settings</string>
+    <string name="gps_disabled">Location services are disabled. Do you want to go to settings menu?</string>
+    <string name="settings_option">Settings</string>
+    <string name="incomplete">Incomplete</string>
+    <string name="undo">Undo</string>
+    <string name="complete">Complete</string>
 </resources>

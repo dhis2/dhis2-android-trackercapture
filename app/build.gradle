@@ -32,7 +32,7 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField "String", "SERVER_URL", '"https://play.dhis2.org/demo"'
+            buildConfigField "String", "SERVER_URL", '"https://play.dhis2.org/dev"'
             buildConfigField "String", "USERNAME", '"android"'
             buildConfigField "String", "PASSWORD", '"Android123"'
 

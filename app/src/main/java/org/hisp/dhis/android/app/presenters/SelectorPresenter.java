@@ -11,11 +11,11 @@ public interface SelectorPresenter extends Presenter {
 
     void listPickers();
 
-    void listEvents(String organisationUnitId, String programId);
+    void listEnrollments(String organisationUnitId, String programId);
 
-    void createEvent(String organisationUnitId, String programId);
+    void createEnrollment(String organisationUnitId, String programId);
 
-    void deleteEvent(ReportEntity reportEntity);
+    void deleteEnrollment(ReportEntity reportEntity);
 
     void onPickersSelectionsChanged(List<Picker> pickerList);
 

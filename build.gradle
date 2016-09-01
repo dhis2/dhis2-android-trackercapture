@@ -1,6 +1,6 @@
 ext {
     configuration = [
-            package          : "org.hisp.dhis.android.skeleton",
+            package          : "org.hisp.dhis.android.trackercapture",
             buildToolsVersion: "23.0.2",
             minSdkVersion    : 15,
             compileSdkVersion: 23,

@@ -2,15 +2,19 @@ package org.hisp.dhis.android.app.presenters;
 
 import org.hisp.dhis.android.app.models.SyncWrapper;
 import org.hisp.dhis.android.app.views.SelectorView;
+import org.hisp.dhis.client.sdk.android.enrollment.EnrollmentInteractor;
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
+import org.hisp.dhis.client.sdk.android.trackedentity.TrackedEntityInstanceInteractor;
 import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 import org.hisp.dhis.client.sdk.core.common.utils.ModelUtils;
 import org.hisp.dhis.client.sdk.models.common.state.State;
 import org.hisp.dhis.client.sdk.models.dataelement.DataElement;
+import org.hisp.dhis.client.sdk.models.enrollment.Enrollment;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
@@ -18,6 +22,7 @@ import org.hisp.dhis.client.sdk.models.program.ProgramStage;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramType;
 import org.hisp.dhis.client.sdk.models.trackedentity.TrackedEntityDataValue;
+import org.hisp.dhis.client.sdk.models.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.ApiExceptionHandler;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.AppError;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.SessionPreferences;
@@ -51,8 +56,11 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     private static final String TAG = SelectorPresenterImpl.class.getSimpleName();
     private final UserOrganisationUnitInteractor userOrganisationUnitInteractor;
     private final UserProgramInteractor userProgramInteractor;
+    private final ProgramInteractor programInteractor;
     private final ProgramStageInteractor programStageInteractor;
     private final ProgramStageDataElementInteractor programStageDataElementInteractor;
+    private final EnrollmentInteractor enrollmentInteractor;
+    private final TrackedEntityInstanceInteractor trackedEntityInstanceInteractor;
     private final EventInteractor eventInteractor;
 
     private final SessionPreferences sessionPreferences;
@@ -68,9 +76,9 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
     public SelectorPresenterImpl(UserOrganisationUnitInteractor interactor,
                                  UserProgramInteractor userProgramInteractor,
-                                 ProgramStageInteractor programStageInteractor,
+                                 ProgramInteractor programInteractor, ProgramStageInteractor programStageInteractor,
                                  ProgramStageDataElementInteractor stageDataElementInteractor,
-                                 EventInteractor eventInteractor,
+                                 EnrollmentInteractor enrollmentInteractor, TrackedEntityInstanceInteractor trackedEntityInstanceInteractor, EventInteractor eventInteractor,
                                  SessionPreferences sessionPreferences,
                                  SyncDateWrapper syncDateWrapper,
                                  SyncWrapper syncWrapper,
@@ -78,8 +86,11 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                                  Logger logger) {
         this.userOrganisationUnitInteractor = interactor;
         this.userProgramInteractor = userProgramInteractor;
+        this.programInteractor = programInteractor;
         this.programStageInteractor = programStageInteractor;
         this.programStageDataElementInteractor = stageDataElementInteractor;
+        this.enrollmentInteractor = enrollmentInteractor;
+        this.trackedEntityInstanceInteractor = trackedEntityInstanceInteractor;
         this.eventInteractor = eventInteractor;
         this.sessionPreferences = sessionPreferences;
         this.syncDateWrapper = syncDateWrapper;
@@ -224,7 +235,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     }
 
     @Override
-    public void listEvents(String organisationUnitId, String programId) {
+    public void listEnrollments(String organisationUnitId, String programId) {
         final OrganisationUnit orgUnit = new OrganisationUnit();
         final Program program = new Program();
 
@@ -266,67 +277,85 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        logger.e(TAG, "Failed loading events", throwable);
+                        logger.e(TAG, "Failed loading enrollments", throwable);
                     }
                 }));
     }
 
     @Override
-    public void createEvent(final String orgUnitId, final String programId) {
+    public void createEnrollment(final String orgUnitId, final String programId) {
         final OrganisationUnit orgUnit = new OrganisationUnit();
         final Program program = new Program();
         orgUnit.setUId(orgUnitId);
         program.setUId(programId);
 
-        subscription.add(programStageInteractor.list(program)
-                .map(new Func1<List<ProgramStage>, ProgramStage>() {
+        subscription.add(programInteractor.get(programId)
+                .map(new Func1<Program, TrackedEntityInstance>() {
                     @Override
-                    public ProgramStage call(List<ProgramStage> stages) {
-                        if (stages != null && !stages.isEmpty()) {
-                            return stages.get(0);
+                    public TrackedEntityInstance call(Program program) {
+                        if (program == null || program.getTrackedEntity() == null) {
+                            throw new IllegalArgumentException("In order to create enrollment, " +
+                                    "we need program and tracked entity to be in place");
                         }
-                        return null;
+                        TrackedEntityInstance trackedEntityInstance = trackedEntityInstanceInteractor.create(
+                                orgUnit,
+                                program.getTrackedEntity());
+
+
+                        return trackedEntityInstance;
                     }
                 })
-                .map(new Func1<ProgramStage, Event>() {
+                .map(new Func1<TrackedEntityInstance, Enrollment>() {
                     @Override
-                    public Event call(ProgramStage programStage) {
-                        if (programStage == null) {
-                            throw new IllegalArgumentException("In order to create event, " +
-                                    "we need program stage to be in place");
+                    public Enrollment call(TrackedEntityInstance trackedEntityInstance) {
+                        if (trackedEntityInstance == null) {
+                            throw new IllegalArgumentException("In order to create enrollment, " +
+                                    "we need a tracked entity instance to be in place");
                         }
-                        Event event = eventInteractor.create(orgUnit, program,
-                                programStage, Event.EventStatus.ACTIVE);
-                        event.setEventDate(DateTime.now());
-                        eventInteractor.save(event).toBlocking().first();
-                        return event;
+
+                        DateTime dateOfEnrollment = DateTime.now();
+                        //TODO Consider having popup dialog in your face asking for dateOfEnrollment and dateOfIncident
+                        DateTime dateOfIncident = null;
+                        if(program.isDisplayIncidentDate()) {
+                            dateOfIncident = DateTime.now();
+                        }
+                        Enrollment enrollment = enrollmentInteractor.create(
+                                orgUnit,
+                                trackedEntityInstance,
+                                program,
+                                true,
+                                dateOfEnrollment,
+                                dateOfIncident).toBlocking().first();
+
+                        enrollmentInteractor.save(enrollment).toBlocking().first();
+                        return enrollment;
                     }
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Event>() {
+                .subscribe(new Action1<Enrollment>() {
                     @Override
-                    public void call(Event event) {
+                    public void call(Enrollment enrollment) {
                         if (selectorView != null) {
-                            selectorView.navigateToFormSectionActivity(event);
+                            selectorView.navigateToFormSectionActivity(enrollment);
                         }
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        logger.e(TAG, "Failed creating event", throwable);
+                        logger.e(TAG, "Failed creating enrollment", throwable);
                     }
                 })
         );
     }
 
     @Override
-    public void deleteEvent(final ReportEntity reportEntity) {
-        subscription.add(eventInteractor.get(reportEntity.getId())
-                .switchMap(new Func1<Event, Observable<Boolean>>() {
+    public void deleteEnrollment(final ReportEntity reportEntity) {
+        subscription.add(enrollmentInteractor.get(reportEntity.getId())
+                .switchMap(new Func1<Enrollment, Observable<Boolean>>() {
                     @Override
-                    public Observable<Boolean> call(Event event) {
-                        return eventInteractor.remove(event);
+                    public Observable<Boolean> call(Enrollment enrollment) {
+                        return enrollmentInteractor.remove(enrollment);
                     }
                 })
                 .subscribeOn(Schedulers.io())
@@ -334,12 +363,12 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                 .subscribe(new Action1<Boolean>() {
                     @Override
                     public void call(Boolean aBoolean) {
-                        logger.d(TAG, "Event deleted");
+                        logger.d(TAG, "Enrollment deleted");
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        logger.e(TAG, "Error deleting event: " + reportEntity, throwable);
+                        logger.e(TAG, "Error deleting enrollment: " + reportEntity, throwable);
                         if (selectorView != null) {
                             selectorView.onReportEntityDeletionError(reportEntity);
                         }

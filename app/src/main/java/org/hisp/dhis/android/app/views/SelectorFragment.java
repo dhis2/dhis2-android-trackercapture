@@ -32,7 +32,7 @@ import android.widget.Toast;
 import org.hisp.dhis.android.app.TrackerCaptureApp;
 import org.hisp.dhis.android.app.R;
 import org.hisp.dhis.android.app.presenters.SelectorPresenter;
-import org.hisp.dhis.client.sdk.models.event.Event;
+import org.hisp.dhis.client.sdk.models.enrollment.Enrollment;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter;
 import org.hisp.dhis.client.sdk.ui.adapters.ReportEntityAdapter;
 import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
@@ -65,7 +65,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
 
     // button which is shown only in case when all pickers are set
     FloatingActionButton createEventButton;
-    OnCreateEventButtonClickListener onCreateEventButtonClickListener;
+    OnCreateEnrollmentButtonClickListener onCreateEnrollmentButtonClickListener;
 
     // pull-to-refresh
     SwipeRefreshLayout swipeRefreshLayout;
@@ -254,9 +254,9 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     }
 
     @Override
-    public void navigateToFormSectionActivity(Event event) {
-        logger.d(TAG, String.format("Event with uid=%s is created", event.getUId()));
-//        FormSectionActivity.navigateToNewEvent(getActivity(), event.getUId());
+    public void navigateToFormSectionActivity(Enrollment enrollment) {
+        logger.d(TAG, String.format("Enrollment with uid=%s is created", enrollment.getUId()));
+        EnrollmentFormActivity.navigateToNewEnrollment(getActivity(), enrollment.getUId());
     }
 
     @Override
@@ -305,10 +305,10 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     }
 
     private void setupFloatingActionButton(final View rootView) {
-        onCreateEventButtonClickListener = new OnCreateEventButtonClickListener();
+        onCreateEnrollmentButtonClickListener = new OnCreateEnrollmentButtonClickListener();
 
         createEventButton = (FloatingActionButton) rootView.findViewById(R.id.fab_create_event);
-        createEventButton.setOnClickListener(onCreateEventButtonClickListener);
+        createEventButton.setOnClickListener(onCreateEnrollmentButtonClickListener);
 
         // button visibility will be changed as soon as pickers are loaded
         createEventButton.setVisibility(View.INVISIBLE);
@@ -394,7 +394,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
             @Override
             public void onDeleteReportEntity(ReportEntity reportEntity) {
                 logger.d(TAG, "ReportEntity id to be deleted: " + reportEntity.getId());
-                selectorPresenter.deleteEvent(reportEntity);
+                selectorPresenter.deleteEnrollment(reportEntity);
 
                 if (pickerAdapter != null) {
                     updateLabels(pickerAdapter.getData());
@@ -431,7 +431,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     }
 
     private void onReportEntityClicked(ReportEntity reportEntity) {
-//        FormSectionActivity.navigateToExistingEvent(getActivity(), reportEntity.getId());
+//        FormSectionActivity.navigateToExistingEnrollment(getActivity(), reportEntity.getId());
     }
 
     private boolean onMenuItemClick(MenuItem item) {
@@ -449,14 +449,14 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     /* change visibility of floating action button*/
     private void onPickerListChanged(List<Picker> pickers) {
 
-        onCreateEventButtonClickListener.setPickers(pickers);
+        onCreateEnrollmentButtonClickListener.setPickers(pickers);
         if (areAllPickersPresent(pickers)) {
-            showCreateEventButton();
+            showCreateEnrollmentButton();
 
-            // load existing eventsz
-            selectorPresenter.listEvents(getOrganisationUnitUid(pickers), getProgramUid(pickers));
+            // load existing enrollments
+            selectorPresenter.listEnrollments(getOrganisationUnitUid(pickers), getProgramUid(pickers));
         } else {
-            hideCreateEventButton();
+            hideCreateEnrollmentButton();
             //This is uncommented, because it introduces buggy behaviour to the bottomSheet.
             //The bottom sheet is opened, but the pickers don't show unless the user clicks on the position where they should be shown.
             //showBottomSheet();
@@ -481,7 +481,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
                 pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild() != null;
     }
 
-    private void showCreateEventButton() {
+    private void showCreateEnrollmentButton() {
         if (!createEventButton.isShown()) {
             createEventButton.setVisibility(View.VISIBLE);
             ObjectAnimator scaleX = ObjectAnimator.ofFloat(createEventButton, "scaleX", 0, 1);
@@ -503,7 +503,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         }
     }
 
-    private void hideCreateEventButton() {
+    private void hideCreateEnrollmentButton() {
         if (createEventButton.isShown()) {
             ObjectAnimator scaleX = ObjectAnimator.ofFloat(createEventButton, "scaleX", 1, 0);
             ObjectAnimator scaleY = ObjectAnimator.ofFloat(createEventButton, "scaleY", 1, 0);
@@ -619,7 +619,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         }
     }
 
-    private class OnCreateEventButtonClickListener implements View.OnClickListener {
+    private class OnCreateEnrollmentButtonClickListener implements View.OnClickListener {
         private List<Picker> pickers;
 
         @Override
@@ -628,7 +628,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
             String programUid = getProgramUid(pickers);
 
             if (orgUnitUid != null && programUid != null) {
-                selectorPresenter.createEvent(orgUnitUid, programUid);
+                selectorPresenter.createEnrollment(orgUnitUid, programUid);
             }
         }
 

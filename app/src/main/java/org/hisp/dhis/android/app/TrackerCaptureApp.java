@@ -49,9 +49,12 @@ import io.fabric.sdk.android.Fabric;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 
+import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
+
 public final class TrackerCaptureApp extends Application {
     private AppComponent appComponent;
     private UserComponent userComponent;
+    private FormComponent formComponent;
 
     @Override
     public void onCreate() {
@@ -66,6 +69,7 @@ public final class TrackerCaptureApp extends Application {
                         .build())
                 .build();
         Fabric.with(this, crashlytics);
+
 
         final String authority = getString(R.string.authority);
         final String accountType = getString(R.string.account_type);
@@ -137,7 +141,22 @@ public final class TrackerCaptureApp extends Application {
                 .build();
     }
 
+    public FormComponent createFormComponent() {
+        isNull(userComponent, "UserComponent must not be null");
+
+        formComponent = userComponent.plus(new FormModule());
+        return formComponent;
+    }
+
     public UserComponent getUserComponent() {
         return userComponent;
     }
+
+    public FormComponent getFormComponent() {
+        return formComponent;
+    }
+    public void releaseFormComponent() {
+        formComponent = null;
+    }
+
 }

@@ -97,4 +97,10 @@ public class AppModule implements DefaultAppModule {
             Context context, AppPreferences appPreferences, Logger logger) {
         return new SyncDateWrapper(context, appPreferences);
     }
+
+    @Provides
+    @Singleton
+    public LocationProvider providesLocationProvider(Context context, Logger logger) {
+        return new LocationProviderImpl(context, logger);
+    }
 }

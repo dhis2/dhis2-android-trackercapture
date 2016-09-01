@@ -34,6 +34,7 @@ import org.hisp.dhis.android.app.models.SyncWrapper;
 import org.hisp.dhis.android.app.presenters.SelectorPresenter;
 import org.hisp.dhis.android.app.presenters.SelectorPresenterImpl;
 import org.hisp.dhis.client.sdk.android.api.D2;
+import org.hisp.dhis.client.sdk.android.enrollment.EnrollmentInteractor;
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
 import org.hisp.dhis.client.sdk.android.optionset.OptionSetInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.OrganisationUnitInteractor;
@@ -45,8 +46,11 @@ import org.hisp.dhis.client.sdk.android.program.ProgramRuleVariableInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramTrackedEntityAttributeInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
+import org.hisp.dhis.client.sdk.android.trackedentity.TrackedEntityAttributeValueInteractor;
 import org.hisp.dhis.client.sdk.android.trackedentity.TrackedEntityDataValueInteractor;
+import org.hisp.dhis.client.sdk.android.trackedentity.TrackedEntityInstanceInteractor;
 import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
 import org.hisp.dhis.client.sdk.core.common.network.Configuration;
 import org.hisp.dhis.client.sdk.ui.AppPreferences;
@@ -71,7 +75,6 @@ import org.hisp.dhis.client.sdk.ui.bindings.presenters.SettingsPresenterImpl;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
 import javax.annotation.Nullable;
-import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
@@ -169,6 +172,28 @@ public class UserModule implements DefaultUserModule {
     @Provides
     @Nullable
     @PerUser
+    public TrackedEntityAttributeValueInteractor providesTrackedEntityAttributeValueInteractor() {
+        if (D2.isConfigured()) {
+            return D2.trackedEntityAttributeValues();
+        }
+
+        return null;
+    }
+
+    @Provides
+    @Nullable
+    @PerUser
+    public ProgramTrackedEntityAttributeInteractor providesProgramTrackedEntityAttributeInteractor() {
+        if (D2.isConfigured()) {
+            return D2.programTrackedEntityAttributes();
+        }
+
+        return null;
+    }
+
+    @Provides
+    @Nullable
+    @PerUser
     public OrganisationUnitInteractor providesOrganisationUnitInteractor() {
         if (D2.isConfigured()) {
             return D2.organisationUnits();
@@ -216,6 +241,28 @@ public class UserModule implements DefaultUserModule {
     public TrackedEntityDataValueInteractor provideTrackedEntityDataValueInteractor() {
         if (D2.isConfigured()) {
             return D2.trackedEntityDataValues();
+        }
+
+        return null;
+    }
+
+    @Provides
+    @Nullable
+    @PerUser
+    public EnrollmentInteractor provideEnrollmentInteractor() {
+        if (D2.isConfigured()) {
+            return D2.enrollments();
+        }
+
+        return null;
+    }
+
+    @Provides
+    @Nullable
+    @PerUser
+    public TrackedEntityInstanceInteractor provideTrackedEntityInstanceInteractor() {
+        if (D2.isConfigured()) {
+            return D2.trackedEntityInstances();
         }
 
         return null;
@@ -334,6 +381,9 @@ public class UserModule implements DefaultUserModule {
     public SelectorPresenter providesSelectorPresenter(
             @Nullable UserOrganisationUnitInteractor userOrganisationUnitInteractor,
             @Nullable UserProgramInteractor userProgramInteractor,
+            @Nullable ProgramInteractor programInteractor,
+            @Nullable TrackedEntityInstanceInteractor trackedEntityInstanceInteractor,
+            @Nullable EnrollmentInteractor enrollmentInteractor,
             @Nullable ProgramStageInteractor programStageInteractor,
             @Nullable ProgramStageDataElementInteractor programStageDataElementInteractor,
             @Nullable EventInteractor eventInteractor,
@@ -342,8 +392,8 @@ public class UserModule implements DefaultUserModule {
             ApiExceptionHandler apiExceptionHandler, Logger logger) {
         return new SelectorPresenterImpl(
                 userOrganisationUnitInteractor, userProgramInteractor,
-                programStageInteractor, programStageDataElementInteractor,
-                eventInteractor, sessionPreferences, syncDateWrapper, syncWrapper,
+                programInteractor, programStageInteractor, programStageDataElementInteractor,
+                enrollmentInteractor, trackedEntityInstanceInteractor, eventInteractor, sessionPreferences, syncDateWrapper, syncWrapper,
                 apiExceptionHandler, logger);
     }
 }

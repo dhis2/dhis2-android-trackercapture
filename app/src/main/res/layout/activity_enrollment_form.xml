@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout android:id="@+id/coordinatorlayout_form"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appbarlayout_data_entry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+        <android.support.design.widget.CollapsingToolbarLayout
+            android:id="@+id/collapsingtoolbarlayout_data_entry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:contentScrim="?attr/colorPrimary"
+            app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
+            app:titleEnabled="false">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/collapsing_toolbar_height"
+                android:gravity="bottom">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/keyline_default"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:orientation="vertical">
+
+
+                    <org.hisp.dhis.client.sdk.ui.views.FontTextView
+                        android:id="@+id/textview_report_date"
+                        android:layout_width="match_parent"
+                        android:layout_height="42dp"
+                        android:layout_marginBottom="8dp"
+                        android:background="@color/color_primary_light"
+                        android:clickable="true"
+                        android:gravity="center_vertical"
+                        android:hint="@string/choose_report_date"
+                        android:padding="8dp"
+                        android:textSize="@dimen/text_size_medium"
+                        app:font="@string/font_name_light"/>
+
+                    <LinearLayout
+                        android:id="@+id/linearlayout_coordinates"
+                        android:layout_width="match_parent"
+                        android:layout_height="42dp"
+                        android:orientation="horizontal"
+                        android:weightSum="1">
+
+                        <FrameLayout
+                            android:id="@+id/button_location_layout"
+                            android:layout_width="42dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginEnd="2dp"
+                            android:layout_marginRight="2dp"
+                            android:background="@drawable/button_selector_blue"
+                            android:clickable="true"
+                            android:padding="4dp"
+                            >
+
+                            <android.support.v7.widget.AppCompatImageView
+                                android:id="@+id/imagevew_location"
+                                android:layout_width="24dp"
+                                android:layout_height="match_parent"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_my_location"
+                                />
+
+                            <android.support.v7.widget.AppCompatImageView
+                                android:id="@+id/imagevew_location_cancel"
+                                android:layout_width="24dp"
+                                android:layout_height="match_parent"
+                                android:layout_gravity="center"
+                                android:padding="5dp"
+                                android:src="@drawable/ic_cancel_white"
+                                android:visibility="gone"
+                                />
+
+                            <fr.castorflex.android.circularprogressbar.CircularProgressBar
+                                android:id="@+id/progress_bar_circular_location"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_gravity="center"
+                                android:indeterminate="true"
+                                android:visibility="gone"
+                                app:cpb_color="@android:color/white"
+                                app:cpb_max_sweep_angle="333"
+                                app:cpb_rotation_speed="0.66"
+                                app:cpb_stroke_width="2dp"
+                                app:cpb_sweep_speed="0.66"
+                                />
+                        </FrameLayout>
+
+                        <org.hisp.dhis.client.sdk.ui.views.FontEditText
+                            android:id="@+id/edittext_latitude"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginEnd="2dp"
+                            android:layout_marginLeft="2dp"
+                            android:layout_marginRight="2dp"
+                            android:layout_marginStart="2dp"
+                            android:layout_weight="0.5"
+                            android:background="@color/color_primary_light"
+                            android:hint="@string/latitude"
+                            android:padding="8dp"
+                            android:textSize="@dimen/text_size_medium"
+                            app:font="@string/font_name_light"
+                            android:enabled="false"
+                            android:singleLine="true"/>
+
+                        <org.hisp.dhis.client.sdk.ui.views.FontEditText
+                            android:id="@+id/edittext_longitude"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginLeft="2dp"
+                            android:layout_marginStart="2dp"
+                            android:layout_weight="0.5"
+                            android:background="@color/color_primary_light"
+                            android:hint="@string/longitude"
+                            android:padding="8dp"
+                            android:textSize="@dimen/text_size_medium"
+                            app:font="@string/font_name_light"
+                            android:enabled="false"
+                            android:singleLine="true"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                app:layout_collapseMode="pin"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:titleTextColor="@android:color/white"/>
+
+        </android.support.design.widget.CollapsingToolbarLayout>
+
+        <android.support.design.widget.TabLayout
+            android:id="@+id/tablayout_data_entry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:tabMode="scrollable"/>
+
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/viewpager_dataentry"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_complete_event"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/keyline_default"
+        android:src="@drawable/ic_save"
+        app:backgroundTint="@color/statelist_complete_button"
+        app:elevation="8dp"
+        app:layout_anchor="@id/viewpager_dataentry"
+        app:layout_anchorGravity="bottom|right|end"
+        app:pressedTranslationZ="8dp"/>
+</android.support.design.widget.CoordinatorLayout>

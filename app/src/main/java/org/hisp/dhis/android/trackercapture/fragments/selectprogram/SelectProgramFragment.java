@@ -410,6 +410,17 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         new MenuInflater(this.getActivity()).inflate(org.hisp.dhis.android.sdk.R.menu.menu_selected_trackedentityinstance, menu);
+
+        // If item has been sent to server, set deletion menu item label as "Remove from device" instead of "delete"
+        MenuItem menuItem = menu.findItem(R.id.action_delete);
+        if (menuItem != null) {
+            AdapterView.AdapterContextMenuInfo info =
+                    (AdapterView.AdapterContextMenuInfo) menuItem.getMenuInfo();
+            final TrackedEntityInstanceItemRow itemRow = (TrackedEntityInstanceItemRow) mListView.getItemAtPosition(info.position);
+            if (itemRow != null && itemRow.getStatus().equals(OnRowClick.ITEM_STATUS.SENT)) {
+                menuItem.setTitle(R.string.remove);
+            }
+        }
     }
 
     @Override
@@ -422,11 +433,11 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
         Log.d(TAG, "" + itemRow.getTrackedEntityInstance().getTrackedEntityInstance());
 
 
-        if (item.getTitle().toString().equals(getResources().getString(org.hisp.dhis.android.sdk.R.string.go_to_programoverview_fragment))) {
+        if (item.getItemId() == R.id.action_overview) {
             HolderActivity.navigateToProgramOverviewFragment(getActivity(),
                     mState.getOrgUnitId(), mState.getProgramId(), itemRow.getTrackedEntityInstance().getLocalId());
-        } else if (item.getTitle().toString().equals(getResources().getString(org.hisp.dhis.android.sdk.R.string.delete))) {
-            // if not sent to server, present dialog to user
+        } else if (item.getItemId() == R.id.action_delete) {
+            // if not sent to server, show dialog with error icon
             if (!(itemRow.getStatus().equals(OnRowClick.ITEM_STATUS.SENT))) {
                 UiUtils.showConfirmDialog(getActivity(), getActivity().getString(R.string.confirm),
                         getActivity().getString(R.string.warning_delete_unsent_tei),
@@ -440,8 +451,18 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
                             }
                         });
             } else {
-                //if sent to server, be able to soft delete without annoying the user
-                performSoftDeleteOfTrackedEntityInstance(itemRow.getTrackedEntityInstance());
+                // if not sent to server, show dialog with warning icon
+                UiUtils.showConfirmDialog(getActivity(), getActivity().getString(R.string.remove_report_entity_dialog_title),
+                        getActivity().getString(R.string.remove_report_entity_dialog_message),
+                        getActivity().getString(R.string.remove), getActivity().getString(R.string.cancel),
+                        (R.drawable.ic_warning_black_24dp),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                performSoftDeleteOfTrackedEntityInstance(itemRow.getTrackedEntityInstance());
+                                dialog.dismiss();
+                            }
+                        });
             }
         }
         return true;

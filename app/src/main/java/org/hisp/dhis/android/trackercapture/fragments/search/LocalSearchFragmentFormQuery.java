@@ -94,6 +94,8 @@ public class LocalSearchFragmentFormQuery implements Query<LocalSearchFragmentFo
             row = new RadioButtonsRow(trackedEntityAttributeName, programTrackedEntityAttribute.getMandatory(), null, dataValue, DataEntryRowTypes.BOOLEAN);
         } else if (trackedEntityAttribute.getValueType().equals(ValueType.TRUE_ONLY)) {
             row = new CheckBoxRow(trackedEntityAttributeName, programTrackedEntityAttribute.getMandatory(), null, dataValue);
+        } else if (trackedEntityAttribute.getValueType().equals(ValueType.PHONE_NUMBER)) {
+            row = new EditTextRow(trackedEntityAttributeName, programTrackedEntityAttribute.getMandatory(), null, dataValue, DataEntryRowTypes.PHONE_NUMBER);
         } else if (trackedEntityAttribute.getValueType().equals(ValueType.DATE)) {
             row = new DatePickerRow(trackedEntityAttributeName, programTrackedEntityAttribute.getMandatory(), null, dataValue, programTrackedEntityAttribute.getAllowFutureDate());
         } else {

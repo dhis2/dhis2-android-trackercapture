@@ -479,7 +479,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             mSpinner.setSelection(getSpinnerIndex(mState.getProgramName()));
 
             if (mForm == null || mForm.getEnrollment() == null) {
-                showNoActiveEnrollment();
+                showNoActiveEnrollment(mForm);
                 return;
             } else {
                 enrollmentLayout.setVisibility(View.VISIBLE);
@@ -726,9 +726,15 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         return failedItemMap;
     }
 
-    public void showNoActiveEnrollment() {
+    public void showNoActiveEnrollment(ProgramOverviewFragmentForm mForm) {
         enrollmentLayout.setVisibility(View.GONE);
-        missingEnrollmentLayout.setVisibility(View.VISIBLE);
+
+        if(mForm.getProgram() != null && !mForm.getProgram().getOnlyEnrollOnce()) {
+            missingEnrollmentLayout.setVisibility(View.VISIBLE);
+        }
+        else {
+            missingEnrollmentLayout.setVisibility(View.GONE);
+        }
 
         //update profile view
         List<Enrollment> enrollmentsForTEI = TrackerController.getEnrollments(TrackerController.getTrackedEntityInstance(mState.getTrackedEntityInstanceId()));

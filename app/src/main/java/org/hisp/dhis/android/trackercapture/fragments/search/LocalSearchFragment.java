@@ -156,7 +156,9 @@ public class LocalSearchFragment extends Fragment implements LoaderManager.Loade
         HashMap<String, String> attributeValueMap = new HashMap<>();
 
         for(TrackedEntityAttributeValue value : mForm.getTrackedEntityAttributeValues()) {
-            attributeValueMap.put(value.getTrackedEntityAttributeId(), value.getValue());
+            if(value.getValue() != null && !value.getValue().isEmpty()) {
+                attributeValueMap.put(value.getTrackedEntityAttributeId(), value.getValue());
+            }
         }
 
         mForm.setAttributeValues(attributeValueMap);

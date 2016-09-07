@@ -34,6 +34,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Pair;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
@@ -51,18 +52,23 @@ import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis.android.sdk.ui.adapters.AbsAdapter;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DatePickerRow;
+import org.hisp.dhis.android.sdk.ui.dialogs.OrgUnitDialogFragment;
+import org.hisp.dhis.android.sdk.ui.dialogs.ProgramDialogFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
+import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentState;
+import org.hisp.dhis.android.sdk.ui.views.CardTextViewButton;
 import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.sdk.utils.api.ProgramType;
 import org.hisp.dhis.android.sdk.utils.support.DateUtils;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
-import org.hisp.dhis.android.trackercapture.fragments.programoverview.ProgramOverviewFragment;
 import org.hisp.dhis.android.trackercapture.ui.adapters.UpcomingEventAdapter;
+import org.hisp.dhis.android.sdk.ui.dialogs.UpcomingEventsDialogFilter;
 import org.joda.time.LocalDate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -73,7 +79,7 @@ public class UpcomingEventsFragment extends SelectProgramFragment implements Ada
     private static final String CLASS_TAG = "UpcomingEventsFragment";
 
     private List<OrganisationUnit> assignedOrganisationUnits;
-
+    protected CardTextViewButton filterButton;
     private FloatingActionButton mQueryButton;
 
     private DataValue startDate;
@@ -129,6 +135,17 @@ public class UpcomingEventsFragment extends SelectProgramFragment implements Ada
         mQueryButton.setOnClickListener(this);
         mQueryButton.hide();
 
+        filterButton = (CardTextViewButton) header.findViewById(R.id.select_filter);
+        filterButton.setText(mPrefs.getFilter().second);
+
+        filterButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                UpcomingEventsDialogFilter upcomingEventsDialogFilter = UpcomingEventsDialogFilter.newInstance(UpcomingEventsFragment.this);
+                upcomingEventsDialogFilter.show(getChildFragmentManager());
+            }
+        });
+
         startDate = new DataValue();
         startDate.setValue(DateUtils.getMediumDateString());
         endDate = new DataValue();
@@ -167,7 +184,7 @@ public class UpcomingEventsFragment extends SelectProgramFragment implements Ada
             return new DbLoader<>(
                     getActivity().getBaseContext(), modelsToTrack,
                     new UpcomingEventsFragmentQuery(mState.getOrgUnitId(), mState.getProgramId(),
-                    startDate.getValue(), endDate.getValue()));
+                    mState.getFilterLabel(), startDate.getValue(), endDate.getValue()));
         }
         return null;
     }
@@ -199,11 +216,23 @@ public class UpcomingEventsFragment extends SelectProgramFragment implements Ada
     protected void handleViews(int level) {
         mAdapter.swapData(null);
         switch (level) {
-            case 0:
+            case 0: {
                 mQueryButton.hide();
                 break;
-            case 1:
+            }
+            case 1: {
+                if(mPrefs.getFilter() == null) {
+                    mQueryButton.hide();
+            }
+                else {
+                    mQueryButton.show();
+                }
+                break;
+            }
+            case 2: {
                 mQueryButton.show();
+                break;
+            }
         }
     }
 
@@ -220,4 +249,31 @@ public class UpcomingEventsFragment extends SelectProgramFragment implements Ada
     public void stateChanged() {
         // stub
     }
+
+    @Override
+    public void onOptionSelected(int dialogId, int position, String id, String name) {
+        switch (dialogId) {
+            case OrgUnitDialogFragment.ID: {
+                onUnitSelected(id, name);
+                break;
+            }
+            case ProgramDialogFragment.ID: {
+                onProgramSelected(id, name);
+                break;
+            }
+            case UpcomingEventsDialogFilter.ID : {
+                onFilterSelected(id,name);
+            }
+        }
+    }
+
+    private void onFilterSelected(String id, String name) {
+        filterButton.setText(name);
+        mState.setFilter(id, name);
+        mPrefs.putFilter(new Pair<>(id, name));
+
+        handleViews(2);
+    }
+
+
 }

@@ -40,6 +40,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -729,10 +730,9 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     public void showNoActiveEnrollment(ProgramOverviewFragmentForm mForm) {
         enrollmentLayout.setVisibility(View.GONE);
 
-        if(mForm.getProgram() != null && !mForm.getProgram().getOnlyEnrollOnce()) {
+        if (mForm.getProgram() != null && !mForm.getProgram().getOnlyEnrollOnce()) {
             missingEnrollmentLayout.setVisibility(View.VISIBLE);
-        }
-        else {
+        } else {
             missingEnrollmentLayout.setVisibility(View.GONE);
         }
 
@@ -847,6 +847,10 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     }
 
     public void completeEnrollment() {
+        if (mForm == null || mForm.getEnrollment() == null) {
+            Log.i("ENROLLMENT", "Unable to complete enrollment. mForm or mForm.getEnrollment() is null");
+            return;
+        }
         mForm.getEnrollment().setStatus(Enrollment.COMPLETED);
         mForm.getEnrollment().setFromServer(false);
         mForm.getEnrollment().async().save();
@@ -854,6 +858,10 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     }
 
     public void terminateEnrollment() {
+        if (mForm == null || mForm.getEnrollment() == null) {
+            Log.i("ENROLLMENT", "Unable to terminate enrollment. mForm or mForm.getEnrollment() is null");
+            return;
+        }
         mForm.getEnrollment().setStatus(Enrollment.CANCELLED);
         mForm.getEnrollment().setFromServer(false);
         mForm.getEnrollment().async().save();

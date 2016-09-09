@@ -199,7 +199,7 @@ public class EnrollmentDataEntryRuleHelper implements IProgramRuleFragmentHelper
         if(uid == null) {
             uid = programRuleAction.getTrackedEntityAttribute();
         }
-//        enrollmentDataEntryFragment.getListViewAdapter().showErrorOnIndex(uid, programRuleAction.getContent());
+        enrollmentDataEntryFragment.getListViewAdapter().showErrorOnIndex(uid, programRuleAction.getContent());
         if(!programRuleValidationErrors.contains(programRuleAction.getContent())) {
             TrackedEntityAttributeValue value = getTrackedEntityAttributeValue(uid);
             programRuleValidationErrors.add(programRuleAction.getContent() + " " + value.getValue());

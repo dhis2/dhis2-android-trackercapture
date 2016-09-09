@@ -474,24 +474,10 @@ public class EnrollmentFormActivity extends AppCompatActivity implements Enrollm
 
                 if (validateForm()) {
 
-                    Snackbar.make(coordinatorLayout, getString(R.string.incomplete), Snackbar.LENGTH_LONG)
-                            .setAction(getString(R.string.undo), new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    // TrackedEntityInstanceDashboardActivity.navigateTo
-                                }
-                            })
-                            .show();
-                } else {
-                    completeEvent();
-                    Snackbar.make(coordinatorLayout, getString(R.string.complete), Snackbar.LENGTH_LONG)
-                            .setAction(getString(R.string.undo), new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
+                    Snackbar.make(coordinatorLayout, getString(R.string.enrollment_saved)
+                            , Snackbar.LENGTH_LONG).show();
 
-                                }
-                            })
-                            .show();
+                     TrackedEntityInstanceDashboardActivity.navigateTo(EnrollmentFormActivity.this, getEnrollmentUid());
                 }
             }
         });

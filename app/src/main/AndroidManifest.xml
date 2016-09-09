@@ -18,6 +18,7 @@
 
         <activity android:name="org.hisp.dhis.client.sdk.ui.bindings.views.DefaultLoginActivity" />
         <activity android:name=".views.EnrollmentFormActivity"/>
+        <activity android:name=".views.TrackedEntityInstanceDashboardActivity"/>
         <activity
             android:name=".views.HomeActivity"
             android:theme="@style/AppTheme.Main" />

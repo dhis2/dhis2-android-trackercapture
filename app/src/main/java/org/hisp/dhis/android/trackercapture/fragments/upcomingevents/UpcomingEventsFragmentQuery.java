@@ -107,7 +107,7 @@ class UpcomingEventsFragmentQuery implements Query<SelectProgramFragmentForm> {
         List<Event> events = new ArrayList<>();
 
         if(UpcomingEventsDialogFilter.Type.UPCOMING.toString().equalsIgnoreCase(mFilterLabel)) {
-             events = TrackerController.getScheduledEvents(
+             events = TrackerController.getScheduledEventsWithActiveEnrollments(
                     mProgramId, mOrgUnitId, mStartDate, mEndDate
             );
             if (isListEmpty(events)) {
@@ -115,11 +115,11 @@ class UpcomingEventsFragmentQuery implements Query<SelectProgramFragmentForm> {
             }
         }
         else if(UpcomingEventsDialogFilter.Type.OVERDUE.toString().equalsIgnoreCase(mFilterLabel)) {
-            events = TrackerController.getOverdueEvents(
+            events = TrackerController.getOverdueEventsWithActiveEnrollments(
                     mProgramId, mOrgUnitId);
         }
         else if(UpcomingEventsDialogFilter.Type.ACTIVE.toString().equalsIgnoreCase(mFilterLabel)) {
-            events = TrackerController.getActiveEvents(mProgramId, mOrgUnitId,mStartDate,mEndDate);
+            events = TrackerController.getActiveEventsWithActiveEnrollments(mProgramId, mOrgUnitId,mStartDate,mEndDate);
         }
         else {
             // if not UPCOMING, OVERDUE or ACTIVE, then it is FOLLOW_UP

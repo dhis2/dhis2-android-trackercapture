@@ -43,6 +43,8 @@ import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.sdk.controllers.DhisController;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
+import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
+import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
@@ -52,6 +54,8 @@ import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.RunProgramRulesEvent;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnDetailedInfoButtonClick;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.DataEntryFragment;
+import org.hisp.dhis.android.sdk.ui.fragments.dataentry.HideLoadingDialogEvent;
+import org.hisp.dhis.android.sdk.ui.fragments.dataentry.RefreshListViewEvent;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.RowValueChangedEvent;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.SaveThread;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
@@ -59,7 +63,7 @@ import org.hisp.dhis.android.trackercapture.R;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Map;
 
 /**
  * Created by erling on 5/18/15.
@@ -79,11 +83,21 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
     private boolean edit;
     private boolean editableDataEntryRows;
 
-    private TrackedEntityInstanceProfileFragmentForm mForm;
+    private Map<String, List<ProgramRule>> programRulesForTrackedEntityAttributes;
+    private TrackedEntityInstanceProfileFragmentForm form;
     private SaveThread saveThread;
+
+    //the enrollment before anything is changed, used to backtrack
+    private Enrollment originalEnrollment;
+
+    //the TEI before anything is changed, used to backtrack
     private TrackedEntityInstance originalTei;
 
+    //the trackedEntityAttributeValues before anything is changed, used to backtrack
+    private Map<String, TrackedEntityAttributeValue> originalTrackedEntityAttributeValueMap;
+
     public TrackedEntityInstanceProfileFragment() {
+        setProgramRuleFragmentHelper(new TrackedEntityInstanceProfileRuleHelper(this));
     }
 
     public static TrackedEntityInstanceProfileFragment newInstance(long mTrackedEntityInstanceId, String mProgramId) {
@@ -239,9 +253,9 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
             progressBar.setVisibility(View.GONE);
             listView.setVisibility(View.VISIBLE);
 
-            mForm = data;
+            form = data;
 
-            listViewAdapter.swapData(mForm.getDataEntryRows());
+            listViewAdapter.swapData(form.getDataEntryRows());
         }
     }
 
@@ -253,7 +267,7 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
     }
 
     public void setEditableDataEntryRows(boolean editable) {
-        List<Row> rows = new ArrayList<>(mForm.getDataEntryRows());
+        List<Row> rows = new ArrayList<>(form.getDataEntryRows());
         listViewAdapter.swapData(null);
         if (editable) {
             for (Row row : rows) {
@@ -282,13 +296,14 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
     @Subscribe
     public void onRowValueChanged(final RowValueChangedEvent event) {
         flagDataChanged(true);
-        if (mForm == null) {
+        if (form == null) {
             return;
         }
 
         // do not run program rules for EditTextRows - DelayedDispatcher takes care of this
         if (event.getRow() == null || !(event.getRow() instanceof EditTextRow)) {
             // TODO running of program rules goes here
+            evaluateRules(event.getId());
         }
 
         saveThread.schedule();
@@ -297,6 +312,68 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
     @Subscribe
     public void onRunProgramRules(final RunProgramRulesEvent event) {
         // TODO running of program rules goes here
+        evaluateRules(event.getId());
+    }
+
+    private void evaluateRules(String trackedEntityAttribute) {
+        if (trackedEntityAttribute == null || form == null) {
+            return;
+        }
+        if (hasRules(trackedEntityAttribute)) {
+            getProgramRuleFragmentHelper().getProgramRuleValidationErrors().clear();
+            initiateEvaluateProgramRules();
+        }
+    }
+
+    /**
+     * Schedules evaluation and updating of views based on ProgramRules in a thread.
+     * This is used to avoid stacking up calls to evaluateAndApplyProgramRules
+     */
+    public void initiateEvaluateProgramRules() {
+        if (rulesEvaluatorThread != null) {
+            rulesEvaluatorThread.schedule();
+        }
+    }
+
+    private boolean hasRules(String trackedEntityAttribute) {
+        if (programRulesForTrackedEntityAttributes == null) {
+            return false;
+        }
+        return programRulesForTrackedEntityAttributes.containsKey(trackedEntityAttribute);
+    }
+
+    @Subscribe
+    public void onRefreshListView(RefreshListViewEvent event) {
+        super.onRefreshListView(event);
+    }
+
+    @Subscribe
+    public void onHideLoadingDialog(HideLoadingDialogEvent event) {
+        super.onHideLoadingDialog(event);
+    }
+
+    public SaveThread getSaveThread() {
+        return saveThread;
+    }
+
+    public void setSaveThread(SaveThread saveThread) {
+        this.saveThread = saveThread;
+    }
+
+    public TrackedEntityInstanceProfileFragmentForm getForm() {
+        return form;
+    }
+
+    public void setForm(TrackedEntityInstanceProfileFragmentForm form) {
+        this.form = form;
+    }
+
+    public Map<String, List<ProgramRule>> getProgramRulesForTrackedEntityAttributes() {
+        return programRulesForTrackedEntityAttributes;
+    }
+
+    public void setProgramRulesForTrackedEntityAttributes(Map<String, List<ProgramRule>> programRulesForTrackedEntityAttributes) {
+        this.programRulesForTrackedEntityAttributes = programRulesForTrackedEntityAttributes;
     }
 
 
@@ -330,12 +407,12 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
             return;
         }
 
-        if (mForm != null && isAdded() && mForm.getTrackedEntityInstance() != null) {
-            for (TrackedEntityAttributeValue val : mForm.getTrackedEntityAttributeValues()) {
+        if (form != null && isAdded() && form.getTrackedEntityInstance() != null) {
+            for (TrackedEntityAttributeValue val : form.getTrackedEntityAttributeValues()) {
                 val.save();
             }
-            mForm.getTrackedEntityInstance().setFromServer(false);
-            mForm.getTrackedEntityInstance().save();
+            form.getTrackedEntityInstance().setFromServer(false);
+            form.getTrackedEntityInstance().save();
         }
 
         flagDataChanged(false);

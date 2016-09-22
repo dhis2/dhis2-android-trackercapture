@@ -48,16 +48,13 @@ public class TrackedEntityInstanceProfileRuleHelper implements IProgramRuleFragm
 
     @Override
     public void mapFieldsToRulesAndIndicators() {
-        //DONE: implement :
-        // fragment.setProgramRulesForTrackedEntityAttributes(...)
-        // fragment.getProgramRulesForTrackedEntityAttributes()
         fragment.setProgramRulesForTrackedEntityAttributes(new HashMap<String, List<ProgramRule>>());
-        for(ProgramRule programRule: fragment.getForm().getProgram().getProgramRules()) {
-            for(String trackedEntityAttribute: ProgramRuleService.getTrackedEntityAttributesInRule(programRule)) {
+        for (ProgramRule programRule : fragment.getForm().getProgram().getProgramRules()) {
+            for (String trackedEntityAttribute : ProgramRuleService.getTrackedEntityAttributesInRule(programRule)) {
                 List<ProgramRule> rulesForTrackedEntityAttribute =
                         fragment.getProgramRulesForTrackedEntityAttributes()
                                 .get(trackedEntityAttribute);
-                if(rulesForTrackedEntityAttribute == null) {
+                if (rulesForTrackedEntityAttribute == null) {
                     rulesForTrackedEntityAttribute = new ArrayList<>();
                     rulesForTrackedEntityAttribute.add(programRule);
                     fragment.getProgramRulesForTrackedEntityAttributes()
@@ -76,7 +73,6 @@ public class TrackedEntityInstanceProfileRuleHelper implements IProgramRuleFragm
 
     @Override
     public void showWarningHiddenValuesDialog(Fragment parentFragment, ArrayList<String> affectedValues) {
-        //DONE: implement
         ArrayList<String> dataElementNames = new ArrayList<>();
         for (String s : affectedValues) {
             DataElement de = MetaDataController.getDataElement(s);
@@ -84,15 +80,15 @@ public class TrackedEntityInstanceProfileRuleHelper implements IProgramRuleFragm
                 dataElementNames.add(de.getDisplayName());
             }
         }
-        if(dataElementNames.isEmpty()) {
+        if (dataElementNames.isEmpty()) {
             return;
         }
-        if(fragment.getValidationErrorDialog() == null || !fragment.getValidationErrorDialog().isVisible()) {
+        if (fragment.getValidationErrorDialog() == null || !fragment.getValidationErrorDialog().isVisible()) {
             ValidationErrorDialog validationErrorDialog = ValidationErrorDialog.newInstance(
                     parentFragment.getString(org.hisp.dhis.android.sdk.R.string.warning_hidefieldwithvalue),
                     dataElementNames);
             fragment.setValidationErrorDialog(validationErrorDialog);
-            if(parentFragment.isAdded()) {
+            if (parentFragment.isAdded()) {
                 fragment.getValidationErrorDialog().show(parentFragment.getChildFragmentManager());
             }
         }
@@ -103,13 +99,11 @@ public class TrackedEntityInstanceProfileRuleHelper implements IProgramRuleFragm
 
     @Override
     public List<ProgramRule> getProgramRules() {
-        //DONE: implement
         return fragment.getForm().getProgram().getProgramRules();
     }
 
     @Override
     public Enrollment getEnrollment() {
-        //DONE: implement this
         return fragment.getForm().getEnrollment();
     }
 
@@ -120,9 +114,8 @@ public class TrackedEntityInstanceProfileRuleHelper implements IProgramRuleFragm
 
     @Override
     public void applyShowWarningRuleAction(ProgramRuleAction programRuleAction) {
-        //DONE : Test this:
         String uid = programRuleAction.getDataElement();
-        if(uid == null) {
+        if (uid == null) {
             uid = programRuleAction.getTrackedEntityAttribute();
         }
         fragment.getListViewAdapter().showWarningOnIndex(uid, programRuleAction.getContent());
@@ -130,13 +123,12 @@ public class TrackedEntityInstanceProfileRuleHelper implements IProgramRuleFragm
 
     @Override
     public void applyShowErrorRuleAction(ProgramRuleAction programRuleAction) {
-        //DONE: test this
         String uid = programRuleAction.getDataElement();
-        if(uid == null) {
+        if (uid == null) {
             uid = programRuleAction.getTrackedEntityAttribute();
         }
         fragment.getListViewAdapter().showErrorOnIndex(uid, programRuleAction.getContent());
-        if(!programRuleValidationErrors.contains(programRuleAction.getContent())) {
+        if (!programRuleValidationErrors.contains(programRuleAction.getContent())) {
             TrackedEntityAttributeValue value = getTrackedEntityAttributeValue(uid);
             programRuleValidationErrors.add(programRuleAction.getContent() + " " + value.getValue());
         }
@@ -144,9 +136,8 @@ public class TrackedEntityInstanceProfileRuleHelper implements IProgramRuleFragm
 
     @Override
     public void applyHideFieldRuleAction(ProgramRuleAction programRuleAction, List<String> affectedFieldsWithValue) {
-        //DONE: test this:
         fragment.getListViewAdapter().hideIndex(programRuleAction.getDataElement());
-        if(fragment.containsValue(getDataElementValue(programRuleAction.getDataElement()))) {
+        if (fragment.containsValue(getDataElementValue(programRuleAction.getDataElement()))) {
             affectedFieldsWithValue.add(programRuleAction.getDataElement());
         }
     }
@@ -183,7 +174,6 @@ public class TrackedEntityInstanceProfileRuleHelper implements IProgramRuleFragm
 
     @Override
     public void saveTrackedEntityAttribute(String uid) {
-        //DONE: implement getSaveThread() in TrackedEntityInstanceProfileFragment
         fragment.getSaveThread().schedule();
     }
 }

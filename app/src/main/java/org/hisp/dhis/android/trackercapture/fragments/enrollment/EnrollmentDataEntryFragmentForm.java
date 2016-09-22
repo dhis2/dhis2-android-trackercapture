@@ -116,6 +116,4 @@ class EnrollmentDataEntryFragmentForm
     public boolean isOutOfTrackedEntityAttributeGeneratedValues() {
         return outOfTrackedEntityAttributeGeneratedValues;
     }
-
-
 }

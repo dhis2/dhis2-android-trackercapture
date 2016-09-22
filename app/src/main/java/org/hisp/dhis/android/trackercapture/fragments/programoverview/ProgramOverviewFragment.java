@@ -1017,7 +1017,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
 
     private void editTrackedEntityInstanceProfile() {
         HolderActivity.navigateToTrackedEntityInstanceProfileFragment(getActivity(), getArguments().
-                getLong(TRACKEDENTITYINSTANCE_ID), getArguments().getString(PROGRAM_ID));
+                getLong(TRACKEDENTITYINSTANCE_ID), getArguments().getString(PROGRAM_ID), mForm.getEnrollment().getLocalId());
     }
 
     private void showAddRelationshipFragment() {

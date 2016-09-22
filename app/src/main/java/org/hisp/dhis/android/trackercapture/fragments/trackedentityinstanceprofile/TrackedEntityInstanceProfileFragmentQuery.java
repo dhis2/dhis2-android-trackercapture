@@ -31,9 +31,10 @@ package org.hisp.dhis.android.trackercapture.fragments.trackedentityinstanceprof
 
 import android.content.Context;
 
-import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
+import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.OptionSet;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
@@ -60,10 +61,13 @@ public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedE
     private String mProgramId;
     private TrackedEntityInstance currentTrackedEntityInstance;
     private boolean editable;
+    private long enrollmentId;
+    private Enrollment currentEnrollment;
 
-    public TrackedEntityInstanceProfileFragmentQuery(long mTrackedEntityInstanceId, String mProgramId) {
+    public TrackedEntityInstanceProfileFragmentQuery(long mTrackedEntityInstanceId, String mProgramId, long enrollmentId) {
         this.mTrackedEntityInstanceId = mTrackedEntityInstanceId;
         this.mProgramId = mProgramId;
+        this.enrollmentId = enrollmentId;
     }
 
     @Override
@@ -72,20 +76,20 @@ public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedE
         final Program mProgram = MetaDataController.getProgram(mProgramId);
         final TrackedEntityInstance mTrackedEntityInstance = TrackerController.getTrackedEntityInstance(mTrackedEntityInstanceId);
 
-        if (mProgram == null || mTrackedEntityInstance == null)
+        if (mProgram == null || mTrackedEntityInstance == null) {
             return mForm;
-
+        }
+        currentEnrollment = TrackerController.getEnrollment(enrollmentId);
         currentTrackedEntityInstance = mTrackedEntityInstance;
-
         mForm.setProgram(mProgram);
         mForm.setTrackedEntityInstance(mTrackedEntityInstance);
 
         List<TrackedEntityAttributeValue> values = TrackerController.getProgramTrackedEntityAttributeValues(mProgram, mTrackedEntityInstance);
         List<ProgramTrackedEntityAttribute> attributes = MetaDataController.getProgramTrackedEntityAttributes(mProgramId);
 
-        if (values == null && attributes == null)
+        if (values == null && attributes == null) {
             return mForm;
-
+        }
         List<Row> dataEntryRows = new ArrayList<>();
         for (int i = 0; i < attributes.size(); i++) {
             Row row = createDataEntryView(attributes.get(i), attributes.get(i).getTrackedEntityAttribute(),
@@ -95,6 +99,7 @@ public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedE
         }
         mForm.setTrackedEntityAttributeValues(values);
         mForm.setDataEntryRows(dataEntryRows);
+        mForm.setEnrollment(currentEnrollment);
         return mForm;
     }
 
@@ -154,7 +159,7 @@ public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedE
         row.setEditable(false); // default in profile fragment is that user shouldn't be able to edit
 
         // If row is generated then it should never be editable.
-        if(trackedEntityAttribute.isGenerated()) {
+        if (trackedEntityAttribute.isGenerated()) {
             row.setShouldNeverBeEdited(true);
         }
         return row;

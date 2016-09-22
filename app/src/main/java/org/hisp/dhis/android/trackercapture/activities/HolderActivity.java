@@ -250,11 +250,12 @@ public class HolderActivity extends AbsHomeActivity {
         activity.startActivity(intent);
     }
 
-    public static void navigateToTrackedEntityInstanceProfileFragment(Activity activity, long trackedEntityInstanceId, String programId) {
+    public static void navigateToTrackedEntityInstanceProfileFragment(Activity activity, long trackedEntityInstanceId, String programId, long enrollmentId) {
         Intent intent = new Intent(activity, HolderActivity.class);
         intent.putExtra(TrackedEntityInstanceProfileFragment.TRACKEDENTITYINSTANCE_ID, trackedEntityInstanceId);
         intent.putExtra(EventDataEntryFragment.PROGRAM_ID, programId);
         intent.putExtra(ARG_TYPE, ARG_TYPE_TRACKEDENTITYINSTANCEPROFILE);
+        intent.putExtra(TrackedEntityInstanceProfileFragment.ENROLLMENT_ID, enrollmentId);
         activity.startActivity(intent);
     }
 

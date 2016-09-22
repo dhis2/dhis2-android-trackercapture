@@ -32,7 +32,6 @@ package org.hisp.dhis.android.trackercapture.fragments.trackedentityinstanceprof
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -46,7 +45,6 @@ import org.hisp.dhis.android.sdk.controllers.DhisController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
-import org.hisp.dhis.android.sdk.persistence.models.ProgramRuleAction;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
@@ -62,13 +60,9 @@ import org.hisp.dhis.android.sdk.ui.fragments.dataentry.RefreshListViewEvent;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.RowValueChangedEvent;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.SaveThread;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
-import org.hisp.dhis.android.sdk.utils.comparators.ProgramRulePriorityComparator;
-import org.hisp.dhis.android.sdk.utils.services.ProgramRuleService;
-import org.hisp.dhis.android.sdk.utils.services.VariableService;
 import org.hisp.dhis.android.trackercapture.R;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +77,7 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
     public static final String TAG = TrackedEntityInstanceProfileFragment.class.getName();
     public static final String TRACKEDENTITYINSTANCE_ID = "extra:TrackedEntityInstanceId";
     public static final String PROGRAM_ID = "extra:ProgramId";
+    public static final String ENROLLMENT_ID = "extra:EnrollmentID";
 
     private static final String EXTRA_ARGUMENTS = "extra:Arguments";
     private static final String EXTRA_SAVED_INSTANCE_STATE = "extra:savedInstanceState";
@@ -100,25 +95,17 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
     //the TEI before anything is changed, used to backtrack
     private TrackedEntityInstance originalTrackedEntityInstance;
 
-    //the trackedEntityAttributeValues before anything is changed, used to backtrack
-    private Map<String, TrackedEntityAttributeValue> originalTrackedEntityAttributeValueMap;
-
     public TrackedEntityInstanceProfileFragment() {
         originalTrackedEntityInstance = null;
         setProgramRuleFragmentHelper(new TrackedEntityInstanceProfileRuleHelper(this));
     }
 
-    public static TrackedEntityInstanceProfileFragment newInstance(long mTrackedEntityInstanceId, String mProgramId) {
+    public static TrackedEntityInstanceProfileFragment newInstance(long mTrackedEntityInstanceId, String mProgramId, Long enrollmentId) {
         TrackedEntityInstanceProfileFragment fragment = new TrackedEntityInstanceProfileFragment();
         Bundle fragmentArgs = new Bundle();
         fragmentArgs.putLong(TRACKEDENTITYINSTANCE_ID, mTrackedEntityInstanceId);
         fragmentArgs.putString(PROGRAM_ID, mProgramId);
-        //TODO: Find where I can get the date from ?
-        /*args.putString(ENROLLMENT_DATE, enrollmentDate);
-        args.putString(INCIDENT_DATE, incidentDate);
-        args.putString(ORG_UNIT_ID, unitId);
-        args.putString(ORG_UNIT_ID, unitId);
-        args.putString(PROGRAM_ID, programId);*/
+        fragmentArgs.putLong(ENROLLMENT_ID, enrollmentId);
         fragment.setArguments(fragmentArgs);
         return fragment;
     }
@@ -215,44 +202,6 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
     }
 
     @Override
-    public void evaluateAndApplyProgramRules() {
-        showBlockingProgressBar();
-        VariableService.initialize(programRuleFragmentHelper.getEnrollment(), programRuleFragmentHelper.getEvent());
-        programRuleFragmentHelper.mapFieldsToRulesAndIndicators();
-        ArrayList<String> affectedFieldsWithValue = new ArrayList<>();
-        List<ProgramRule> programRules = programRuleFragmentHelper.getProgramRules();
-        List<ProgramRule> programRulesToRun = new ArrayList<>();
-        for (ProgramRule programRule : programRules) {
-            //if (this instanceof EventDataEntryFragment) {
-            if (programRule.getProgramStage() == null || programRule.getProgramStage().isEmpty()) {
-                programRulesToRun.add(programRule);
-            } else if (programRuleFragmentHelper.getEvent() != null &&
-                    programRule.getProgramStage().equals(programRuleFragmentHelper.getEvent().getProgramStageId())) {
-                programRulesToRun.add(programRule);
-                //}
-            }
-        }
-        Collections.sort(programRulesToRun, new ProgramRulePriorityComparator());
-        for (ProgramRule programRule : programRulesToRun) {
-            try {
-                boolean evaluatedTrue = ProgramRuleService.evaluate(programRule.getCondition());
-                for (ProgramRuleAction action : programRule.getProgramRuleActions()) {
-                    if (evaluatedTrue) {
-                        applyProgramRuleAction(action, affectedFieldsWithValue);
-                    }
-                }
-            } catch (Exception e) {
-                Log.e("PROGRAM RULE", "Error evaluating program rule", e);
-            }
-        }
-        if (!affectedFieldsWithValue.isEmpty()) {
-            programRuleFragmentHelper.showWarningHiddenValuesDialog(programRuleFragmentHelper.getFragment(), affectedFieldsWithValue);
-        }
-        hideBlockingProgressBar();
-        programRuleFragmentHelper.updateUi();
-    }
-
-    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         Bundle argumentsBundle = new Bundle();
@@ -272,18 +221,15 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
             List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
             Bundle fragmentArguments = args.getBundle(EXTRA_ARGUMENTS);
             String programId = fragmentArguments.getString(PROGRAM_ID);
-            /*String orgUnitId = fragmentArguments.getString(ORG_UNIT_ID);
-            String enrollmentDate = fragmentArguments.getString(ENROLLMENT_DATE);
-            String incidentDate = fragmentArguments.getString(INCIDENT_DATE);*/
+            long enrollmentId = fragmentArguments.getLong(ENROLLMENT_ID);
             long trackedEntityInstance = fragmentArguments.getLong(TRACKEDENTITYINSTANCE_ID, -1);
-
             return new DbLoader<>(
-                    getActivity().getBaseContext(), modelsToTrack, new TrackedEntityInstanceProfileFragmentQuery(
-                    trackedEntityInstance, programId));
-            /*return new DbLoader<>(
-                    getActivity().getBaseContext(), modelsToTrack, new EnrollmentDataEntryFragmentQuery(
-                    orgUnitId, programId, trackedEntityInstance, enrollmentDate, incidentDate)
-            );*/
+                    getActivity().getBaseContext(),
+                    modelsToTrack,
+                    new TrackedEntityInstanceProfileFragmentQuery(
+                            trackedEntityInstance,
+                            programId,
+                            enrollmentId));
         }
         return null;
     }
@@ -445,17 +391,14 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
         if (form.getEnrollment() == null || form.getProgram() == null) {
             return errors;
         }
-
         if (isEmpty(form.getEnrollment().getEnrollmentDate())) {
             String dateOfEnrollmentDescription = form.getProgram().getEnrollmentDateLabel() == null ?
                     getString(R.string.report_date) : form.getProgram().getEnrollmentDateLabel();
             errors.add(dateOfEnrollmentDescription);
         }
-
         Map<String, ProgramTrackedEntityAttribute> dataElements = toMap(
                 MetaDataController.getProgramTrackedEntityAttributes(form.getProgram().getUid())
         );
-
         for (TrackedEntityAttributeValue value : form.getEnrollment().getAttributes()) {
             ProgramTrackedEntityAttribute programTrackedEntityAttribute = dataElements.get(value.getTrackedEntityAttributeId());
 
@@ -478,7 +421,18 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
 
     @Override
     protected boolean isValid() {
-        //TODO:....
+        if (form.getEnrollment() == null || form.getProgram() == null) {
+            return false;
+        }
+        Map<String, ProgramTrackedEntityAttribute> dataElements = toMap(
+                MetaDataController.getProgramTrackedEntityAttributes(form.getProgram().getUid())
+        );
+        for (TrackedEntityAttributeValue value : form.getEnrollment().getAttributes()) {
+            ProgramTrackedEntityAttribute programTrackedEntityAttribute = dataElements.get(value.getTrackedEntityAttributeId());
+            if (programTrackedEntityAttribute.getMandatory() && isEmpty(value.getValue())) {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -490,7 +444,8 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
         if (!edit) {// if rows are not edited
             return;
         }
-        if (form != null && isAdded() && form.getTrackedEntityInstance() != null) {
+        if (validate() &&
+                form != null && isAdded() && form.getTrackedEntityInstance() != null) {
             for (TrackedEntityAttributeValue val : form.getTrackedEntityAttributeValues()) {
                 val.save();
             }
@@ -500,10 +455,15 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
         flagDataChanged(false);
     }
 
-    //@Override
-    protected boolean goBack() {
-        doBack();
-        return true;
+    private boolean validate() {
+        ArrayList<String> programRulesValidationErrors = getProgramRuleFragmentHelper().getProgramRuleValidationErrors();
+        ArrayList<String> mandatoryValidationErrors = getValidationErrors();
+        if (programRulesValidationErrors.isEmpty() && mandatoryValidationErrors.isEmpty()) {
+            return true;
+        } else {
+            showValidationErrorDialog(mandatoryValidationErrors, programRulesValidationErrors);
+            return false;
+        }
     }
 
     @Subscribe

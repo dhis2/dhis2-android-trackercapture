@@ -85,10 +85,7 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
         final Program mProgram = MetaDataController.getProgram(mProgramId);
         final OrganisationUnit mOrgUnit = MetaDataController.getOrganisationUnit(mOrgUnitId);
 
-        if (mProgram == null) {
-            return mForm;
-        }
-        if (mOrgUnit == null) {
+        if (mProgram == null || mOrgUnit == null) {
             return mForm;
         }
 

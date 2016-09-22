@@ -109,7 +109,7 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
     }
 
     @Override
-    public void createDataEntryFormStage(String enrollmentId, String programId) {
+    public void createDataEntryFormEnrollment(String enrollmentId, String programId) {
         logger.d(TAG, "ProgramId: " + programId);
 
         if (subscription != null && !subscription.isUnsubscribed()) {
@@ -267,7 +267,7 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                             logger.d(TAG, "data value is saved successfully");
 
                             // fire rule engine execution
-                            rxRulesEngine.notifyDataSetChanged();
+//                            rxRulesEngine.notifyDataSetChanged();
                         } else {
                             logger.d(TAG, "Failed to save value");
                         }

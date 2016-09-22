@@ -51,9 +51,11 @@ public class ActivityModule {
     public TrackedEntityInstanceDashboardPresenter providesTrackedEntityInstanceDashboardPresenter(
             @Nullable EnrollmentInteractor enrollmentInteractor,
             @Nullable TrackedEntityInstanceInteractor trackedEntityInstanceInteractor,
+            @Nullable TrackedEntityAttributeValueInteractor trackedEntityAttributeValueInteractor,
             Logger logger) {
         return new TrackedEntityInstanceDashboardPresenterImpl(
-                enrollmentInteractor, trackedEntityInstanceInteractor, logger);
+                enrollmentInteractor, trackedEntityInstanceInteractor,
+                trackedEntityAttributeValueInteractor, logger);
     }
 
     @Provides
@@ -83,10 +85,5 @@ public class ActivityModule {
                 enrollmentInteractor,programInteractor,
                 programTrackedEntityAttributeInteractor,trackedEntityAttributeValueInteractor,
                 rxRulesEngine,logger);
-
-
-
-
-
     }
 }

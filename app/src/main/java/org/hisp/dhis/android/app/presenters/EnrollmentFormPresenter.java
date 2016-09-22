@@ -9,8 +9,6 @@ public interface EnrollmentFormPresenter extends Presenter {
 
     void saveDateOfEnrollment(String enrollmentUid, DateTime eventDate);
 
-    void saveEnrollmentStatus(String enrollmentUid, Enrollment.EnrollmentStatus enrollmentStatus);
-
     boolean validateForm(String enrollmentUid);
 
     void subscribeToLocations();

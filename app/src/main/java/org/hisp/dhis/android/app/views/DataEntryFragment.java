@@ -102,7 +102,7 @@ public class DataEntryFragment extends BaseFragment implements DataEntryView {
 
         try {
             ((TrackerCaptureApp) getActivity().getApplication())
-                    .getFormComponent().inject(this);
+                    .getActivityComponent().inject(this);
 
             // attach view is called in this case from onCreate(),
             // in order to prevent unnecessary work which should be done
@@ -142,11 +142,11 @@ public class DataEntryFragment extends BaseFragment implements DataEntryView {
 
         // injection point was changed from onCreate() to onActivityCreated()
         // because od stupid fragment lifecycle
-        // ((EventCaptureApp) getActivity().getApplication()).getFormComponent().inject(this);
+        // ((EventCaptureApp) getActivity().getApplication()).getActivityComponent().inject(this);
 
         if (!isEmpty(getEnrollmentId())) {
-            // Pass event id into presenter
-            dataEntryPresenter.createDataEntryFormStage(getEnrollmentId(), getProgramId());
+            // Pass enrollment id and programId into presenter
+            dataEntryPresenter.createDataEntryFormEnrollment(getEnrollmentId(), getProgramId());
             return;
         }
 

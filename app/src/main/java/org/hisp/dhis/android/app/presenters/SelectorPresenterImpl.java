@@ -32,6 +32,7 @@ import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
 import org.hisp.dhis.client.sdk.utils.Logger;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
@@ -54,6 +55,7 @@ import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
 public class SelectorPresenterImpl implements SelectorPresenter {
     private static final String TAG = SelectorPresenterImpl.class.getSimpleName();
+    private static final String DATE_FORMAT = "yyyy-MM-dd";
     private final UserOrganisationUnitInteractor userOrganisationUnitInteractor;
     private final UserProgramInteractor userProgramInteractor;
     private final ProgramInteractor programInteractor;
@@ -460,21 +462,16 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
             ArrayList<String> dataElementLabels = new ArrayList<>();
 
-            for (ProgramStageDataElement filteredElement : filteredElements) {
-                DataElement dataElement = filteredElement.getDataElement();
+            dataElementToValueMap.put(Event.EVENT_DATE_KEY,
+                    event.getEventDate().toString(DateTimeFormat.forPattern(DATE_FORMAT)));
+            dataElementToValueMap.put(Event.STATUS_KEY, event.getStatus().toString());
 
-                String value = !isEmpty(dataElementToValueMap.get(dataElement.getUId())) ?
-                        dataElementToValueMap.get(dataElement.getUId()) : "none";
-                String dataElementName = !isEmpty(dataElement.getDisplayFormName()) ?
-                        dataElement.getDisplayFormName() : dataElement.getDisplayName();
-                String dataElementLabel = String.format(Locale.getDefault(), "%s: %s",
-                        dataElementName, value);
+            reportEntities.add(
+                    new ReportEntity(
+                            event.getUId(),
+                            status,
+                            dataElementToValueMap));
 
-                dataElementLabels.add(dataElementLabel);
-
-            }
-
-            reportEntities.add(new ReportEntity(event.getUId(), status, dataElementLabels));
         }
 
         return reportEntities;

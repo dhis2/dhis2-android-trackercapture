@@ -38,7 +38,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.hisp.dhis.android.app.FormComponent;
+import org.hisp.dhis.android.app.ActivityComponent;
 import org.hisp.dhis.android.app.R;
 import org.hisp.dhis.android.app.TrackerCaptureApp;
 import org.hisp.dhis.android.app.presenters.EnrollmentFormPresenter;
@@ -98,7 +98,7 @@ public class EnrollmentFormActivity extends AppCompatActivity implements Enrollm
         navigateTo(activity, enrollmentUid, true);
     }
 
-    public static void navigateToExistingEnrollment(Activity activity, String enrollmentUid) {
+    public static void navigateToExistingEnrollment(Activity activity, String enrollmentUid) { // TrackedEntityInstanceProfile
         navigateTo(activity, enrollmentUid, false);
     }
 
@@ -135,22 +135,19 @@ public class EnrollmentFormActivity extends AppCompatActivity implements Enrollm
         setupViewPager();
         setupFloatingActionButton();
 
-        // attach listener if dialog opened (post-configuration change)
-        attachListenerToExistingFragment();
-
-        FormComponent formComponent = ((TrackerCaptureApp) getApplication()).getFormComponent();
+        ActivityComponent activityComponent = ((TrackerCaptureApp) getApplication()).getActivityComponent();
 
         // first time activity is created
         if (savedInstanceState == null) {
             // it means we found old component and we have to release it
-            if (formComponent != null) {
+            if (activityComponent != null) {
                 // create new instance of component
                 ((TrackerCaptureApp) getApplication()).releaseFormComponent();
             }
 
-            formComponent = ((TrackerCaptureApp) getApplication()).createFormComponent();
+            activityComponent = ((TrackerCaptureApp) getApplication()).createActivityComponent();
         } else {
-            formComponent = ((TrackerCaptureApp) getApplication()).getFormComponent();
+            activityComponent = ((TrackerCaptureApp) getApplication()).getActivityComponent();
         }
 
         // if it is first time when FormSectionsActivity is
@@ -160,7 +157,7 @@ public class EnrollmentFormActivity extends AppCompatActivity implements Enrollm
         }
 
         // inject dependencies
-        formComponent.inject(this);
+        activityComponent.inject(this);
 
         // start building the form
         enrollmentFormPresenter.createDataEntryForm(getEnrollmentUid());
@@ -292,31 +289,6 @@ public class EnrollmentFormActivity extends AppCompatActivity implements Enrollm
         supportInvalidateOptionsMenu();
     }
 
-//    @Override
-//    public void showFormSections(List<FormSection> formSections) {
-//        FormSectionsAdapter viewPagerAdapter =
-//                new FormSectionsAdapter(getSupportFragmentManager());
-//        viewPagerAdapter.swapData(getEnrollmentUid(), formSections);
-//
-//        // in order not to loose state of ViewPager, first we
-//        // have to fill FormSectionsAdapter with data, and only then set it to ViewPager
-//        viewPager.setAdapter(viewPagerAdapter);
-//
-//        // hide tab layout
-//        tabLayout.setVisibility(View.VISIBLE);
-//
-//        // TabLayout will fail on you, if ViewPager which is going to be
-//        // attached does not contain ViewPagerAdapter set to it.
-//        tabLayout.setupWithViewPager(viewPager);
-//    }
-
-//    @Override
-//    public void setFormSectionsPicker(Picker picker) {
-//        sectionDialogFragment = FilterableDialogFragment.newInstance(picker);
-//        sectionDialogFragment.setOnPickerItemClickListener(new OnSearchSectionsClickListener());
-//
-//        supportInvalidateOptionsMenu();
-//    }
     //TODO Adapt this for dateLabel to display enrollment.getDateOfEnrollmentLabel() if exists, if not fallback to "Report date"
     @Override
     public void showReportDatePicker(String hint, String value) {
@@ -350,17 +322,6 @@ public class EnrollmentFormActivity extends AppCompatActivity implements Enrollm
             fabComplete.setVisibility(View.VISIBLE);
             fabComplete.setActivated(Enrollment.EnrollmentStatus.COMPLETED.equals(enrollmentStatus));
         }
-    }
-    //TODO Should adapt to save Enrollment button
-    private void attachListenerToExistingFragment() {
-//        FilterableDialogFragment dialogFragment = (FilterableDialogFragment)
-//                getSupportFragmentManager().findFragmentByTag(FilterableDialogFragment.TAG);
-//
-//        // if we don't have fragment attached to activity,
-//        // we don't want to do anything else
-//        if (dialogFragment != null) {
-//            dialogFragment.setOnPickerItemClickListener(new OnSearchSectionsClickListener());
-//        }
     }
 
     private void setupCoordinatorLayout() {
@@ -485,14 +446,6 @@ public class EnrollmentFormActivity extends AppCompatActivity implements Enrollm
 
     private boolean validateForm() {
         return enrollmentFormPresenter.validateForm(getEnrollmentUid());
-    }
-
-    private void incompleteEvent() {
-        enrollmentFormPresenter.saveEnrollmentStatus(getEnrollmentUid(), Enrollment.EnrollmentStatus.ACTIVE);
-    }
-
-    private void completeEvent() {
-        enrollmentFormPresenter.saveEnrollmentStatus(getEnrollmentUid(), Enrollment.EnrollmentStatus.COMPLETED);
     }
 
     private void showDatePickerDialog() {

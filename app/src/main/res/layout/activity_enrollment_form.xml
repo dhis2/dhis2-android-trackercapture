@@ -148,10 +148,10 @@
         </android.support.design.widget.CollapsingToolbarLayout>
 
         <android.support.design.widget.TabLayout
-            android:id="@+id/tablayout_data_entry"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:tabMode="scrollable"/>
+        android:id="@+id/tablayout_data_entry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:tabMode="scrollable"/>
 
     </android.support.design.widget.AppBarLayout>
 

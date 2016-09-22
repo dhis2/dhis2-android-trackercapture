@@ -45,7 +45,7 @@ public interface UserComponent {
     //------------------------------------------------------------------------
     // Sub-modules
     //------------------------------------------------------------------------
-    FormComponent plus(FormModule formModule);
+    ActivityComponent plus(ActivityModule activityModule);
     //------------------------------------------------------------------------
     // Injection targets
     //------------------------------------------------------------------------

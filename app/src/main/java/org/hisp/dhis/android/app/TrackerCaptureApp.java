@@ -54,7 +54,7 @@ import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 public final class TrackerCaptureApp extends Application {
     private AppComponent appComponent;
     private UserComponent userComponent;
-    private FormComponent formComponent;
+    private ActivityComponent activityComponent;
 
     @Override
     public void onCreate() {
@@ -141,22 +141,22 @@ public final class TrackerCaptureApp extends Application {
                 .build();
     }
 
-    public FormComponent createFormComponent() {
+    public ActivityComponent createActivityComponent() {
         isNull(userComponent, "UserComponent must not be null");
 
-        formComponent = userComponent.plus(new FormModule());
-        return formComponent;
+        activityComponent = userComponent.plus(new ActivityModule());
+        return activityComponent;
     }
 
     public UserComponent getUserComponent() {
         return userComponent;
     }
 
-    public FormComponent getFormComponent() {
-        return formComponent;
+    public ActivityComponent getActivityComponent() {
+        return activityComponent;
     }
     public void releaseFormComponent() {
-        formComponent = null;
+        activityComponent = null;
     }
 
 }

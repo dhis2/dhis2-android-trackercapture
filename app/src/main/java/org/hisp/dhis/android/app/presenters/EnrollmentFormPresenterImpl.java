@@ -164,33 +164,6 @@ public class EnrollmentFormPresenterImpl implements EnrollmentFormPresenter {
                 }));
     }
 
-    @Override
-    public void saveEnrollmentStatus(final String enrollmentUid, final Enrollment.EnrollmentStatus enrollmentStatus) {
-        if (subscription != null && !subscription.isUnsubscribed()) {
-            subscription.unsubscribe();
-            subscription = null;
-        }
-
-        subscription = new CompositeSubscription();
-        subscription.add(enrollmentInteractor.get(enrollmentUid)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Enrollment>() {
-                    @Override
-                    public void call(Enrollment enrollment) {
-                        isNull(enrollment, String.format("Enrollment with uid %s does not exist", enrollmentUid));
-
-                        enrollment.setStatus(enrollmentStatus);
-
-                        subscription.add(saveEnrollment(enrollment));
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        logger.e(TAG, null, throwable);
-                    }
-                }));
-    }
 
     @Override
     public boolean validateForm(final String enrollmentUid) {

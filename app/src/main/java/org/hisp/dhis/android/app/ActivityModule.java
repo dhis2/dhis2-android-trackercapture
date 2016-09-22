@@ -5,6 +5,8 @@ import org.hisp.dhis.android.app.presenters.DataEntryPresenter;
 import org.hisp.dhis.android.app.presenters.DataEntryPresenterImpl;
 import org.hisp.dhis.android.app.presenters.EnrollmentFormPresenter;
 import org.hisp.dhis.android.app.presenters.EnrollmentFormPresenterImpl;
+import org.hisp.dhis.android.app.presenters.TrackedEntityInstanceDashboardPresenter;
+import org.hisp.dhis.android.app.presenters.TrackedEntityInstanceDashboardPresenterImpl;
 import org.hisp.dhis.client.sdk.android.enrollment.EnrollmentInteractor;
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
 import org.hisp.dhis.client.sdk.android.optionset.OptionSetInteractor;
@@ -16,6 +18,7 @@ import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramTrackedEntityAttributeInteractor;
 import org.hisp.dhis.client.sdk.android.trackedentity.TrackedEntityAttributeValueInteractor;
+import org.hisp.dhis.client.sdk.android.trackedentity.TrackedEntityInstanceInteractor;
 import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
@@ -25,9 +28,9 @@ import dagger.Module;
 import dagger.Provides;
 
 @Module
-public class FormModule {
+public class ActivityModule {
 
-    public FormModule() {
+    public ActivityModule() {
         // explicit empty constructor
     }
 
@@ -41,6 +44,16 @@ public class FormModule {
             @Nullable EventInteractor eventInteractor, Logger logger) {
         return new RxRulesEngine(programRuleInteractor, programRuleActionInteractor,
                 programRuleVariableInteractor, eventInteractor, enrollmentInteractor, logger);
+    }
+
+    @Provides
+    @PerActivity
+    public TrackedEntityInstanceDashboardPresenter providesTrackedEntityInstanceDashboardPresenter(
+            @Nullable EnrollmentInteractor enrollmentInteractor,
+            @Nullable TrackedEntityInstanceInteractor trackedEntityInstanceInteractor,
+            Logger logger) {
+        return new TrackedEntityInstanceDashboardPresenterImpl(
+                enrollmentInteractor, trackedEntityInstanceInteractor, logger);
     }
 
     @Provides
@@ -70,5 +83,10 @@ public class FormModule {
                 enrollmentInteractor,programInteractor,
                 programTrackedEntityAttributeInteractor,trackedEntityAttributeValueInteractor,
                 rxRulesEngine,logger);
+
+
+
+
+
     }
 }

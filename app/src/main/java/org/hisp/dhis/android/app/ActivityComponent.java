@@ -8,10 +8,10 @@ import dagger.Subcomponent;
 @PerActivity
 @Subcomponent(
         modules = {
-                FormModule.class
+                ActivityModule.class
         }
 )
-public interface FormComponent {
+public interface ActivityComponent {
 
     //------------------------------------------------------------------------
     // Injection targets

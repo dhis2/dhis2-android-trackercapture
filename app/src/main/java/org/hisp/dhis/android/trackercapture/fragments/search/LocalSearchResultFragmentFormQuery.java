@@ -54,7 +54,6 @@ public class LocalSearchResultFragmentFormQuery implements Query<LocalSearchResu
         Program selectedProgram = MetaDataController.getProgram(programId);
         List<EventRow> eventRows = new ArrayList<>();
         List<ProgramTrackedEntityAttribute> attributes = selectedProgram.getProgramTrackedEntityAttributes();
-        Map<String, TrackedEntityAttribute> trackedEntityAttributeMap = new HashMap();
 
         List<String> attributesToShow = new ArrayList<>();
         TrackedEntityInstanceColumnNamesRow columnNames = new TrackedEntityInstanceColumnNamesRow();
@@ -80,15 +79,18 @@ public class LocalSearchResultFragmentFormQuery implements Query<LocalSearchResu
 
         HashMap<String, String> attributesWithValuesMap = new HashMap<>();
 
+        //map of Tracked Entity Attributes used in this query
+        Map<String, TrackedEntityAttribute> usedTrackedEntityAttributeMap = new HashMap();
+
         for(String key : attributeValueMap.keySet()) {
             String val = attributeValueMap.get(key);
             if(val != null && !val.equals("")) {
                 attributesWithValuesMap.put(key, val);
             }
-            trackedEntityAttributeMap.put(key, MetaDataController.getTrackedEntityAttribute(key));
+            usedTrackedEntityAttributeMap.put(key, MetaDataController.getTrackedEntityAttribute(key));
         }
 
-        String query = getTrackedEntityInstancesQuery(attributesWithValuesMap, trackedEntityAttributeMap);
+        String query = getTrackedEntityInstancesQuery(attributesWithValuesMap, usedTrackedEntityAttributeMap);
         if(query == null) {
             return form;
         }
@@ -109,22 +111,10 @@ public class LocalSearchResultFragmentFormQuery implements Query<LocalSearchResu
         }
 
         //searching for Failed Items for any of the resulting TEI
-        Set<String> failedItemsForTrackedEntityInstances = new HashSet<>();
-        List<FailedItem> failedItemsTrackedEntityInstances = new Select().from(FailedItem.class).
-                where(Condition.column(FailedItem$Table.ITEMTYPE).is(FailedItem.TRACKEDENTITYINSTANCE)).
-                and(Condition.column(FailedItem$Table.ITEMID).in(trackedEntityInstanceLocalIdToTeiMap.keySet())).queryList();
-
-        for (FailedItem failedItem : failedItemsTrackedEntityInstances) {
-            if(failedItem.getHttpStatusCode()>=0) {
-                TrackedEntityInstance trackedEntityInstance = trackedEntityInstanceLocalIdToTeiMap.get(failedItem.getItemId());
-                if(trackedEntityInstance != null && trackedEntityInstance.getTrackedEntityInstance() != null) {
-                    failedItemsForTrackedEntityInstances.add(trackedEntityInstance.getTrackedEntityInstance());
-                }
-            }
-        }
+        Set<String> failedItemsForTrackedEntityInstances = getFailedItemsForTrackedEntityInstances(trackedEntityInstanceLocalIdToTeiMap);
 
         //Caching Option Sets for further use to avoid repeated db calls
-        Map<String, Map<String, Option>> optionsForOptionSetMap = getCachedOptionsForOptionSets(trackedEntityAttributeMap);
+        Map<String, Map<String, Option>> optionsForOptionSetMap = getCachedOptionsForOptionSets(usedTrackedEntityAttributeMap);
 
         //caching TrackedEntityAttributeValues to avoid looped db queries
         Map<Long, Map<String, TrackedEntityAttributeValue>> cachedTrackedEntityAttributeValuesForTrackedEntityInstances = getCachedTrackedEntityAttributeValuesForTrackedEntityInstances(attributesToShow, resultTrackedEntityInstances);
@@ -135,7 +125,7 @@ public class LocalSearchResultFragmentFormQuery implements Query<LocalSearchResu
                 continue;
             }
             eventRows.add(createTrackedEntityInstanceItem(context,
-                    trackedEntityInstance, attributesToShow, attributes,
+                    trackedEntityInstance, attributesToShow,
                     allTrackedEntityAttributesMap, failedItemsForTrackedEntityInstances,
                     cachedTrackedEntityAttributeValuesForTrackedEntityInstances,
                     optionsForOptionSetMap));
@@ -154,7 +144,7 @@ public class LocalSearchResultFragmentFormQuery implements Query<LocalSearchResu
     }
 
     private EventRow createTrackedEntityInstanceItem(Context context, TrackedEntityInstance trackedEntityInstance,
-                                                     List<String> attributesToShow, List<ProgramTrackedEntityAttribute> attributes,
+                                                     List<String> attributesToShow,
                                                      Map<String, TrackedEntityAttribute> trackedEntityAttributeMap,
                                                      Set<String> failedEventIds, Map<Long, Map<String, TrackedEntityAttributeValue>> cachedTrackedEntityAttributeValuesForTrackedEntityInstances, Map<String, Map<String, Option>> optionsForOptionSetMap) {
         TrackedEntityInstanceItemRow trackedEntityInstanceItemRow = new TrackedEntityInstanceItemRow(context);
@@ -357,5 +347,39 @@ public class LocalSearchResultFragmentFormQuery implements Query<LocalSearchResu
         }
         query += ';';
         return query;
+    }
+
+    private Set<String> getFailedItemsForTrackedEntityInstances(Map<Long, TrackedEntityInstance> trackedEntityInstanceLocalIdToTeiMap) {
+        //making tei localids string to add to query separated by comma
+        Set<Long> trackedEntityLocalIdSet = trackedEntityInstanceLocalIdToTeiMap.keySet();
+        Iterator<Long> idIterator = trackedEntityLocalIdSet.iterator();
+        String trackedEntityInstanceLocalIdsString = "";
+        for(int i = 0; i<trackedEntityLocalIdSet.size(); i++) {
+            if(idIterator.hasNext()) {
+                trackedEntityInstanceLocalIdsString += "" + idIterator.next();
+                if (i < trackedEntityLocalIdSet.size() - 1) {
+                    trackedEntityInstanceLocalIdsString += ',';
+                }
+            }
+        }
+
+        String failedItemsQuery = "SELECT * FROM " + FailedItem.class.getSimpleName() + " WHERE " + FailedItem$Table.ITEMTYPE + " IS '" + FailedItem.TRACKEDENTITYINSTANCE
+                + "' AND " + FailedItem$Table.ITEMID + " IN (" + trackedEntityInstanceLocalIdsString + ");";
+        List<FailedItem> newFailedItems = new StringQuery<>(FailedItem.class, failedItemsQuery).queryList();
+
+        Set<String> failedItemsForTrackedEntityInstances = new HashSet<>();
+        for (FailedItem failedItem : newFailedItems) {
+            TrackedEntityInstance trackedEntityInstance = trackedEntityInstanceLocalIdToTeiMap.get(failedItem.getItemId());
+            if(trackedEntityInstance == null) {
+                failedItem.delete();
+            } else {
+                if(failedItem.getHttpStatusCode()>=0) {
+                    if(trackedEntityInstance.getTrackedEntityInstance() != null) {
+                        failedItemsForTrackedEntityInstances.add(trackedEntityInstance.getTrackedEntityInstance());
+                    }
+                }
+            }
+        }
+        return failedItemsForTrackedEntityInstances;
     }
 }

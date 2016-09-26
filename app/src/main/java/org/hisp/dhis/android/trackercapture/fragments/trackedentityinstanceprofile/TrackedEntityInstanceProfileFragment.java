@@ -175,10 +175,12 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             proceed();
-                            onDetach();
+                            if (!isValid()) {
+                                onDetach();
 //                            getFragmentManager().popBackStack();
-                            DhisController.hasUnSynchronizedDatavalues = true;
-                            getActivity().finish();
+                                DhisController.hasUnSynchronizedDatavalues = true;
+                                getActivity().finish();
+                            }
                         }
                     }, new DialogInterface.OnClickListener() {
                         @Override
@@ -451,8 +453,8 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
             }
             form.getTrackedEntityInstance().setFromServer(false);
             form.getTrackedEntityInstance().save();
+            flagDataChanged(false);
         }
-        flagDataChanged(false);
     }
 
     private boolean validate() {

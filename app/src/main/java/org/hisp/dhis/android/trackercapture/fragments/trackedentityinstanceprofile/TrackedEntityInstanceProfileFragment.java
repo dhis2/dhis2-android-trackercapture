@@ -174,10 +174,9 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            proceed();
-                            if (!isValid()) {
+                            if (validate()) {
                                 onDetach();
-//                            getFragmentManager().popBackStack();
+                                //                            getFragmentManager().popBackStack();
                                 DhisController.hasUnSynchronizedDatavalues = true;
                                 getActivity().finish();
                             }

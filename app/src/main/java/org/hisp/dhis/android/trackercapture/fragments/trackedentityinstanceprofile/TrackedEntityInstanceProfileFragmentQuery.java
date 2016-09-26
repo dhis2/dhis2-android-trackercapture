@@ -51,6 +51,7 @@ import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 import org.hisp.dhis.android.sdk.utils.api.ValueType;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -83,21 +84,28 @@ public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedE
         currentTrackedEntityInstance = mTrackedEntityInstance;
         mForm.setProgram(mProgram);
         mForm.setTrackedEntityInstance(mTrackedEntityInstance);
+        mForm.setTrackedEntityAttributeValueMap(new HashMap<String, TrackedEntityAttributeValue>());
 
-        List<TrackedEntityAttributeValue> values = TrackerController.getProgramTrackedEntityAttributeValues(mProgram, mTrackedEntityInstance);
-        List<ProgramTrackedEntityAttribute> attributes = MetaDataController.getProgramTrackedEntityAttributes(mProgramId);
+        List<TrackedEntityAttributeValue> trackedEntityAttributeValues = TrackerController.getProgramTrackedEntityAttributeValues(mProgram, mTrackedEntityInstance);
+        List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = MetaDataController.getProgramTrackedEntityAttributes(mProgramId);
 
-        if (values == null && attributes == null) {
+        if (trackedEntityAttributeValues == null && programTrackedEntityAttributes == null) {
             return mForm;
         }
+        currentEnrollment.setAttributes(trackedEntityAttributeValues);
+        mForm.setTrackedEntityAttributeValues(trackedEntityAttributeValues);
         List<Row> dataEntryRows = new ArrayList<>();
-        for (int i = 0; i < attributes.size(); i++) {
-            Row row = createDataEntryView(attributes.get(i), attributes.get(i).getTrackedEntityAttribute(),
-                    getTrackedEntityDataValue(attributes.get(i).getTrackedEntityAttribute().getUid(),
-                            values));
+        for (int i = 0; i < programTrackedEntityAttributes.size(); i++) {
+            Row row = createDataEntryView(programTrackedEntityAttributes.get(i), programTrackedEntityAttributes.get(i).getTrackedEntityAttribute(),
+                    getTrackedEntityDataValue(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getUid(),
+                            trackedEntityAttributeValues));
             dataEntryRows.add(row);
         }
-        mForm.setTrackedEntityAttributeValues(values);
+        if (trackedEntityAttributeValues != null) {
+            for (TrackedEntityAttributeValue trackedEntityAttributeValue : trackedEntityAttributeValues) {
+                mForm.getTrackedEntityAttributeValueMap().put(trackedEntityAttributeValue.getTrackedEntityAttributeId(), trackedEntityAttributeValue);
+            }
+        }
         mForm.setDataEntryRows(dataEntryRows);
         mForm.setEnrollment(currentEnrollment);
         return mForm;

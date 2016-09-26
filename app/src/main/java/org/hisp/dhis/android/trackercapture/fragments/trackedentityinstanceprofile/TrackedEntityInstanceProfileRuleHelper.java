@@ -161,7 +161,7 @@ public class TrackedEntityInstanceProfileRuleHelper implements IProgramRuleFragm
 
     @Override
     public TrackedEntityAttributeValue getTrackedEntityAttributeValue(String uid) {
-        return null;
+        return fragment.getForm().getTrackedEntityAttributeValueMap().get(uid);
     }
 
     @Override

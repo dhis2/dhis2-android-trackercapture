@@ -1097,7 +1097,9 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     }
 
     public void synchronize() {
-        sendTrackedEntityInstance(mForm.getTrackedEntityInstance());
+        if(mForm != null) {
+            sendTrackedEntityInstance(mForm.getTrackedEntityInstance());
+        }
     }
 
 

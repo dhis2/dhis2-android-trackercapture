@@ -187,7 +187,6 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             if (originalEnrollment == null) {
                 originalEnrollment = new Enrollment(data.getEnrollment());
             }
-
             form = data;
             if (data.getTrackedEntityInstance().getLocalId() >= 0) {
                 originalTrackedEntityInstance = new TrackedEntityInstance(data.getTrackedEntityInstance());
@@ -199,28 +198,28 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
                     originalTrackedEntityAttributeValueMap.put(copiedTrackedEntityAttributeValue.getTrackedEntityAttributeId(), copiedTrackedEntityAttributeValue);
                 }
             }
-
             if (data.getProgram() != null) {
                 getActionBar().setTitle(form.getProgram().getName());
             }
-
             if (form.isOutOfTrackedEntityAttributeGeneratedValues()) {
                 for (Row row : form.getDataEntryRows()) {
                     row.setEditable(false);
                 }
-                UiUtils.showErrorDialog(getActivity(), getString(R.string.error_message), getString(org.hisp.dhis.android.trackercapture.R.string.out_of_generated_ids), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        getActivity().finish();
-                    }
-                });
+                UiUtils.showErrorDialog(getActivity(),
+                        getString(R.string.error_message),
+                        getString(org.hisp.dhis.android.trackercapture.R.string.out_of_generated_ids),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                getActivity().finish();
+                            }
+                        });
             }
             if (data.getDataEntryRows() != null && !data.getDataEntryRows().isEmpty()) {
                 listViewAdapter.swapData(data.getDataEntryRows());
             }
-
-
-            if (data.getProgram().getProgramRules() != null && !data.getProgram().getProgramRules().isEmpty()) {
+            if (data.getProgram().getProgramRules() != null &&
+                    !data.getProgram().getProgramRules().isEmpty()) {
                 initiateEvaluateProgramRules();
             }
         }
@@ -310,16 +309,8 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
         return attributeMap;
     }
 
-    /**
-     * returns true if the enrollment was successfully saved
-     *
-     * @return
-     */
     @Override
-    protected void save() {
-
-//        }
-    }
+    protected void save() {}
 
     @Override
     protected void proceed() {
@@ -447,7 +438,6 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
                 //saving tei first to get auto-increment reference for enrollment
                 form.getTrackedEntityInstance().setFromServer(false);
                 form.getTrackedEntityInstance().save();
-
             }
             if (form.getEnrollment().getEvents() != null) {
                 for (Event event : form.getEnrollment().getEvents()) {
@@ -460,7 +450,6 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             form.getEnrollment().save();
             flagDataChanged(false);
         }
-
 
         for (ProgramTrackedEntityAttribute ptea : form.getProgram().getProgramTrackedEntityAttributes()) {
             if (ptea.getTrackedEntityAttribute().isGenerated()) {

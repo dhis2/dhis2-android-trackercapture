@@ -181,10 +181,12 @@ public class UpcomingEventsFragment extends SelectProgramFragment implements Ada
         if (LOADER_ID == id && isAdded()) {
             List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
             modelsToTrack.add(Event.class);
-            return new DbLoader<>(
-                    getActivity().getBaseContext(), modelsToTrack,
-                    new UpcomingEventsFragmentQuery(mState.getOrgUnitId(), mState.getProgramId(),
-                    mState.getFilterLabel(), startDate.getValue(), endDate.getValue()));
+            if(startDate != null && endDate != null) {
+                return new DbLoader<>(
+                        getActivity().getBaseContext(), modelsToTrack,
+                        new UpcomingEventsFragmentQuery(mState.getOrgUnitId(), mState.getProgramId(),
+                                mState.getFilterLabel(), startDate.getValue(), endDate.getValue()));
+            }
         }
         return null;
     }

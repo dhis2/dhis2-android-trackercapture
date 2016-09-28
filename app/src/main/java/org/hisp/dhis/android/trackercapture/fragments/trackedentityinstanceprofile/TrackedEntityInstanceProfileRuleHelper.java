@@ -95,7 +95,8 @@ public class TrackedEntityInstanceProfileRuleHelper implements IProgramRuleFragm
     }
 
     @Override
-    public void updateUi() {}
+    public void updateUi() {
+    }
 
     @Override
     public List<ProgramRule> getProgramRules() {
@@ -143,16 +144,20 @@ public class TrackedEntityInstanceProfileRuleHelper implements IProgramRuleFragm
     }
 
     @Override
-    public void applyHideSectionRuleAction(ProgramRuleAction programRuleAction) {}
+    public void applyHideSectionRuleAction(ProgramRuleAction programRuleAction) {
+    }
 
     @Override
-    public void applyCreateEventRuleAction(ProgramRuleAction programRuleAction) {}
+    public void applyCreateEventRuleAction(ProgramRuleAction programRuleAction) {
+    }
 
     @Override
-    public void applyDisplayKeyValuePairRuleAction(ProgramRuleAction programRuleAction) {}
+    public void applyDisplayKeyValuePairRuleAction(ProgramRuleAction programRuleAction) {
+    }
 
     @Override
-    public void applyDisplayTextRuleAction(ProgramRuleAction programRuleAction) {}
+    public void applyDisplayTextRuleAction(ProgramRuleAction programRuleAction) {
+    }
 
     @Override
     public DataValue getDataElementValue(String uid) {
@@ -170,10 +175,16 @@ public class TrackedEntityInstanceProfileRuleHelper implements IProgramRuleFragm
     }
 
     @Override
-    public void saveDataElement(String uid) {}
+    public void saveDataElement(String uid) {
+    }
 
     @Override
     public void saveTrackedEntityAttribute(String uid) {
         fragment.getSaveThread().schedule();
+    }
+
+    @Override
+    public boolean blockingSpinnerNeeded() {
+        return true;
     }
 }

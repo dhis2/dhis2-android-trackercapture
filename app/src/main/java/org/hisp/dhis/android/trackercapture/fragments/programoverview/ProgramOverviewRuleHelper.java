@@ -152,6 +152,11 @@ class ProgramOverviewRuleHelper implements IProgramRuleFragmentHelper {
     }
 
     @Override
+    public boolean blockingSpinnerNeeded() {
+        return true;
+    }
+
+    @Override
     public void applyHideFieldRuleAction(ProgramRuleAction programRuleAction, List affectedFieldsWithValue) {
         //do nothing
     }

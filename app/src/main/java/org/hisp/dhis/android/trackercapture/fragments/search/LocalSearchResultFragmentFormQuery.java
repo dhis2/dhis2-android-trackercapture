@@ -56,11 +56,13 @@ public class LocalSearchResultFragmentFormQuery implements Query<LocalSearchResu
         List<ProgramTrackedEntityAttribute> attributes = selectedProgram.getProgramTrackedEntityAttributes();
 
         List<String> attributesToShow = new ArrayList<>();
+        Map<String, TrackedEntityAttribute> attributesToShowMap = new HashMap<>();
         TrackedEntityInstanceColumnNamesRow columnNames = new TrackedEntityInstanceColumnNamesRow();
 
          for (ProgramTrackedEntityAttribute attribute : attributes) {
             if (attribute.getDisplayInList() && attributesToShow.size() < 3) {
                 attributesToShow.add(attribute.getTrackedEntityAttributeId());
+                attributesToShowMap.put(attribute.getTrackedEntityAttributeId(), attribute.getTrackedEntityAttribute());
                 if (attribute.getTrackedEntityAttribute() != null) {
                     String name = attribute.getTrackedEntityAttribute().getName();
                     if (attributesToShow.size() == 1) {
@@ -80,17 +82,17 @@ public class LocalSearchResultFragmentFormQuery implements Query<LocalSearchResu
         HashMap<String, String> attributesWithValuesMap = new HashMap<>();
 
         //map of Tracked Entity Attributes used in this query
-        Map<String, TrackedEntityAttribute> usedTrackedEntityAttributeMap = new HashMap();
+        Map<String, TrackedEntityAttribute> trackedEntityAttributesUsedInQueryMap = new HashMap();
 
         for(String key : attributeValueMap.keySet()) {
             String val = attributeValueMap.get(key);
             if(val != null && !val.equals("")) {
                 attributesWithValuesMap.put(key, val);
             }
-            usedTrackedEntityAttributeMap.put(key, MetaDataController.getTrackedEntityAttribute(key));
+            trackedEntityAttributesUsedInQueryMap.put(key, MetaDataController.getTrackedEntityAttribute(key));
         }
 
-        String query = getTrackedEntityInstancesQuery(attributesWithValuesMap, usedTrackedEntityAttributeMap);
+        String query = getTrackedEntityInstancesQuery(attributesWithValuesMap, trackedEntityAttributesUsedInQueryMap);
         if(query == null) {
             return form;
         }
@@ -114,7 +116,7 @@ public class LocalSearchResultFragmentFormQuery implements Query<LocalSearchResu
         Set<String> failedItemsForTrackedEntityInstances = getFailedItemsForTrackedEntityInstances(trackedEntityInstanceLocalIdToTeiMap);
 
         //Caching Option Sets for further use to avoid repeated db calls
-        Map<String, Map<String, Option>> optionsForOptionSetMap = getCachedOptionsForOptionSets(usedTrackedEntityAttributeMap);
+        Map<String, Map<String, Option>> optionsForOptionSetsDisplayedInListMap = getCachedOptionsForOptionSets(attributesToShowMap);
 
         //caching TrackedEntityAttributeValues to avoid looped db queries
         Map<Long, Map<String, TrackedEntityAttributeValue>> cachedTrackedEntityAttributeValuesForTrackedEntityInstances = getCachedTrackedEntityAttributeValuesForTrackedEntityInstances(attributesToShow, resultTrackedEntityInstances);
@@ -128,7 +130,7 @@ public class LocalSearchResultFragmentFormQuery implements Query<LocalSearchResu
                     trackedEntityInstance, attributesToShow,
                     allTrackedEntityAttributesMap, failedItemsForTrackedEntityInstances,
                     cachedTrackedEntityAttributeValuesForTrackedEntityInstances,
-                    optionsForOptionSetMap));
+                    optionsForOptionSetsDisplayedInListMap));
         }
 
         form.setEventRowList(eventRows);
@@ -185,7 +187,11 @@ public class LocalSearchResultFragmentFormQuery implements Query<LocalSearchResu
                     }
 
                     String optionSetId = trackedEntityAttribute.getOptionSet();
-                    Option optionWithMatchingValue = optionsForOptionSetMap.get(optionSetId).get(value);
+                    Map<String, Option> optionsMap = optionsForOptionSetMap.get(optionSetId);
+                    if(optionsMap == null) {
+                        continue;
+                    }
+                    Option optionWithMatchingValue = optionsMap.get(value);
                     if(optionWithMatchingValue != null) {
                         value = optionWithMatchingValue.getName();
                     }

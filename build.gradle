@@ -30,16 +30,16 @@ ext {
     minSdkVersion = 15
     compileSdkVersion = 23
     targetSdkVersion = 23
-    versionCode = 43
-    versionName = "0.3.26-2.24"
+    versionCode = 44
+    versionName = "0.3.27-2.24"
 
     configuration = [
             buildToolsVersion: "23.0.2",
             minSdkVersion    : 15,
             compileSdkVersion: 23,
             targetSdkVersion : 23,
-            versionCode      : 43,
-            versionName      : "0.3.26-2.24"
+            versionCode      : 44,
+            versionName      : "0.3.27-2.24"
     ]
 
     libraries = [

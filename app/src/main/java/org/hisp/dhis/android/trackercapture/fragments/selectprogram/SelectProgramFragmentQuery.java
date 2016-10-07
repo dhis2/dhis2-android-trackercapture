@@ -231,7 +231,11 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
                     }
 
                     String optionSetId = trackedEntityAttribute.getOptionSet();
-                    Option optionWithMatchingValue = optionsForOptionSetMap.get(optionSetId).get(value);
+                    Map<String, Option> optionsMap = optionsForOptionSetMap.get(optionSetId);
+                    if(optionsMap == null) {
+                        continue;
+                    }
+                    Option optionWithMatchingValue = optionsMap.get(value);
                     if(optionWithMatchingValue != null) {
                         value = optionWithMatchingValue.getName();
                     }

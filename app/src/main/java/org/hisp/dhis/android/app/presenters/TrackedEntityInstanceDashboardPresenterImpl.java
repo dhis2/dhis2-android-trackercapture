@@ -118,9 +118,11 @@ public class TrackedEntityInstanceDashboardPresenterImpl implements TrackedEntit
         return formEntities;
     }
 
+
+    //TODO: NOTIFY listener is by default set to false
     private FormEntity transformTrackedEntityAttribute(TrackedEntityAttributeValue trackedEntityAttributeValue) {
         FormEntityText formEntityText = new FormEntityText(trackedEntityAttributeValue.getTrackedEntityAttributeUId(), "");
-        formEntityText.setValue(trackedEntityAttributeValue.getValue());
+        formEntityText.setValue(trackedEntityAttributeValue.getValue(),false);
         return formEntityText;
 
     }

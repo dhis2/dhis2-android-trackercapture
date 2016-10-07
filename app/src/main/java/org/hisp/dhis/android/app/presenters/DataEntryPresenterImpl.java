@@ -368,89 +368,89 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
 
             return formEntityFilter;
         }
-
+        //TODO: NOTIFYLISTENER is default set to FALSE
         switch (trackedEntityAttribute.getValueType()) {
             case TEXT: {
                 FormEntityEditText formEntityEditText = new FormEntityEditText(trackedEntityAttribute.getUId(),
                         getFormEntityLabel(programTrackedEntityAttribute), FormEntityEditText.InputType.TEXT, trackedEntityAttributeValue);
-                formEntityEditText.setValue(trackedEntityAttributeValue.getValue());
+                formEntityEditText.setValue(trackedEntityAttributeValue.getValue(),false);
                 formEntityEditText.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityEditText;
             }
             case LONG_TEXT: {
                 FormEntityEditText formEntityEditText = new FormEntityEditText(trackedEntityAttribute.getUId(),
                         getFormEntityLabel(programTrackedEntityAttribute), FormEntityEditText.InputType.LONG_TEXT, trackedEntityAttributeValue);
-                formEntityEditText.setValue(trackedEntityAttributeValue.getValue());
+                formEntityEditText.setValue(trackedEntityAttributeValue.getValue(),false);
                 formEntityEditText.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityEditText;
             }
             case PHONE_NUMBER: {
                 FormEntityEditText formEntityEditText = new FormEntityEditText(trackedEntityAttribute.getUId(),
                         getFormEntityLabel(programTrackedEntityAttribute), FormEntityEditText.InputType.TEXT, trackedEntityAttributeValue);
-                formEntityEditText.setValue(trackedEntityAttributeValue.getValue());
+                formEntityEditText.setValue(trackedEntityAttributeValue.getValue(),false);
                 formEntityEditText.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityEditText;
             }
             case EMAIL: {
                 FormEntityEditText formEntityEditText = new FormEntityEditText(trackedEntityAttribute.getUId(),
                         getFormEntityLabel(programTrackedEntityAttribute), FormEntityEditText.InputType.TEXT, trackedEntityAttributeValue);
-                formEntityEditText.setValue(trackedEntityAttributeValue.getValue());
+                formEntityEditText.setValue(trackedEntityAttributeValue.getValue(),false);
                 formEntityEditText.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityEditText;
             }
             case NUMBER: {
                 FormEntityEditText formEntityEditText = new FormEntityEditText(trackedEntityAttribute.getUId(),
                         getFormEntityLabel(programTrackedEntityAttribute), FormEntityEditText.InputType.NUMBER, trackedEntityAttributeValue);
-                formEntityEditText.setValue(trackedEntityAttributeValue.getValue());
+                formEntityEditText.setValue(trackedEntityAttributeValue.getValue(),false);
                 formEntityEditText.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityEditText;
             }
             case INTEGER: {
                 FormEntityEditText formEntityEditText = new FormEntityEditText(trackedEntityAttribute.getUId(),
                         getFormEntityLabel(programTrackedEntityAttribute), FormEntityEditText.InputType.INTEGER, trackedEntityAttributeValue);
-                formEntityEditText.setValue(trackedEntityAttributeValue.getValue());
+                formEntityEditText.setValue(trackedEntityAttributeValue.getValue(),false);
                 formEntityEditText.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityEditText;
             }
             case INTEGER_POSITIVE: {
                 FormEntityEditText formEntityEditText = new FormEntityEditText(trackedEntityAttribute.getUId(),
                         getFormEntityLabel(programTrackedEntityAttribute), FormEntityEditText.InputType.INTEGER_POSITIVE, trackedEntityAttributeValue);
-                formEntityEditText.setValue(trackedEntityAttributeValue.getValue());
+                formEntityEditText.setValue(trackedEntityAttributeValue.getValue(),false);
                 formEntityEditText.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityEditText;
             }
             case INTEGER_NEGATIVE: {
                 FormEntityEditText formEntityEditText = new FormEntityEditText(trackedEntityAttribute.getUId(),
                         getFormEntityLabel(programTrackedEntityAttribute), FormEntityEditText.InputType.INTEGER_NEGATIVE, trackedEntityAttributeValue);
-                formEntityEditText.setValue(trackedEntityAttributeValue.getValue());
+                formEntityEditText.setValue(trackedEntityAttributeValue.getValue(),false);
                 formEntityEditText.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityEditText;
             }
             case INTEGER_ZERO_OR_POSITIVE: {
                 FormEntityEditText formEntityEditText = new FormEntityEditText(trackedEntityAttribute.getUId(),
                         getFormEntityLabel(programTrackedEntityAttribute), FormEntityEditText.InputType.INTEGER_ZERO_OR_POSITIVE, trackedEntityAttributeValue);
-                formEntityEditText.setValue(trackedEntityAttributeValue.getValue());
+                formEntityEditText.setValue(trackedEntityAttributeValue.getValue(),false);
                 formEntityEditText.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityEditText;
             }
             case DATE: {
                 FormEntityDate formEntityDate = new FormEntityDate(trackedEntityAttribute.getUId(),
                         getFormEntityLabel(programTrackedEntityAttribute), trackedEntityAttributeValue);
-                formEntityDate.setValue(trackedEntityAttributeValue.getValue());
+                formEntityDate.setValue(trackedEntityAttributeValue.getValue(),false);
                 formEntityDate.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityDate;
             }
             case BOOLEAN: {
                 FormEntityRadioButtons formEntityRadioButtons = new FormEntityRadioButtons(
                         trackedEntityAttribute.getUId(), getFormEntityLabel(programTrackedEntityAttribute), trackedEntityAttributeValue);
-                formEntityRadioButtons.setValue(trackedEntityAttributeValue.getValue());
+                formEntityRadioButtons.setValue(trackedEntityAttributeValue.getValue(),false);
                 formEntityRadioButtons.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityRadioButtons;
             }
             case TRUE_ONLY: {
                 FormEntityCheckBox formEntityCheckBox = new FormEntityCheckBox(
                         trackedEntityAttribute.getUId(), getFormEntityLabel(programTrackedEntityAttribute), trackedEntityAttributeValue);
-                formEntityCheckBox.setValue(trackedEntityAttributeValue.getValue());
+                formEntityCheckBox.setValue(trackedEntityAttributeValue.getValue(),false);
                 formEntityCheckBox.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityCheckBox;
             }
@@ -459,7 +459,7 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
 
                 FormEntityText formEntityText = new FormEntityText(trackedEntityAttribute.getUId(),
                         getFormEntityLabel(programTrackedEntityAttribute));
-                formEntityText.setValue("Unsupported value type: " + trackedEntityAttribute.getValueType());
+                formEntityText.setValue("Unsupported value type: " + trackedEntityAttribute.getValueType(),false);
 
                 return formEntityText;
         }
@@ -560,4 +560,5 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
 
         return null;
     }
+
 }

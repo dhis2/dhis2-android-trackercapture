@@ -41,18 +41,18 @@ import org.hisp.dhis.android.sdk.controllers.DhisService;
 import org.hisp.dhis.android.sdk.controllers.LoadingController;
 import org.hisp.dhis.android.sdk.controllers.PeriodicSynchronizerController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis.android.sdk.network.Session;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.models.UserAccount;
 import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
-import org.hisp.dhis.android.sdk.ui.fragments.settings.SettingsFragment;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.SelectProgramFragment;
 import org.hisp.dhis.client.sdk.ui.activities.AbsHomeActivity;
+import org.hisp.dhis.client.sdk.ui.fragments.InformationFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.WrapperFragment;
 
 import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
-
 
 public class MainActivity extends AbsHomeActivity {
     public final static String TAG = MainActivity.class.getSimpleName();
@@ -103,7 +103,7 @@ public class MainActivity extends AbsHomeActivity {
 
         UserAccount userAccount = MetaDataController.getUserAccount();
         String name = "";
-        if(userAccount != null) {
+        if (userAccount != null) {
             if (!isEmpty(userAccount.getFirstName()) &&
                     !isEmpty(userAccount.getSurname())) {
                 name = String.valueOf(userAccount.getFirstName().charAt(0)) +
@@ -119,9 +119,6 @@ public class MainActivity extends AbsHomeActivity {
         }
 
         getUsernameLetterTextView().setText(name);
-
-
-
     }
 
     @NonNull
@@ -196,6 +193,9 @@ public class MainActivity extends AbsHomeActivity {
         } else if (menuItemId == org.hisp.dhis.client.sdk.ui.R.id.drawer_item_settings) {
             HolderActivity.navigateToSettingsFragment(this);
             isSelected = true;
+        } else if (menuItemId == R.id.drawer_item_information) {
+            attachFragment(getInformationFragment());
+            isSelected = true;
         }
         /*else if (menuItemId == R.id.drawer_item_help) {
             attachFragment(getHelpFragment());
@@ -212,5 +212,17 @@ public class MainActivity extends AbsHomeActivity {
         }
 
         return isSelected;
+    }
+
+    protected Fragment getInformationFragment() {
+        Bundle args = new Bundle();
+        Session session = DhisController.getInstance().getSession();
+        if (session != null && session.getCredentials() != null) {
+            args.putString(InformationFragment.USERNAME, session.getCredentials().getUsername());
+            args.putString(InformationFragment.URL, String.valueOf(session.getServerUrl()));
+        }
+        return WrapperFragment.newInstance(InformationFragment.class,
+                getString(R.string.drawer_item_information),
+                args);
     }
 }

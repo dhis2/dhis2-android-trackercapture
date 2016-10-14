@@ -108,11 +108,7 @@ class UpcomingEventsFragmentQuery implements Query<SelectProgramFragmentForm> {
 
         if(UpcomingEventsDialogFilter.Type.UPCOMING.toString().equalsIgnoreCase(mFilterLabel)) {
              events = TrackerController.getScheduledEventsWithActiveEnrollments(
-                    mProgramId, mOrgUnitId, mStartDate, mEndDate
-            );
-            if (isListEmpty(events)) {
-                return fragmentForm;
-            }
+                    mProgramId, mOrgUnitId, mStartDate, mEndDate );
         }
         else if(UpcomingEventsDialogFilter.Type.OVERDUE.toString().equalsIgnoreCase(mFilterLabel)) {
             events = TrackerController.getOverdueEventsWithActiveEnrollments(
@@ -124,8 +120,6 @@ class UpcomingEventsFragmentQuery implements Query<SelectProgramFragmentForm> {
         else {
             // if not UPCOMING, OVERDUE or ACTIVE, then it is FOLLOW_UP
             // NOT YET IMPLEMENTED
-
-
         }
 
         List<Option> options = new Select().from(Option.class).queryList();

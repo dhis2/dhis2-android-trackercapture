@@ -480,6 +480,9 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     }
 
     private void discardChanges() {
+        if(form == null) {
+            return;
+        }
         if (originalEnrollment == null && form.getEnrollment() != null) {
             form.getEnrollment().delete();
             List<Event> events = form.getEnrollment().getEvents();

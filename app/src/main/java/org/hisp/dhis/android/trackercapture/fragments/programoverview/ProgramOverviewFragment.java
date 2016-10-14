@@ -1012,7 +1012,10 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     }
 
     private void editEnrollmentDates() {
-        HolderActivity.navigateToEnrollmentDateFragment(getActivity(), mForm.getEnrollment().getLocalId());
+        if(mForm != null && mForm.getEnrollment() != null ) {
+            HolderActivity.navigateToEnrollmentDateFragment(getActivity(), mForm.getEnrollment().getLocalId());
+        }
+
     }
 
     private void editTrackedEntityInstanceProfile() {

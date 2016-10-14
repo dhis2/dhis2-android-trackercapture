@@ -53,6 +53,7 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.ui.adapters.SectionAdapter;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowTypes;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EditTextRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.RunProgramRulesEvent;
@@ -81,6 +82,7 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     public static final String ENROLLMENT_DATE = "extra:enrollmentDate";
     public static final String INCIDENT_DATE = "extra:incidentDate";
     public static final String TRACKEDENTITYINSTANCE_ID = "extra:TrackedEntityInstanceId";
+    public static final String PROGRAMRULES_FORCED_TRIGGER = "forced";
     private EnrollmentDataEntryFragmentForm form;
     private SaveThread saveThread;
     private Map<String, List<ProgramRule>> programRulesForTrackedEntityAttributes;
@@ -340,6 +342,10 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
         if (trackedEntityAttribute == null || form == null) {
             return;
         }
+        if(PROGRAMRULES_FORCED_TRIGGER.equals(trackedEntityAttribute)) {
+            getProgramRuleFragmentHelper().getProgramRuleValidationErrors().clear();
+            initiateEvaluateProgramRules();
+        }
         if (hasRules(trackedEntityAttribute)) {
             getProgramRuleFragmentHelper().getProgramRuleValidationErrors().clear();
             initiateEvaluateProgramRules();
@@ -360,6 +366,10 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
         // do not run program rules for EditTextRows - DelayedDispatcher takes care of this
         if (event.getRow() == null || !(event.getRow() instanceof EditTextRow)) {
             evaluateRules(event.getId());
+        }
+
+        if (DataEntryRowTypes.ENROLLMENT_DATE.toString().equals(event.getRowType()) || DataEntryRowTypes.EVENT_DATE.toString().equals(event.getRowType())) {
+            evaluateRules(PROGRAMRULES_FORCED_TRIGGER);
         }
 
         saveThread.schedule();

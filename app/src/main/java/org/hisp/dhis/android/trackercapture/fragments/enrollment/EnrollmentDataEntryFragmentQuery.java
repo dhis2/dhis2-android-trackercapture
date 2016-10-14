@@ -110,10 +110,10 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
         List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = mProgram.getProgramTrackedEntityAttributes();
         List<Row> dataEntryRows = new ArrayList<>();
 
-        dataEntryRows.add(new EnrollmentDatePickerRow(currentEnrollment.getProgram().getEnrollmentDateLabel(), currentEnrollment, currentEnrollment.getEnrollmentDate()));
+        dataEntryRows.add(new EnrollmentDatePickerRow(currentEnrollment.getProgram().getEnrollmentDateLabel(), currentEnrollment));
 
         if (currentEnrollment.getProgram().getDisplayIncidentDate()) {
-            dataEntryRows.add(new IncidentDatePickerRow(currentEnrollment.getProgram().getIncidentDateLabel(), currentEnrollment, currentEnrollment.getIncidentDate()));
+            dataEntryRows.add(new IncidentDatePickerRow(currentEnrollment.getProgram().getIncidentDateLabel(), currentEnrollment));
         }
 
         for (ProgramTrackedEntityAttribute ptea : programTrackedEntityAttributes) {

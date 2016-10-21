@@ -41,6 +41,7 @@ import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribut
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowFactory;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.autocompleterow.AutoCompleteRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.CheckBoxRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowTypes;
@@ -96,9 +97,14 @@ public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedE
         mForm.setTrackedEntityAttributeValues(trackedEntityAttributeValues);
         List<Row> dataEntryRows = new ArrayList<>();
         for (int i = 0; i < programTrackedEntityAttributes.size(); i++) {
-            Row row = createDataEntryView(programTrackedEntityAttributes.get(i), programTrackedEntityAttributes.get(i).getTrackedEntityAttribute(),
-                    getTrackedEntityDataValue(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getUid(),
-                            trackedEntityAttributeValues));
+            boolean shouldNeverBeEdited = false;
+            if(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().isGenerated()) {
+                shouldNeverBeEdited = true;
+            }
+            Row row = DataEntryRowFactory.createDataEntryView(programTrackedEntityAttributes.get(i).getMandatory(),
+                    programTrackedEntityAttributes.get(i).getAllowFutureDate(), programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getOptionSet(),
+                    programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getName(), getTrackedEntityDataValue(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getUid(),
+                            trackedEntityAttributeValues), programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getValueType(), true, shouldNeverBeEdited);
             dataEntryRows.add(row);
         }
         if (trackedEntityAttributeValues != null) {
@@ -126,50 +132,5 @@ public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedE
         trackedEntityAttributeValue.setValue("");
         trackedEntityAttributeValues.add(trackedEntityAttributeValue);
         return trackedEntityAttributeValue;
-    }
-
-    public Row createDataEntryView(ProgramTrackedEntityAttribute programTrackedEntityAttribute, TrackedEntityAttribute trackedEntityAttribute, TrackedEntityAttributeValue dataValue) {
-        Row row;
-        String trackedEntityAttributeName = trackedEntityAttribute.getName();
-        if (trackedEntityAttribute.getOptionSet() != null) {
-            OptionSet optionSet = MetaDataController.getOptionSet(trackedEntityAttribute.getOptionSet());
-            if (optionSet == null) {
-                row = new EditTextRow(trackedEntityAttributeName, false, null, dataValue, DataEntryRowTypes.TEXT);
-            } else {
-                row = new AutoCompleteRow(trackedEntityAttributeName, false, null, dataValue, optionSet);
-            }
-        } else if (trackedEntityAttribute.getValueType().equals(ValueType.TEXT)) {
-            row = new EditTextRow(trackedEntityAttributeName, false, null, dataValue, DataEntryRowTypes.TEXT);
-        } else if (trackedEntityAttribute.getValueType().equals(ValueType.LONG_TEXT)) {
-            row = new EditTextRow(trackedEntityAttributeName, false, null, dataValue, DataEntryRowTypes.LONG_TEXT);
-        } else if (trackedEntityAttribute.getValueType().equals(ValueType.NUMBER)) {
-            row = new EditTextRow(trackedEntityAttributeName, false, null, dataValue, DataEntryRowTypes.NUMBER);
-        } else if (trackedEntityAttribute.getValueType().equals(ValueType.INTEGER)) {
-            row = new EditTextRow(trackedEntityAttributeName, false, null, dataValue, DataEntryRowTypes.INTEGER);
-        } else if (trackedEntityAttribute.getValueType().equals(ValueType.INTEGER_ZERO_OR_POSITIVE)) {
-            row = new EditTextRow(trackedEntityAttributeName, false, null, dataValue, DataEntryRowTypes.INTEGER_ZERO_OR_POSITIVE);
-        } else if (trackedEntityAttribute.getValueType().equals(ValueType.INTEGER_POSITIVE)) {
-            row = new EditTextRow(trackedEntityAttributeName, false, null, dataValue, DataEntryRowTypes.INTEGER_POSITIVE);
-        } else if (trackedEntityAttribute.getValueType().equals(ValueType.INTEGER_NEGATIVE)) {
-            row = new EditTextRow(trackedEntityAttributeName, false, null, dataValue, DataEntryRowTypes.INTEGER_NEGATIVE);
-        } else if (trackedEntityAttribute.getValueType().equals(ValueType.BOOLEAN)) {
-            row = new RadioButtonsRow(trackedEntityAttributeName, false, null, dataValue, DataEntryRowTypes.BOOLEAN);
-        } else if (trackedEntityAttribute.getValueType().equals(ValueType.PHONE_NUMBER)) {
-            row = new EditTextRow(trackedEntityAttributeName, programTrackedEntityAttribute.getMandatory(), null, dataValue, DataEntryRowTypes.PHONE_NUMBER);
-        } else if (trackedEntityAttribute.getValueType().equals(ValueType.TRUE_ONLY)) {
-            row = new CheckBoxRow(trackedEntityAttributeName, false, null, dataValue);
-        } else if (trackedEntityAttribute.getValueType().equals(ValueType.DATE)) {
-            row = new DatePickerRow(trackedEntityAttributeName, false, null, dataValue, programTrackedEntityAttribute.getAllowFutureDate());
-        } else {
-            row = new EditTextRow(trackedEntityAttributeName, false, null, dataValue, DataEntryRowTypes.LONG_TEXT);
-        }
-
-        row.setEditable(false); // default in profile fragment is that user shouldn't be able to edit
-
-        // If row is generated then it should never be editable.
-        if (trackedEntityAttribute.isGenerated()) {
-            row.setShouldNeverBeEdited(true);
-        }
-        return row;
     }
 }

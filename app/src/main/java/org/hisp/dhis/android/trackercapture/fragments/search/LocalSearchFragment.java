@@ -20,6 +20,7 @@ import android.widget.ListView;
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
+import org.hisp.dhis.android.sdk.controllers.GpsController;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 
@@ -243,6 +244,13 @@ public class LocalSearchFragment extends Fragment implements LoaderManager.Loade
     @Override
     public void onLoaderReset(Loader<LocalSearchFragmentForm> loader) {
 
+    }
+
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        GpsController.disableGps();
     }
 }
 

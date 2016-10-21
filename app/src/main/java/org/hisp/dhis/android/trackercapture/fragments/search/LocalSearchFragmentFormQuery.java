@@ -3,6 +3,7 @@ package org.hisp.dhis.android.trackercapture.fragments.search;
 import android.content.Context;
 import android.util.Log;
 
+import org.hisp.dhis.android.sdk.controllers.GpsController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.persistence.models.OptionSet;
@@ -56,7 +57,9 @@ public class LocalSearchFragmentFormQuery implements Query<LocalSearchFragmentFo
             if(ptea.getMandatory()) {
                 ptea.setMandatory(!ptea.getMandatory()); // HACK to skip mandatory fields in search form
             }
-
+            if(ValueType.COORDINATE.equals(ptea.getTrackedEntityAttribute().getValueType())) {
+                GpsController.activateGps(context);
+            }
             Row row = DataEntryRowFactory.createDataEntryView(ptea.getMandatory(),
                     ptea.getAllowFutureDate(), trackedEntityAttribute.getOptionSet(),
                     trackedEntityAttribute.getName(), value, trackedEntityAttribute.getValueType(), true, false);

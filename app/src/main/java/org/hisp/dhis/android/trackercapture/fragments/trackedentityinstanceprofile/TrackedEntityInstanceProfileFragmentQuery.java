@@ -31,6 +31,7 @@ package org.hisp.dhis.android.trackercapture.fragments.trackedentityinstanceprof
 
 import android.content.Context;
 
+import org.hisp.dhis.android.sdk.controllers.GpsController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
@@ -101,10 +102,13 @@ public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedE
             if(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().isGenerated()) {
                 shouldNeverBeEdited = true;
             }
+            if(ValueType.COORDINATE.equals(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getValueType())) {
+                GpsController.activateGps(context);
+            }
             Row row = DataEntryRowFactory.createDataEntryView(programTrackedEntityAttributes.get(i).getMandatory(),
                     programTrackedEntityAttributes.get(i).getAllowFutureDate(), programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getOptionSet(),
                     programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getName(), getTrackedEntityDataValue(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getUid(),
-                            trackedEntityAttributeValues), programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getValueType(), true, shouldNeverBeEdited);
+                            trackedEntityAttributeValues), programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getValueType(), false, shouldNeverBeEdited);
             dataEntryRows.add(row);
         }
         if (trackedEntityAttributeValues != null) {

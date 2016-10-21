@@ -31,6 +31,7 @@ package org.hisp.dhis.android.trackercapture.fragments.enrollment;
 
 import android.content.Context;
 
+import org.hisp.dhis.android.sdk.controllers.GpsController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
@@ -146,6 +147,9 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
             if(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().isGenerated()) {
                 editable = false;
                 shouldNeverBeEdited = true;
+            }
+            if(ValueType.COORDINATE.equals(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getValueType())) {
+                GpsController.activateGps(context);
             }
             Row row = DataEntryRowFactory.createDataEntryView(programTrackedEntityAttributes.get(i).getMandatory(),
                     programTrackedEntityAttributes.get(i).getAllowFutureDate(), programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getOptionSet(),

@@ -42,6 +42,7 @@ import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.sdk.controllers.DhisController;
+import org.hisp.dhis.android.sdk.controllers.GpsController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
@@ -474,4 +475,10 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {}
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        GpsController.disableGps();
+    }
 }

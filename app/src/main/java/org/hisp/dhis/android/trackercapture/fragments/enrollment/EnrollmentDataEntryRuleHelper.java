@@ -30,6 +30,7 @@
 package org.hisp.dhis.android.trackercapture.fragments.enrollment;
 
 import android.support.v4.app.Fragment;
+import android.util.Log;
 
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.models.DataValue;
@@ -205,7 +206,13 @@ public class EnrollmentDataEntryRuleHelper implements IProgramRuleFragmentHelper
         enrollmentDataEntryFragment.getListViewAdapter().showErrorOnIndex(uid, programRuleAction.getContent());
         if (!programRuleValidationErrors.contains(programRuleAction.getContent())) {
             TrackedEntityAttributeValue value = getTrackedEntityAttributeValue(uid);
-            programRuleValidationErrors.add(programRuleAction.getContent() + " " + value.getValue());
+            String stringValue;
+            if(value != null) {
+                stringValue = value.getValue();
+            } else {
+                stringValue = "";
+            }
+            programRuleValidationErrors.add(programRuleAction.getContent() + " " + stringValue);
         }
     }
 

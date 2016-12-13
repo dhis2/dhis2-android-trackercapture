@@ -127,8 +127,8 @@ public class LocalSearchFragment extends Fragment implements LoaderManager.Loade
         if (id == R.id.action_search) {
 
             buildQuery();
-            LocalSearchResultFragment fragment = LocalSearchResultFragment.newInstance(
-                    mForm.getOrganisationUnitId(), mForm.getProgram(), mForm.getAttributeValues());
+//            LocalSearchResultFragment fragment = LocalSearchResultFragment.newInstance(
+//                    mForm.getOrganisationUnitId(), mForm.getProgram(), mForm.getAttributeValues());
             HolderActivity.navigateToLocalSearchResultFragment(getActivity(),
                     mForm.getOrganisationUnitId(),
                     mForm.getProgram(), mForm.getAttributeValues());
@@ -205,8 +205,8 @@ public class LocalSearchFragment extends Fragment implements LoaderManager.Loade
 
             List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
             modelsToTrack.add(TrackedEntityInstance.class);
-            modelsToTrack.add(Enrollment.class);
-            modelsToTrack.add(Event.class);
+//            modelsToTrack.add(Enrollment.class);
+//            modelsToTrack.add(Event.class);
             modelsToTrack.add(FailedItem.class);
             return new DbLoader<>(
                     getActivity().getBaseContext(), modelsToTrack,

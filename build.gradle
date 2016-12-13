@@ -11,6 +11,7 @@ buildscript {
         classpath 'com.raizlabs:Griddle:1.0.3'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
         classpath 'io.fabric.tools:gradle:1.+'
+
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -30,16 +31,16 @@ ext {
     minSdkVersion = 15
     compileSdkVersion = 23
     targetSdkVersion = 23
-    versionCode = 48
-    versionName = "0.3.31-2.24"
+    versionCode = 50
+    versionName = "0.3.33-2.24"
 
     configuration = [
             buildToolsVersion: "23.0.2",
             minSdkVersion    : 15,
             compileSdkVersion: 23,
             targetSdkVersion : 23,
-            versionCode      : 48,
-            versionName      : "0.3.31-2.24"
+            versionCode      : 50,
+            versionName      : "0.3.33-2.24"
     ]
 
     libraries = [

@@ -30,7 +30,7 @@ For 2.23-legacy branch: A workspace folder structure would look like this:
 
 dhis2-android-sdk project should be in branch 2.23-legacy. 
 dhis2-android-trackercapture should be in branch 2.23-legacy.
-dhis2-android-new-sdk should be in branch master
+dhis2-android-new-sdk should be in branch eventcapture
 
 dhis2-android-new-sdk is the same project as dhis2-android-sdk but in a different branch. This means that you need to keep two sets of this project in your workspace. Since these two projects cannot have the same folder name the sdk-project in master branch should be renamed to dhis2-android-new-sdk
 

@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+  <string name="app_name">"DHIS 2 Tracker Capture "</string>
+  <string name="hello_world">Olá mundo!</string>
+  <string name="action_settings">Definições</string>
+  <string name="register_new_event">Registar novo evento</string>
+  <string name="registered_events">Evento registado</string>
+  <string name="register_relationship">Registo de relacionamento</string>
+  <string name="new_event">Novo evento</string>
+  <string name="is">é</string>
+  <string name="please_enter">Por favor, insira</string>
+  <string name="report_date">Data do relatório</string>
+  <string name="event_sent">Enviado</string>
+  <string name="event_offline">Desligado</string>
+  <string name="event_error">Erro</string>
+  <string name="error_401_description">"O nome de usuário ou a senha foram alterados.Termine a sessão  e faça entre novamente.\nNota! Evento será perdido"</string>
+  <string name="error_408_description">Conexão lenta. Por favor, tente sincronizar mais tarde</string>
+  <string name="error_series_400_description">40x application level error.</string>
+  <string name="error_series_500_description">50x server error. Please, try to synchronize later.</string>
+  <string name="unknown_error">Erro desconhecido</string>
+  <string name="confirm_complete_enrollment">Tem certeza que pretende completar a corrente inscrição? Não será mais possível editar</string>
+  <string name="confirm_terminate_enrollment">Tem a certeza que pretende cancelar a corrente inscrição ?Isto não pode ser desfeito.</string>
+  <string name="confirm_delete_relationship">Tem a certeza de que pretende apagar este relacionamento?</string>
+  <string name="no_active_enrollment">Sem inscrição ativa</string>
+  <string name="select_relationship_type">Seleciona o tipo de relacionamento</string>
+  <string name="search">Pesquisar</string>
+  <string name="http_error_400">Pedido inválido</string>
+  <string name="http_error_401">Não autorizado</string>
+  <string name="http_error_403">Proibido</string>
+  <string name="http_error_409">Conflito</string>
+  <string name="http_error_500">Erro interno de servidor</string>
+  <string name="http_error_501">Não implementado</string>
+  <string name="http_error_502">Gateway inválida</string>
+  <string name="http_error_503">Serviço indisponível</string>
+  <string name="http_error_504">Gateway expirou</string>
+</resources>

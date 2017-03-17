@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+  <string name="app_name">Saisie Tracker DHIS2</string>
+  <string name="hello_world">Bonjour Monde !</string>
+  <string name="action_settings">Paramètres</string>
+  <string name="register_new_event">Enregistrer un nouvel évènement</string>
+  <string name="registered_events">Evènements enregistrés</string>
+  <string name="register_relationship">Enregistrer relation</string>
+  <string name="new_event">Nouvel évènement</string>
+  <string name="is">est</string>
+  <string name="please_enter">Veuillez saisir</string>
+  <string name="report_date">Date du rapport</string>
+  <string name="event_sent">Envoyé</string>
+  <string name="event_offline">Hors ligne</string>
+  <string name="event_error">Erreur</string>
+  <string name="error_401_description">Nom d\'utilisateur ou mot de passe changés. Veuillez vous déconnecter et vous reconnecter. \nA noter! L\'évènement sera perdu</string>
+  <string name="error_408_description">Connexion lente. Veuillez ressayer de synchroniser plus tard.</string>
+  <string name="error_series_400_description">40x application level error.</string>
+  <string name="error_series_500_description">Errreur serveur 50x. Veuillez ressayer de synchroniser plus tard.</string>
+  <string name="unknown_error">Erreur inconnue</string>
+  <string name="confirm_complete_enrollment">Etes-vous certain(e) de vouloir compléter l\'enrôlement en cours? Il ne sera plus possible de l\'éditer par la suite.</string>
+  <string name="confirm_terminate_enrollment">Etes-vous certain(e) de vouloir annuler l\'enrôlement en cours? Cette opération ne peut être défaite.</string>
+  <string name="confirm_delete_relationship">Voulez-vous vraiment supprimer cette relation?</string>
+  <string name="no_active_enrollment">Pas de d\'enrôlement actif</string>
+  <string name="select_relationship_type">Sélection du type de relation</string>
+  <string name="search">Rechercher</string>
+  <string name="http_error_400">Mauvaise requête</string>
+  <string name="http_error_401">Non autorisé(e)</string>
+  <string name="http_error_403">Interdit</string>
+  <string name="http_error_409">Conflit</string>
+  <string name="http_error_500">Erreur interne du serveur</string>
+  <string name="http_error_501">Non implémenté</string>
+  <string name="http_error_502">Passerelle non valide (bad gateway)</string>
+  <string name="http_error_503">Service indisponible</string>
+  <string name="http_error_504">Time out de la passerelle</string>
+</resources>

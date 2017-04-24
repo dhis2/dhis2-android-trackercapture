@@ -11,7 +11,7 @@ If you want to try the application out with a demo database, you can use the fol
 - Username: android
 - Password: Android123
 
-#How to Download and Set up in Android Studio
+# How to Download and Set up in Android Studio
 Stepwise explanation on how to set it up: https://docs.google.com/document/d/141uX2IKA7NRouaYDAPUhJu29WRmiw7UxwNtXSj_iOVA/edit?usp=sharing 
 
 To successfully build and run this project, the dhis2-android-sdk is required.

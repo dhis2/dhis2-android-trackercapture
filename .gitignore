@@ -27,3 +27,6 @@ build
 #Android
 *.apk
 fabric.properties
+
+# last commit file
+app/src/main/res/raw/lastcommit.txt

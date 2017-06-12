@@ -170,6 +170,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
 
     private LinearLayout relationshipsLinearLayout;
     private Button newRelationshipButton;
+    private Button refreshRelationshipButton;
 
     private ProgramOverviewFragmentState mState;
     private ProgramOverviewFragmentForm mForm;
@@ -259,6 +260,9 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         mSwipeRefreshLayout.setOnRefreshListener(this);
 
         relationshipsLinearLayout = (LinearLayout) header.findViewById(R.id.relationships_linearlayout);
+
+        refreshRelationshipButton = (Button) header.findViewById(R.id.pullrelationshipbutton);
+        refreshRelationshipButton.setOnClickListener(this);
         newRelationshipButton = (Button) header.findViewById(R.id.addrelationshipbutton);
         newRelationshipButton.setOnClickListener(this);
 
@@ -980,6 +984,10 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                     showStatusDialog(mForm.getEnrollment());
                 break;
             }
+            case R.id.pullrelationshipbutton: {
+                refreshRelationships();
+                break;
+            }
             case R.id.addrelationshipbutton: {
                 showAddRelationshipFragment();
                 break;
@@ -987,6 +995,14 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             case R.id.enrollmentLayout: {
                 editEnrollmentDates();
             }
+        }
+    }
+
+    private void refreshRelationships() {
+        Context context = getActivity().getBaseContext();
+        Toast.makeText(context, getString(org.hisp.dhis.android.sdk.R.string.refresh_relations), Toast.LENGTH_SHORT).show();
+        if(mForm!=null && mForm.getTrackedEntityInstance()!=null) {
+            refreshTrackedEntityRelationships(mForm.getTrackedEntityInstance().getUid());
         }
     }
 
@@ -1105,6 +1121,17 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         }
     }
 
+    public void refreshTrackedEntityRelationships(final String trackedEntityInstance) {
+        Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_START));
+        JobExecutor.enqueueJob(new NetworkJob<Object>(0,
+                ResourceType.TRACKEDENTITYINSTANCE) {
+            @Override
+            public Object execute() {
+                TrackerController.refreshRelationsByTrackedEntity(DhisController.getInstance().getDhisApi(), trackedEntityInstance);
+                return new Object();
+            }
+        });
+    }
 
     public void sendTrackedEntityInstance(final TrackedEntityInstance trackedEntityInstance) {
         JobExecutor.enqueueJob(new NetworkJob<Object>(0,

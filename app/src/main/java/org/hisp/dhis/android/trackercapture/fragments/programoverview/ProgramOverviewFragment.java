@@ -97,10 +97,12 @@ import org.hisp.dhis.android.sdk.utils.comparators.EnrollmentDateComparator;
 import org.hisp.dhis.android.sdk.utils.services.ProgramRuleService;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
-import org.hisp.dhis.android.trackercapture.fragments.programoverview.registerrelationshipdialogfragment.RegisterRelationshipDialogFragment;
+import org.hisp.dhis.android.trackercapture.fragments.programoverview
+        .registerrelationshipdialogfragment.RegisterRelationshipDialogFragment;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.EnrollmentDateSetterHelper;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.IEnroller;
-import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.ItemStatusDialogFragment;
+import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs
+        .ItemStatusDialogFragment;
 import org.hisp.dhis.android.trackercapture.ui.adapters.ProgramAdapter;
 import org.hisp.dhis.android.trackercapture.ui.adapters.ProgramStageAdapter;
 import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.OnProgramStageEventClick;
@@ -637,28 +639,44 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                     if (relative != null && relative.getAttributes() != null) {
                         List<Enrollment> enrollments = TrackerController.getEnrollments(relative);
                         List<TrackedEntityAttribute> attributesToShow = new ArrayList<>();
-                        if (enrollments != null && !enrollments.isEmpty()) {
-                            Program program = null;
-                            for (Enrollment e : enrollments) {
-                                if (e != null && e.getProgram() != null && e.getProgram().getProgramTrackedEntityAttributes() != null) {
-                                    program = e.getProgram();
-                                    break;
+                        List<TrackedEntityAttributeValue> attributes = TrackerController.getVisibleTrackedEntityAttributeValues(relative.getLocalId());
+                        for (int i = 0; i < attributes.size() && i < 2; i++) {
+                            relativeString += attributes.get(i).getValue() + " ";
+                        }
+                        if(attributes.size() == 0) {
+                            if (enrollments != null && !enrollments.isEmpty()) {
+                                Program program = null;
+                                for (Enrollment e : enrollments) {
+                                    if (e != null && e.getProgram() != null
+                                            && e.getProgram().getProgramTrackedEntityAttributes()
+                                            != null) {
+                                        program = e.getProgram();
+                                        break;
+                                    }
                                 }
-                            }
-                            List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = program.getProgramTrackedEntityAttributes();
-                            for (int i = 0; i < programTrackedEntityAttributes.size() && i < 2; i++) {
-                                attributesToShow.add(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute());
-                            }
-                            for (int i = 0; i < attributesToShow.size() && i < 2; i++) {
-                                TrackedEntityAttributeValue av = TrackerController.getTrackedEntityAttributeValue(attributesToShow.get(i).getUid(), relative.getLocalId());
-                                if (av != null && av.getValue() != null) {
-                                    relativeString += av.getValue() + " ";
+                                List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes =
+                                        program.getProgramTrackedEntityAttributes();
+                                for (int i = 0; i < programTrackedEntityAttributes.size() && i < 2;
+                                        i++) {
+                                    attributesToShow.add(programTrackedEntityAttributes.get(
+                                            i).getTrackedEntityAttribute());
                                 }
-                            }
-                        } else {
-                            for (int i = 0; i < relative.getAttributes().size() && i < 2; i++) {
-                                if (relative.getAttributes().get(i) != null && relative.getAttributes().get(i).getValue() != null) {
-                                    relativeString += relative.getAttributes().get(i).getValue() + " ";
+                                for (int i = 0; i < attributesToShow.size() && i < 2; i++) {
+                                    TrackedEntityAttributeValue av =
+                                            TrackerController.getTrackedEntityAttributeValue(
+                                                    attributesToShow.get(i).getUid(),
+                                                    relative.getLocalId());
+                                    if (av != null && av.getValue() != null) {
+                                        relativeString += av.getValue() + " ";
+                                    }
+                                }
+                            } else {
+                                for (int i = 0; i < relative.getAttributes().size() && i < 2; i++) {
+                                    if (relative.getAttributes().get(i) != null
+                                            && relative.getAttributes().get(i).getValue() != null) {
+                                        relativeString += relative.getAttributes().get(i).getValue()
+                                                + " ";
+                                    }
                                 }
                             }
                         }

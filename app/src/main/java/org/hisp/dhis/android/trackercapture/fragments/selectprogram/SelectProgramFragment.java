@@ -246,7 +246,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     }
 
     private final void showOnlineSearchFragment(String orgUnit, String program) {
-        HolderActivity.navigateToOnlineSearchFragment(getActivity(), program, orgUnit);
+        HolderActivity.navigateToOnlineSearchFragment(getActivity(), program, orgUnit, false, null);
     }
 
     public void showStatusDialog(BaseSerializableModel model) {

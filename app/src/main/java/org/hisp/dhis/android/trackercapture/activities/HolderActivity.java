@@ -12,16 +12,18 @@ import android.widget.Toast;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.ui.fragments.eventdataentry.EventDataEntryFragment;
-import org.hisp.dhis.android.trackercapture.fragments.settings.SettingsFragment;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.fragments.enrollment.EnrollmentDataEntryFragment;
 import org.hisp.dhis.android.trackercapture.fragments.enrollmentdate.EnrollmentDateFragment;
 import org.hisp.dhis.android.trackercapture.fragments.programoverview.ProgramOverviewFragment;
+import org.hisp.dhis.android.trackercapture.fragments.programoverview
+        .registerrelationshipdialogfragment.RegisterRelationshipDialogFragment;
 import org.hisp.dhis.android.trackercapture.fragments.search.LocalSearchFragment;
 import org.hisp.dhis.android.trackercapture.fragments.search.LocalSearchResultFragment;
 import org.hisp.dhis.android.trackercapture.fragments.search.OnlineSearchFragment;
 import org.hisp.dhis.android.trackercapture.fragments.search.OnlineSearchResultFragment;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.SelectProgramFragment;
+import org.hisp.dhis.android.trackercapture.fragments.settings.SettingsFragment;
 import org.hisp.dhis.android.trackercapture.fragments.trackedentityinstanceprofile.TrackedEntityInstanceProfileFragment;
 import org.hisp.dhis.android.trackercapture.fragments.upcomingevents.UpcomingEventsFragment;
 import org.hisp.dhis.client.sdk.ui.activities.AbsHomeActivity;
@@ -46,7 +48,7 @@ public class HolderActivity extends AbsHomeActivity {
     public static final String ARG_TYPE_ONLINESEARCHRESULTFRAGMENT = "arg:OnlineSearchResultFragment";
     private static final String ARG_TYPE_UPCOMINGEVENTSFRAGMENT = "arg:UpcomingEventsFragment";
     OnBackPressedListener onBackPressedListener;
-
+    public static RegisterRelationshipDialogFragment.CallBack mCallBack;
 
     @Override
     public void onBackPressed() {
@@ -275,16 +277,20 @@ public class HolderActivity extends AbsHomeActivity {
         activity.startActivity(intent);
     }
 
-    public static void navigateToOnlineSearchFragment(Activity activity, String programId, String orgUnitId) {
+    public static void navigateToOnlineSearchFragment(Activity activity, String programId,
+            String orgUnitId, boolean backNavigation,
+            RegisterRelationshipDialogFragment.CallBack callBack) {
+        mCallBack = callBack;
         Intent intent = new Intent(activity, HolderActivity.class);
         intent.putExtra(OnlineSearchFragment.EXTRA_PROGRAM, programId);
         intent.putExtra(OnlineSearchFragment.EXTRA_ORGUNIT, orgUnitId);
+        intent.putExtra(OnlineSearchFragment.EXTRA_NAVIGATION, backNavigation);
         intent.putExtra(ARG_TYPE, ARG_TYPE_ONLINESEARCHFRAGMENT);
         intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NO_HISTORY); // we don't want to keep it to backstack
         activity.startActivity(intent);
     }
 
-    public static void navigateToOnlineSearchResultFragment(Activity activity, List<TrackedEntityInstance> trackedEntityInstances, String orgUnit, String program) {
+    public static void navigateToOnlineSearchResultFragment(Activity activity, List<TrackedEntityInstance> trackedEntityInstances, String orgUnit, String program, boolean backNavigation) {
         try {
             Intent intent = new Intent(activity, HolderActivity.class);
 
@@ -299,6 +305,7 @@ public class HolderActivity extends AbsHomeActivity {
             intent.putExtra(OnlineSearchResultFragment.EXTRA_PROGRAM, program);
             intent.putExtra(OnlineSearchResultFragment.EXTRA_TRACKEDENTITYINSTANCESSELECTED, parameterSerializible1);
             intent.putExtra(OnlineSearchResultFragment.EXTRA_TRACKEDENTITYINSTANCESLIST, parameterSerializible2);
+            intent.putExtra(OnlineSearchResultFragment.EXTRA_NAVIGATION, backNavigation);
             intent.putExtra(ARG_TYPE, ARG_TYPE_ONLINESEARCHRESULTFRAGMENT);
             intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NO_HISTORY); // we don't want to keep it to backstack
 

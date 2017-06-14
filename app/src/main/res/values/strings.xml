@@ -81,5 +81,6 @@
     <string name="re_open">Re-open</string>
 
     <string name="online_query_tracked_entity_instances">Online query tracked entity instances</string>
+    <string name="download_entities_title">Download entities from server</string>
 
 </resources>

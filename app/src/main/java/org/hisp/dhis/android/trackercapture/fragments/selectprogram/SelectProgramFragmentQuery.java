@@ -76,7 +76,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
+public class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
     private final String mOrgUnitId;
     private final String mProgramId;
 

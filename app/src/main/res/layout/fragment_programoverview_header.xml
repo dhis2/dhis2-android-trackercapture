@@ -319,6 +319,14 @@
                     android:textSize="@dimen/medium_text_size" />
 
                 <Button
+                    android:id="@+id/pullrelationshipbutton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:layout_gravity="right"
+                    android:background="@drawable/transparent_selector"
+                    android:text="@string/refresh_string" />
+
+                <Button
                     android:id="@+id/addrelationshipbutton"
                     android:layout_width="wrap_content"
                     android:layout_height="30dp"

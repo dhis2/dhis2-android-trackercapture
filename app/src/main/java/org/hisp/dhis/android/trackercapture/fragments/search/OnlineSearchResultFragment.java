@@ -47,7 +47,6 @@ import org.hisp.dhis.android.sdk.ui.fragments.progressdialog.ProgressDialogFragm
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
-import org.joda.time.DateTime;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -342,7 +341,7 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
             @Override
             public Object execute() throws APIException {
                 SynchronisationStateHandler.getInstance().changeState(true);
-                List<TrackedEntityInstance> trackedEntityInstances = TrackerController.getTrackedEntityInstancesDataFromServer(DhisController.getInstance().getDhisApi(), getSelectedTrackedEntityInstances(), false);
+                List<TrackedEntityInstance> trackedEntityInstances = TrackerController.getTrackedEntityInstancesDataFromServer(DhisController.getInstance().getDhisApi(), getSelectedTrackedEntityInstances(), true, true);
 
                 if (trackedEntityInstances != null) {
                     if (downloadedTrackedEntityInstances == null) {

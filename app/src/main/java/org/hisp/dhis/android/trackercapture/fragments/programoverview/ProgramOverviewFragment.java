@@ -97,10 +97,12 @@ import org.hisp.dhis.android.sdk.utils.comparators.EnrollmentDateComparator;
 import org.hisp.dhis.android.sdk.utils.services.ProgramRuleService;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
-import org.hisp.dhis.android.trackercapture.fragments.programoverview.registerrelationshipdialogfragment.RegisterRelationshipDialogFragment;
+import org.hisp.dhis.android.trackercapture.fragments.programoverview
+        .registerrelationshipdialogfragment.RegisterRelationshipDialogFragment;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.EnrollmentDateSetterHelper;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.IEnroller;
-import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.ItemStatusDialogFragment;
+import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs
+        .ItemStatusDialogFragment;
 import org.hisp.dhis.android.trackercapture.ui.adapters.ProgramAdapter;
 import org.hisp.dhis.android.trackercapture.ui.adapters.ProgramStageAdapter;
 import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.OnProgramStageEventClick;
@@ -170,6 +172,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
 
     private LinearLayout relationshipsLinearLayout;
     private Button newRelationshipButton;
+    private Button refreshRelationshipButton;
 
     private ProgramOverviewFragmentState mState;
     private ProgramOverviewFragmentForm mForm;
@@ -259,6 +262,9 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         mSwipeRefreshLayout.setOnRefreshListener(this);
 
         relationshipsLinearLayout = (LinearLayout) header.findViewById(R.id.relationships_linearlayout);
+
+        refreshRelationshipButton = (Button) header.findViewById(R.id.pullrelationshipbutton);
+        refreshRelationshipButton.setOnClickListener(this);
         newRelationshipButton = (Button) header.findViewById(R.id.addrelationshipbutton);
         newRelationshipButton.setOnClickListener(this);
 
@@ -628,40 +634,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                         continue;
                     }
 
-                    /* Creating a string to display as name of relative from attributes */
-                    String relativeString = "";
-                    if (relative != null && relative.getAttributes() != null) {
-                        List<Enrollment> enrollments = TrackerController.getEnrollments(relative);
-                        List<TrackedEntityAttribute> attributesToShow = new ArrayList<>();
-                        if (enrollments != null && !enrollments.isEmpty()) {
-                            Program program = null;
-                            for (Enrollment e : enrollments) {
-                                if (e != null && e.getProgram() != null && e.getProgram().getProgramTrackedEntityAttributes() != null) {
-                                    program = e.getProgram();
-                                    break;
-                                }
-                            }
-                            List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = program.getProgramTrackedEntityAttributes();
-                            for (int i = 0; i < programTrackedEntityAttributes.size() && i < 2; i++) {
-                                attributesToShow.add(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute());
-                            }
-                            for (int i = 0; i < attributesToShow.size() && i < 2; i++) {
-                                TrackedEntityAttributeValue av = TrackerController.getTrackedEntityAttributeValue(attributesToShow.get(i).getUid(), relative.getLocalId());
-                                if (av != null && av.getValue() != null) {
-                                    relativeString += av.getValue() + " ";
-                                }
-                            }
-                        } else {
-                            for (int i = 0; i < relative.getAttributes().size() && i < 2; i++) {
-                                if (relative.getAttributes().get(i) != null && relative.getAttributes().get(i).getValue() != null) {
-                                    relativeString += relative.getAttributes().get(i).getValue() + " ";
-                                }
-                            }
-                        }
-                    }
-                    if (relativeString.isEmpty()) {
-                        relativeString = getString(R.string.unknown);
-                    }
+                    String relativeString = getRelativeString(relative);
+
                     relativeLabel.setText(relativeString);
 
                     ll.setOnClickListener(new View.OnClickListener() {
@@ -685,6 +659,61 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 }
             }
         }
+    }
+
+    private String getRelativeString(TrackedEntityInstance relative) {
+
+        String relativeString = "";
+
+        if (relative != null && relative.getAttributes() != null) {
+            List<Enrollment> enrollments = TrackerController.getEnrollments(relative);
+            List<TrackedEntityAttribute> attributesToShow = new ArrayList<>();
+            List<TrackedEntityAttributeValue> attributes = TrackerController.getVisibleTrackedEntityAttributeValues(relative.getLocalId());
+            for (int i = 0; i < attributes.size() && i < 2; i++) {
+                relativeString += attributes.get(i).getValue() + " ";
+            }
+            if(attributes.size() == 0) {
+                if (enrollments != null && !enrollments.isEmpty()) {
+                    Program program = null;
+                    for (Enrollment e : enrollments) {
+                        if (e != null && e.getProgram() != null
+                                && e.getProgram().getProgramTrackedEntityAttributes()
+                                != null) {
+                            program = e.getProgram();
+                            break;
+                        }
+                    }
+                    List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes =
+                            program.getProgramTrackedEntityAttributes();
+                    for (int i = 0; i < programTrackedEntityAttributes.size() && i < 2;
+                            i++) {
+                        attributesToShow.add(programTrackedEntityAttributes.get(
+                                i).getTrackedEntityAttribute());
+                    }
+                    for (int i = 0; i < attributesToShow.size() && i < 2; i++) {
+                        TrackedEntityAttributeValue av =
+                                TrackerController.getTrackedEntityAttributeValue(
+                                        attributesToShow.get(i).getUid(),
+                                        relative.getLocalId());
+                        if (av != null && av.getValue() != null) {
+                            relativeString += av.getValue() + " ";
+                        }
+                    }
+                } else {
+                    for (int i = 0; i < relative.getAttributes().size() && i < 2; i++) {
+                        if (relative.getAttributes().get(i) != null
+                                && relative.getAttributes().get(i).getValue() != null) {
+                            relativeString += relative.getAttributes().get(i).getValue()
+                                    + " ";
+                        }
+                    }
+                }
+            }
+        }
+        if (relativeString.isEmpty()) {
+            relativeString = getString(R.string.unknown);
+        }
+        return relativeString;
     }
 
     public static void showConfirmDeleteRelationshipDialog(final Relationship relationship,
@@ -980,6 +1009,10 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                     showStatusDialog(mForm.getEnrollment());
                 break;
             }
+            case R.id.pullrelationshipbutton: {
+                refreshRelationships();
+                break;
+            }
             case R.id.addrelationshipbutton: {
                 showAddRelationshipFragment();
                 break;
@@ -987,6 +1020,14 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             case R.id.enrollmentLayout: {
                 editEnrollmentDates();
             }
+        }
+    }
+
+    private void refreshRelationships() {
+        Context context = getActivity().getBaseContext();
+        Toast.makeText(context, getString(org.hisp.dhis.android.sdk.R.string.refresh_relations), Toast.LENGTH_SHORT).show();
+        if(mForm!=null && mForm.getTrackedEntityInstance()!=null) {
+            refreshTrackedEntityRelationships(mForm.getTrackedEntityInstance().getUid());
         }
     }
 
@@ -1105,6 +1146,17 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         }
     }
 
+    public void refreshTrackedEntityRelationships(final String trackedEntityInstance) {
+        Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_START));
+        JobExecutor.enqueueJob(new NetworkJob<Object>(0,
+                ResourceType.TRACKEDENTITYINSTANCE) {
+            @Override
+            public Object execute() {
+                TrackerController.refreshRelationsByTrackedEntity(DhisController.getInstance().getDhisApi(), trackedEntityInstance);
+                return new Object();
+            }
+        });
+    }
 
     public void sendTrackedEntityInstance(final TrackedEntityInstance trackedEntityInstance) {
         JobExecutor.enqueueJob(new NetworkJob<Object>(0,

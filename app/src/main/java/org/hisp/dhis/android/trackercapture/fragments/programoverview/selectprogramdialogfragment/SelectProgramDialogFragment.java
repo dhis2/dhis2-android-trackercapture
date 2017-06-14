@@ -119,7 +119,7 @@ public class SelectProgramDialogFragment extends DialogFragment
                 .findViewById(R.id.dialog_label);
         setDialogLabel(org.hisp.dhis.android.trackercapture.R.string.download_entities_title);
 
-        setStandardBottons(view);
+        setOUAndProgramButtons(view);
 
         setState(savedInstanceState);
     }
@@ -156,7 +156,7 @@ public class SelectProgramDialogFragment extends DialogFragment
         onRestoreState(true);
     }
 
-    private void setStandardBottons(View view) {
+    private void setOUAndProgramButtons(View view) {
         mOrgUnitButton = (CardTextViewButton) view.findViewById(R.id.select_organisation_unit);
         mProgramButton = (CardTextViewButton) view.findViewById(R.id.select_program);
 
@@ -263,7 +263,7 @@ public class SelectProgramDialogFragment extends DialogFragment
         mPrefs.putOrgUnit(new Pair<>(orgUnitId, orgUnitLabel));
         mPrefs.putProgram(null);
 
-        handleViews(0);
+        searchAndDownloadButton.hide();
     }
 
     public void onProgramSelected(String programId, String programName) {
@@ -271,7 +271,7 @@ public class SelectProgramDialogFragment extends DialogFragment
 
         mState.setProgram(programId, programName);
         mPrefs.putProgram(new Pair<>(programId, programName));
-        handleViews(1);
+        searchAndDownloadButton.show();
 
         // this call will trigger onCreateLoader method
     }
@@ -280,15 +280,5 @@ public class SelectProgramDialogFragment extends DialogFragment
         return new ProgramType[]{
                 ProgramType.WITH_REGISTRATION
         };
-    }
-
-    protected void handleViews(int level) {
-        switch (level) {
-            case 0:
-                searchAndDownloadButton.hide();
-                break;
-            case 1:
-                searchAndDownloadButton.show();
-        }
     }
 }

@@ -80,5 +80,6 @@
     <string name="generic_error">Error. Please retry</string>
     <string name="re_open">Re-open</string>
 
+    <string name="online_query_tracked_entity_instances">Online query tracked entity instances</string>
 
 </resources>

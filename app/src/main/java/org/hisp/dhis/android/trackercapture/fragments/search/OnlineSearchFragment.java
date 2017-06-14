@@ -186,6 +186,7 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
         argumentsBundle.putBundle(EXTRA_ARGUMENTS, getArguments());
         argumentsBundle.putBundle(EXTRA_SAVED_INSTANCE_STATE, savedInstanceState);
         getLoaderManager().initLoader(LOADER_ID, argumentsBundle, this);
+        getActionBar().setTitle(getString(R.string.online_query_tracked_entity_instances));
     }
 
     @Override

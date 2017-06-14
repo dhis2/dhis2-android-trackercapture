@@ -176,7 +176,7 @@ public class LocalSearchFragment extends Fragment implements LoaderManager.Loade
         super.onViewCreated(view, savedInstanceState);
 
         if(getActivity() instanceof AppCompatActivity) {
-            getActionBar().setDisplayShowTitleEnabled(false);
+            getActionBar().setTitle(getString(R.string.local_search));
             getActionBar().setDisplayHomeAsUpEnabled(true);
             getActionBar().setHomeButtonEnabled(true);
         }

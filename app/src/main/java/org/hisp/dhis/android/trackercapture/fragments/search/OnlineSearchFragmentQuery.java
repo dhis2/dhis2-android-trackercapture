@@ -63,7 +63,7 @@ public class OnlineSearchFragmentQuery implements Query<OnlineSearchFragmentForm
 
             Row row = DataEntryRowFactory.createDataEntryView(ptea.getMandatory(),
                     ptea.getAllowFutureDate(), trackedEntityAttribute.getOptionSet(),
-                    trackedEntityAttribute.getName(), value, trackedEntityAttribute.getValueType(), true, false);
+                    trackedEntityAttribute.getName(), value, trackedEntityAttribute.getValueType(), true, false, program.getDataEntryMethod());
             dataEntryRows.add(row);
         }
         form.setTrackedEntityAttributeValues(values);

@@ -157,7 +157,7 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
                     getTrackedEntityDataValue(programTrackedEntityAttributes.get(i).
                             getTrackedEntityAttribute().getUid(), trackedEntityAttributeValues),
                     programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getValueType(),
-                    editable, shouldNeverBeEdited);
+                    editable, shouldNeverBeEdited, mProgram.getDataEntryMethod());
             dataEntryRows.add(row);
         }
         for (TrackedEntityAttributeValue trackedEntityAttributeValue : trackedEntityAttributeValues) {

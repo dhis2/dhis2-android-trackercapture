@@ -108,7 +108,7 @@ public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedE
             Row row = DataEntryRowFactory.createDataEntryView(programTrackedEntityAttributes.get(i).getMandatory(),
                     programTrackedEntityAttributes.get(i).getAllowFutureDate(), programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getOptionSet(),
                     programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getName(), getTrackedEntityDataValue(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getUid(),
-                            trackedEntityAttributeValues), programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getValueType(), false, shouldNeverBeEdited);
+                            trackedEntityAttributeValues), programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getValueType(), false, shouldNeverBeEdited, mProgram.getDataEntryMethod());
             dataEntryRows.add(row);
         }
         if (trackedEntityAttributeValues != null) {

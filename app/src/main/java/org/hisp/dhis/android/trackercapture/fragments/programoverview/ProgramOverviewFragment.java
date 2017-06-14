@@ -634,56 +634,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                         continue;
                     }
 
-                    /* Creating a string to display as name of relative from attributes */
-                    String relativeString = "";
-                    if (relative != null && relative.getAttributes() != null) {
-                        List<Enrollment> enrollments = TrackerController.getEnrollments(relative);
-                        List<TrackedEntityAttribute> attributesToShow = new ArrayList<>();
-                        List<TrackedEntityAttributeValue> attributes = TrackerController.getVisibleTrackedEntityAttributeValues(relative.getLocalId());
-                        for (int i = 0; i < attributes.size() && i < 2; i++) {
-                            relativeString += attributes.get(i).getValue() + " ";
-                        }
-                        if(attributes.size() == 0) {
-                            if (enrollments != null && !enrollments.isEmpty()) {
-                                Program program = null;
-                                for (Enrollment e : enrollments) {
-                                    if (e != null && e.getProgram() != null
-                                            && e.getProgram().getProgramTrackedEntityAttributes()
-                                            != null) {
-                                        program = e.getProgram();
-                                        break;
-                                    }
-                                }
-                                List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes =
-                                        program.getProgramTrackedEntityAttributes();
-                                for (int i = 0; i < programTrackedEntityAttributes.size() && i < 2;
-                                        i++) {
-                                    attributesToShow.add(programTrackedEntityAttributes.get(
-                                            i).getTrackedEntityAttribute());
-                                }
-                                for (int i = 0; i < attributesToShow.size() && i < 2; i++) {
-                                    TrackedEntityAttributeValue av =
-                                            TrackerController.getTrackedEntityAttributeValue(
-                                                    attributesToShow.get(i).getUid(),
-                                                    relative.getLocalId());
-                                    if (av != null && av.getValue() != null) {
-                                        relativeString += av.getValue() + " ";
-                                    }
-                                }
-                            } else {
-                                for (int i = 0; i < relative.getAttributes().size() && i < 2; i++) {
-                                    if (relative.getAttributes().get(i) != null
-                                            && relative.getAttributes().get(i).getValue() != null) {
-                                        relativeString += relative.getAttributes().get(i).getValue()
-                                                + " ";
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (relativeString.isEmpty()) {
-                        relativeString = getString(R.string.unknown);
-                    }
+                    String relativeString = getRelativeString(relative);
+
                     relativeLabel.setText(relativeString);
 
                     ll.setOnClickListener(new View.OnClickListener() {
@@ -707,6 +659,61 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 }
             }
         }
+    }
+
+    private String getRelativeString(TrackedEntityInstance relative) {
+
+        String relativeString = "";
+
+        if (relative != null && relative.getAttributes() != null) {
+            List<Enrollment> enrollments = TrackerController.getEnrollments(relative);
+            List<TrackedEntityAttribute> attributesToShow = new ArrayList<>();
+            List<TrackedEntityAttributeValue> attributes = TrackerController.getVisibleTrackedEntityAttributeValues(relative.getLocalId());
+            for (int i = 0; i < attributes.size() && i < 2; i++) {
+                relativeString += attributes.get(i).getValue() + " ";
+            }
+            if(attributes.size() == 0) {
+                if (enrollments != null && !enrollments.isEmpty()) {
+                    Program program = null;
+                    for (Enrollment e : enrollments) {
+                        if (e != null && e.getProgram() != null
+                                && e.getProgram().getProgramTrackedEntityAttributes()
+                                != null) {
+                            program = e.getProgram();
+                            break;
+                        }
+                    }
+                    List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes =
+                            program.getProgramTrackedEntityAttributes();
+                    for (int i = 0; i < programTrackedEntityAttributes.size() && i < 2;
+                            i++) {
+                        attributesToShow.add(programTrackedEntityAttributes.get(
+                                i).getTrackedEntityAttribute());
+                    }
+                    for (int i = 0; i < attributesToShow.size() && i < 2; i++) {
+                        TrackedEntityAttributeValue av =
+                                TrackerController.getTrackedEntityAttributeValue(
+                                        attributesToShow.get(i).getUid(),
+                                        relative.getLocalId());
+                        if (av != null && av.getValue() != null) {
+                            relativeString += av.getValue() + " ";
+                        }
+                    }
+                } else {
+                    for (int i = 0; i < relative.getAttributes().size() && i < 2; i++) {
+                        if (relative.getAttributes().get(i) != null
+                                && relative.getAttributes().get(i).getValue() != null) {
+                            relativeString += relative.getAttributes().get(i).getValue()
+                                    + " ";
+                        }
+                    }
+                }
+            }
+        }
+        if (relativeString.isEmpty()) {
+            relativeString = getString(R.string.unknown);
+        }
+        return relativeString;
     }
 
     public static void showConfirmDeleteRelationshipDialog(final Relationship relationship,

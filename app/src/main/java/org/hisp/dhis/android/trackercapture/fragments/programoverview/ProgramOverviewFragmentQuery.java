@@ -31,8 +31,8 @@ package org.hisp.dhis.android.trackercapture.fragments.programoverview;
 
 import android.content.Context;
 
-import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
@@ -96,19 +96,20 @@ class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm>
         programOverviewFragmentForm.setEnrollment(activeEnrollment);
         programOverviewFragmentForm.setDateOfEnrollmentValue(Utils.removeTimeFromDateString(activeEnrollment.getEnrollmentDate()));
         programOverviewFragmentForm.setIncidentDateValue(Utils.removeTimeFromDateString(activeEnrollment.getIncidentDate()));
-        List<TrackedEntityAttributeValue> attributeValues = activeEnrollment.getAttributes();
-        if(attributeValues!=null) {
-            if(attributeValues.size() > 0) {
+        List<TrackedEntityAttributeValue> trackedEntityAttributeValues =
+                TrackerController.getVisibleTrackedEntityAttributeValues(trackedEntityInstance.getLocalId());
+        if(trackedEntityAttributeValues!=null) {
+            if(trackedEntityAttributeValues.size() > 0) {
                 programOverviewFragmentForm.setAttribute1Label(MetaDataController.
-                        getTrackedEntityAttribute(attributeValues.get(0).getTrackedEntityAttributeId()).
+                        getTrackedEntityAttribute(trackedEntityAttributeValues.get(0).getTrackedEntityAttributeId()).
                         getName());
-                programOverviewFragmentForm.setAttribute1Value(attributeValues.get(0).getValue());
+                programOverviewFragmentForm.setAttribute1Value(trackedEntityAttributeValues.get(0).getValue());
             }
-            if(attributeValues.size() > 1) {
+            if(trackedEntityAttributeValues.size() > 1) {
                 programOverviewFragmentForm.setAttribute2Label(MetaDataController.
-                        getTrackedEntityAttribute(attributeValues.get(1).getTrackedEntityAttributeId()).
+                        getTrackedEntityAttribute(trackedEntityAttributeValues.get(1).getTrackedEntityAttributeId()).
                         getName());
-                programOverviewFragmentForm.setAttribute2Value(attributeValues.get(1).getValue());
+                programOverviewFragmentForm.setAttribute2Value(trackedEntityAttributeValues.get(1).getValue());
             }
         }
 

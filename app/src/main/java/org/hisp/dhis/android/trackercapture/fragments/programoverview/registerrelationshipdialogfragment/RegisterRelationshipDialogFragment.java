@@ -38,12 +38,10 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.text.Editable;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -59,7 +57,6 @@ import com.raizlabs.android.dbflow.sql.language.Select;
 import com.raizlabs.android.dbflow.structure.Model;
 
 import org.hisp.dhis.android.sdk.R;
-import org.hisp.dhis.android.sdk.controllers.DhisController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
@@ -75,8 +72,10 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.AbsTextWatcher;
 import org.hisp.dhis.android.sdk.ui.dialogs.AutoCompleteDialogFragment;
 import org.hisp.dhis.android.sdk.ui.views.CardTextViewButton;
+import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.sdk.ui.views.FontTextView;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
+import org.hisp.dhis.android.trackercapture.fragments.programoverview.selectprogramdialogfragment.SelectProgramDialogFragment;
 import org.hisp.dhis.android.trackercapture.ui.adapters.RelationshipTypeAdapter;
 import org.hisp.dhis.android.trackercapture.ui.adapters.TrackedEntityInstanceAdapter;
 
@@ -91,6 +90,7 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
 
     private RegisterRelationshipDialogFragmentForm mForm;
     private EditText mFilter;
+    private FloatingActionButton searchAndDownloadButton;
     private CardTextViewButton mRelationshipTypeButton;
     private TextView mDialogLabel;
     private TrackedEntityInstanceAdapter mAdapter;
@@ -100,10 +100,15 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
     private RelationshipTypeAdapter mSpinnerAdapter;
     private int mDialogId;
     private ProgressBar mProgressBar;
+    private static Bundle mSavedInstance;
 
     private static final String EXTRA_TRACKEDENTITYINSTANCEID = "extra:trackedEntityInstanceId";
     private static final String EXTRA_ARGUMENTS = "extra:Arguments";
     private static final String EXTRA_SAVED_INSTANCE_STATE = "extra:savedInstanceState";
+
+    public interface CallBack {
+        void onSuccess();
+    }
 
     public static RegisterRelationshipDialogFragment newInstance(long trackedEntityInstanceId) {
         RegisterRelationshipDialogFragment dialogFragment = new RegisterRelationshipDialogFragment();
@@ -144,6 +149,9 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
         mTrackedEntityInstanceLabel = (FontTextView) view.findViewById(org.hisp.dhis.android.trackercapture.R.id.tei_label);
         mFilter = (EditText) view
                 .findViewById(R.id.filter_options);
+        searchAndDownloadButton  = (FloatingActionButton) view
+                .findViewById(org.hisp.dhis.android.trackercapture.R.id.search_and_download_button);
+        searchAndDownloadButton.setOnClickListener(this);
         mDialogLabel = (TextView) view
                 .findViewById(R.id.dialog_label);
         InputMethodManager imm = (InputMethodManager)
@@ -180,6 +188,7 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
         Bundle argumentsBundle = new Bundle();
         argumentsBundle.putBundle(EXTRA_ARGUMENTS, getArguments());
         argumentsBundle.putBundle(EXTRA_SAVED_INSTANCE_STATE, savedInstanceState);
+        mSavedInstance = argumentsBundle;
         getLoaderManager().initLoader(LOADER_ID, argumentsBundle, this);
     }
 
@@ -295,7 +304,24 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
             fragment.show(getChildFragmentManager());
         } else if(v.getId() == R.id.close_dialog_button) {
             dismiss();
+        } else if(v.getId() == org.hisp.dhis.android.trackercapture.R.id.search_and_download_button){
+            showSelectionProgramFragment(new CallBack() {
+                @Override
+                public void onSuccess() {
+                    refresh();
+                }
+            });
         }
+    }
+
+    private void refresh() {
+        getLoaderManager().restartLoader(LOADER_ID, mSavedInstance, this);
+    }
+
+    private void showSelectionProgramFragment(CallBack callBack) {
+        if (mForm == null || mForm.getTrackedEntityInstance() == null) return;
+        SelectProgramDialogFragment fragment = SelectProgramDialogFragment.newInstance(mForm.getTrackedEntityInstance().getLocalId(), callBack);
+        fragment.show(getChildFragmentManager(), TAG);
     }
 
     @Override

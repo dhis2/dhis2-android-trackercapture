@@ -2,7 +2,6 @@ package org.hisp.dhis.android.trackercapture.fragments.search;
 
 import android.content.Context;
 
-import com.raizlabs.android.dbflow.sql.builder.Condition;
 import com.raizlabs.android.dbflow.sql.language.Select;
 import com.raizlabs.android.dbflow.sql.queriable.StringQuery;
 
@@ -305,8 +304,11 @@ public class LocalSearchResultFragmentFormQuery implements Query<LocalSearchResu
         if(attributesIdsUsedInQueryIterator.hasNext()) {
             firstId = attributesIdsUsedInQueryIterator.next();
         } else {
-            //no values have been used in the query
-            return null;
+            //no values have been used in the query show with no filter
+            return "SELECT * FROM " + TrackedEntityInstance.class.getSimpleName() + " WHERE "
+                    + TrackedEntityInstance$Table.TRACKEDENTITYINSTANCE + " IN (SELECT " +
+                    TrackedEntityAttributeValue$Table.TRACKEDENTITYINSTANCEID + " FROM " +
+                    TrackedEntityAttributeValue.class.getSimpleName() + ")";
         }
         String firstValue;
         TrackedEntityAttribute firstTrackedEntityAttribute = trackedEntityAttributeMap.get(firstId);

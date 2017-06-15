@@ -29,12 +29,12 @@
 
 package org.hisp.dhis.android.trackercapture.fragments.selectprogram;
 
-import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.widget.DatePicker;
 
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
+import org.hisp.dhis.android.sdk.ui.views.CustomDatePickerDialog;
 import org.hisp.dhis.android.trackercapture.R;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -93,11 +93,11 @@ public class EnrollmentDateSetterHelper {
     private void showEnrollmentDatePicker() {
         enrollmentDate = new DateTime(1, 1, 1, 1, 0);
         LocalDate currentDate = new LocalDate();
-        final DatePickerDialog enrollmentDatePickerDialog =
-                new DatePickerDialog(context,
+        final CustomDatePickerDialog enrollmentDatePickerDialog =
+                new CustomDatePickerDialog(context,
                         null, currentDate.getYear(),
                         currentDate.getMonthOfYear() - 1, currentDate.getDayOfMonth());
-        enrollmentDatePickerDialog.setTitle(context.getString(R.string.please_enter) + " " + enrollmentDateLabel);
+        enrollmentDatePickerDialog.setPermanentTitle(context.getString(R.string.please_enter) + " " + enrollmentDateLabel);
         enrollmentDatePickerDialog.setCanceledOnTouchOutside(true);
         if(!enrollmentDatesInFuture) {
             enrollmentDatePickerDialog.getDatePicker().setMaxDate(DateTime.now().getMillis());
@@ -131,11 +131,11 @@ public class EnrollmentDateSetterHelper {
     private void showIncidentDatePicker() {
         LocalDate currentDate = new LocalDate();
         incidentDate = new DateTime(1, 1, 1, 1, 0);
-        final DatePickerDialog incidentDatePickerDialog =
-                new DatePickerDialog(context,
+        final CustomDatePickerDialog incidentDatePickerDialog =
+                new CustomDatePickerDialog(context,
                         null, currentDate.getYear(),
                         currentDate.getMonthOfYear() - 1, currentDate.getDayOfMonth());
-        incidentDatePickerDialog.setTitle(context.getString(R.string.please_enter) + " " + incidentDateLabel);
+        incidentDatePickerDialog.setPermanentTitle(context.getString(R.string.please_enter) + " " + incidentDateLabel);
         incidentDatePickerDialog.setCanceledOnTouchOutside(true);
         if(!incidentDatesInFuture) {
             incidentDatePickerDialog.getDatePicker().setMaxDate(DateTime.now().getMillis());

@@ -150,12 +150,14 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     private TextView enrollmentDateValue;
     private TextView incidentDateLabel;
     private TextView incidentDateValue;
+    private TextView noActiveEnrollment;
 
     private LinearLayout missingEnrollmentLayout;
     private FloatingActionButton newEnrollmentButton;
 
     private CardView profileCardView;
     private CardView enrollmentCardview;
+
     private CardView programIndicatorCardView;
 
     private ImageButton followupButton;
@@ -285,6 +287,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         incidentDateValue = (TextView) header.findViewById(R.id.dateOfIncidentValue);
         profileCardView = (CardView) header.findViewById(R.id.profile_cardview);
         enrollmentCardview = (CardView) header.findViewById(R.id.enrollment_cardview);
+        noActiveEnrollment = (TextView) header.findViewById(R.id.noactiveenrollment);
         programIndicatorCardView = (CardView) header.findViewById(R.id.programindicators_cardview);
 
         completeButton = (Button) header.findViewById(R.id.complete);
@@ -796,10 +799,22 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     public void showNoActiveEnrollment(ProgramOverviewFragmentForm mForm) {
         enrollmentLayout.setVisibility(View.GONE);
 
-        if (mForm.getProgram() != null && !mForm.getProgram().getOnlyEnrollOnce()) {
-            missingEnrollmentLayout.setVisibility(View.VISIBLE);
-        } else {
-            missingEnrollmentLayout.setVisibility(View.GONE);
+        //start values
+        reOpenButton.setVisibility(View.VISIBLE);
+        newEnrollmentButton.setVisibility(View.VISIBLE);
+        noActiveEnrollment.setText(R.string.no_active_enrollment);
+
+        missingEnrollmentLayout.setVisibility(View.VISIBLE);
+        List<Enrollment> enrollments = TrackerController.getEnrollments(mForm.getProgram().getUid(),
+                mForm.getTrackedEntityInstance());
+        if(enrollments!=null && enrollments.size()>0) {
+            if (mForm.getProgram() != null && mForm.getProgram().getOnlyEnrollOnce()) {
+                newEnrollmentButton.setVisibility(View.GONE);
+                noActiveEnrollment.setText(R.string.enrollemnt_complete);
+            }
+        }
+        if(getLastEnrollmentForTrackedEntityInstance()==null){
+            reOpenButton.setVisibility(View.GONE);
         }
 
         TrackedEntityInstance trackedEntityInstance = TrackerController.getTrackedEntityInstance(
@@ -993,9 +1008,11 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             }
             case R.id.re_open: {
                 Enrollment enrollment = getLastEnrollmentForTrackedEntityInstance();
-                enrollment.setStatus(Enrollment.ACTIVE);
-                enrollment.async().save();
-                refreshUi();
+                if(enrollment!=null) {
+                    enrollment.setStatus(Enrollment.ACTIVE);
+                    enrollment.async().save();
+                    refreshUi();
+                }
                 break;
             }
 
@@ -1068,6 +1085,9 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     private Enrollment getLastEnrollmentForTrackedEntityInstance() {
         List<Enrollment> enrollments = TrackerController.getEnrollments(
                 mForm.getTrackedEntityInstance());
+         if(enrollments==null || enrollments.size()==0) {
+            return null;
+        }
         EnrollmentDateComparator comparator = new EnrollmentDateComparator();
         Collections.reverseOrder(comparator);
         Collections.sort(enrollments, comparator);

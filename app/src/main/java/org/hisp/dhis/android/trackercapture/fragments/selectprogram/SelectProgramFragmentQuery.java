@@ -133,9 +133,9 @@ public class SelectProgramFragmentQuery implements Query<SelectProgramFragmentFo
         }
         teiRows.add(columnNames);
 
-        if(!selectedProgram.isDisplayFrontPageList()) {
-            return fragmentForm; // we don't want to show any values or any list header
-        }
+//        if(!selectedProgram.isDisplayFrontPageList()) {
+//            return fragmentForm; // we don't want to show any values or any list header
+//        }
 
         String query = getTrackedEntityInstancesWithEnrollmentQuery(mOrgUnitId, mProgramId);
         if(query == null) {

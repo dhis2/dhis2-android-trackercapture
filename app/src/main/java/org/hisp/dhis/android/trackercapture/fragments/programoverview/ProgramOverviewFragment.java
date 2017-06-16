@@ -97,10 +97,12 @@ import org.hisp.dhis.android.sdk.utils.comparators.EnrollmentDateComparator;
 import org.hisp.dhis.android.sdk.utils.services.ProgramRuleService;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
-import org.hisp.dhis.android.trackercapture.fragments.programoverview.registerrelationshipdialogfragment.RegisterRelationshipDialogFragment;
+import org.hisp.dhis.android.trackercapture.fragments.programoverview
+        .registerrelationshipdialogfragment.RegisterRelationshipDialogFragment;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.EnrollmentDateSetterHelper;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.IEnroller;
-import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.ItemStatusDialogFragment;
+import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs
+        .ItemStatusDialogFragment;
 import org.hisp.dhis.android.trackercapture.ui.adapters.ProgramAdapter;
 import org.hisp.dhis.android.trackercapture.ui.adapters.ProgramStageAdapter;
 import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.OnProgramStageEventClick;
@@ -148,12 +150,14 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     private TextView enrollmentDateValue;
     private TextView incidentDateLabel;
     private TextView incidentDateValue;
+    private TextView noActiveEnrollment;
 
     private LinearLayout missingEnrollmentLayout;
     private FloatingActionButton newEnrollmentButton;
 
     private CardView profileCardView;
     private CardView enrollmentCardview;
+
     private CardView programIndicatorCardView;
 
     private ImageButton followupButton;
@@ -179,7 +183,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         setProgramRuleFragmentHelper(new ProgramOverviewRuleHelper(this));
     }
 
-    public static ProgramOverviewFragment newInstance(String orgUnitId, String programId, long trackedEntityInstanceId) {
+    public static ProgramOverviewFragment newInstance(String orgUnitId, String programId,
+            long trackedEntityInstanceId) {
         ProgramOverviewFragment fragment = new ProgramOverviewFragment();
         Bundle args = new Bundle();
         args.putString(ORG_UNIT_ID, orgUnitId);
@@ -234,7 +239,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_programoverview, container, false);
     }
 
@@ -251,11 +257,14 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 R.layout.fragment_programoverview_header, listView, false
         );
 
-        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(org.hisp.dhis.android.sdk.R.id.swipe_to_refresh_layout);
-        mSwipeRefreshLayout.setColorSchemeResources(org.hisp.dhis.android.sdk.R.color.Green, org.hisp.dhis.android.sdk.R.color.Blue, org.hisp.dhis.android.sdk.R.color.orange);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(
+                org.hisp.dhis.android.sdk.R.id.swipe_to_refresh_layout);
+        mSwipeRefreshLayout.setColorSchemeResources(org.hisp.dhis.android.sdk.R.color.Green,
+                org.hisp.dhis.android.sdk.R.color.Blue, org.hisp.dhis.android.sdk.R.color.orange);
         mSwipeRefreshLayout.setOnRefreshListener(this);
 
-        relationshipsLinearLayout = (LinearLayout) header.findViewById(R.id.relationships_linearlayout);
+        relationshipsLinearLayout = (LinearLayout) header.findViewById(
+                R.id.relationships_linearlayout);
 
         refreshRelationshipButton = (Button) header.findViewById(R.id.pullrelationshipbutton);
         refreshRelationshipButton.setOnClickListener(this);
@@ -278,6 +287,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         incidentDateValue = (TextView) header.findViewById(R.id.dateOfIncidentValue);
         profileCardView = (CardView) header.findViewById(R.id.profile_cardview);
         enrollmentCardview = (CardView) header.findViewById(R.id.enrollment_cardview);
+        noActiveEnrollment = (TextView) header.findViewById(R.id.noactiveenrollment);
         programIndicatorCardView = (CardView) header.findViewById(R.id.programindicators_cardview);
 
         completeButton = (Button) header.findViewById(R.id.complete);
@@ -312,11 +322,14 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         }
         if (mState == null) {
             mState = new ProgramOverviewFragmentState();
-            OrganisationUnit ou = MetaDataController.getOrganisationUnit(fragmentArguments.getString(ORG_UNIT_ID));
-            Program program = MetaDataController.getProgram(fragmentArguments.getString(PROGRAM_ID));
+            OrganisationUnit ou = MetaDataController.getOrganisationUnit(
+                    fragmentArguments.getString(ORG_UNIT_ID));
+            Program program = MetaDataController.getProgram(
+                    fragmentArguments.getString(PROGRAM_ID));
             mState.setOrgUnit(ou.getId(), ou.getLabel());
             mState.setProgram(program.getUid(), program.getName());
-            mState.setTrackedEntityInstance(fragmentArguments.getLong(TRACKEDENTITYINSTANCE_ID, -1));
+            mState.setTrackedEntityInstance(
+                    fragmentArguments.getLong(TRACKEDENTITYINSTANCE_ID, -1));
         }
         attachSpinner();
         mSpinnerAdapter.swapData(MetaDataController.getProgramsForOrganisationUnit
@@ -394,8 +407,9 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         int index = -1;
         for (int i = 0; i < mSpinnerAdapter.getCount(); i++) {
             Program program = (Program) mSpinnerAdapter.getItem(i);
-            if (program.getName().equals(programName))
+            if (program.getName().equals(programName)) {
                 index = i;
+            }
         }
         return index;
     }
@@ -414,7 +428,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
 
             mSpinnerAdapter = new ProgramAdapter(inflater);
 
-            mSpinner = (Spinner) mSpinnerContainer.findViewById(org.hisp.dhis.android.sdk.R.id.toolbar_spinner);
+            mSpinner = (Spinner) mSpinnerContainer.findViewById(
+                    org.hisp.dhis.android.sdk.R.id.toolbar_spinner);
             mSpinner.setAdapter(mSpinnerAdapter);
             mSpinner.post(new Runnable() {
                 public void run() {
@@ -471,7 +486,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     }
 
     @Override
-    public void onLoadFinished(Loader<ProgramOverviewFragmentForm> loader, ProgramOverviewFragmentForm data) {
+    public void onLoadFinished(Loader<ProgramOverviewFragmentForm> loader,
+            ProgramOverviewFragmentForm data) {
         if (LOADER_ID == loader.getId()) {
             mForm = data;
             mProgressBar.setVisibility(View.GONE);
@@ -485,7 +501,9 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             } else {
                 enrollmentLayout.setVisibility(View.VISIBLE);
                 missingEnrollmentLayout.setVisibility(View.GONE);
-                profileCardView.setClickable(true); //is set to false when TEI doesn't have an applicable enrollment. todo why?
+                profileCardView.setClickable(
+                        true); //is set to false when TEI doesn't have an applicable enrollment.
+                // todo why?
                 profileButton.setClickable(true);
             }
             enrollmentDateLabel.setText(data.getDateOfEnrollmentLabel());
@@ -498,7 +516,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 incidentDateLabel.setText(data.getIncidentDateLabel());
                 incidentDateValue.setText(data.getIncidentDateValue());
             }
-            FailedItem failedItem = TrackerController.getFailedItem(FailedItem.ENROLLMENT, mForm.getEnrollment().getLocalId());
+            FailedItem failedItem = TrackerController.getFailedItem(FailedItem.ENROLLMENT,
+                    mForm.getEnrollment().getLocalId());
 
             if (failedItem != null && failedItem.getHttpStatusCode() >= 0) {
                 enrollmentServerStatus.setImageResource(R.drawable.ic_event_error);
@@ -540,7 +559,9 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                     if (stageRow.getProgramStage().getRepeatable()) {
                         stageRow.setButtonListener(this);
                     } else {
-                        if (stageRow.getEventRows().size() < 1) { // if stage is not autogen and not repeatable, allow user to create exactly one event
+                        if (stageRow.getEventRows().size()
+                                < 1) { // if stage is not autogen and not repeatable, allow user
+                            // to create exactly one event
                             stageRow.setButtonListener(this);
                         }
                         if (stageRow.getProgramStage().getAllowGenerateNextVisit()) {
@@ -551,11 +572,13 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 } else if (row instanceof ProgramStageEventRow) {
                     final ProgramStageEventRow eventRow = (ProgramStageEventRow) row;
 
-                    FailedItem failedItem1 = TrackerController.getFailedItem(FailedItem.EVENT, eventRow.getEvent().getLocalId());
+                    FailedItem failedItem1 = TrackerController.getFailedItem(FailedItem.EVENT,
+                            eventRow.getEvent().getLocalId());
 
                     if (failedItem1 != null && failedItem1.getHttpStatusCode() >= 0) {
                         eventRow.setHasFailed(true);
-                        eventRow.setMessage(failedEvents.get(eventRow.getEvent().getLocalId()).getErrorMessage());
+                        eventRow.setMessage(failedEvents.get(
+                                eventRow.getEvent().getLocalId()).getErrorMessage());
                     } else if (eventRow.getEvent().isFromServer()) {
                         eventRow.setSynchronized(true);
                         eventRow.setMessage(getString(R.string.status_sent_description));
@@ -565,16 +588,22 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                     }
                 }
             }
-            setRelationships(getLayoutInflater(getArguments().getBundle(EXTRA_SAVED_INSTANCE_STATE)));
+            setRelationships(
+                    getLayoutInflater(getArguments().getBundle(EXTRA_SAVED_INSTANCE_STATE)));
 
-            LinearLayout programIndicatorLayout = (LinearLayout) programIndicatorCardView.findViewById(R.id.programindicatorlayout);
+            LinearLayout programIndicatorLayout =
+                    (LinearLayout) programIndicatorCardView.findViewById(
+                            R.id.programindicatorlayout);
             programIndicatorLayout.removeAllViews();
-            FlowLayout keyValueLayout = (FlowLayout) programIndicatorCardView.findViewById(R.id.keyvaluelayout);
+            FlowLayout keyValueLayout = (FlowLayout) programIndicatorCardView.findViewById(
+                    R.id.keyvaluelayout);
             keyValueLayout.removeAllViews();
-            LinearLayout displayTextLayout = (LinearLayout) programIndicatorCardView.findViewById(R.id.textlayout);
+            LinearLayout displayTextLayout = (LinearLayout) programIndicatorCardView.findViewById(
+                    R.id.textlayout);
             displayTextLayout.removeAllViews();
             for (IndicatorRow indicatorRow : mForm.getProgramIndicatorRows().values()) {
-                View view = indicatorRow.getView(getChildFragmentManager(), getLayoutInflater(getArguments()), null, programIndicatorLayout);
+                View view = indicatorRow.getView(getChildFragmentManager(),
+                        getLayoutInflater(getArguments()), null, programIndicatorLayout);
                 programIndicatorLayout.addView(view);
             }
 
@@ -589,16 +618,21 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
      */
     public void setRelationships(LayoutInflater inflater) {
         relationshipsLinearLayout.removeAllViews();
-        if (mForm.getTrackedEntityInstance() != null && mForm.getTrackedEntityInstance().getRelationships() != null) {
-            ListIterator<Relationship> it = mForm.getTrackedEntityInstance().getRelationships().listIterator();
+        if (mForm.getTrackedEntityInstance() != null
+                && mForm.getTrackedEntityInstance().getRelationships() != null) {
+            ListIterator<Relationship> it =
+                    mForm.getTrackedEntityInstance().getRelationships().listIterator();
             while (it.hasNext()) {
                 final Relationship relationship = it.next();
                 if (relationship == null) {
                     continue;
                 }
-                LinearLayout ll = (LinearLayout) inflater.inflate(R.layout.listview_row_relationship, null);
-                FontTextView currentTeiRelationshipLabel = (FontTextView) ll.findViewById(R.id.current_tei_relationship_label);
-                FontTextView relativeLabel = (FontTextView) ll.findViewById(R.id.relative_relationship_label);
+                LinearLayout ll = (LinearLayout) inflater.inflate(
+                        R.layout.listview_row_relationship, null);
+                FontTextView currentTeiRelationshipLabel = (FontTextView) ll.findViewById(
+                        R.id.current_tei_relationship_label);
+                FontTextView relativeLabel = (FontTextView) ll.findViewById(
+                        R.id.relative_relationship_label);
                 Button deleteButton = (Button) ll.findViewById(R.id.delete_relationship);
                 deleteButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -607,23 +641,29 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                                 mForm.getTrackedEntityInstance(), getActivity());
                     }
                 });
-                RelationshipType relationshipType = MetaDataController.getRelationshipType(relationship.getRelationship());
+                RelationshipType relationshipType = MetaDataController.getRelationshipType(
+                        relationship.getRelationship());
 
                 if (relationshipType != null) {
 
                     /* establishing if the relative is A or B in Relationship Type */
                     final TrackedEntityInstance relative;
                     if (mForm.getTrackedEntityInstance().getTrackedEntityInstance() != null &&
-                            mForm.getTrackedEntityInstance().getTrackedEntityInstance().equals(relationship.getTrackedEntityInstanceA())) {
+                            mForm.getTrackedEntityInstance().getTrackedEntityInstance().equals(
+                                    relationship.getTrackedEntityInstanceA())) {
 
                         currentTeiRelationshipLabel.setText(relationshipType.getaIsToB());
-                        relative = TrackerController.getTrackedEntityInstance(relationship.getTrackedEntityInstanceB());
+                        relative = TrackerController.getTrackedEntityInstance(
+                                relationship.getTrackedEntityInstanceB());
 
-                    } else if (mForm.getTrackedEntityInstance().getTrackedEntityInstance() != null &&
-                            mForm.getTrackedEntityInstance().getTrackedEntityInstance().equals(relationship.getTrackedEntityInstanceB())) {
+                    } else if (mForm.getTrackedEntityInstance().getTrackedEntityInstance() != null
+                            &&
+                            mForm.getTrackedEntityInstance().getTrackedEntityInstance().equals(
+                                    relationship.getTrackedEntityInstanceB())) {
 
                         currentTeiRelationshipLabel.setText(relationshipType.getbIsToA());
-                        relative = TrackerController.getTrackedEntityInstance(relationship.getTrackedEntityInstanceA());
+                        relative = TrackerController.getTrackedEntityInstance(
+                                relationship.getTrackedEntityInstanceA());
                     } else {
                         continue;
                     }
@@ -638,7 +678,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                             if (relative != null) {
                                 ProgramOverviewFragment fragment = ProgramOverviewFragment.
                                         newInstance(getArguments().getString(ORG_UNIT_ID),
-                                                getArguments().getString(PROGRAM_ID), relative.getLocalId());
+                                                getArguments().getString(PROGRAM_ID),
+                                                relative.getLocalId());
 //                                mNavigationHandler.switchFragment(fragment, CLASS_TAG, true);
                             }
                         }
@@ -646,7 +687,9 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                     relationshipsLinearLayout.addView(ll);
                     if (it.hasNext()) {
                         View view = new View(getActivity());
-                        view.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
+                        view.setLayoutParams(
+                                new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                        1));
                         view.setBackgroundColor(getResources().getColor(R.color.light_grey));
                         relationshipsLinearLayout.addView(view);
                     }
@@ -662,11 +705,12 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         if (relative != null && relative.getAttributes() != null) {
             List<Enrollment> enrollments = TrackerController.getEnrollments(relative);
             List<TrackedEntityAttribute> attributesToShow = new ArrayList<>();
-            List<TrackedEntityAttributeValue> attributes = TrackerController.getVisibleTrackedEntityAttributeValues(relative.getLocalId());
+            List<TrackedEntityAttributeValue> attributes =
+                    TrackerController.getVisibleTrackedEntityAttributeValues(relative.getLocalId());
             for (int i = 0; i < attributes.size() && i < 2; i++) {
                 relativeString += attributes.get(i).getValue() + " ";
             }
-            if(attributes.size() == 0) {
+            if (attributes.size() == 0) {
                 if (enrollments != null && !enrollments.isEmpty()) {
                     Program program = null;
                     for (Enrollment e : enrollments) {
@@ -711,8 +755,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     }
 
     public static void showConfirmDeleteRelationshipDialog(final Relationship relationship,
-                                                           final TrackedEntityInstance trackedEntityInstance,
-                                                           Activity activity) {
+            final TrackedEntityInstance trackedEntityInstance,
+            Activity activity) {
         if (activity == null) return;
         UiUtils.showConfirmDialog(activity, activity.getString(R.string.confirm),
                 activity.getString(R.string.confirm_delete_relationship),
@@ -731,8 +775,9 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     @Subscribe
     public void onItemClick(OnProgramStageEventClick eventClick) {
         if (eventClick.isHasPressedFailedButton()) {
-            if (eventClick.getEvent() != null)
+            if (eventClick.getEvent() != null) {
                 showStatusDialog(eventClick.getEvent());
+            }
         } else {
             showDataEntryFragment(eventClick.getEvent(), eventClick.getEvent().getProgramStageId());
         }
@@ -743,8 +788,9 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         List<FailedItem> failedItems = TrackerController.getFailedItems();
         if (failedItems != null && failedItems.size() > 0) {
             for (FailedItem failedItem : failedItems) {
-                if (failedItem.getItemType().equals(FailedItem.EVENT))
+                if (failedItem.getItemType().equals(FailedItem.EVENT)) {
                     failedItemMap.put(failedItem.getItemId(), failedItem);
+                }
             }
         }
         return failedItemMap;
@@ -753,72 +799,63 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     public void showNoActiveEnrollment(ProgramOverviewFragmentForm mForm) {
         enrollmentLayout.setVisibility(View.GONE);
 
-        if (mForm.getProgram() != null && !mForm.getProgram().getOnlyEnrollOnce()) {
-            missingEnrollmentLayout.setVisibility(View.VISIBLE);
-        } else {
-            missingEnrollmentLayout.setVisibility(View.GONE);
+        //start values
+        reOpenButton.setVisibility(View.VISIBLE);
+        newEnrollmentButton.setVisibility(View.VISIBLE);
+        noActiveEnrollment.setText(R.string.no_active_enrollment);
+
+        missingEnrollmentLayout.setVisibility(View.VISIBLE);
+        List<Enrollment> enrollments = TrackerController.getEnrollments(mForm.getProgram().getUid(),
+                mForm.getTrackedEntityInstance());
+        if(enrollments!=null && enrollments.size()>0) {
+            if (mForm.getProgram() != null && mForm.getProgram().getOnlyEnrollOnce()) {
+                newEnrollmentButton.setVisibility(View.GONE);
+                noActiveEnrollment.setText(R.string.enrollemnt_complete);
+            }
+        }
+        if(getLastEnrollmentForTrackedEntityInstance()==null){
+            reOpenButton.setVisibility(View.GONE);
         }
 
-        //update profile view
-        List<Enrollment> enrollmentsForTEI = TrackerController.getEnrollments(TrackerController.getTrackedEntityInstance(mState.getTrackedEntityInstanceId()));
-        for (Enrollment enrollment : enrollmentsForTEI) {
-            Program selectedProgram = (Program) mSpinner.getSelectedItem();
-
-            if (selectedProgram.getUid().equals(enrollment.getProgram().getUid())) {
-                profileCardView.setClickable(false); // Enrollment attributes is applicable.
-                profileButton.setClickable(false);
-                TrackedEntityInstance trackedEntityInstance = TrackerController.getTrackedEntityInstance(enrollment.getLocalTrackedEntityInstanceId());
-
-                int numberOfProgramTrackedEntityAttributes = selectedProgram.getProgramTrackedEntityAttributes().size();
-                int numberOfTrackedEntityAttributeValues = trackedEntityInstance.getAttributes().size();
-
-                if (numberOfProgramTrackedEntityAttributes > 0 && numberOfTrackedEntityAttributeValues > 0) {
-                    TrackedEntityAttribute attribute1 = selectedProgram.getProgramTrackedEntityAttributes().get(0).getTrackedEntityAttribute();
-                    attribute1Label.setText(attribute1.getName());
-                    TrackedEntityAttributeValue attribute1Val = TrackerController.getTrackedEntityAttributeValue(attribute1.getUid(), trackedEntityInstance.getLocalId());
-                    if (attribute1Val != null) {
-                        attribute1Value.setText(attribute1Val.getValue());
-                    } else {
-                        attribute1Value.setText("");
-                    }
-                } else {
-                    attribute1Label.setText("");
-                    attribute1Value.setText("");
+        TrackedEntityInstance trackedEntityInstance = TrackerController.getTrackedEntityInstance(
+                mForm.getTrackedEntityInstance().getTrackedEntityInstance());
+        List<TrackedEntityAttributeValue> trackedEntityAttributeValues =
+                TrackerController.getVisibleTrackedEntityAttributeValues(
+                        trackedEntityInstance.getLocalId());
+        {
+            //update profile view
+            if (trackedEntityAttributeValues != null) {
+                TrackedEntityAttribute attribute = MetaDataController.getTrackedEntityAttribute(
+                        trackedEntityAttributeValues.get(0).getTrackedEntityAttributeId());
+                if (attribute != null) {
+                    attribute1Label.setText(attribute.getName());
+                    attribute1Value.setText(trackedEntityAttributeValues.get(0).getValue());
                 }
-
-                if (numberOfProgramTrackedEntityAttributes > 1 && numberOfTrackedEntityAttributeValues > 1) {
-                    TrackedEntityAttribute attribute2 = selectedProgram.getProgramTrackedEntityAttributes().get(1).getTrackedEntityAttribute();
-                    TrackedEntityAttributeValue attribute2Val = TrackerController.getTrackedEntityAttributeValue(attribute2.getUid(), trackedEntityInstance.getLocalId());
-
-                    attribute2Label.setText(attribute2.getName());
-                    if (attribute2Val != null) {
-                        attribute2Value.setText(attribute2Val.getValue());
-                    } else {
-                        attribute2Value.setText("");
-                    }
-                } else {
-                    attribute2Label.setText("");
-                    attribute2Value.setText("");
+                attribute = MetaDataController.getTrackedEntityAttribute(
+                        trackedEntityAttributeValues.get(1).getTrackedEntityAttributeId());
+                if (attribute != null) {
+                    attribute2Label.setText(attribute.getName());
+                    attribute2Value.setText(trackedEntityAttributeValues.get(1).getValue());
                 }
+            }
 
-                break;
-            } else {
-                profileCardView.setClickable(false); // Enrollment attributes not applicable. Clickable(false) to prevent crash
-                profileButton.setClickable(false);
-                int numberOfProgramTrackedEntityAttributes = selectedProgram.getProgramTrackedEntityAttributes().size();
+            List<Enrollment> enrollmentsForTEI = TrackerController.getEnrollments(
+                    TrackerController.getTrackedEntityInstance(
+                            mState.getTrackedEntityInstanceId()));
+            for (Enrollment enrollment : enrollmentsForTEI) {
+                Program selectedProgram = (Program) mSpinner.getSelectedItem();
 
-                if (numberOfProgramTrackedEntityAttributes > 0)
-                    attribute1Label.setText(selectedProgram.getProgramTrackedEntityAttributes().get(0).getTrackedEntityAttribute().getName());
-                else
-                    attribute1Label.setText("");
+                if (selectedProgram.getUid().equals(enrollment.getProgram().getUid())) {
+                    profileCardView.setClickable(false); // Enrollment attributes is applicable.
+                    profileButton.setClickable(false);
+                    break;
+                } else {
+                    profileCardView.setClickable(
+                            false); // Enrollment attributes not applicable. Clickable(false) to
+                    // prevent crash
 
-                if (numberOfProgramTrackedEntityAttributes > 1)
-                    attribute2Label.setText(selectedProgram.getProgramTrackedEntityAttributes().get(1).getTrackedEntityAttribute().getName());
-                else
-                    attribute2Label.setText("");
-
-                attribute1Value.setText("");
-                attribute2Value.setText("");
+                    profileButton.setClickable(false);
+                }
             }
         }
     }
@@ -839,39 +876,50 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     }
 
     private void createEnrollment() {
-        EnrollmentDateSetterHelper.createEnrollment(mForm.getTrackedEntityInstance(), this, getActivity(), mForm.getProgram().
-                        getDisplayIncidentDate(), mForm.getProgram().getSelectEnrollmentDatesInFuture(),
-                mForm.getProgram().getSelectIncidentDatesInFuture(), mForm.getProgram().getEnrollmentDateLabel(),
+        EnrollmentDateSetterHelper.createEnrollment(mForm.getTrackedEntityInstance(), this,
+                getActivity(), mForm.getProgram().
+                        getDisplayIncidentDate(),
+                mForm.getProgram().getSelectEnrollmentDatesInFuture(),
+                mForm.getProgram().getSelectIncidentDatesInFuture(),
+                mForm.getProgram().getEnrollmentDateLabel(),
                 mForm.getProgram().getIncidentDateLabel());
     }
 
     @Override
-    public void showEnrollmentFragment(TrackedEntityInstance trackedEntityInstance, DateTime enrollmentDate, DateTime incidentDate) {
+    public void showEnrollmentFragment(TrackedEntityInstance trackedEntityInstance,
+            DateTime enrollmentDate, DateTime incidentDate) {
         String enrollmentDateString = enrollmentDate.toString();
         String incidentDateString = null;
         if (incidentDate != null) {
             incidentDateString = incidentDate.toString();
         }
         if (trackedEntityInstance == null) {
-            HolderActivity.navigateToEnrollmentDataEntryFragment(getActivity(), mState.getOrgUnitId(), mState.getProgramId(), enrollmentDateString, incidentDateString);
+            HolderActivity.navigateToEnrollmentDataEntryFragment(getActivity(),
+                    mState.getOrgUnitId(), mState.getProgramId(), enrollmentDateString,
+                    incidentDateString);
         } else {
-            HolderActivity.navigateToEnrollmentDataEntryFragment(getActivity(), mState.getOrgUnitId(), mState.getProgramId(), trackedEntityInstance.getLocalId(), enrollmentDateString, incidentDateString);
+            HolderActivity.navigateToEnrollmentDataEntryFragment(getActivity(),
+                    mState.getOrgUnitId(), mState.getProgramId(),
+                    trackedEntityInstance.getLocalId(), enrollmentDateString, incidentDateString);
         }
     }
 
     public void showDataEntryFragment(Event event, String programStage) {
         Bundle args = getArguments();
         if (event == null) {
-            HolderActivity.navigateToDataEntryFragment(getActivity(), args.getString(ORG_UNIT_ID), args.getString(PROGRAM_ID), programStage, mForm.getEnrollment().getLocalId());
+            HolderActivity.navigateToDataEntryFragment(getActivity(), args.getString(ORG_UNIT_ID),
+                    args.getString(PROGRAM_ID), programStage, mForm.getEnrollment().getLocalId());
         } else {
-            HolderActivity.navigateToDataEntryFragment(getActivity(), args.getString(ORG_UNIT_ID), args.getString(PROGRAM_ID), programStage,
+            HolderActivity.navigateToDataEntryFragment(getActivity(), args.getString(ORG_UNIT_ID),
+                    args.getString(PROGRAM_ID), programStage,
                     mForm.getEnrollment().getLocalId(), event.getLocalId());
         }
     }
 
     public void completeEnrollment() {
         if (mForm == null || mForm.getEnrollment() == null) {
-            Log.i("ENROLLMENT", "Unable to complete enrollment. mForm or mForm.getEnrollment() is null");
+            Log.i("ENROLLMENT",
+                    "Unable to complete enrollment. mForm or mForm.getEnrollment() is null");
             return;
         }
         mForm.getEnrollment().setStatus(Enrollment.COMPLETED);
@@ -882,7 +930,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
 
     public void terminateEnrollment() {
         if (mForm == null || mForm.getEnrollment() == null) {
-            Log.i("ENROLLMENT", "Unable to terminate enrollment. mForm or mForm.getEnrollment() is null");
+            Log.i("ENROLLMENT",
+                    "Unable to terminate enrollment. mForm or mForm.getEnrollment() is null");
             return;
         }
         mForm.getEnrollment().setStatus(Enrollment.CANCELLED);
@@ -959,9 +1008,11 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             }
             case R.id.re_open: {
                 Enrollment enrollment = getLastEnrollmentForTrackedEntityInstance();
-                enrollment.setStatus(Enrollment.ACTIVE);
-                enrollment.async().save();
-                refreshUi();
+                if(enrollment!=null) {
+                    enrollment.setStatus(Enrollment.ACTIVE);
+                    enrollment.async().save();
+                    refreshUi();
+                }
                 break;
             }
 
@@ -999,8 +1050,9 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 break;
             }
             case R.id.enrollmentstatus: {
-                if (mForm != null && mForm.getEnrollment() != null)
+                if (mForm != null && mForm.getEnrollment() != null) {
                     showStatusDialog(mForm.getEnrollment());
+                }
                 break;
             }
             case R.id.pullrelationshipbutton: {
@@ -1019,8 +1071,9 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
 
     private void refreshRelationships() {
         Context context = getActivity().getBaseContext();
-        Toast.makeText(context, getString(org.hisp.dhis.android.sdk.R.string.refresh_relations), Toast.LENGTH_SHORT).show();
-        if(mForm!=null && mForm.getTrackedEntityInstance()!=null) {
+        Toast.makeText(context, getString(org.hisp.dhis.android.sdk.R.string.refresh_relations),
+                Toast.LENGTH_SHORT).show();
+        if (mForm != null && mForm.getTrackedEntityInstance() != null) {
             refreshTrackedEntityRelationships(mForm.getTrackedEntityInstance().getUid());
         }
     }
@@ -1030,7 +1083,11 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     }
 
     private Enrollment getLastEnrollmentForTrackedEntityInstance() {
-        List<Enrollment> enrollments = TrackerController.getEnrollments(mForm.getTrackedEntityInstance());
+        List<Enrollment> enrollments = TrackerController.getEnrollments(
+                mForm.getTrackedEntityInstance());
+         if(enrollments==null || enrollments.size()==0) {
+            return null;
+        }
         EnrollmentDateComparator comparator = new EnrollmentDateComparator();
         Collections.reverseOrder(comparator);
         Collections.sort(enrollments, comparator);
@@ -1047,26 +1104,32 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     }
 
     private void editEnrollmentDates() {
-        if(mForm != null && mForm.getEnrollment() != null ) {
-            HolderActivity.navigateToEnrollmentDateFragment(getActivity(), mForm.getEnrollment().getLocalId());
+        if (mForm != null && mForm.getEnrollment() != null) {
+            HolderActivity.navigateToEnrollmentDateFragment(getActivity(),
+                    mForm.getEnrollment().getLocalId());
         }
 
     }
 
     private void editTrackedEntityInstanceProfile() {
         HolderActivity.navigateToTrackedEntityInstanceProfileFragment(getActivity(), getArguments().
-                getLong(TRACKEDENTITYINSTANCE_ID), getArguments().getString(PROGRAM_ID), mForm.getEnrollment().getLocalId());
+                        getLong(TRACKEDENTITYINSTANCE_ID), getArguments().getString(PROGRAM_ID),
+                mForm.getEnrollment().getLocalId());
     }
 
     private void showAddRelationshipFragment() {
         if (mForm == null || mForm.getTrackedEntityInstance() == null) return;
-        RegisterRelationshipDialogFragment fragment = RegisterRelationshipDialogFragment.newInstance(mForm.getTrackedEntityInstance().getLocalId());
+        RegisterRelationshipDialogFragment fragment =
+                RegisterRelationshipDialogFragment.newInstance(
+                        mForm.getTrackedEntityInstance().getLocalId());
         fragment.show(getChildFragmentManager(), CLASS_TAG);
     }
 
     void displayKeyValuePair(ProgramRuleAction programRuleAction) {
-        FlowLayout programIndicatorLayout = (FlowLayout) programIndicatorCardView.findViewById(R.id.keyvaluelayout);
-        KeyValueView keyValueView = new KeyValueView(programRuleAction.getContent(), ProgramRuleService.getCalculatedConditionValue(programRuleAction.getData()));
+        FlowLayout programIndicatorLayout = (FlowLayout) programIndicatorCardView.findViewById(
+                R.id.keyvaluelayout);
+        KeyValueView keyValueView = new KeyValueView(programRuleAction.getContent(),
+                ProgramRuleService.getCalculatedConditionValue(programRuleAction.getData()));
         FlowLayout.LayoutParams layoutParams = new FlowLayout.LayoutParams(10, 10);
         View view = keyValueView.getView(getLayoutInflater(getArguments()), programIndicatorLayout);
         view.setLayoutParams(layoutParams);
@@ -1074,9 +1137,12 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     }
 
     void displayText(ProgramRuleAction programRuleAction) {
-        LinearLayout programIndicatorLayout = (LinearLayout) programIndicatorCardView.findViewById(R.id.textlayout);
-        PlainTextRow textRow = new PlainTextRow(ProgramRuleService.getCalculatedConditionValue(programRuleAction.getData()));
-        View view = textRow.getView(getChildFragmentManager(), getLayoutInflater(getArguments()), null, programIndicatorLayout);
+        LinearLayout programIndicatorLayout = (LinearLayout) programIndicatorCardView.findViewById(
+                R.id.textlayout);
+        PlainTextRow textRow = new PlainTextRow(
+                ProgramRuleService.getCalculatedConditionValue(programRuleAction.getData()));
+        View view = textRow.getView(getChildFragmentManager(), getLayoutInflater(getArguments()),
+                null, programIndicatorLayout);
         view.findViewById(R.id.text_label).setVisibility(View.GONE);
         view.findViewById(R.id.detailed_info_button_layout).setVisibility(View.GONE);
         programIndicatorLayout.addView(view);
@@ -1108,7 +1174,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     public void onRefresh() {
         if (isAdded()) {
             Context context = getActivity().getBaseContext();
-            Toast.makeText(context, getString(org.hisp.dhis.android.sdk.R.string.syncing), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, getString(org.hisp.dhis.android.sdk.R.string.syncing),
+                    Toast.LENGTH_SHORT).show();
             synchronize();
         }
     }
@@ -1135,7 +1202,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     }
 
     public void synchronize() {
-        if(mForm != null) {
+        if (mForm != null) {
             sendTrackedEntityInstance(mForm.getTrackedEntityInstance());
         }
     }
@@ -1146,7 +1213,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 ResourceType.TRACKEDENTITYINSTANCE) {
             @Override
             public Object execute() {
-                TrackerController.refreshRelationsByTrackedEntity(DhisController.getInstance().getDhisApi(), trackedEntityInstance);
+                TrackerController.refreshRelationsByTrackedEntity(
+                        DhisController.getInstance().getDhisApi(), trackedEntityInstance);
                 return new Object();
             }
         });
@@ -1157,7 +1225,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 ResourceType.TRACKEDENTITYINSTANCE) {
             @Override
             public Object execute() {
-                TrackerController.sendTrackedEntityInstanceChanges(DhisController.getInstance().getDhisApi(), trackedEntityInstance, true);
+                TrackerController.sendTrackedEntityInstanceChanges(
+                        DhisController.getInstance().getDhisApi(), trackedEntityInstance, true);
                 return new Object();
             }
         });

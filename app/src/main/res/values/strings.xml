@@ -80,8 +80,7 @@
     <string name="generic_error">Error. Please retry</string>
     <string name="re_open">Re-open</string>
 
-    <string name="online_query_tracked_entity_instances">Online query tracked entity instances</string>
-    <string name="download_entities_title">Download entities from server</string>
+    <string name="download_entities_title">Download entities</string>
     <string name="enrollemnt_complete">Enrollment is complete</string>
 
 </resources>

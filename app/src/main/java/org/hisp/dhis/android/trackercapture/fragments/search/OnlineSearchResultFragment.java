@@ -385,17 +385,8 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
 
                 if (downloadedTrackedEntityInstances != null && downloadedTrackedEntityInstances.size() == 1) {
                     if (downloadedEnrollments != null) {
-                        Enrollment activeEnrollment = null;
-                        if (downloadedEnrollments.size() == 1) {
-                            activeEnrollment = downloadedEnrollments.get(0);
-                        } else {
-                            for (Enrollment enrollment : downloadedEnrollments) {
-                                if (enrollment.getProgram().getUid().equals(programId)) {
-                                    activeEnrollment = enrollment;
-                                    break;
-                                }
-                            }
-                        }
+                        Enrollment activeEnrollment = getActiveEnrollmentByProgram(programId);
+
                         final Enrollment enrollment = activeEnrollment;
                         if (enrollment != null) {
                             final TrackedEntityInstance trackedEntityInstance =
@@ -431,7 +422,19 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
                 return new Object();
             }
         });
+    }
 
+    private Enrollment getActiveEnrollmentByProgram (String programId){
+        Enrollment activeEnrollment = null;
+
+        for (Enrollment enrollment : downloadedEnrollments) {
+            if (enrollment.getProgram().getUid().equals(programId)) {
+                activeEnrollment = enrollment;
+                break;
+            }
+        }
+
+        return activeEnrollment;
     }
 
     @Subscribe

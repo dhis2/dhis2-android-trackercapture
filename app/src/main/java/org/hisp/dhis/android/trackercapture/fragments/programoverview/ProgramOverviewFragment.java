@@ -527,6 +527,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 enrollmentServerStatus.setImageResource(R.drawable.ic_from_server);
             }
 
+            refreshRelationshipButton.setEnabled(mForm.getEnrollment().isFromServer());
+
             if (mForm.getEnrollment().getStatus().equals(Enrollment.CANCELLED)) {
                 setTerminated();
             }

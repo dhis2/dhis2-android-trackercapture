@@ -137,7 +137,7 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
             if(!backNavigation) {
                 getActivity().finish();
             }
-            initiateLoading(activity);
+            initiateLoading(activity, programId);
 
         } else if (id == android.R.id.home) {
             getActivity().finish();
@@ -334,7 +334,7 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
      * When it is done it will either display ProgramOverviewFragment if only one TEI and one Enrollment
      * is downloaded
      */
-    public void initiateLoading(final Activity activity) {
+    public void initiateLoading(final Activity activity, final String programId) {
 
         mAdapter.swapData(null);
         filterButton.setVisibility(View.INVISIBLE);
@@ -384,20 +384,25 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
 
 
                 if (downloadedTrackedEntityInstances != null && downloadedTrackedEntityInstances.size() == 1) {
-                    if (downloadedEnrollments != null && downloadedEnrollments.size() == 1) {
-                        final TrackedEntityInstance trackedEntityInstance = downloadedTrackedEntityInstances.get(0);
-                        final Enrollment enrollment = downloadedEnrollments.get(0);
+                    if (downloadedEnrollments != null) {
+                        Enrollment activeEnrollment = getActiveEnrollmentByProgram(programId);
 
-                        if(!backNavigation) {
-                            activity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    HolderActivity.navigateToProgramOverviewFragment(activity,
-                                            orgUnitId,
-                                            enrollment.getProgram().getUid(),
-                                            trackedEntityInstance.getLocalId());
-                                }
-                            });
+                        final Enrollment enrollment = activeEnrollment;
+                        if (enrollment != null) {
+                            final TrackedEntityInstance trackedEntityInstance =
+                                    downloadedTrackedEntityInstances.get(0);
+
+                            if (!backNavigation) {
+                                activity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        HolderActivity.navigateToProgramOverviewFragment(activity,
+                                                orgUnitId,
+                                                enrollment.getProgram().getUid(),
+                                                trackedEntityInstance.getLocalId());
+                                    }
+                                });
+                            }
                         }
                     }
                 }
@@ -417,7 +422,19 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
                 return new Object();
             }
         });
+    }
 
+    private Enrollment getActiveEnrollmentByProgram (String programId){
+        Enrollment activeEnrollment = null;
+
+        for (Enrollment enrollment : downloadedEnrollments) {
+            if (enrollment.getProgram().getUid().equals(programId)) {
+                activeEnrollment = enrollment;
+                break;
+            }
+        }
+
+        return activeEnrollment;
     }
 
     @Subscribe

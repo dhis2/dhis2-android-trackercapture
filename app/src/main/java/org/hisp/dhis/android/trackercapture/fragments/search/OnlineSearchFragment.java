@@ -59,11 +59,13 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
     private ListView mListView;
     private int mDialogId;
     private View progressBar;
+    private boolean backNavigation;
 
     public static final String EXTRA_PROGRAM = "extra:trackedEntityAttributes";
     public static final String EXTRA_ORGUNIT = "extra:orgUnit";
     public static final String EXTRA_DETAILED = "extra:detailed";
     public static final String EXTRA_ARGUMENTS = "extra:Arguments";
+    public static final String EXTRA_NAVIGATION = "extra:Navigation";
     public static final String EXTRA_SAVED_INSTANCE_STATE = "extra:savedInstanceState";
 
     public static OnlineSearchFragment newInstance(String program, String orgUnit) {
@@ -186,6 +188,7 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
         argumentsBundle.putBundle(EXTRA_ARGUMENTS, getArguments());
         argumentsBundle.putBundle(EXTRA_SAVED_INSTANCE_STATE, savedInstanceState);
         getLoaderManager().initLoader(LOADER_ID, argumentsBundle, this);
+        getActionBar().setTitle(getString(R.string.download_entities_title));
     }
 
     @Override
@@ -198,6 +201,7 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
             Bundle fragmentArguments = args.getBundle(EXTRA_ARGUMENTS);
             String programId = fragmentArguments.getString(EXTRA_PROGRAM);
             String orgUnitId = fragmentArguments.getString(EXTRA_ORGUNIT);
+            backNavigation = fragmentArguments.getBoolean(EXTRA_NAVIGATION);
 
             return new DbLoader<>(
                     getActivity().getBaseContext(), modelsToTrack, new OnlineSearchFragmentQuery(
@@ -369,19 +373,19 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
                 }
 
                 // showTrackedEntityInstanceQueryResultDialog(fragmentManager, trackedEntityInstancesQueryResult, orgUnit);
-                showOnlineSearchResultFragment(trackedEntityInstancesQueryResult, orgUnit, program);
+                showOnlineSearchResultFragment(trackedEntityInstancesQueryResult, orgUnit, program, backNavigation);
                 return new Object();
             }
         });
     }
 
-    public void showOnlineSearchResultFragment(final List<TrackedEntityInstance> trackedEntityInstances, final String orgUnit, final String programId) {
+    public void showOnlineSearchResultFragment(final List<TrackedEntityInstance> trackedEntityInstances, final String orgUnit, final String programId, final boolean backNavigation) {
         if (getActivity() != null && isAdded()) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     progressBar.setVisibility(View.INVISIBLE);
-                    HolderActivity.navigateToOnlineSearchResultFragment(getActivity(), trackedEntityInstances, orgUnit, programId);
+                    HolderActivity.navigateToOnlineSearchResultFragment(getActivity(), trackedEntityInstances, orgUnit, programId, backNavigation);
                 }
             });
         }

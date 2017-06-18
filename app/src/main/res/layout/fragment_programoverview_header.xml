@@ -56,6 +56,7 @@
             android:visibility="gone">
 
             <TextView
+                android:id="@+id/noactiveenrollment"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
@@ -317,6 +318,14 @@
                     android:layout_weight="1"
                     android:text="@string/relationships"
                     android:textSize="@dimen/medium_text_size" />
+
+                <Button
+                    android:id="@+id/pullrelationshipbutton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:layout_gravity="right"
+                    android:background="@drawable/transparent_selector"
+                    android:text="@string/refresh_string" />
 
                 <Button
                     android:id="@+id/addrelationshipbutton"

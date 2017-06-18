@@ -84,6 +84,7 @@ public class ProgramStageLabelRow implements ProgramStageRow {
             holder.newEventButton.setOnClickListener(listener);
             holder.newEventButton.setVisibility(View.VISIBLE);
             holder.newEventButton.setEnabled(true);
+            holder.newEventButton.setTag(programStage);
         }
         else
         {

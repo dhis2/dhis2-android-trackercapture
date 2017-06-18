@@ -94,12 +94,11 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="4dp"
         app:hint="@string/select_relationship_type" />
-    
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
-
         <org.hisp.dhis.android.sdk.ui.views.FontTextView
             android:id="@+id/tei_label"
             android:layout_width="wrap_content"
@@ -132,39 +131,57 @@
             android:gravity="center_vertical"
             android:id="@+id/spinner"
             android:layout_gravity="right|center_horizontal" />
+    </LinearLayout>
 
 
-        </LinearLayout>
-
-
-    <org.hisp.dhis.android.sdk.ui.views.FontEditText
-        android:id="@+id/filter_options"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_margin="16dp"
-        android:drawableRight ="@drawable/ic_search"
-        android:singleLine="true"
-        android:drawablePadding="4dp"
-        android:imeOptions="actionSearch"
-        android:inputType="text"
-        android:hint="@string/search"
-        app:font="@string/light_font_name"/>
-
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="28dp"
-        android:layout_gravity="center_horizontal"
-        android:indeterminate="true" />
+        android:orientation="vertical">
 
-    <ListView
-        android:id="@+id/simple_listview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:cacheColorHint="@color/transparent"
-        android:divider="@color/darker_grey"
-        android:dividerHeight="1px"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <org.hisp.dhis.android.sdk.ui.views.FontEditText
+                android:id="@+id/filter_options"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="0.8"
+                android:layout_margin="16dp"
+                android:drawableRight ="@drawable/ic_search"
+                android:singleLine="true"
+                android:drawablePadding="4dp"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:hint="@string/search"
+                app:font="@string/light_font_name"/>
+        <org.hisp.dhis.android.sdk.ui.views.FloatingActionButton
+            android:id="@+id/search_and_download_button"
+            android:layout_height="48dp"
+            android:layout_width="0dp"
+            android:layout_weight="0.15"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_search_server" />
+        </LinearLayout>
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="28dp"
+            android:layout_gravity="center_horizontal"
+            android:indeterminate="true" />
+
+        <ListView
+            android:id="@+id/simple_listview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:cacheColorHint="@color/transparent"
+            android:divider="@color/darker_grey"
+            android:dividerHeight="1px"/>
+    </LinearLayout>
 
 </LinearLayout>

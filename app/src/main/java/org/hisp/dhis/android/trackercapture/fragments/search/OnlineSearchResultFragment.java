@@ -21,6 +21,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.squareup.otto.Subscribe;
@@ -44,10 +45,10 @@ import org.hisp.dhis.android.sdk.ui.activities.SynchronisationStateHandler;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.AbsTextWatcher;
 import org.hisp.dhis.android.sdk.ui.dialogs.QueryTrackedEntityInstancesResultDialogAdapter;
 import org.hisp.dhis.android.sdk.ui.fragments.progressdialog.ProgressDialogFragment;
+import org.hisp.dhis.android.sdk.ui.views.FontEditText;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
-import org.joda.time.DateTime;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -71,12 +72,17 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
     private String orgUnitId;
     private String programId;
     private Map<String, ProgramTrackedEntityAttribute> programTrackedEntityAttributeMap;
+    private boolean backNavigation;
+    private ProgressBar mProgressBar;
+    private FontEditText filterButton;
+    private Button searchButton;
 
     public static final String EXTRA_TRACKEDENTITYINSTANCESLIST = "extra:trackedEntityInstances";
     public static final String EXTRA_TRACKEDENTITYINSTANCESSELECTED = "extra:trackedEntityInstancesSelected";
     public static final String EXTRA_ORGUNIT = "extra:orgUnit";
     public static final String EXTRA_SELECTALL = "extra:selectAll";
     public static final String EXTRA_PROGRAM = "extra:Program";
+    public static final String EXTRA_NAVIGATION = "extra:Navigation";
 
     public static OnlineSearchResultFragment newInstance(List<TrackedEntityInstance> trackedEntityInstances, String orgUnit) {
         OnlineSearchResultFragment dialogFragment = new OnlineSearchResultFragment();
@@ -128,9 +134,10 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
         int id = item.getItemId();
         if (id == R.id.action_load_to_device) {
             Activity activity = getActivity();
-            getActivity().finish();
-            initiateLoading(activity);
-
+            if(!backNavigation) {
+                getActivity().finish();
+            }
+            initiateLoading(activity, programId);
 
         } else if (id == android.R.id.home) {
             getActivity().finish();
@@ -149,7 +156,7 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
     public void onViewCreated(View view, Bundle savedInstanceState) {
         mListView = (ListView) view
                 .findViewById(org.hisp.dhis.android.sdk.R.id.simple_listview);
-
+        mProgressBar = (ProgressBar) view.findViewById(org.hisp.dhis.android.sdk.R.id.progress_bar);
         if (getActivity() instanceof AppCompatActivity) {
             getActionBar().setDisplayShowTitleEnabled(true);
             getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -157,11 +164,18 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
         }
         programId = getArguments().getString(EXTRA_PROGRAM);
         orgUnitId = getArguments().getString(EXTRA_ORGUNIT);
+        backNavigation = getArguments().getBoolean(EXTRA_NAVIGATION);
         Program selectedProgram = MetaDataController.getProgram(programId);
         mFilter = (EditText) view
                 .findViewById(org.hisp.dhis.android.sdk.R.id.filter_options);
         mDialogLabel = (TextView) view
                 .findViewById(org.hisp.dhis.android.sdk.R.id.dialog_label);
+
+
+        filterButton = (FontEditText) view
+                .findViewById(org.hisp.dhis.android.sdk.R.id.filter_options);
+        searchButton = (Button) view
+                .findViewById(org.hisp.dhis.android.sdk.R.id.teiqueryresult_selectall);
 
         UiUtils.hideKeyboard(getActivity());
 
@@ -320,12 +334,15 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
      * When it is done it will either display ProgramOverviewFragment if only one TEI and one Enrollment
      * is downloaded
      */
-    public void initiateLoading(final Activity activity) {
+    public void initiateLoading(final Activity activity, final String programId) {
 
+        mAdapter.swapData(null);
+        filterButton.setVisibility(View.INVISIBLE);
+        searchButton.setVisibility(View.INVISIBLE);
+        mProgressBar.setVisibility(View.VISIBLE);
         Dhis2Application.getEventBus().post(
                 new OnTeiDownloadedEvent(OnTeiDownloadedEvent.EventType.START,
                         getSelectedTrackedEntityInstances().size()));
-
         Log.d(TAG, "loading: " + getSelectedTrackedEntityInstances().size());
         downloadedTrackedEntityInstances = new ArrayList<>();
         downloadedEnrollments = new ArrayList<>();
@@ -342,7 +359,7 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
             @Override
             public Object execute() throws APIException {
                 SynchronisationStateHandler.getInstance().changeState(true);
-                List<TrackedEntityInstance> trackedEntityInstances = TrackerController.getTrackedEntityInstancesDataFromServer(DhisController.getInstance().getDhisApi(), getSelectedTrackedEntityInstances(), false);
+                List<TrackedEntityInstance> trackedEntityInstances = TrackerController.getTrackedEntityInstancesDataFromServer(DhisController.getInstance().getDhisApi(), getSelectedTrackedEntityInstances(), true, true);
 
                 if (trackedEntityInstances != null) {
                     if (downloadedTrackedEntityInstances == null) {
@@ -367,32 +384,57 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
 
 
                 if (downloadedTrackedEntityInstances != null && downloadedTrackedEntityInstances.size() == 1) {
-                    if (downloadedEnrollments != null && downloadedEnrollments.size() == 1) {
-                        final TrackedEntityInstance trackedEntityInstance = downloadedTrackedEntityInstances.get(0);
-                        final Enrollment enrollment = downloadedEnrollments.get(0);
+                    if (downloadedEnrollments != null) {
+                        Enrollment activeEnrollment = getActiveEnrollmentByProgram(programId);
 
+                        final Enrollment enrollment = activeEnrollment;
+                        if (enrollment != null) {
+                            final TrackedEntityInstance trackedEntityInstance =
+                                    downloadedTrackedEntityInstances.get(0);
 
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                HolderActivity.navigateToProgramOverviewFragment(activity,
-                                        orgUnitId,
-                                        enrollment.getProgram().getUid(),
-                                        trackedEntityInstance.getLocalId());
+                            if (!backNavigation) {
+                                activity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        HolderActivity.navigateToProgramOverviewFragment(activity,
+                                                orgUnitId,
+                                                enrollment.getProgram().getUid(),
+                                                trackedEntityInstance.getLocalId());
+                                    }
+                                });
                             }
-                        });
-
+                        }
                     }
                 }
                 Dhis2Application.getEventBus().post(
                         new OnTeiDownloadedEvent(OnTeiDownloadedEvent.EventType.END,
                                 getSelectedTrackedEntityInstances().size()));
                 Dhis2Application.getEventBus().post(new UiEvent(UiEvent.UiEventType.SYNCING_END));
-                SynchronisationStateHandler.getInstance().changeState(false);
+                SynchronisationStateHandler.getInstance().changeState(false);activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(backNavigation) {
+                            getActivity().finish();
+                            HolderActivity.mCallBack.onSuccess();
+                        }
+                    }
+                });
                 return new Object();
             }
         });
+    }
 
+    private Enrollment getActiveEnrollmentByProgram (String programId){
+        Enrollment activeEnrollment = null;
+
+        for (Enrollment enrollment : downloadedEnrollments) {
+            if (enrollment.getProgram().getUid().equals(programId)) {
+                activeEnrollment = enrollment;
+                break;
+            }
+        }
+
+        return activeEnrollment;
     }
 
     @Subscribe

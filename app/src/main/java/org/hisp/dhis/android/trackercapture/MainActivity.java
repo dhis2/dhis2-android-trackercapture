@@ -29,6 +29,8 @@
 
 package org.hisp.dhis.android.trackercapture;
 
+import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -45,14 +47,11 @@ import org.hisp.dhis.android.sdk.network.Session;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.models.UserAccount;
 import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
-import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.SelectProgramFragment;
 import org.hisp.dhis.client.sdk.ui.activities.AbsHomeActivity;
 import org.hisp.dhis.client.sdk.ui.fragments.InformationFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.WrapperFragment;
-
-import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
 public class MainActivity extends AbsHomeActivity {
     public final static String TAG = MainActivity.class.getSimpleName();
@@ -147,8 +146,6 @@ public class MainActivity extends AbsHomeActivity {
     }
 
     public void loadInitialData() {
-        String message = getString(org.hisp.dhis.android.sdk.R.string.finishing_up);
-        UiUtils.postProgressMessage(message);
         DhisService.loadInitialData(MainActivity.this);
     }
 

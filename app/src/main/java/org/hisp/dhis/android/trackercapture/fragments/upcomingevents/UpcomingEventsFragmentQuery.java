@@ -89,7 +89,11 @@ class UpcomingEventsFragmentQuery implements Query<SelectProgramFragmentForm> {
 
         List<String> attributesToShow = new ArrayList<>();
         UpcomingEventsColumnNamesRow columnNames = new UpcomingEventsColumnNamesRow();
-        columnNames.setTitle(mFilterLabel + " " + "EVENTS");
+        String title = "EVENTS";
+        if(mFilterLabel!=null){
+            title = mFilterLabel + " " + title;
+        }
+        columnNames.setTitle(title);
         for (ProgramTrackedEntityAttribute attribute : programTrackedEntityAttributes) {
             if (attribute.getDisplayInList() && attributesToShow.size() < mNumAttributesToShow) {
                 attributesToShow.add(attribute.getTrackedEntityAttributeId());

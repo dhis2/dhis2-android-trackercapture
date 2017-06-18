@@ -145,15 +145,6 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.menu_select_program, menu);
-        MenuItem item = menu.findItem(R.id.action_search);
-
-        SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
-        MenuItemCompat.setOnActionExpandListener(item, this);
-
-        searchView.setOnQueryTextListener(this);
-        searchView.setOnQueryTextFocusChangeListener(this);
-        searchView.setOnCloseListener(this);
     }
 
     @Override
@@ -246,7 +237,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     }
 
     private final void showOnlineSearchFragment(String orgUnit, String program) {
-        HolderActivity.navigateToOnlineSearchFragment(getActivity(), program, orgUnit);
+        HolderActivity.navigateToOnlineSearchFragment(getActivity(), program, orgUnit, false, null);
     }
 
     public void showStatusDialog(BaseSerializableModel model) {

@@ -78,5 +78,5 @@
 
     <string name="download_entities_title">Télécharger entités</string>
     <string name="enrollemnt_complete">Enregistrement complété</string>
-
+    <string name="profile_form_empty">Le formulaire est vide, veuillez remplir au moins un</string>
 </resources>

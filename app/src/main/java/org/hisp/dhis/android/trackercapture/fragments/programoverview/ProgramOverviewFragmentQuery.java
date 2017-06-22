@@ -52,6 +52,7 @@ import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.ProgramStage
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm> {
@@ -117,13 +118,15 @@ class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm>
         programOverviewFragmentForm.setProgramStageRows(programStageRows);
 
         List<ProgramIndicator> programIndicators = programOverviewFragmentForm.getProgram().getProgramIndicators();
-        programOverviewFragmentForm.setProgramIndicatorRows(new HashMap<ProgramIndicator, IndicatorRow>());
+        programOverviewFragmentForm.setProgramIndicatorRows(new LinkedHashMap<ProgramIndicator, IndicatorRow>());
         if(programIndicators != null ) {
             for(ProgramIndicator programIndicator : programIndicators) {
                 String value = ProgramIndicatorService.getProgramIndicatorValue(programOverviewFragmentForm.getEnrollment(), programIndicator);
-                IndicatorRow indicatorRow = new IndicatorRow(programIndicator, value);
+                IndicatorRow indicatorRow = new IndicatorRow(programIndicator, value, programIndicator.getDisplayDescription());
                 programOverviewFragmentForm.getProgramIndicatorRows().put(programIndicator, indicatorRow);
             }
+        }else{
+            programOverviewFragmentForm.getProgramIndicatorRows().clear();
         }
         return programOverviewFragmentForm;
     }

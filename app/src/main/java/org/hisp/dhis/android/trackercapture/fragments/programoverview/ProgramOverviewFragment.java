@@ -87,6 +87,7 @@ import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
 import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.IndicatorRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.PlainTextRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnDetailedInfoButtonClick;
 import org.hisp.dhis.android.sdk.ui.dialogs.ProgramDialogFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.common.AbsProgramRuleFragment;
 import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
@@ -1246,5 +1247,21 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     public boolean doBack() {
         getActivity().finish();
         return false;
+    }
+
+
+    @Subscribe
+    public void onShowDetailedInfo(OnDetailedInfoButtonClick eventClick)
+    {
+        UiUtils.showConfirmDialog(getActivity(),
+                getResources().getString(org.hisp.dhis.android.sdk.R.string.detailed_info_dataelement),
+                eventClick.getRow().getDescription(), getResources().getString(
+                        org.hisp.dhis.android.sdk.R.string.ok_option),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int i) {
+                        dialog.dismiss();
+                    }
+                });
     }
 }

@@ -121,13 +121,17 @@ class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm>
         programOverviewFragmentForm.setProgramIndicatorRows(new LinkedHashMap<ProgramIndicator, IndicatorRow>());
         if(programIndicators != null ) {
             for(ProgramIndicator programIndicator : programIndicators) {
-                String value = ProgramIndicatorService.getProgramIndicatorValue(programOverviewFragmentForm.getEnrollment(), programIndicator);
-                if(value!=null) {
-                    IndicatorRow indicatorRow = new IndicatorRow(programIndicator, value,
-                            programIndicator.getDisplayDescription());
-                    programOverviewFragmentForm.getProgramIndicatorRows().put(programIndicator,
-                            indicatorRow);
+                if(!programIndicator.isDisplayInForm()){
+                    continue;
                 }
+                String value = ProgramIndicatorService.getProgramIndicatorValue(programOverviewFragmentForm.getEnrollment(), programIndicator);
+                if(value==null) {
+                    continue;
+                }
+                IndicatorRow indicatorRow = new IndicatorRow(programIndicator, value,
+                        programIndicator.getDisplayDescription());
+                programOverviewFragmentForm.getProgramIndicatorRows().put(programIndicator,
+                        indicatorRow);
             }
         }else{
             programOverviewFragmentForm.getProgramIndicatorRows().clear();

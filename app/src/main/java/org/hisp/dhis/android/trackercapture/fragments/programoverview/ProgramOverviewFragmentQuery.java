@@ -122,8 +122,12 @@ class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm>
         if(programIndicators != null ) {
             for(ProgramIndicator programIndicator : programIndicators) {
                 String value = ProgramIndicatorService.getProgramIndicatorValue(programOverviewFragmentForm.getEnrollment(), programIndicator);
-                IndicatorRow indicatorRow = new IndicatorRow(programIndicator, value, programIndicator.getDisplayDescription());
-                programOverviewFragmentForm.getProgramIndicatorRows().put(programIndicator, indicatorRow);
+                if(value!=null) {
+                    IndicatorRow indicatorRow = new IndicatorRow(programIndicator, value,
+                            programIndicator.getDisplayDescription());
+                    programOverviewFragmentForm.getProgramIndicatorRows().put(programIndicator,
+                            indicatorRow);
+                }
             }
         }else{
             programOverviewFragmentForm.getProgramIndicatorRows().clear();

@@ -29,6 +29,7 @@
 
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
+apply plugin: 'jacoco-android'
 
 android {
 //    compileSdkVersion rootProject.ext.configuration.compileSdkVersion
@@ -57,10 +58,14 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        debug {
+            testCoverageEnabled true
+        }
     }
 
     lintOptions {
         disable 'RtlSymmetry', 'RtlHardcoded'
+        abortOnError false
     }
 
     packagingOptions {

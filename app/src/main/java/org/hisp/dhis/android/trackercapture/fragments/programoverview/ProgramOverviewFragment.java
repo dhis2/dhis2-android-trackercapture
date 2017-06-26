@@ -996,9 +996,9 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
 
             case R.id.complete: {
                 UiUtils.showConfirmDialog(getActivity(),
-                        getString(R.string.complete),
+                        getString(R.string.un_enroll),
                         getString(R.string.confirm_complete_enrollment),
-                        getString(R.string.complete),
+                        getString(R.string.un_enroll),
                         getString(R.string.cancel),
                         new DialogInterface.OnClickListener() {
                             @Override

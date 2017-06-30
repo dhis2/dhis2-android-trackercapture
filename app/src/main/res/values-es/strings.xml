@@ -79,4 +79,5 @@
     <string name="download_entities_title">Descargar entidades</string>
     <string name="enrollemnt_complete">Registro completo</string>
 
+    <string name="profile_form_empty">El formulario está vacío, por favor rellene al menos un campo</string>
 </resources>

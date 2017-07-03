@@ -36,19 +36,11 @@ import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
-import org.hisp.dhis.android.sdk.persistence.models.OptionSet;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
-import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowFactory;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.autocompleterow.AutoCompleteRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.CheckBoxRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowTypes;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DatePickerRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EditTextRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.RadioButtonsRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 import org.hisp.dhis.android.sdk.utils.api.ValueType;
 
@@ -59,7 +51,8 @@ import java.util.List;
 /**
  * Created by erling on 5/19/15.
  */
-public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedEntityInstanceProfileFragmentForm> {
+public class TrackedEntityInstanceProfileFragmentQuery implements
+        Query<TrackedEntityInstanceProfileFragmentForm> {
     private long mTrackedEntityInstanceId;
     private String mProgramId;
     private TrackedEntityInstance currentTrackedEntityInstance;
@@ -67,7 +60,8 @@ public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedE
     private long enrollmentId;
     private Enrollment currentEnrollment;
 
-    public TrackedEntityInstanceProfileFragmentQuery(long mTrackedEntityInstanceId, String mProgramId, long enrollmentId) {
+    public TrackedEntityInstanceProfileFragmentQuery(long mTrackedEntityInstanceId,
+            String mProgramId, long enrollmentId) {
         this.mTrackedEntityInstanceId = mTrackedEntityInstanceId;
         this.mProgramId = mProgramId;
         this.enrollmentId = enrollmentId;
@@ -75,9 +69,11 @@ public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedE
 
     @Override
     public TrackedEntityInstanceProfileFragmentForm query(Context context) {
-        TrackedEntityInstanceProfileFragmentForm mForm = new TrackedEntityInstanceProfileFragmentForm();
+        TrackedEntityInstanceProfileFragmentForm mForm =
+                new TrackedEntityInstanceProfileFragmentForm();
         final Program mProgram = MetaDataController.getProgram(mProgramId);
-        final TrackedEntityInstance mTrackedEntityInstance = TrackerController.getTrackedEntityInstance(mTrackedEntityInstanceId);
+        final TrackedEntityInstance mTrackedEntityInstance =
+                TrackerController.getTrackedEntityInstance(mTrackedEntityInstanceId);
 
         if (mProgram == null || mTrackedEntityInstance == null) {
             return mForm;
@@ -88,8 +84,11 @@ public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedE
         mForm.setTrackedEntityInstance(mTrackedEntityInstance);
         mForm.setTrackedEntityAttributeValueMap(new HashMap<String, TrackedEntityAttributeValue>());
 
-        List<TrackedEntityAttributeValue> trackedEntityAttributeValues = TrackerController.getProgramTrackedEntityAttributeValues(mProgram, mTrackedEntityInstance);
-        List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = MetaDataController.getProgramTrackedEntityAttributes(mProgramId);
+        List<TrackedEntityAttributeValue> trackedEntityAttributeValues =
+                TrackerController.getProgramTrackedEntityAttributeValues(mProgram,
+                        mTrackedEntityInstance);
+        List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes =
+                MetaDataController.getProgramTrackedEntityAttributes(mProgramId);
 
         if (trackedEntityAttributeValues == null && programTrackedEntityAttributes == null) {
             return mForm;
@@ -99,21 +98,32 @@ public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedE
         List<Row> dataEntryRows = new ArrayList<>();
         for (int i = 0; i < programTrackedEntityAttributes.size(); i++) {
             boolean shouldNeverBeEdited = false;
-            if(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().isGenerated()) {
+            if (programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().isGenerated()) {
                 shouldNeverBeEdited = true;
             }
-            if(ValueType.COORDINATE.equals(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getValueType())) {
+            if (ValueType.COORDINATE.equals(programTrackedEntityAttributes.get(
+                    i).getTrackedEntityAttribute().getValueType())) {
                 GpsController.activateGps(context);
             }
-            Row row = DataEntryRowFactory.createDataEntryView(programTrackedEntityAttributes.get(i).getMandatory(),
-                    programTrackedEntityAttributes.get(i).getAllowFutureDate(), programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getOptionSet(),
-                    programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getName(), getTrackedEntityDataValue(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getUid(),
-                            trackedEntityAttributeValues), programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getValueType(), false, shouldNeverBeEdited, mProgram.getDataEntryMethod());
+            Row row = DataEntryRowFactory.createDataEntryView(
+                    programTrackedEntityAttributes.get(i).getMandatory(),
+                    programTrackedEntityAttributes.get(i).getAllowFutureDate(),
+                    programTrackedEntityAttributes.get(
+                            i).getTrackedEntityAttribute().getOptionSet(),
+                    programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getName(),
+                    getTrackedEntityDataValue(programTrackedEntityAttributes.get(
+                            i).getTrackedEntityAttribute().getUid(),
+                            trackedEntityAttributeValues), programTrackedEntityAttributes.get(
+                            i).getTrackedEntityAttribute().getValueType(), false,
+                    shouldNeverBeEdited, mProgram.getDataEntryMethod());
             dataEntryRows.add(row);
         }
         if (trackedEntityAttributeValues != null) {
-            for (TrackedEntityAttributeValue trackedEntityAttributeValue : trackedEntityAttributeValues) {
-                mForm.getTrackedEntityAttributeValueMap().put(trackedEntityAttributeValue.getTrackedEntityAttributeId(), trackedEntityAttributeValue);
+            for (TrackedEntityAttributeValue trackedEntityAttributeValue :
+                    trackedEntityAttributeValues) {
+                mForm.getTrackedEntityAttributeValueMap().put(
+                        trackedEntityAttributeValue.getTrackedEntityAttributeId(),
+                        trackedEntityAttributeValue);
             }
         }
         mForm.setDataEntryRows(dataEntryRows);
@@ -121,9 +131,12 @@ public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedE
         return mForm;
     }
 
-    public TrackedEntityAttributeValue getTrackedEntityDataValue(String trackedEntityAttribute, List<TrackedEntityAttributeValue> trackedEntityAttributeValues) {
-        for (TrackedEntityAttributeValue trackedEntityAttributeValue : trackedEntityAttributeValues) {
-            if (trackedEntityAttributeValue.getTrackedEntityAttributeId().equals(trackedEntityAttribute)) {
+    public TrackedEntityAttributeValue getTrackedEntityDataValue(String trackedEntityAttribute,
+            List<TrackedEntityAttributeValue> trackedEntityAttributeValues) {
+        for (TrackedEntityAttributeValue trackedEntityAttributeValue :
+                trackedEntityAttributeValues) {
+            if (trackedEntityAttributeValue.getTrackedEntityAttributeId().equals(
+                    trackedEntityAttribute)) {
                 return trackedEntityAttributeValue;
             }
         }
@@ -131,8 +144,10 @@ public class TrackedEntityInstanceProfileFragmentQuery implements Query<TrackedE
         //the datavalue didnt exist for some reason. Create a new one.
         TrackedEntityAttributeValue trackedEntityAttributeValue = new TrackedEntityAttributeValue();
         trackedEntityAttributeValue.setTrackedEntityAttributeId(trackedEntityAttribute);
-        trackedEntityAttributeValue.setTrackedEntityInstanceId(currentTrackedEntityInstance.getTrackedEntityInstance());
-        trackedEntityAttributeValue.setLocalTrackedEntityInstanceId(currentTrackedEntityInstance.getLocalId());
+        trackedEntityAttributeValue.setTrackedEntityInstanceId(
+                currentTrackedEntityInstance.getTrackedEntityInstance());
+        trackedEntityAttributeValue.setLocalTrackedEntityInstanceId(
+                currentTrackedEntityInstance.getLocalId());
         trackedEntityAttributeValue.setValue("");
         trackedEntityAttributeValues.add(trackedEntityAttributeValue);
         return trackedEntityAttributeValue;

@@ -6,18 +6,11 @@ import android.util.Log;
 import org.hisp.dhis.android.sdk.controllers.GpsController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
-import org.hisp.dhis.android.sdk.persistence.models.OptionSet;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowFactory;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.autocompleterow.AutoCompleteRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.CheckBoxRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowTypes;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DatePickerRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EditTextRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.RadioButtonsRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 import org.hisp.dhis.android.sdk.utils.api.ValueType;
 
@@ -33,6 +26,7 @@ public class LocalSearchFragmentFormQuery implements Query<LocalSearchFragmentFo
         this.orgUnitId = orgUnitId;
         this.programId = programId;
     }
+
     @Override
     public LocalSearchFragmentForm query(Context context) {
         LocalSearchFragmentForm form = new LocalSearchFragmentForm();
@@ -42,33 +36,35 @@ public class LocalSearchFragmentFormQuery implements Query<LocalSearchFragmentFo
         Log.d(TAG, orgUnitId + programId);
 
         Program program = MetaDataController.getProgram(programId);
-        if(program == null || orgUnitId == null) {
+        if (program == null || orgUnitId == null) {
             return form;
         }
-        List<ProgramTrackedEntityAttribute> programAttrs = program.getProgramTrackedEntityAttributes();
+        List<ProgramTrackedEntityAttribute> programAttrs =
+                program.getProgramTrackedEntityAttributes();
         List<TrackedEntityAttributeValue> values = new ArrayList<>();
         List<Row> dataEntryRows = new ArrayList<>();
-        for(ProgramTrackedEntityAttribute ptea: programAttrs) {
+        for (ProgramTrackedEntityAttribute ptea : programAttrs) {
             TrackedEntityAttribute trackedEntityAttribute = ptea.getTrackedEntityAttribute();
             TrackedEntityAttributeValue value = new TrackedEntityAttributeValue();
             value.setTrackedEntityAttributeId(trackedEntityAttribute.getUid());
             values.add(value);
 
-            if(ptea.getMandatory()) {
-                ptea.setMandatory(!ptea.getMandatory()); // HACK to skip mandatory fields in search form
+            if (ptea.getMandatory()) {
+                ptea.setMandatory(
+                        !ptea.getMandatory()); // HACK to skip mandatory fields in search form
             }
-            if(ValueType.COORDINATE.equals(ptea.getTrackedEntityAttribute().getValueType())) {
+            if (ValueType.COORDINATE.equals(ptea.getTrackedEntityAttribute().getValueType())) {
                 GpsController.activateGps(context);
             }
             Row row = DataEntryRowFactory.createDataEntryView(ptea.getMandatory(),
                     ptea.getAllowFutureDate(), trackedEntityAttribute.getOptionSet(),
-                    trackedEntityAttribute.getName(), value, trackedEntityAttribute.getValueType(), true, false,program.getDataEntryMethod());
+                    trackedEntityAttribute.getName(), value, trackedEntityAttribute.getValueType(),
+                    true, false, program.getDataEntryMethod());
             dataEntryRows.add(row);
         }
         form.setTrackedEntityAttributeValues(values);
         form.setDataEntryRows(dataEntryRows);
         return form;
-
 
 
     }

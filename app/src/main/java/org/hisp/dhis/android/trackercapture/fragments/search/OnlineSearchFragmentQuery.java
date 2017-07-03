@@ -5,20 +5,12 @@ import android.util.Log;
 
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
-import org.hisp.dhis.android.sdk.persistence.models.OptionSet;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowFactory;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.autocompleterow.AutoCompleteRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.CheckBoxRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowTypes;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DatePickerRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EditTextRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.RadioButtonsRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
-import org.hisp.dhis.android.sdk.utils.api.ValueType;
 
 import java.util.ArrayList;
 import java.util.List;

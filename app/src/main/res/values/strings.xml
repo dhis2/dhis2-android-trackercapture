@@ -81,4 +81,5 @@
     <string name="download_entities_title">Download entities</string>
     <string name="enrollemnt_complete">Enrollment is complete</string>
 
+    <string name="profile_form_empty">Form is empty, please fill at least one</string>
 </resources>

@@ -29,6 +29,8 @@
 
 package org.hisp.dhis.android.trackercapture.fragments.enrollment;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
@@ -71,8 +73,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDataEntryFragmentForm>
         implements OnBackPressedListener {
@@ -329,7 +329,13 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     }
 
     private boolean validate() {
-        ArrayList<String> programRulesValidationErrors = getProgramRuleFragmentHelper().getProgramRuleValidationErrors();
+        if (isMapEmpty(form.getTrackedEntityAttributeValueMap())) {
+            UiUtils.showErrorDialog(getActivity(), getContext().getString(org.hisp.dhis.android.trackercapture.R.string.error_message),
+                    getContext().getString(org.hisp.dhis.android.trackercapture.R.string.profile_form_empty));
+            return false;
+        }
+        ArrayList<String> programRulesValidationErrors =
+                getProgramRuleFragmentHelper().getProgramRuleValidationErrors();
         ArrayList<String> mandatoryValidationErrors = getValidationErrors();
         if (programRulesValidationErrors.isEmpty() && mandatoryValidationErrors.isEmpty()) {
             return true;
@@ -337,6 +343,18 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             showValidationErrorDialog(mandatoryValidationErrors, programRulesValidationErrors);
             return false;
         }
+    }
+
+    private boolean isMapEmpty(
+            Map<String, TrackedEntityAttributeValue> trackedEntityAttributeValueMap) {
+        boolean isEmpty = true;
+        for (String key : trackedEntityAttributeValueMap.keySet()) {
+            TrackedEntityAttributeValue value = trackedEntityAttributeValueMap.get(key);
+            if (value.getValue() != null && !value.getValue().equals("")) {
+                isEmpty = false;
+            }
+        }
+        return isEmpty;
     }
 
     private void evaluateRules(String trackedEntityAttribute) {

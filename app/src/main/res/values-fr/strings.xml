@@ -51,7 +51,7 @@
     <string name="error_series_500_description">Erreur de serveur 50x. Prière de synchroniser plus tard.</string>
     <string name="unknown_error">Erreur inconnue</string>
 
-    <string name="confirm_complete_enrollment">Souhaitez-vous vraiment compléter l\'enregistrement?\n        Vous ne pourrez plus éditer ultérierement</string>
+    <string name="confirm_complete_enrollment">Souhaitez-vous vraiment désinscription l\'enregistrement?\n        Vous ne pourrez plus éditer ultérierement</string>
     <string name="confirm_terminate_enrollment">Souhaitez-vous vraiment annuler cette\n        enregistrement ? Vous ne pourrez plus revenir en arrière.</string>
     <string name="confirm_delete_relationship">Souhaitez-vous vraiment supprimer cette relation ?</string>
     <string name="no_active_enrollment">Pas d\'enregistrement actif</string>

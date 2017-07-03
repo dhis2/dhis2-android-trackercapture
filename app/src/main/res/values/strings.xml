@@ -51,7 +51,7 @@
     <string name="error_series_500_description">50x server error. Please, try to synchronize later.</string>
     <string name="unknown_error">Unknown error</string>
 
-    <string name="confirm_complete_enrollment">Are you sure you want to complete the current
+    <string name="confirm_complete_enrollment">Are you sure you want to un-enroll the current
         enrollment? No more editing will be possible.</string>
     <string name="confirm_terminate_enrollment">Are you sure you want to cancel the current
         enrollment? This cannot be undone.</string>
@@ -81,4 +81,5 @@
     <string name="download_entities_title">Download entities</string>
     <string name="enrollemnt_complete">Enrollment is complete</string>
 
+    <string name="profile_form_empty">Form is empty, please fill at least one</string>
 </resources>

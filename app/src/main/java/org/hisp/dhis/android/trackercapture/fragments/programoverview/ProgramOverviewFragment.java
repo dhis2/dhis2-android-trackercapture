@@ -33,6 +33,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -495,6 +496,11 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
 
             mSpinner.setSelection(getSpinnerIndex(mState.getProgramName()));
 
+            if(mForm!=null){
+                setRelationships(
+                        getLayoutInflater(getArguments().getBundle(EXTRA_SAVED_INSTANCE_STATE)));
+            }
+
             if (mForm == null || mForm.getEnrollment() == null) {
                 showNoActiveEnrollment(mForm);
                 return;
@@ -590,8 +596,6 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                     }
                 }
             }
-            setRelationships(
-                    getLayoutInflater(getArguments().getBundle(EXTRA_SAVED_INSTANCE_STATE)));
 
             LinearLayout programIndicatorLayout =
                     (LinearLayout) programIndicatorCardView.findViewById(
@@ -674,6 +678,17 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
 
                     relativeLabel.setText(relativeString);
 
+                    relativeLabel.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if(!relationship.getTrackedEntityInstanceA().equals(mForm.getTrackedEntityInstance().getUid())) {
+                                moveToRelative(relationship.getTrackedEntityInstanceA(), getActivity());
+                            }
+                            else{
+                                moveToRelative(relationship.getTrackedEntityInstanceB(), getActivity());
+                            }
+                        }
+                    });
                     ll.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -698,6 +713,12 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 }
             }
         }
+    }
+
+    private void moveToRelative(String trackedEntityInstanceUid, FragmentActivity activity) {
+        activity.finish();
+        TrackedEntityInstance trackedEntityInstance =TrackerController.getTrackedEntityInstance(trackedEntityInstanceUid);
+        HolderActivity.navigateToProgramOverviewFragment(activity, mState.getOrgUnitId(), mState.getProgramId(), trackedEntityInstance.getLocalId());
     }
 
     private String getRelativeString(TrackedEntityInstance relative) {
@@ -826,18 +847,21 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                         trackedEntityInstance.getLocalId());
         {
             //update profile view
-            if (trackedEntityAttributeValues != null) {
+            if (trackedEntityAttributeValues != null && trackedEntityAttributeValues.size()>0) {
                 TrackedEntityAttribute attribute = MetaDataController.getTrackedEntityAttribute(
                         trackedEntityAttributeValues.get(0).getTrackedEntityAttributeId());
                 if (attribute != null) {
                     attribute1Label.setText(attribute.getName());
                     attribute1Value.setText(trackedEntityAttributeValues.get(0).getValue());
                 }
-                attribute = MetaDataController.getTrackedEntityAttribute(
-                        trackedEntityAttributeValues.get(1).getTrackedEntityAttributeId());
-                if (attribute != null) {
-                    attribute2Label.setText(attribute.getName());
-                    attribute2Value.setText(trackedEntityAttributeValues.get(1).getValue());
+
+                if (trackedEntityAttributeValues.size()>1) {
+                    attribute = MetaDataController.getTrackedEntityAttribute(
+                            trackedEntityAttributeValues.get(1).getTrackedEntityAttributeId());
+                    if (attribute != null) {
+                        attribute2Label.setText(attribute.getName());
+                        attribute2Value.setText(trackedEntityAttributeValues.get(1).getValue());
+                    }
                 }
             }
 

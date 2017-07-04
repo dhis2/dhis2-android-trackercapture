@@ -21,15 +21,13 @@ public class OnlineSearchFragmentQuery implements Query<OnlineSearchFragmentForm
     private String orgUnit;
     private String programId;
 
-    public OnlineSearchFragmentQuery(String orgUnit, String programId)
-    {
+    public OnlineSearchFragmentQuery(String orgUnit, String programId) {
         this.programId = programId;
         this.orgUnit = orgUnit;
     }
 
     @Override
-    public OnlineSearchFragmentForm query(Context context)
-    {
+    public OnlineSearchFragmentForm query(Context context) {
         OnlineSearchFragmentForm form = new OnlineSearchFragmentForm();
         form.setOrganisationUnit(orgUnit);
         form.setProgram(programId);
@@ -37,25 +35,28 @@ public class OnlineSearchFragmentQuery implements Query<OnlineSearchFragmentForm
         Log.d(TAG, orgUnit + programId);
 
         Program program = MetaDataController.getProgram(programId);
-        if(program == null || orgUnit == null) {
+        if (program == null || orgUnit == null) {
             return form;
         }
-        List<ProgramTrackedEntityAttribute> programAttrs = program.getProgramTrackedEntityAttributes();
+        List<ProgramTrackedEntityAttribute> programAttrs =
+                program.getProgramTrackedEntityAttributes();
         List<TrackedEntityAttributeValue> values = new ArrayList<>();
         List<Row> dataEntryRows = new ArrayList<>();
-        for(ProgramTrackedEntityAttribute ptea: programAttrs) {
+        for (ProgramTrackedEntityAttribute ptea : programAttrs) {
             TrackedEntityAttribute trackedEntityAttribute = ptea.getTrackedEntityAttribute();
             TrackedEntityAttributeValue value = new TrackedEntityAttributeValue();
             value.setTrackedEntityAttributeId(trackedEntityAttribute.getUid());
             values.add(value);
 
-            if(ptea.getMandatory()) {
-                ptea.setMandatory(!ptea.getMandatory()); // HACK to skip mandatory fields in search form
+            if (ptea.getMandatory()) {
+                ptea.setMandatory(
+                        !ptea.getMandatory()); // HACK to skip mandatory fields in search form
             }
 
             Row row = DataEntryRowFactory.createDataEntryView(ptea.getMandatory(),
                     ptea.getAllowFutureDate(), trackedEntityAttribute.getOptionSet(),
-                    trackedEntityAttribute.getName(), value, trackedEntityAttribute.getValueType(), true, false, program.getDataEntryMethod());
+                    trackedEntityAttribute.getName(), value, trackedEntityAttribute.getValueType(),
+                    true, false, program.getDataEntryMethod());
             dataEntryRows.add(row);
         }
         form.setTrackedEntityAttributeValues(values);

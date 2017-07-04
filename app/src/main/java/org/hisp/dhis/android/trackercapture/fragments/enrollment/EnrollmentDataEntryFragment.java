@@ -56,6 +56,7 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.ui.adapters.SectionAdapter;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowTypes;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.RunProgramRulesEvent;
@@ -336,10 +337,15 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
         ArrayList<String> programRulesValidationErrors =
                 getProgramRuleFragmentHelper().getProgramRuleValidationErrors();
         ArrayList<String> mandatoryValidationErrors = getValidationErrors();
-        if (programRulesValidationErrors.isEmpty() && mandatoryValidationErrors.isEmpty()) {
+        ArrayList<String> validationErrors = new ArrayList<>();
+        for(DataEntryRow dataEntryRow : form.getDataEntryRows()){
+            if(dataEntryRow.getValidationError()!=null)
+                validationErrors.add(getContext().getString(dataEntryRow.getValidationError()));
+        }
+        if (programRulesValidationErrors.isEmpty() && mandatoryValidationErrors.isEmpty() && validationErrors.isEmpty()) {
             return true;
         } else {
-            showValidationErrorDialog(mandatoryValidationErrors, programRulesValidationErrors);
+            showValidationErrorDialog(mandatoryValidationErrors, programRulesValidationErrors, validationErrors);
             return false;
         }
     }

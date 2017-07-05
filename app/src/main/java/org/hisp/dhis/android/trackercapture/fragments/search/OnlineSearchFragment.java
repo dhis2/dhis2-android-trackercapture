@@ -35,7 +35,7 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.adapters.DataValueAdapter;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.AbsTextWatcher;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.CoordinatesRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EventCoordinatesRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.IndicatorRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.StatusRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnDetailedInfoButtonClick;
@@ -238,7 +238,7 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
     {
         String message = "";
 
-        if (eventClick.getRow() instanceof CoordinatesRow)
+        if (eventClick.getRow() instanceof EventCoordinatesRow)
             message = getResources().getString(org.hisp.dhis.android.sdk.R.string.detailed_info_coordinate_row);
         else if (eventClick.getRow() instanceof StatusRow)
             message = getResources().getString(org.hisp.dhis.android.sdk.R.string.detailed_info_status_row);

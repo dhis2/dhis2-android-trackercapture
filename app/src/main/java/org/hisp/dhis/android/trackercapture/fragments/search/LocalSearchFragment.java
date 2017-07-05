@@ -23,15 +23,11 @@ import com.squareup.otto.Subscribe;
 import org.hisp.dhis.android.sdk.controllers.GpsController;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
-
-import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
-import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
-import org.hisp.dhis.android.sdk.ui.activities.INavigationHandler;
 import org.hisp.dhis.android.sdk.ui.adapters.DataValueAdapter;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.CoordinatesRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EventCoordinatesRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.IndicatorRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.StatusRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnDetailedInfoButtonClick;
@@ -43,7 +39,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class LocalSearchFragment extends Fragment implements LoaderManager.LoaderCallbacks<LocalSearchFragmentForm> {
+public class LocalSearchFragment extends Fragment implements
+        LoaderManager.LoaderCallbacks<LocalSearchFragmentForm> {
     public static final String EXTRA_PROGRAM = "extra:ProgramId";
     public static final String EXTRA_ORGUNIT = "extra:OrgUnitId";
     public static final String EXTRA_SAVED_INSTANCE_STATE = "extra:savedInstanceState";
@@ -70,11 +67,11 @@ public class LocalSearchFragment extends Fragment implements LoaderManager.Loade
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-    Bundle arguments = getArguments();
-    programId = arguments.getString(EXTRA_PROGRAM);
-    orgUnitId = arguments.getString(EXTRA_ORGUNIT);
+        Bundle arguments = getArguments();
+        programId = arguments.getString(EXTRA_PROGRAM);
+        orgUnitId = arguments.getString(EXTRA_ORGUNIT);
 
-    setHasOptionsMenu(true);
+        setHasOptionsMenu(true);
 
     }
 
@@ -91,21 +88,28 @@ public class LocalSearchFragment extends Fragment implements LoaderManager.Loade
     }
 
     @Subscribe
-    public void onShowDetailedInfo(OnDetailedInfoButtonClick eventClick) // may re-use code from DataEntryFragment
+    public void onShowDetailedInfo(
+            OnDetailedInfoButtonClick eventClick) // may re-use code from DataEntryFragment
     {
         String message = "";
 
-        if (eventClick.getRow() instanceof CoordinatesRow)
-            message = getResources().getString(org.hisp.dhis.android.sdk.R.string.detailed_info_coordinate_row);
-        else if (eventClick.getRow() instanceof StatusRow)
-            message = getResources().getString(org.hisp.dhis.android.sdk.R.string.detailed_info_status_row);
-        else if (eventClick.getRow() instanceof IndicatorRow)
+        if (eventClick.getRow() instanceof EventCoordinatesRow){
+            message = getResources().getString(
+                    org.hisp.dhis.android.sdk.R.string.detailed_info_coordinate_row);
+        } else if (eventClick.getRow() instanceof StatusRow) {
+            message = getResources().getString(
+                    org.hisp.dhis.android.sdk.R.string.detailed_info_status_row);
+        } else if (eventClick.getRow() instanceof IndicatorRow) {
             message = ""; // need to change ProgramIndicator to extend BaseValue for this to work
-        else         // rest of the rows can either be of data element or tracked entity instance attribute
+        } else         // rest of the rows can either be of data element or tracked entity instance
+        // attribute
+        {
             message = eventClick.getRow().getDescription();
+        }
 
         UiUtils.showConfirmDialog(getActivity(),
-                getResources().getString(org.hisp.dhis.android.sdk.R.string.detailed_info_dataelement),
+                getResources().getString(
+                        org.hisp.dhis.android.sdk.R.string.detailed_info_dataelement),
                 message, getResources().getString(org.hisp.dhis.android.sdk.R.string.ok_option),
                 new DialogInterface.OnClickListener() {
                     @Override
@@ -128,14 +132,14 @@ public class LocalSearchFragment extends Fragment implements LoaderManager.Loade
 
             buildQuery();
 //            LocalSearchResultFragment fragment = LocalSearchResultFragment.newInstance(
-//                    mForm.getOrganisationUnitId(), mForm.getProgram(), mForm.getAttributeValues());
+//                    mForm.getOrganisationUnitId(), mForm.getProgram(), mForm.getAttributeValues
+// ());
             HolderActivity.navigateToLocalSearchResultFragment(getActivity(),
                     mForm.getOrganisationUnitId(),
                     mForm.getProgram(), mForm.getAttributeValues());
 //            navigationHandler.switchFragment(
 //                    fragment, fragment.getClass().getSimpleName(), true);
-        }
-        else if (id == android.R.id.home) {
+        } else if (id == android.R.id.home) {
             getActivity().finish();
             return true;
         }
@@ -156,8 +160,8 @@ public class LocalSearchFragment extends Fragment implements LoaderManager.Loade
     public void buildQuery() {
         HashMap<String, String> attributeValueMap = new HashMap<>();
 
-        for(TrackedEntityAttributeValue value : mForm.getTrackedEntityAttributeValues()) {
-            if(value.getValue() != null && !value.getValue().isEmpty()) {
+        for (TrackedEntityAttributeValue value : mForm.getTrackedEntityAttributeValues()) {
+            if (value.getValue() != null && !value.getValue().isEmpty()) {
                 attributeValueMap.put(value.getTrackedEntityAttributeId(), value.getValue());
             }
         }
@@ -167,7 +171,8 @@ public class LocalSearchFragment extends Fragment implements LoaderManager.Loade
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.activity_local_search, container, false);
     }
 
@@ -175,13 +180,15 @@ public class LocalSearchFragment extends Fragment implements LoaderManager.Loade
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        if(getActivity() instanceof AppCompatActivity) {
+        if (getActivity() instanceof AppCompatActivity) {
             getActionBar().setTitle(getString(R.string.local_search));
             getActionBar().setDisplayHomeAsUpEnabled(true);
             getActionBar().setHomeButtonEnabled(true);
         }
-        trackedEntityAttributeListView = (ListView) view.findViewById(R.id.localSearchAttributeListView);
-        mAdapter = new DataValueAdapter(getChildFragmentManager(), getActivity().getLayoutInflater());
+        trackedEntityAttributeListView = (ListView) view.findViewById(
+                R.id.localSearchAttributeListView);
+        mAdapter = new DataValueAdapter(getChildFragmentManager(),
+                getActivity().getLayoutInflater());
         trackedEntityAttributeListView.setAdapter(mAdapter);
     }
 
@@ -228,7 +235,8 @@ public class LocalSearchFragment extends Fragment implements LoaderManager.Loade
     }
 
     @Override
-    public void onLoadFinished(Loader<LocalSearchFragmentForm> loader, LocalSearchFragmentForm data) {
+    public void onLoadFinished(Loader<LocalSearchFragmentForm> loader,
+            LocalSearchFragmentForm data) {
         if (loader.getId() == LOADER_ID && isAdded()) {
             trackedEntityAttributeListView.setVisibility(View.VISIBLE);
 

@@ -53,11 +53,7 @@ public class HolderActivity extends AbsHomeActivity {
     @Override
     public void onBackPressed() {
         if (onBackPressedListener != null) {
-            if (onBackPressedListener instanceof  EventDataEntryFragment) {
-                if(((EventDataEntryFragment) onBackPressedListener).onBackPressed()){
-                    super.onBackPressed();
-                }
-            }else if (onBackPressedListener.doBack()) {
+            if (onBackPressedListener.doBack()) {
                 super.onBackPressed();
             }
         } else {

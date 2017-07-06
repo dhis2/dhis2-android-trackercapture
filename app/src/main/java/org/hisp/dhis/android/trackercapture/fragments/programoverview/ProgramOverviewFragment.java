@@ -573,9 +573,6 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                             // to create exactly one event
                             stageRow.setButtonListener(this);
                         }
-                        if (stageRow.getProgramStage().getAllowGenerateNextVisit()) {
-                            stageRow.setButtonListener(this);
-                        }
                     }
 
                 } else if (row instanceof ProgramStageEventRow) {

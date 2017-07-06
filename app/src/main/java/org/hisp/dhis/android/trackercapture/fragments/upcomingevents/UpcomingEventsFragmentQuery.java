@@ -33,11 +33,8 @@ import android.content.Context;
 
 import com.raizlabs.android.dbflow.sql.language.Select;
 
-import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
-import org.hisp.dhis.android.sdk.persistence.preferences.DateTimeManager;
-import org.hisp.dhis.android.sdk.ui.dialogs.UpcomingEventsDialogFilter;
-import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
+import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.Option;
@@ -45,9 +42,11 @@ import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
+import org.hisp.dhis.android.sdk.ui.dialogs.UpcomingEventsDialogFilter;
+import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
+import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.UpcomingEventItemRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.UpcomingEventsColumnNamesRow;
-import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -89,9 +88,9 @@ class UpcomingEventsFragmentQuery implements Query<SelectProgramFragmentForm> {
 
         List<String> attributesToShow = new ArrayList<>();
         UpcomingEventsColumnNamesRow columnNames = new UpcomingEventsColumnNamesRow();
-        String title = "EVENTS";
+        String title = context.getString(R.string.events);
         if(mFilterLabel!=null){
-            title = mFilterLabel + " " + title;
+            title = getLabelTitle(mFilterLabel, context);
         }
         columnNames.setTitle(title);
         for (ProgramTrackedEntityAttribute attribute : programTrackedEntityAttributes) {
@@ -139,6 +138,19 @@ class UpcomingEventsFragmentQuery implements Query<SelectProgramFragmentForm> {
         fragmentForm.setEventRowList(eventUpcomingEventRows);
         fragmentForm.setProgram(selectedProgram);
         return fragmentForm;
+    }
+
+    private String getLabelTitle(String filterLabel, Context context) {
+        if (UpcomingEventsDialogFilter.Type.UPCOMING.toString().equalsIgnoreCase(mFilterLabel)) {
+            return context.getString(R.string.upcoming_events);
+        } else if (UpcomingEventsDialogFilter.Type.OVERDUE.toString().equalsIgnoreCase(
+                mFilterLabel)) {
+            return context.getString(R.string.overdue_events);
+        } else if (UpcomingEventsDialogFilter.Type.ACTIVE.toString().equalsIgnoreCase(
+                mFilterLabel)) {
+            return context.getString(R.string.active_events);
+        }
+        return "";
     }
 
     private UpcomingEventItemRow createEventItem(Event event, List<String> attributesToShow,

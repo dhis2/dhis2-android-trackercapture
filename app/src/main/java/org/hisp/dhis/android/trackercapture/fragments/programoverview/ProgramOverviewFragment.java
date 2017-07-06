@@ -1108,7 +1108,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
 
     private Enrollment getLastEnrollmentForTrackedEntityInstance() {
         List<Enrollment> enrollments = TrackerController.getEnrollments(
-                mForm.getTrackedEntityInstance());
+                mForm.getTrackedEntityInstance(), mForm.getProgram().getUid(), mForm.getTrackedEntityInstance().getOrgUnit());
          if(enrollments==null || enrollments.size()==0) {
             return null;
         }

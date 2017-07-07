@@ -39,6 +39,19 @@ import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 public class TrackerCaptureApplication extends Dhis2Application {
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+
+//        if (LeakCanary.isInAnalyzerProcess(this)) {
+//            // This process is dedicated to LeakCanary for heap analysis.
+//            // You should not init your app in this process.
+//            return;
+//        }
+//
+//        LeakCanary.install(this);
+    }
+
+    @Override
     public Class<? extends Activity> getMainActivity() {
         return new MainActivity().getClass();
     }

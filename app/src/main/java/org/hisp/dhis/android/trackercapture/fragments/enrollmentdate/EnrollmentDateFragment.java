@@ -57,7 +57,7 @@ import java.util.List;
  */
 public class EnrollmentDateFragment extends DataEntryFragment<EnrollmentDateFragmentForm>
 {
-    private static final String ENROLLMENT_ID = "extra:EnrollmentId";
+    public static final String ENROLLMENT_ID = "extra:EnrollmentId";
     private static final String EXTRA_ARGUMENTS = "extra:Arguments";
     private static final String EXTRA_SAVED_INSTANCE_STATE = "extra:savedInstanceState";
     public static final String TAG = EnrollmentDateFragment.class.getSimpleName();
@@ -97,7 +97,10 @@ public class EnrollmentDateFragment extends DataEntryFragment<EnrollmentDateFrag
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        getActionBar().setDisplayShowTitleEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
+        getActionBar().setTitle(R.string.enrollment);
     }
 
 
@@ -120,7 +123,8 @@ public class EnrollmentDateFragment extends DataEntryFragment<EnrollmentDateFrag
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem) {
         if (menuItem.getItemId() == android.R.id.home) {
-            getFragmentManager().popBackStack();
+//            getFragmentManager().popBackStack();
+            getActivity().finish();
         }
         else if (menuItem.getItemId() == org.hisp.dhis.android.sdk.R.id.action_new_event)
         {
@@ -161,6 +165,7 @@ public class EnrollmentDateFragment extends DataEntryFragment<EnrollmentDateFrag
         if (mForm == null ) {
             return;
         }
+        edit = true;
         save();
 
     }
@@ -190,13 +195,29 @@ public class EnrollmentDateFragment extends DataEntryFragment<EnrollmentDateFrag
         {
             mForm.getEnrollment().setFromServer(false);
             mForm.getEnrollment().save();
+
         }
+        edit = false;
     }
 
     @Override
     protected void proceed() {
 
     }
+
+
+    //@Override
+    protected boolean goBack() {
+        if(isValid()) {
+            goBackToPreviousActivity();
+        }
+        return false;
+    }
+
+    private void goBackToPreviousActivity() {
+        getActivity().finish();
+    }
+
 
     @Override
     public void onLoadFinished(Loader<EnrollmentDateFragmentForm> loader, EnrollmentDateFragmentForm data)

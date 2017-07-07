@@ -1,8 +1,6 @@
 # dhis2-android-trackercapture
 Android application for DHIS 2 for tracking of persons and things.
 
-The refactored version of Tracker Capture, utilizing our new SDK is on the roadmap to be finished by 1st May 2016
-
 Get the APK from the release page:
 
 https://github.com/dhis2/dhis2-android-trackercapture/releases
@@ -14,12 +12,31 @@ If you want to try the application out with a demo database, you can use the fol
 - Password: Android123
 
 # How to Download and Set up in Android Studio
-Want a step wise document on how to build this app? 
-https://docs.google.com/document/d/141uX2IKA7NRouaYDAPUhJu29WRmiw7UxwNtXSj_iOVA/edit
+Stepwise explanation on how to set it up: https://docs.google.com/document/d/141uX2IKA7NRouaYDAPUhJu29WRmiw7UxwNtXSj_iOVA/edit?usp=sharing 
+
 To successfully build and run this project, the dhis2-android-sdk is required.
 
 The dhis2-android-sdk project https://github.com/dhis2/dhis2-android-sdk folder should be in the same root folder as the dhis2-android-trackercapture.
-A workspace folder structure would look like this:
+
+For 2.23-legacy branch: A workspace folder structure would look like this:
+
+> .
+
+> ..
+
+> dhis2-android-sdk
+
+> dhis2-android-trackercapture
+
+> dhis2-android-new-sdk
+
+dhis2-android-sdk project should be in branch 2.23-legacy. 
+dhis2-android-trackercapture should be in branch 2.23-legacy.
+dhis2-android-new-sdk should be in branch eventcapture
+
+dhis2-android-new-sdk is the same project as dhis2-android-sdk but in a different branch. This means that you need to keep two sets of this project in your workspace. Since these two projects cannot have the same folder name the sdk-project in master branch should be renamed to dhis2-android-new-sdk
+
+For older branches below 2.23: A workspace folder structure would look like this:
 
 > .
 

@@ -72,6 +72,13 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:src="@drawable/ic_menu_find_mtrl_alpha" />
+        <org.hisp.dhis.android.sdk.ui.views.FloatingActionButton
+            android:id="@+id/local_search_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:src="@drawable/ic_search_device_white" />
+
 
         </LinearLayout>
 
@@ -84,5 +91,8 @@
         android:layout_marginBottom="28dp"
         android:layout_gravity="center_horizontal"
         android:indeterminate="true" />
-
+    <TextView
+               android:id="@+id/textview_no_items"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content" />
 </LinearLayout>

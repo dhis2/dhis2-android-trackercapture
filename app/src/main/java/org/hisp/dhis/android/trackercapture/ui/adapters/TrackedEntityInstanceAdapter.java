@@ -37,6 +37,9 @@ import android.widget.Filter;
 import android.widget.Filterable;
 
 import org.hisp.dhis.android.sdk.events.OnRowClick;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.adapters.AbsAdapter;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceColumnNamesRow;
@@ -159,15 +162,26 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<EventRow> implement
                     for (int i = 0, l = allRows.size(); i < l; i++) {
                         EventRow row = allRows.get(i);
                         if ( row != null && row instanceof TrackedEntityInstanceItemRow ) {
-
-                            if ( ( (TrackedEntityInstanceItemRow) row ).getmFirstItem() != null)
-                                if ( ( (TrackedEntityInstanceItemRow) row ).getmFirstItem().toLowerCase().contains(constraint))
+                            TrackedEntityInstanceItemRow trackedEntityInstanceItemRow = (TrackedEntityInstanceItemRow) row;
+//                            List<TrackedEntityAttributeValue> trackedEntityAttributeValues =
+//                                    trackedEntityInstanceItemRow.getTrackedEntityInstance().getAttributes();
+//
+//                            for(TrackedEntityAttributeValue trackedEntityAttributeValue : trackedEntityAttributeValues) {
+//
+//                                if( trackedEntityAttributeValue.getValue() != null &&
+//                                        trackedEntityAttributeValue.getValue().toLowerCase().contains(constraint)) {
+//                                    filteredItems.add(row);
+//                                    break;
+//                                }
+//                            }
+                            if ( trackedEntityInstanceItemRow.getmFirstItem() != null)
+                                if ( trackedEntityInstanceItemRow.getmFirstItem().toLowerCase().contains(constraint))
                                     filteredItems.add(row);
-                                else if ( ( (TrackedEntityInstanceItemRow) row ).getmSecondItem() != null)
-                                    if ( ( (TrackedEntityInstanceItemRow) row ).getmSecondItem().toLowerCase().contains(constraint))
+                                else if ( trackedEntityInstanceItemRow.getmSecondItem() != null)
+                                    if ( trackedEntityInstanceItemRow.getmSecondItem().toLowerCase().contains(constraint))
                                         filteredItems.add(row);
-                                    else if ( ( (TrackedEntityInstanceItemRow) row ).getmThirdItem() != null)
-                                        if ( ( (TrackedEntityInstanceItemRow) row ).getmThirdItem().toLowerCase().contains(constraint))
+                                    else if ( trackedEntityInstanceItemRow.getmThirdItem() != null)
+                                        if ( trackedEntityInstanceItemRow.getmThirdItem().toLowerCase().contains(constraint))
                                             filteredItems.add(row);
                         } else {
                             if (row instanceof TrackedEntityInstanceColumnNamesRow)
@@ -278,6 +292,14 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<EventRow> implement
             else
             {
                 filteredRows = (ArrayList<EventRow>) results.values;
+
+                for(EventRow eventRow : filteredRows) {
+                    if(eventRow instanceof TrackedEntityInstanceColumnNamesRow) {
+                        TrackedEntityInstanceColumnNamesRow row = (TrackedEntityInstanceColumnNamesRow) eventRow;
+                        row.setTitle(row.getTrackedEntity() + " (" + (filteredRows.size() - 1) +")");
+                        break;
+                    }
+                }
                 swapData(filteredRows);
             }
         }
@@ -314,7 +336,8 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<EventRow> implement
 
         private int sortAscending(T lhs, T rhs)
         {
-
+            TrackedEntityInstanceItemRow left = (TrackedEntityInstanceItemRow) lhs;
+            TrackedEntityInstanceItemRow right = (TrackedEntityInstanceItemRow) rhs;
             if(column == 1 )
             {
                 try
@@ -330,7 +353,22 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<EventRow> implement
                 {
                     return lhsDate.compareTo(rhsDate);
                 }
-                int compare = ((TrackedEntityInstanceItemRow) lhs).getmFirstItem().toLowerCase().compareTo(((TrackedEntityInstanceItemRow) rhs).getmFirstItem().toLowerCase());
+                int compare = 0;
+                String leftFirstItem = left.getmFirstItem();
+                String rightFirstItem = right.getmFirstItem();
+                if(leftFirstItem == null)  {
+                    leftFirstItem = "";
+                }
+
+                if(rightFirstItem == null)  {
+                    rightFirstItem = "";
+                }
+                if(rightFirstItem.equalsIgnoreCase(leftFirstItem)) {
+                    return 0;
+                }
+                else {
+                    compare = rightFirstItem.toLowerCase().compareTo(leftFirstItem.toLowerCase());
+                }
                 return compare;
             }
             else if(column == 2)
@@ -349,8 +387,25 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<EventRow> implement
                 {
                     return lhsDate.compareTo(rhsDate);
                 }
-                int compare = ((TrackedEntityInstanceItemRow) lhs).getmSecondItem().toLowerCase().compareTo(((TrackedEntityInstanceItemRow) rhs).getmSecondItem().toLowerCase());
+                int compare = 0;
+                String leftSecondItem = left.getmSecondItem();
+                String rightSecondItem = right.getmSecondItem();
+                if(leftSecondItem == null)  {
+                    leftSecondItem = "";
+                }
+
+                if(rightSecondItem == null)  {
+                    rightSecondItem = "";
+                }
+
+                if(rightSecondItem.equalsIgnoreCase(leftSecondItem)) {
+                    return 0;
+                }
+                else {
+                    compare = rightSecondItem.toLowerCase().compareTo(leftSecondItem.toLowerCase());
+                }
                 return compare;
+
             }
             else if(column == 3)
             {
@@ -368,7 +423,24 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<EventRow> implement
                 {
                     return lhsDate.compareTo(rhsDate);
                 }
-                int compare = ((TrackedEntityInstanceItemRow) lhs).getmThirdItem().toLowerCase().compareTo(((TrackedEntityInstanceItemRow) rhs).getmThirdItem().toLowerCase());
+                int compare = 0;
+                String leftThirdItem = left.getmThirdItem();
+                String rightThirdItem = right.getmThirdItem();
+                if(leftThirdItem == null)  {
+                    leftThirdItem = "";
+                }
+
+                if(rightThirdItem == null)  {
+                    rightThirdItem = "";
+                }
+
+                if(rightThirdItem.equalsIgnoreCase(leftThirdItem)) {
+                    return 0;
+                }
+                else {
+                    compare = rightThirdItem.toLowerCase().compareTo(leftThirdItem.toLowerCase());
+                }
+
 
                 return compare;
             }
@@ -378,7 +450,8 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<EventRow> implement
         }
         private int sortDescending(T lhs, T rhs)
         {
-
+            TrackedEntityInstanceItemRow left = (TrackedEntityInstanceItemRow) lhs;
+            TrackedEntityInstanceItemRow right = (TrackedEntityInstanceItemRow) rhs;
             if(column == 1 )
             {
                 try
@@ -394,7 +467,23 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<EventRow> implement
                 {
                     return rhsDate.compareTo(lhsDate);
                 }
-                int compare = ((TrackedEntityInstanceItemRow) rhs).getmFirstItem().toLowerCase().compareTo(((TrackedEntityInstanceItemRow) lhs).getmFirstItem().toLowerCase());
+                int compare = 0;
+                String leftFirstItem = left.getmFirstItem();
+                String rightFirstItem = right.getmFirstItem();
+                if(leftFirstItem == null)  {
+                    leftFirstItem = "";
+                }
+
+                if(rightFirstItem == null)  {
+                    rightFirstItem = "";
+                }
+
+                if(rightFirstItem.equalsIgnoreCase(leftFirstItem)) {
+                    return 0;
+                }
+                else {
+                    compare = rightFirstItem.toLowerCase().compareTo(leftFirstItem.toLowerCase());
+                }
                 return compare;
             }
             else if(column == 2)
@@ -413,7 +502,23 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<EventRow> implement
                 {
                     return rhsDate.compareTo(lhsDate);
                 }
-                int compare = ((TrackedEntityInstanceItemRow) rhs).getmSecondItem().toLowerCase().compareTo(((TrackedEntityInstanceItemRow) lhs).getmSecondItem().toLowerCase());
+                int compare = 0;
+                String leftSecondItem = left.getmSecondItem();
+                String rightSecondItem = right.getmSecondItem();
+                if(leftSecondItem == null)  {
+                    leftSecondItem = "";
+                }
+
+                if(rightSecondItem == null)  {
+                    rightSecondItem = "";
+                }
+
+                if(rightSecondItem.equalsIgnoreCase(leftSecondItem)) {
+                    return 0;
+                }
+                else {
+                    compare = rightSecondItem.toLowerCase().compareTo(leftSecondItem.toLowerCase());
+                }
                 return compare;
             }
             else if(column == 3) {
@@ -427,7 +532,23 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<EventRow> implement
                 if (lhsDate != null && rhsDate != null) {
                     return rhsDate.compareTo(lhsDate);
                 }
-                int compare = ((TrackedEntityInstanceItemRow) rhs).getmThirdItem().toLowerCase().compareTo(((TrackedEntityInstanceItemRow) lhs).getmThirdItem().toLowerCase());
+                int compare = 0;
+                String leftThirdItem = left.getmThirdItem();
+                String rightThirdItem = right.getmThirdItem();
+                if(leftThirdItem == null)  {
+                    leftThirdItem = "";
+                }
+
+                if(rightThirdItem == null)  {
+                    rightThirdItem = "";
+                }
+
+                if(rightThirdItem.equalsIgnoreCase(leftThirdItem)) {
+                    return 0;
+                }
+                else {
+                    compare = rightThirdItem.toLowerCase().compareTo(leftThirdItem.toLowerCase());
+                }
 
                 return compare;
             }

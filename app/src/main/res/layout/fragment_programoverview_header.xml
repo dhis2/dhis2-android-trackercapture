@@ -178,7 +178,7 @@
                     android:layout_margin="5dp"
                     android:layout_weight="1"
                     android:background="@drawable/rounded_imagebutton_orange"
-                    android:text="@string/complete" />
+                    android:text="@string/un_enroll" />
 
                 <Button
                     android:id="@+id/terminate"

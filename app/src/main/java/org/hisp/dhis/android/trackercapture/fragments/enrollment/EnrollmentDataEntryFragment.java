@@ -29,6 +29,8 @@
 
 package org.hisp.dhis.android.trackercapture.fragments.enrollment;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
@@ -54,8 +56,8 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.ui.adapters.SectionAdapter;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowTypes;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EditTextRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.RunProgramRulesEvent;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnDetailedInfoButtonClick;
@@ -71,8 +73,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDataEntryFragmentForm>
         implements OnBackPressedListener {
@@ -329,14 +329,37 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     }
 
     private boolean validate() {
-        ArrayList<String> programRulesValidationErrors = getProgramRuleFragmentHelper().getProgramRuleValidationErrors();
-        ArrayList<String> mandatoryValidationErrors = getValidationErrors();
-        if (programRulesValidationErrors.isEmpty() && mandatoryValidationErrors.isEmpty()) {
-            return true;
-        } else {
-            showValidationErrorDialog(mandatoryValidationErrors, programRulesValidationErrors);
+        if (isMapEmpty(form.getTrackedEntityAttributeValueMap())) {
+            UiUtils.showErrorDialog(getActivity(), getContext().getString(org.hisp.dhis.android.trackercapture.R.string.error_message),
+                    getContext().getString(org.hisp.dhis.android.trackercapture.R.string.profile_form_empty));
             return false;
         }
+        ArrayList<String> programRulesValidationErrors =
+                getProgramRuleFragmentHelper().getProgramRuleValidationErrors();
+        ArrayList<String> mandatoryValidationErrors = getValidationErrors();
+        ArrayList<String> validationErrors = new ArrayList<>();
+        for(DataEntryRow dataEntryRow : form.getDataEntryRows()){
+            if(dataEntryRow.getValidationError()!=null)
+                validationErrors.add(getContext().getString(dataEntryRow.getValidationError()));
+        }
+        if (programRulesValidationErrors.isEmpty() && mandatoryValidationErrors.isEmpty() && validationErrors.isEmpty()) {
+            return true;
+        } else {
+            showValidationErrorDialog(mandatoryValidationErrors, programRulesValidationErrors, validationErrors);
+            return false;
+        }
+    }
+
+    private boolean isMapEmpty(
+            Map<String, TrackedEntityAttributeValue> trackedEntityAttributeValueMap) {
+        boolean isEmpty = true;
+        for (String key : trackedEntityAttributeValueMap.keySet()) {
+            TrackedEntityAttributeValue value = trackedEntityAttributeValueMap.get(key);
+            if (value.getValue() != null && !value.getValue().equals("")) {
+                isEmpty = false;
+            }
+        }
+        return isEmpty;
     }
 
     private void evaluateRules(String trackedEntityAttribute) {
@@ -365,7 +388,7 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
         super.onRowValueChanged(event);
 
         // do not run program rules for EditTextRows - DelayedDispatcher takes care of this
-        if (event.getRow() == null || !(event.getRow() instanceof EditTextRow)) {
+        if (event.getRow() == null || !(event.getRow().isEditTextRow())) {
             evaluateRules(event.getId());
         }
 

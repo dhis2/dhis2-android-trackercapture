@@ -35,18 +35,11 @@ import android.util.Log;
 import org.hisp.dhis.android.sdk.controllers.GpsController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
-import org.hisp.dhis.android.sdk.persistence.models.OptionSet;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowFactory;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.autocompleterow.AutoCompleteRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.CheckBoxRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowTypes;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DatePickerRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EditTextRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.RadioButtonsRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 import org.hisp.dhis.android.sdk.utils.api.ValueType;
 
@@ -56,45 +49,47 @@ import java.util.List;
 /**
  * Created by Simen S. Russnes on 7/9/15.
  */
-public class QueryTrackedEntityInstancesDialogFragmentQuery implements Query<QueryTrackedEntityInstancesDialogFragmentForm>
-{
-    public static final String TAG = QueryTrackedEntityInstancesDialogFragmentQuery.class.getSimpleName();
+public class QueryTrackedEntityInstancesDialogFragmentQuery implements
+        Query<QueryTrackedEntityInstancesDialogFragmentForm> {
+    public static final String TAG =
+            QueryTrackedEntityInstancesDialogFragmentQuery.class.getSimpleName();
     private String orgUnit;
     private String programId;
 
-    public QueryTrackedEntityInstancesDialogFragmentQuery(String orgUnit, String programId)
-    {
+    public QueryTrackedEntityInstancesDialogFragmentQuery(String orgUnit, String programId) {
         this.programId = programId;
         this.orgUnit = orgUnit;
     }
 
     @Override
-    public QueryTrackedEntityInstancesDialogFragmentForm query(Context context)
-    {
-        QueryTrackedEntityInstancesDialogFragmentForm form = new QueryTrackedEntityInstancesDialogFragmentForm();
+    public QueryTrackedEntityInstancesDialogFragmentForm query(Context context) {
+        QueryTrackedEntityInstancesDialogFragmentForm form =
+                new QueryTrackedEntityInstancesDialogFragmentForm();
         form.setOrganisationUnit(orgUnit);
         form.setProgram(programId);
 
         Log.d(TAG, orgUnit + programId);
 
         Program program = MetaDataController.getProgram(programId);
-        if(program == null || orgUnit == null) {
+        if (program == null || orgUnit == null) {
             return form;
         }
-        List<ProgramTrackedEntityAttribute> programAttrs = program.getProgramTrackedEntityAttributes();
+        List<ProgramTrackedEntityAttribute> programAttrs =
+                program.getProgramTrackedEntityAttributes();
         List<TrackedEntityAttributeValue> values = new ArrayList<>();
         List<Row> dataEntryRows = new ArrayList<>();
-        for(ProgramTrackedEntityAttribute ptea: programAttrs) {
+        for (ProgramTrackedEntityAttribute ptea : programAttrs) {
             TrackedEntityAttribute trackedEntityAttribute = ptea.getTrackedEntityAttribute();
             TrackedEntityAttributeValue value = new TrackedEntityAttributeValue();
             value.setTrackedEntityAttributeId(trackedEntityAttribute.getUid());
             values.add(value);
-            if(ValueType.COORDINATE.equals(ptea.getTrackedEntityAttribute().getValueType())) {
+            if (ValueType.COORDINATE.equals(ptea.getTrackedEntityAttribute().getValueType())) {
                 GpsController.activateGps(context);
             }
             Row row = DataEntryRowFactory.createDataEntryView(ptea.getMandatory(),
                     ptea.getAllowFutureDate(), trackedEntityAttribute.getOptionSet(),
-                    trackedEntityAttribute.getName(), value, trackedEntityAttribute.getValueType(), true, false, program.getDataEntryMethod());
+                    trackedEntityAttribute.getName(), value, trackedEntityAttribute.getValueType(),
+                    true, false, program.getDataEntryMethod());
             dataEntryRows.add(row);
         }
         form.setTrackedEntityAttributeValues(values);

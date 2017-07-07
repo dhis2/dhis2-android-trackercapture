@@ -51,7 +51,7 @@
     <string name="error_series_500_description">Erreur de serveur 50x. Prière de synchroniser plus tard.</string>
     <string name="unknown_error">Erreur inconnue</string>
 
-    <string name="confirm_complete_enrollment">Souhaitez-vous vraiment compléter l\'enregistrement?\n        Vous ne pourrez plus éditer ultérierement</string>
+    <string name="confirm_complete_enrollment">Souhaitez-vous vraiment désinscription l\'enregistrement?\n        Vous ne pourrez plus éditer ultérierement</string>
     <string name="confirm_terminate_enrollment">Souhaitez-vous vraiment annuler cette\n        enregistrement ? Vous ne pourrez plus revenir en arrière.</string>
     <string name="confirm_delete_relationship">Souhaitez-vous vraiment supprimer cette relation ?</string>
     <string name="no_active_enrollment">Pas d\'enregistrement actif</string>
@@ -77,6 +77,11 @@
     <string name="re_open">Rouvrir</string>
 
     <string name="download_entities_title">Télécharger entités</string>
-    <string name="enrollemnt_complete">Enregistrement complété</string>
-
+    <string name="enrollment_complete">Enregistrement complété</string>
+    <string name="profile_form_empty">Le formulaire est vide, veuillez remplir au moins un</string>
+    <string name="events">ÉVÉNEMENTS</string>
+    <string name="upcoming_events">PROCHAINS ÉVÉNEMENTS</string>
+    <string name="overdue_events">ÉVÉNEMENTS EN RETARD</string>
+    <string name="active_events">ÉVÉNEMENTS ACTIFS</string>
+    <string name="enrollment_cancelled">Enregistrement annulé</string>
 </resources>

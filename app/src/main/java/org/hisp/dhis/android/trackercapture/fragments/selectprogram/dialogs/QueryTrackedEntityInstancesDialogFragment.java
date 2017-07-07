@@ -36,7 +36,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
@@ -70,7 +69,7 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.adapters.DataValueAdapter;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.AbsTextWatcher;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.CoordinatesRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EventCoordinatesRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.IndicatorRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.StatusRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnDetailedInfoButtonClick;
@@ -78,7 +77,6 @@ import org.hisp.dhis.android.sdk.ui.dialogs.QueryTrackedEntityInstancesResultDia
 import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -251,7 +249,7 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
     {
         String message = "";
 
-        if (eventClick.getRow() instanceof CoordinatesRow)
+        if (eventClick.getRow() instanceof EventCoordinatesRow)
             message = getResources().getString(R.string.detailed_info_coordinate_row);
         else if (eventClick.getRow() instanceof StatusRow)
             message = getResources().getString(R.string.detailed_info_status_row);

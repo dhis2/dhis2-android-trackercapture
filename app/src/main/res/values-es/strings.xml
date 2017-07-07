@@ -51,7 +51,7 @@
     <string name="error_series_500_description">Error de servidor 50x. Por favor, intenta sincronizar más tarde.</string>
     <string name="unknown_error">Error desconocido</string>
 
-    <string name="confirm_complete_enrollment">¿Estás seguro de querer completar el registro\n        actual? No se podrá editar posteriormente</string>
+    <string name="confirm_complete_enrollment">¿Estás seguro de querer desinscribirse del registro\n        actual? No se podrá editar posteriormente</string>
     <string name="confirm_terminate_enrollment">¿Estás seguro de querer cancelar el registro\n        actual? No se podrá deshacer esta acción.</string>
     <string name="confirm_delete_relationship">¿Estás seguro de querer borrar esta relación?</string>
     <string name="no_active_enrollment">No existe registro activo</string>
@@ -77,6 +77,12 @@
     <string name="re_open">Reabrir</string>
 
     <string name="download_entities_title">Descargar entidades</string>
-    <string name="enrollemnt_complete">Registro completo</string>
+    <string name="enrollment_complete">Registro completo</string>
 
+    <string name="profile_form_empty">El formulario está vacío, por favor rellene al menos un campo</string>
+    <string name="events">EVENTOS</string>
+    <string name="upcoming_events">PRÓXIMOS EVENTOS</string>
+    <string name="overdue_events">EVENTOS ATRASADOS</string>
+    <string name="active_events">EVENTOS ACTIVOS</string>
+    <string name="enrollment_cancelled">Registro cancelado</string>
 </resources>

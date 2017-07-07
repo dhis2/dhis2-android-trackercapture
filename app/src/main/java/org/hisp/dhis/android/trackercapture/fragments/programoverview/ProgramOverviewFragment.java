@@ -826,12 +826,17 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         noActiveEnrollment.setText(R.string.no_active_enrollment);
 
         missingEnrollmentLayout.setVisibility(View.VISIBLE);
-        List<Enrollment> enrollments = TrackerController.getEnrollments(mForm.getProgram().getUid(),
+        Enrollment lastEnrollment = TrackerController.getLastEnrollment(mForm.getProgram().getUid(),
                 mForm.getTrackedEntityInstance());
-        if(enrollments!=null && enrollments.size()>0) {
+        if(lastEnrollment!=null) {
             if (mForm.getProgram() != null && mForm.getProgram().getOnlyEnrollOnce()) {
-                newEnrollmentButton.setVisibility(View.GONE);
-                noActiveEnrollment.setText(R.string.enrollemnt_complete);
+                if(lastEnrollment.getStatus().equals(Enrollment.CANCELLED)) {
+                    newEnrollmentButton.setVisibility(View.VISIBLE);
+                    noActiveEnrollment.setText(R.string.enrollment_cancelled);
+                }else{
+                    newEnrollmentButton.setVisibility(View.GONE);
+                    noActiveEnrollment.setText(R.string.enrollment_complete);
+                }
             }
         }
         if(getLastEnrollmentForTrackedEntityInstance()==null){

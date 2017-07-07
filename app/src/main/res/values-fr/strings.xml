@@ -77,10 +77,11 @@
     <string name="re_open">Rouvrir</string>
 
     <string name="download_entities_title">Télécharger entités</string>
-    <string name="enrollemnt_complete">Enregistrement complété</string>
+    <string name="enrollment_complete">Enregistrement complété</string>
     <string name="profile_form_empty">Le formulaire est vide, veuillez remplir au moins un</string>
     <string name="events">ÉVÉNEMENTS</string>
     <string name="upcoming_events">PROCHAINS ÉVÉNEMENTS</string>
     <string name="overdue_events">ÉVÉNEMENTS EN RETARD</string>
     <string name="active_events">ÉVÉNEMENTS ACTIFS</string>
+    <string name="enrollment_cancelled">Enregistrement annulé</string>
 </resources>

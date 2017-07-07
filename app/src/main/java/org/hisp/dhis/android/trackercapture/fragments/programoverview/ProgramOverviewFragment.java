@@ -832,10 +832,10 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             if (mForm.getProgram() != null && mForm.getProgram().getOnlyEnrollOnce()) {
                 if(lastEnrollment.getStatus().equals(Enrollment.CANCELLED)) {
                     newEnrollmentButton.setVisibility(View.VISIBLE);
-                    noActiveEnrollment.setText(R.string.enrollemnt_cancelled);
+                    noActiveEnrollment.setText(R.string.enrollment_cancelled);
                 }else{
                     newEnrollmentButton.setVisibility(View.GONE);
-                    noActiveEnrollment.setText(R.string.enrollemnt_complete);
+                    noActiveEnrollment.setText(R.string.enrollment_complete);
                 }
             }
         }

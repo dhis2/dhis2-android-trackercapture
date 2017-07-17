@@ -92,6 +92,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     private SelectProgramFragmentForm mForm;
     protected TextView noRowsTextView;
     private DownloadEventSnackbar snackbar;
+    private MenuItem item;
 
     @Override
     protected TrackedEntityInstanceAdapter getAdapter(Bundle savedInstanceState) {
@@ -146,7 +147,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_select_program, menu);
-        MenuItem item = menu.findItem(R.id.action_search);
+        item = menu.findItem(R.id.action_search);
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
         MenuItemCompat.setOnActionExpandListener(item, this);
         searchView.setOnQueryTextListener(this);
@@ -279,8 +280,10 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
             if (data.getProgram() != null && !data.getProgram().isDisplayFrontPageList()) {
                 // if no rows is selected - let the user know
                 noRowsTextView.setVisibility(View.VISIBLE);
+                item.setVisible(false);
             } else {
                 noRowsTextView.setVisibility(View.GONE);
+                item.setVisible(true);
             }
         }
     }

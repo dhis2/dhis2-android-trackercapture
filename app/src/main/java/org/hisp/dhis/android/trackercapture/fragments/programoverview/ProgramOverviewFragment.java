@@ -42,6 +42,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -799,9 +800,20 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             if (eventClick.getEvent() != null) {
                 showStatusDialog(eventClick.getEvent());
             }
+        } else if (eventClick.isLongPressed()) {
+            registerForContextMenu(eventClick.getView());
+            getActivity().openContextMenu(eventClick.getView());
+            unregisterForContextMenu(eventClick.getView());
         } else {
             showDataEntryFragment(eventClick.getEvent(), eventClick.getEvent().getProgramStageId());
         }
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v,
+            ContextMenu.ContextMenuInfo menuInfo) {
+        new MenuInflater(this.getActivity()).inflate(R.menu.long_click_event_menu, menu);
+
     }
 
     public Map<Long, FailedItem> getFailedEvents() {

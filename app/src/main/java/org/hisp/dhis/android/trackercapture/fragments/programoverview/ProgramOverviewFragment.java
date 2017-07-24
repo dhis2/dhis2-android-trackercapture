@@ -281,6 +281,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         listView.addHeaderView(header, CLASS_TAG, false);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(this);
+        registerForContextMenu(listView);
 
         enrollmentServerStatus = (ImageView) header.findViewById(R.id.enrollmentstatus);
         enrollmentLayout = (LinearLayout) header.findViewById(R.id.enrollmentLayout);
@@ -801,9 +802,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 showStatusDialog(eventClick.getEvent());
             }
         } else if (eventClick.isLongPressed()) {
-            registerForContextMenu(eventClick.getView());
             getActivity().openContextMenu(eventClick.getView());
-            unregisterForContextMenu(eventClick.getView());
         } else {
             showDataEntryFragment(eventClick.getEvent(), eventClick.getEvent().getProgramStageId());
         }
@@ -814,6 +813,47 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             ContextMenu.ContextMenuInfo menuInfo) {
         new MenuInflater(this.getActivity()).inflate(R.menu.long_click_event_menu, menu);
 
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info =
+                (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        ProgramStageEventRow itemRow = null;
+        if (listView.getItemAtPosition(info.position) instanceof ProgramStageEventRow) {
+            itemRow = (ProgramStageEventRow) listView.getItemAtPosition(info.position);
+        }
+
+        switch (item.getItemId()) {
+            case R.id.edit_event:
+                if (itemRow != null) {
+                    showDataEntryFragment(itemRow.getEvent(),
+                            itemRow.getEvent().getProgramStageId());
+                }
+                return true;
+            case R.id.delete_event:
+                if (itemRow != null) {
+                    deleteEvent(itemRow);
+                }
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
+
+    private void deleteEvent(final ProgramStageEventRow eventItemRow) {
+        UiUtils.showConfirmDialog(getActivity(), getActivity().getString(R.string.confirm),
+                getActivity().getString(R.string.warning_delete_event),
+                getActivity().getString(R.string.delete), getActivity().getString(R.string.cancel),
+                (R.drawable.ic_event_error),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        eventItemRow.getEvent().setStatus(Event.STATUS_DELETED);
+                        eventItemRow.getEvent().save();
+                        dialog.dismiss();
+                    }
+                });
     }
 
     public Map<Long, FailedItem> getFailedEvents() {

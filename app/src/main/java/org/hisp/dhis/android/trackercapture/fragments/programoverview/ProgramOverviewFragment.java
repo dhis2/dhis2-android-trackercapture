@@ -502,6 +502,18 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                         getLayoutInflater(getArguments().getBundle(EXTRA_SAVED_INSTANCE_STATE)));
             }
 
+            LinearLayout programIndicatorLayout =
+                    (LinearLayout) programIndicatorCardView.findViewById(
+                            R.id.programindicatorlayout);
+            programIndicatorLayout.removeAllViews();
+            FlowLayout keyValueLayout = (FlowLayout) programIndicatorCardView.findViewById(
+                    R.id.keyvaluelayout);
+            keyValueLayout.removeAllViews();
+            LinearLayout displayTextLayout = (LinearLayout) programIndicatorCardView.findViewById(
+                    R.id.textlayout);
+            displayTextLayout.removeAllViews();
+            programIndicatorLayout.removeAllViews();
+
             if (mForm == null || mForm.getEnrollment() == null) {
                 showNoActiveEnrollment(mForm);
                 return;
@@ -594,17 +606,6 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                     }
                 }
             }
-
-            LinearLayout programIndicatorLayout =
-                    (LinearLayout) programIndicatorCardView.findViewById(
-                            R.id.programindicatorlayout);
-            programIndicatorLayout.removeAllViews();
-            FlowLayout keyValueLayout = (FlowLayout) programIndicatorCardView.findViewById(
-                    R.id.keyvaluelayout);
-            keyValueLayout.removeAllViews();
-            LinearLayout displayTextLayout = (LinearLayout) programIndicatorCardView.findViewById(
-                    R.id.textlayout);
-            displayTextLayout.removeAllViews();
             for (IndicatorRow indicatorRow : mForm.getProgramIndicatorRows().values()) {
                 View view = indicatorRow.getView(getChildFragmentManager(),
                         getLayoutInflater(getArguments()), null, programIndicatorLayout);

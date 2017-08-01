@@ -505,14 +505,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             LinearLayout programIndicatorLayout =
                     (LinearLayout) programIndicatorCardView.findViewById(
                             R.id.programindicatorlayout);
-            programIndicatorLayout.removeAllViews();
-            FlowLayout keyValueLayout = (FlowLayout) programIndicatorCardView.findViewById(
-                    R.id.keyvaluelayout);
-            keyValueLayout.removeAllViews();
-            LinearLayout displayTextLayout = (LinearLayout) programIndicatorCardView.findViewById(
-                    R.id.textlayout);
-            displayTextLayout.removeAllViews();
-            programIndicatorLayout.removeAllViews();
+
+            initializeIndicatorViews(programIndicatorLayout);
 
             if (mForm == null || mForm.getEnrollment() == null) {
                 showNoActiveEnrollment(mForm);
@@ -615,6 +609,17 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             evaluateAndApplyProgramRules();
             adapter.swapData(data.getProgramStageRows());
         }
+    }
+
+    private void initializeIndicatorViews(LinearLayout programIndicatorLayout) {
+        programIndicatorLayout.removeAllViews();
+        FlowLayout keyValueLayout = (FlowLayout) programIndicatorCardView.findViewById(
+                R.id.keyvaluelayout);
+        keyValueLayout.removeAllViews();
+        LinearLayout displayTextLayout = (LinearLayout) programIndicatorCardView.findViewById(
+                R.id.textlayout);
+        displayTextLayout.removeAllViews();
+        programIndicatorLayout.removeAllViews();
     }
 
     /**

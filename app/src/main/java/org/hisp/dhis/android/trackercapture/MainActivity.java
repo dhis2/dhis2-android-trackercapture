@@ -51,6 +51,7 @@ import org.hisp.dhis.android.sdk.network.Session;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.models.UserAccount;
 import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
+import org.hisp.dhis.android.sdk.utils.ScreenSizeConfigurator;
 import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.SelectProgramFragment;
 import org.hisp.dhis.client.sdk.ui.activities.AbsHomeActivity;
@@ -173,6 +174,7 @@ public class MainActivity extends AbsHomeActivity {
         super.onResume();
         Dhis2Application.getEventBus().register(this);
         loadInitialData();
+        ScreenSizeConfigurator.init(getWindowManager()).getFields();
     }
 
     @Override

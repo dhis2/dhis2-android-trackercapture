@@ -619,7 +619,6 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                     programEventsLayout.addView(view);
             }
             evaluateAndApplyProgramRules();
-            adapter.notifyDataSetChanged();
         }
     }
 
@@ -633,6 +632,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         displayTextLayout.removeAllViews();
         programIndicatorLayout.removeAllViews();
     }
+
     private void initializeIndicatorViews(LinearLayout programIndicatorLayout) {
         programIndicatorLayout.removeAllViews();
         FlowLayout keyValueLayout = (FlowLayout) programIndicatorCardView.findViewById(
@@ -1182,16 +1182,6 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         fragment.show(getChildFragmentManager(), CLASS_TAG);
     }
 
-    void displayKeyValueEventPair(ProgramRuleAction programRuleAction) {
-        FlowLayout programIndicatorLayout = (FlowLayout) programIndicatorCardView.findViewById(
-                R.id.keyvaluelayout);
-        KeyValueView keyValueView = new KeyValueView(programRuleAction.getContent(),
-                ProgramRuleService.getCalculatedConditionValue(programRuleAction.getData()));
-        FlowLayout.LayoutParams layoutParams = new FlowLayout.LayoutParams(10, 10);
-        View view = keyValueView.getView(getLayoutInflater(getArguments()), programIndicatorLayout);
-        view.setLayoutParams(layoutParams);
-        programIndicatorLayout.addView(view);
-    }
     void displayKeyValuePair(ProgramRuleAction programRuleAction) {
         FlowLayout programIndicatorLayout = (FlowLayout) programIndicatorCardView.findViewById(
                 R.id.keyvaluelayout);

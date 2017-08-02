@@ -29,7 +29,6 @@
 
 package org.hisp.dhis.android.trackercapture.ui.rows.programoverview;
 
-import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,18 +40,14 @@ import org.hisp.dhis.android.sdk.events.OnRowClick;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.OrganisationUnit;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 import org.hisp.dhis.android.sdk.utils.Utils;
 import org.hisp.dhis.android.sdk.utils.support.DateUtils;
-import org.hisp.dhis.android.trackercapture.ui.adapters.ProgramStageAdapter;
 import org.joda.time.LocalDate;
 
-import java.util.List;
-
-public class ProgramStageEventRow extends Row implements ProgramStageRow  {
+public class ProgramStageEventRow implements ProgramStageRow {
 
     private static final String TAG = ProgramStageEventRow.class.getSimpleName();
-    private ProgramStageAdapter adapter;
+
     private final Event event;
     private boolean hasFailed = false;
     private boolean isSynchronized = false;
@@ -171,20 +166,6 @@ public class ProgramStageEventRow extends Row implements ProgramStageRow  {
         return color;
     }
 
-
-
-    @Override
-    public View getView(FragmentManager fragmentManager, LayoutInflater inflater, View convertView,
-            ViewGroup container) {
-
-        return convertView;
-    }
-
-    @Override
-    public int getViewType() {
-        return 0;
-    }
-
     private static class EventViewHolder {
         public final TextView orgUnit;
         public final TextView date;
@@ -280,13 +261,5 @@ public class ProgramStageEventRow extends Row implements ProgramStageRow  {
                 Dhis2Application.getEventBus().post(new OnProgramStageEventClick(event, statusButton, true, message, status));
             }
         }
-    }
-
-    public ProgramStageAdapter getAdapter() {
-        return adapter;
-    }
-
-    public void setAdapter(ProgramStageAdapter adapter) {
-        this.adapter = adapter;
     }
 }

@@ -161,6 +161,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     private CardView enrollmentCardview;
 
     private CardView programIndicatorCardView;
+    private CardView eventsCardView;
 
     private ImageButton followupButton;
     private ImageButton profileButton;
@@ -291,6 +292,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         enrollmentCardview = (CardView) header.findViewById(R.id.enrollment_cardview);
         noActiveEnrollment = (TextView) header.findViewById(R.id.noactiveenrollment);
         programIndicatorCardView = (CardView) header.findViewById(R.id.programindicators_cardview);
+        eventsCardView = (CardView) header.findViewById(R.id.events_cardview);
 
         completeButton = (Button) header.findViewById(R.id.complete);
         reOpenButton = (Button) header.findViewById(R.id.re_open);
@@ -502,10 +504,15 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                         getLayoutInflater(getArguments().getBundle(EXTRA_SAVED_INSTANCE_STATE)));
             }
 
+            LinearLayout programEventsLayout =
+                    (LinearLayout) eventsCardView.findViewById(
+                            R.id.programeventlayout);
+
             LinearLayout programIndicatorLayout =
                     (LinearLayout) programIndicatorCardView.findViewById(
                             R.id.programindicatorlayout);
 
+            initializeEventsViews(programEventsLayout);
             initializeIndicatorViews(programIndicatorLayout);
 
             if (mForm == null || mForm.getEnrollment() == null) {
@@ -605,12 +612,27 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                         getLayoutInflater(getArguments()), null, programIndicatorLayout);
                 programIndicatorLayout.addView(view);
             }
-
+            for (ProgramStageRow programStageRow :data.getProgramStageRows()) {
+                    ProgramStageRow programStageEventRow = programStageRow;
+                    View view = programStageEventRow.getView(getLayoutInflater(getArguments()),
+                            null, programEventsLayout);
+                    programEventsLayout.addView(view);
+            }
             evaluateAndApplyProgramRules();
-            adapter.swapData(data.getProgramStageRows());
+            adapter.notifyDataSetChanged();
         }
     }
 
+    private void initializeEventsViews(LinearLayout programIndicatorLayout) {
+        programIndicatorLayout.removeAllViews();
+        FlowLayout keyValueLayout = (FlowLayout) eventsCardView.findViewById(
+                R.id.keyvalueeventlayout);
+        keyValueLayout.removeAllViews();
+        LinearLayout displayTextLayout = (LinearLayout) eventsCardView.findViewById(
+                R.id.texteventlayout);
+        displayTextLayout.removeAllViews();
+        programIndicatorLayout.removeAllViews();
+    }
     private void initializeIndicatorViews(LinearLayout programIndicatorLayout) {
         programIndicatorLayout.removeAllViews();
         FlowLayout keyValueLayout = (FlowLayout) programIndicatorCardView.findViewById(
@@ -1160,6 +1182,16 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         fragment.show(getChildFragmentManager(), CLASS_TAG);
     }
 
+    void displayKeyValueEventPair(ProgramRuleAction programRuleAction) {
+        FlowLayout programIndicatorLayout = (FlowLayout) programIndicatorCardView.findViewById(
+                R.id.keyvaluelayout);
+        KeyValueView keyValueView = new KeyValueView(programRuleAction.getContent(),
+                ProgramRuleService.getCalculatedConditionValue(programRuleAction.getData()));
+        FlowLayout.LayoutParams layoutParams = new FlowLayout.LayoutParams(10, 10);
+        View view = keyValueView.getView(getLayoutInflater(getArguments()), programIndicatorLayout);
+        view.setLayoutParams(layoutParams);
+        programIndicatorLayout.addView(view);
+    }
     void displayKeyValuePair(ProgramRuleAction programRuleAction) {
         FlowLayout programIndicatorLayout = (FlowLayout) programIndicatorCardView.findViewById(
                 R.id.keyvaluelayout);

@@ -119,6 +119,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
         mQueryTrackedEntityInstancesButton = (FloatingActionButton) header.findViewById(R.id.query_trackedentityinstances_button);
         mUpcomingEventsButton = (FloatingActionButton) header.findViewById(R.id.upcoming_events_button);
         mLocalSearchButton = (FloatingActionButton) header.findViewById(R.id.local_search_button);
+        mLocalSearchButton = (FloatingActionButton) header.findViewById(R.id.local_search_button);
         noRowsTextView = (TextView) header.findViewById(R.id.textview_no_items);
         noRowsTextView.setText(getString(R.string.specify_search_criteria));
 

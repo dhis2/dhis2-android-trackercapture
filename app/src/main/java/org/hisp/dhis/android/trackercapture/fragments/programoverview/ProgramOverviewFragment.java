@@ -622,15 +622,15 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         }
     }
 
-    private void initializeEventsViews(LinearLayout programIndicatorLayout) {
-        programIndicatorLayout.removeAllViews();
+    private void initializeEventsViews(LinearLayout programEventsLayout) {
+        programEventsLayout.removeAllViews();
         FlowLayout keyValueLayout = (FlowLayout) eventsCardView.findViewById(
                 R.id.keyvalueeventlayout);
         keyValueLayout.removeAllViews();
         LinearLayout displayTextLayout = (LinearLayout) eventsCardView.findViewById(
                 R.id.texteventlayout);
         displayTextLayout.removeAllViews();
-        programIndicatorLayout.removeAllViews();
+        programEventsLayout.removeAllViews();
     }
 
     private void initializeIndicatorViews(LinearLayout programIndicatorLayout) {

@@ -162,6 +162,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     private CardView enrollmentCardview;
 
     private CardView programIndicatorCardView;
+    private CardView eventsCardView;
 
     private ImageButton followupButton;
     private ImageButton profileButton;
@@ -293,6 +294,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         enrollmentCardview = (CardView) header.findViewById(R.id.enrollment_cardview);
         noActiveEnrollment = (TextView) header.findViewById(R.id.noactiveenrollment);
         programIndicatorCardView = (CardView) header.findViewById(R.id.programindicators_cardview);
+        eventsCardView = (CardView) header.findViewById(R.id.events_cardview);
 
         completeButton = (Button) header.findViewById(R.id.complete);
         reOpenButton = (Button) header.findViewById(R.id.re_open);
@@ -504,6 +506,17 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                         getLayoutInflater(getArguments().getBundle(EXTRA_SAVED_INSTANCE_STATE)));
             }
 
+            LinearLayout programEventsLayout =
+                    (LinearLayout) eventsCardView.findViewById(
+                            R.id.programeventlayout);
+
+            LinearLayout programIndicatorLayout =
+                    (LinearLayout) programIndicatorCardView.findViewById(
+                            R.id.programindicatorlayout);
+
+            initializeEventsViews(programEventsLayout);
+            initializeIndicatorViews(programIndicatorLayout);
+
             if (mForm == null || mForm.getEnrollment() == null) {
                 showNoActiveEnrollment(mForm);
                 return;
@@ -596,26 +609,41 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                     }
                 }
             }
-
-            LinearLayout programIndicatorLayout =
-                    (LinearLayout) programIndicatorCardView.findViewById(
-                            R.id.programindicatorlayout);
-            programIndicatorLayout.removeAllViews();
-            FlowLayout keyValueLayout = (FlowLayout) programIndicatorCardView.findViewById(
-                    R.id.keyvaluelayout);
-            keyValueLayout.removeAllViews();
-            LinearLayout displayTextLayout = (LinearLayout) programIndicatorCardView.findViewById(
-                    R.id.textlayout);
-            displayTextLayout.removeAllViews();
             for (IndicatorRow indicatorRow : mForm.getProgramIndicatorRows().values()) {
                 View view = indicatorRow.getView(getChildFragmentManager(),
                         getLayoutInflater(getArguments()), null, programIndicatorLayout);
                 programIndicatorLayout.addView(view);
             }
-
+            for (ProgramStageRow programStageRow :data.getProgramStageRows()) {
+                    ProgramStageRow programStageEventRow = programStageRow;
+                    View view = programStageEventRow.getView(getLayoutInflater(getArguments()),
+                            null, programEventsLayout);
+                    programEventsLayout.addView(view);
+            }
             evaluateAndApplyProgramRules();
-            adapter.swapData(data.getProgramStageRows());
         }
+    }
+
+    private void initializeEventsViews(LinearLayout programEventsLayout) {
+        programEventsLayout.removeAllViews();
+        FlowLayout keyValueLayout = (FlowLayout) eventsCardView.findViewById(
+                R.id.keyvalueeventlayout);
+        keyValueLayout.removeAllViews();
+        LinearLayout displayTextLayout = (LinearLayout) eventsCardView.findViewById(
+                R.id.texteventlayout);
+        displayTextLayout.removeAllViews();
+        programEventsLayout.removeAllViews();
+    }
+
+    private void initializeIndicatorViews(LinearLayout programIndicatorLayout) {
+        programIndicatorLayout.removeAllViews();
+        FlowLayout keyValueLayout = (FlowLayout) programIndicatorCardView.findViewById(
+                R.id.keyvaluelayout);
+        keyValueLayout.removeAllViews();
+        LinearLayout displayTextLayout = (LinearLayout) programIndicatorCardView.findViewById(
+                R.id.textlayout);
+        displayTextLayout.removeAllViews();
+        programIndicatorLayout.removeAllViews();
     }
 
     /**

@@ -85,4 +85,5 @@
     <string name="overdue_events">EVENTOS ATRASADOS</string>
     <string name="active_events">EVENTOS ACTIVOS</string>
     <string name="enrollment_cancelled">Registro cancelado</string>
+    <string name="events_title">Entrada de datos chronológica</string>
 </resources>

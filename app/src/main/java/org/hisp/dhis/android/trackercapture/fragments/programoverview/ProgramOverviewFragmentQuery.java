@@ -70,6 +70,7 @@ class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm>
     @Override
     public ProgramOverviewFragmentForm query(Context context) {
         ProgramOverviewFragmentForm programOverviewFragmentForm = new ProgramOverviewFragmentForm();
+        programOverviewFragmentForm.setProgramIndicatorRows(new LinkedHashMap<ProgramIndicator, IndicatorRow>());
         Program program = MetaDataController.getProgram(mProgramId);
         TrackedEntityInstance trackedEntityInstance = TrackerController.getTrackedEntityInstance(mTrackedEntityInstanceId);
 
@@ -118,7 +119,6 @@ class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm>
         programOverviewFragmentForm.setProgramStageRows(programStageRows);
 
         List<ProgramIndicator> programIndicators = programOverviewFragmentForm.getProgram().getProgramIndicators();
-        programOverviewFragmentForm.setProgramIndicatorRows(new LinkedHashMap<ProgramIndicator, IndicatorRow>());
         if(programIndicators != null ) {
             for(ProgramIndicator programIndicator : programIndicators) {
                 if(!programIndicator.isDisplayInForm()){

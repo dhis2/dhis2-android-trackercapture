@@ -171,7 +171,8 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
                 getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mFilter.getWindowToken(), 0);
 
-        mAdapter = new DataValueAdapter(getChildFragmentManager(), getActivity().getLayoutInflater());
+        mAdapter = new DataValueAdapter(getChildFragmentManager(),
+                getActivity().getLayoutInflater());
         mListView.setAdapter(mAdapter);
 
         mFilter.addTextChangedListener(new AbsTextWatcher() {

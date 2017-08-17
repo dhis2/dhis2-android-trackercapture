@@ -188,7 +188,7 @@ public class LocalSearchFragment extends Fragment implements
         trackedEntityAttributeListView = (ListView) view.findViewById(
                 R.id.localSearchAttributeListView);
         mAdapter = new DataValueAdapter(getChildFragmentManager(),
-                getActivity().getLayoutInflater());
+                getActivity().getLayoutInflater(), trackedEntityAttributeListView, getContext());
         trackedEntityAttributeListView.setAdapter(mAdapter);
     }
 

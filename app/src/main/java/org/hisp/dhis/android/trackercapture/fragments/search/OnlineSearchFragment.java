@@ -157,7 +157,8 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
                 .findViewById(org.hisp.dhis.android.sdk.R.id.dialog_label);
         UiUtils.hideKeyboard(getActivity());
 
-        mAdapter = new DataValueAdapter(getChildFragmentManager(), getActivity().getLayoutInflater());
+        mAdapter = new DataValueAdapter(getChildFragmentManager(),
+                getActivity().getLayoutInflater(), mListView, getContext());
         mListView.setAdapter(mAdapter);
 
         mFilter.addTextChangedListener(new AbsTextWatcher() {

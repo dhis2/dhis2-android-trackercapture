@@ -107,13 +107,6 @@ public class EnrollmentDateFragment extends DataEntryFragment<EnrollmentDateFrag
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
     {
-        inflater.inflate(org.hisp.dhis.android.sdk.R.menu.menu_data_entry, menu);
-
-        final MenuItem editFormButton = menu.findItem(org.hisp.dhis.android.sdk.R.id.action_new_event);
-
-        editFormButton.setEnabled(true);
-        editFormButton.setIcon(R.drawable.ic_edit);
-        editFormButton.getIcon().setAlpha(0xFF);
     }
 
     @Override

@@ -52,9 +52,10 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue$
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance$Table;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceColumnNamesRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceDynamicColumnRows;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceItemRow;
 import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
+import org.hisp.dhis.android.sdk.utils.ScreenSizeConfigurator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -101,15 +102,16 @@ public class SelectProgramFragmentQuery implements Query<SelectProgramFragmentFo
 
         List<String> attributesToShow = new ArrayList<>();
         Map<String, TrackedEntityAttribute> attributesToShowMap = new HashMap<>();
-        TrackedEntityInstanceColumnNamesRow columnNames = new TrackedEntityInstanceColumnNamesRow();
-
+        TrackedEntityInstanceDynamicColumnRows columnNames = new TrackedEntityInstanceDynamicColumnRows();
+        TrackedEntityInstanceDynamicColumnRows attributeNames = new TrackedEntityInstanceDynamicColumnRows();
         for (ProgramTrackedEntityAttribute attribute : attributes) {
-            if (attribute.getDisplayInList() && attributesToShow.size() < 1) {
+            if (attribute.getDisplayInList() && attributesToShow.size() < ScreenSizeConfigurator.getInstance().getFields()) {
                 attributesToShow.add(attribute.getTrackedEntityAttributeId());
                 if (attribute.getTrackedEntityAttribute() != null) {
                     String name = attribute.getTrackedEntityAttribute().getName();
-                    if (attributesToShow.size() == 1) {
-                        columnNames.setFirstItem(name);
+                    if (attributesToShow.size() <= ScreenSizeConfigurator.getInstance().getFields()) {
+                        columnNames.addColumn(name);
+                        attributeNames.addColumn(attribute.getTrackedEntityAttribute().getShortName());
                     }
                     attributesToShowMap.put(attribute.getTrackedEntityAttributeId(), attribute.getTrackedEntityAttribute());
                 }
@@ -164,6 +166,7 @@ public class SelectProgramFragmentQuery implements Query<SelectProgramFragmentFo
         fragmentForm.setEventRowList(teiRows);
         fragmentForm.setColumnNames(columnNames);
 
+        fragmentForm.setColumnNames(attributeNames);
         if(selectedProgram.getTrackedEntity() != null) {
             columnNames.setTrackedEntity(selectedProgram.getTrackedEntity().getName());
             columnNames.setTitle(selectedProgram.getTrackedEntity().getName() + " (" + ( teiRows.size() - 1 ) + ")") ;
@@ -202,21 +205,25 @@ public class SelectProgramFragmentQuery implements Query<SelectProgramFragmentFo
                     teav = trackedEntityAttributeValueMapForTrackedEntityInstance.get(attributeUid);
                 }
 
+                String value;
                 TrackedEntityAttribute trackedEntityAttribute = trackedEntityAttributeMap.get(attributeUid);
                 if (teav == null || trackedEntityAttribute == null) {
+                    trackedEntityInstanceItemRow.addColumn("");
                     continue;
                 }
 
-                String value = teav.getValue();
+                value = teav.getValue();
 
                 if (trackedEntityAttribute.isOptionSetValue()) {
                     if (trackedEntityAttribute.getOptionSet() == null) {
+                        trackedEntityInstanceItemRow.addColumn("");
                         continue;
                     }
 
                     String optionSetId = trackedEntityAttribute.getOptionSet();
                     Map<String, Option> optionsMap = optionsForOptionSetMap.get(optionSetId);
                     if(optionsMap == null) {
+                        trackedEntityInstanceItemRow.addColumn("");
                         continue;
                     }
                     Option optionWithMatchingValue = optionsMap.get(value);

@@ -1,7 +1,6 @@
 package org.hisp.dhis.android.trackercapture.fragments.search;
 
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceColumnNamesRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceDynamicColumnRows;
 
 import java.util.List;

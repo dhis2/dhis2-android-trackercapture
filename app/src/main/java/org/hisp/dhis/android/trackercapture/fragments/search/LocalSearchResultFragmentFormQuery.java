@@ -180,7 +180,6 @@ public class LocalSearchResultFragmentFormQuery implements Query<LocalSearchResu
 
                 if (trackedEntityAttribute.isOptionSetValue()) {
                     if (trackedEntityAttribute.getOptionSet() == null) {
-                        trackedEntityInstanceItemRow.addColumn(value);
                         continue;
                     }
 

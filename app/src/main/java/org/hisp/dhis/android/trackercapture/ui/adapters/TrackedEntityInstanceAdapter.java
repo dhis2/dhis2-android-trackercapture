@@ -37,12 +37,9 @@ import android.widget.Filter;
 import android.widget.Filterable;
 
 import org.hisp.dhis.android.sdk.events.OnRowClick;
-import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
-import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
-import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.adapters.AbsAdapter;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceColumnNamesRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceDynamicColumnRows;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceItemRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.upcomingevents.EventRowType;
 import org.joda.time.DateTime;
@@ -170,7 +167,7 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<EventRow> implement
                                 }
                             }
                         } else {
-                            if (row instanceof TrackedEntityInstanceColumnNamesRow) {
+                            if (row instanceof TrackedEntityInstanceDynamicColumnRows) {
                                 filteredItems.add(row);
                             }
                         }
@@ -190,7 +187,7 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<EventRow> implement
                 for (int i = 0, l = allRows.size(); i < l; i++) {
                     EventRow row = allRows.get(i);
                     OnRowClick.ITEM_STATUS status = null;
-                    if (row instanceof TrackedEntityInstanceColumnNamesRow) {
+                    if (row instanceof TrackedEntityInstanceDynamicColumnRows) {
                         filteredItems.add(row);
                     } else if (row instanceof TrackedEntityInstanceItemRow) {
                         status = ((TrackedEntityInstanceItemRow) row).getStatus();
@@ -244,7 +241,7 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<EventRow> implement
             String value = null;
             for (int i = 0, l = allRows.size(); i < l; i++) {
                 EventRow row = allRows.get(i);
-                if (row instanceof TrackedEntityInstanceColumnNamesRow) {
+                if (row instanceof TrackedEntityInstanceDynamicColumnRows) {
                     headerRow = row;
                 } else if (row instanceof TrackedEntityInstanceItemRow) {
                     filteredItems.add(row);
@@ -270,9 +267,9 @@ public class TrackedEntityInstanceAdapter extends AbsAdapter<EventRow> implement
                 filteredRows = (ArrayList<EventRow>) results.values;
 
                 for (EventRow eventRow : filteredRows) {
-                    if (eventRow instanceof TrackedEntityInstanceColumnNamesRow) {
-                        TrackedEntityInstanceColumnNamesRow row =
-                                (TrackedEntityInstanceColumnNamesRow) eventRow;
+                    if (eventRow instanceof TrackedEntityInstanceDynamicColumnRows) {
+                        TrackedEntityInstanceDynamicColumnRows row =
+                                (TrackedEntityInstanceDynamicColumnRows) eventRow;
                         row.setTitle(
                                 row.getTrackedEntity() + " (" + (filteredRows.size() - 1) + ")");
                         break;

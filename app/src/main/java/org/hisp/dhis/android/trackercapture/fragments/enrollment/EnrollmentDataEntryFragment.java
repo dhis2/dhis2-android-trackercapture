@@ -51,6 +51,7 @@ import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeGeneratedValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
@@ -334,6 +335,16 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
                     getContext().getString(org.hisp.dhis.android.trackercapture.R.string.profile_form_empty));
             return false;
         }
+        if(!validateUniqueValues(form.getTrackedEntityAttributeValueMap())){
+            List<String> listOfUniqueInvalidFields = getNotValidatedUniqueValues(form.getTrackedEntityAttributeValueMap());
+            String listOfInvalidAttributes = " ";
+            for(String value:listOfUniqueInvalidFields){
+                listOfInvalidAttributes += value + " ";
+            }
+            UiUtils.showErrorDialog(getActivity(), getContext().getString(org.hisp.dhis.android.trackercapture.R.string.error_message),
+                    String.format(getContext().getString(org.hisp.dhis.android.trackercapture.R.string.invalid_unique_value_form_empty), listOfInvalidAttributes));
+            return false;
+        }
         ArrayList<String> programRulesValidationErrors =
                 getProgramRuleFragmentHelper().getProgramRuleValidationErrors();
         ArrayList<String> mandatoryValidationErrors = getValidationErrors();
@@ -348,6 +359,42 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             showValidationErrorDialog(mandatoryValidationErrors, programRulesValidationErrors, validationErrors);
             return false;
         }
+    }
+
+    private List<String> getNotValidatedUniqueValues(
+            Map<String, TrackedEntityAttributeValue> trackedEntityAttributeValueMap) {
+        List<String> listOFUniqueFields = new ArrayList<>();
+        for (String key : trackedEntityAttributeValueMap.keySet()) {
+            TrackedEntityAttributeValue value = trackedEntityAttributeValueMap.get(key);
+            TrackedEntityAttribute trackedEntityAttribute =
+                    MetaDataController.getTrackedEntityAttribute(
+                            value.getTrackedEntityAttributeId());
+            if (trackedEntityAttribute.isUnique()) {
+                if (TrackerController.countTrackedEntityAttributeValue(value.getValue(),
+                        value.getTrackedEntityAttributeId()) != 0) {
+                    listOFUniqueFields.add(trackedEntityAttribute.getDisplayName());
+                }
+            }
+        }
+        return listOFUniqueFields;
+    }
+
+    private boolean validateUniqueValues(
+            Map<String, TrackedEntityAttributeValue> trackedEntityAttributeValueMap) {
+        for (String key : trackedEntityAttributeValueMap.keySet()) {
+            TrackedEntityAttributeValue value = trackedEntityAttributeValueMap.get(key);
+                TrackedEntityAttribute trackedEntityAttribute =
+                        MetaDataController.getTrackedEntityAttribute(
+                                value.getTrackedEntityAttributeId());
+                if (trackedEntityAttribute.isUnique()) {
+                    if(TrackerController.countTrackedEntityAttributeValue(value.getValue(), value.getTrackedEntityAttributeId())!=0){
+                        return false;
+                    }else{
+                        return  true;
+                    }
+                }
+            }
+        return true;
     }
 
     private boolean isMapEmpty(

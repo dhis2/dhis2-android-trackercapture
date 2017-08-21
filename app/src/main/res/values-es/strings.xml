@@ -79,7 +79,7 @@
     <string name="download_entities_title">Descargar entidades</string>
     <string name="enrollment_complete">Registro completo</string>
 
-    <string name="invalid_unique_value_form_empty">Valor no unico inválido: %s</string>
+    <string name="invalid_unique_value_form_empty">Valor no único inválido: %s</string>
     <string name="profile_form_empty">El formulario está vacío, por favor rellene al menos un campo</string>
     <string name="events">EVENTOS</string>
     <string name="upcoming_events">PRÓXIMOS EVENTOS</string>

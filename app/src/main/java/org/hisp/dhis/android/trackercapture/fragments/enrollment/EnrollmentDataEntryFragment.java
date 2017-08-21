@@ -43,6 +43,7 @@ import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.sdk.R;
+import org.hisp.dhis.android.sdk.controllers.ErrorType;
 import org.hisp.dhis.android.sdk.controllers.GpsController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
@@ -253,8 +254,8 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     }
 
     @Override
-    protected ArrayList<String> getValidationErrors() {
-        ArrayList<String> errors = new ArrayList<>();
+    protected HashMap<ErrorType, ArrayList<String>> getValidationErrors() {
+        HashMap<ErrorType, ArrayList<String>> errors = new HashMap<>();
 
         if (form.getEnrollment() == null || form.getProgram() == null || form.getOrganisationUnit() == null) {
             return errors;
@@ -263,7 +264,10 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
         if (isEmpty(form.getEnrollment().getEnrollmentDate())) {
             String dateOfEnrollmentDescription = form.getProgram().getEnrollmentDateLabel() == null ?
                     getString(R.string.report_date) : form.getProgram().getEnrollmentDateLabel();
-            errors.add(dateOfEnrollmentDescription);
+            if(!errors.containsKey(ErrorType.MANDATORY)){
+                errors.put(ErrorType.MANDATORY, new ArrayList<String>());
+            }
+            errors.get(ErrorType.MANDATORY).add(dateOfEnrollmentDescription);
         }
 
         Map<String, ProgramTrackedEntityAttribute> dataElements = toMap(
@@ -274,7 +278,10 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             ProgramTrackedEntityAttribute programTrackedEntityAttribute = dataElements.get(value.getTrackedEntityAttributeId());
 
             if (programTrackedEntityAttribute.getMandatory() && isEmpty(value.getValue())) {
-                errors.add(programTrackedEntityAttribute.getTrackedEntityAttribute().getName());
+                if(!errors.containsKey(ErrorType.MANDATORY)){
+                    errors.put(ErrorType.MANDATORY, new ArrayList<String>());
+                }
+                errors.get(ErrorType.MANDATORY).add(programTrackedEntityAttribute.getTrackedEntityAttribute().getName());
             }
         }
         return errors;
@@ -347,16 +354,19 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
         }
         ArrayList<String> programRulesValidationErrors =
                 getProgramRuleFragmentHelper().getProgramRuleValidationErrors();
-        ArrayList<String> mandatoryValidationErrors = getValidationErrors();
+        HashMap<ErrorType, ArrayList<String>> allErrors = getValidationErrors();
+
         ArrayList<String> validationErrors = new ArrayList<>();
         for(DataEntryRow dataEntryRow : form.getDataEntryRows()){
             if(dataEntryRow.getValidationError()!=null)
                 validationErrors.add(getContext().getString(dataEntryRow.getValidationError()));
         }
-        if (programRulesValidationErrors.isEmpty() && mandatoryValidationErrors.isEmpty() && validationErrors.isEmpty()) {
+        if (programRulesValidationErrors.isEmpty() && allErrors.isEmpty() && validationErrors.isEmpty()) {
             return true;
         } else {
-            showValidationErrorDialog(mandatoryValidationErrors, programRulesValidationErrors, validationErrors);
+            allErrors.put(ErrorType.PROGRAM_RULE, programRulesValidationErrors);
+            allErrors.put(ErrorType.INVALID_FIELD, validationErrors);
+            showValidationErrorDialog(allErrors);
             return false;
         }
     }

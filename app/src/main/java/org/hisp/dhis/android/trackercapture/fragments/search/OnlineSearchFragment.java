@@ -158,7 +158,7 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
         UiUtils.hideKeyboard(getActivity());
 
         mAdapter = new DataValueAdapter(getChildFragmentManager(),
-                getActivity().getLayoutInflater());
+                getActivity().getLayoutInflater(), mListView, getContext());
         mListView.setAdapter(mAdapter);
 
         mFilter.addTextChangedListener(new AbsTextWatcher() {

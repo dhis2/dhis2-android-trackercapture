@@ -77,6 +77,7 @@ public class MainActivity extends AbsHomeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ScreenSizeConfigurator.init(getWindowManager());
 
         boolean hasPermissionLocation = (ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED);
@@ -173,9 +174,9 @@ public class MainActivity extends AbsHomeActivity {
     @Override
     public void onResume() {
         super.onResume();
+        ScreenSizeConfigurator.init(getWindowManager());
         Dhis2Application.getEventBus().register(this);
         loadInitialData();
-        ScreenSizeConfigurator.init(getWindowManager());
     }
 
     @Override

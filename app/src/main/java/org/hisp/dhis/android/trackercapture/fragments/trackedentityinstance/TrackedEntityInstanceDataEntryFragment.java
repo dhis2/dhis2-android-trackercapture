@@ -251,7 +251,7 @@ public class TrackedEntityInstanceDataEntryFragment extends
     }
 
     @Override
-    protected HashMap<ErrorType, ArrayList<String>> getValidationErrors() {
+    protected HashMap<ErrorType, ArrayList<String>>  getValidationErrors() {
         HashMap<ErrorType, ArrayList<String>> errors = new HashMap<>();
 
         if (form.getEnrollment() == null || form.getProgram() == null
@@ -354,13 +354,14 @@ public class TrackedEntityInstanceDataEntryFragment extends
             }
         }
 
-        if (allErrors.get(ErrorType.INVALID_FIELD).size() == 0 &&
-                allErrors.get(ErrorType.MANDATORY).size() == 0 &&
-                allErrors.get(ErrorType.INVALID_FIELD).size() == 0) {
-            return true;
-        } else {
+        if (allErrors != null &&
+                (allErrors.get(ErrorType.INVALID_FIELD) != null && allErrors.get(ErrorType.INVALID_FIELD).size() > 0) ||
+                (allErrors.get(ErrorType.MANDATORY) != null && allErrors.get(ErrorType.MANDATORY).size() > 0) ||
+                (allErrors.get(ErrorType.PROGRAM_RULE) != null && allErrors.get(ErrorType.PROGRAM_RULE).size() > 0)) {
             showValidationErrorDialog(allErrors);
             return false;
+        } else {
+            return true;
         }
     }
 

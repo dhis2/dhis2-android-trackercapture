@@ -183,6 +183,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     private ProgramOverviewFragmentState mState;
     private ProgramOverviewFragmentForm mForm;
 
+    private OnProgramStageEventClick eventLongPressed;
+
     public ProgramOverviewFragment() {
         setProgramRuleFragmentHelper(new ProgramOverviewRuleHelper(this));
     }
@@ -830,6 +832,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 showStatusDialog(eventClick.getEvent());
             }
         } else if (eventClick.isLongPressed()) {
+            eventLongPressed = eventClick;
             getActivity().openContextMenu(eventClick.getView());
         } else {
             showDataEntryFragment(eventClick.getEvent(), eventClick.getEvent().getProgramStageId());
@@ -845,23 +848,18 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info =
-                (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        ProgramStageEventRow itemRow = null;
-        if (listView.getItemAtPosition(info.position) instanceof ProgramStageEventRow) {
-            itemRow = (ProgramStageEventRow) listView.getItemAtPosition(info.position);
-        }
+        Event eventClicked = eventLongPressed.getEvent();
 
         switch (item.getItemId()) {
             case R.id.edit_event:
-                if (itemRow != null) {
-                    showDataEntryFragment(itemRow.getEvent(),
-                            itemRow.getEvent().getProgramStageId());
+                if (eventClicked != null) {
+                    showDataEntryFragment(eventClicked,
+                            eventClicked.getProgramStageId());
                 }
                 return true;
             case R.id.delete_event:
-                if (itemRow != null) {
-                    deleteEvent(itemRow);
+                if (eventClicked != null) {
+                    deleteEvent(eventClicked);
                 }
                 return true;
             default:
@@ -869,7 +867,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         }
     }
 
-    private void deleteEvent(final ProgramStageEventRow eventItemRow) {
+    private void deleteEvent(final Event eventItemRow) {
         UiUtils.showConfirmDialog(getActivity(), getActivity().getString(R.string.confirm),
                 getActivity().getString(R.string.warning_delete_event),
                 getActivity().getString(R.string.delete), getActivity().getString(R.string.cancel),
@@ -877,8 +875,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        eventItemRow.getEvent().setStatus(Event.STATUS_DELETED);
-                        eventItemRow.getEvent().save();
+                        eventItemRow.setStatus(Event.STATUS_DELETED);
+                        eventItemRow.save();
                         dialog.dismiss();
                     }
                 });

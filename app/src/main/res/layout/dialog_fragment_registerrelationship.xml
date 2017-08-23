@@ -139,26 +139,33 @@
             <org.hisp.dhis.android.sdk.ui.views.FontEditText
                 android:id="@+id/filter_options"
                 android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_margin="16dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="0.8"
+                android:layout_margin="16dp"
                 android:drawablePadding="4dp"
                 android:drawableRight="@drawable/ic_search"
-                android:hint="@string/search"
                 android:imeOptions="actionSearch"
                 android:inputType="text"
-                android:singleLine="true"
-                app:font="@string/light_font_name" />
-
+                android:hint="@string/search"
+                app:font="@string/light_font_name"/>
             <org.hisp.dhis.android.sdk.ui.views.FloatingActionButton
-                android:id="@+id/search_and_download_button"
-                android:layout_width="0dp"
+                android:id="@+id/create_new_tei_button"
+                android:layout_width="28dp"
                 android:layout_height="48dp"
-                android:layout_marginBottom="16dp"
+                android:layout_weight="0.1"
                 android:layout_marginTop="16dp"
-                android:layout_weight="0.15"
+                android:layout_marginBottom="16dp"
                 android:scaleType="centerInside"
-                android:src="@drawable/ic_search_server" />
+                android:src="@drawable/ic_menu_add" />
+        <org.hisp.dhis.android.sdk.ui.views.FloatingActionButton
+            android:id="@+id/search_and_download_button"
+            android:layout_width="28dp"
+            android:layout_height="48dp"
+            android:layout_weight="0.1"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_search_server" />
         </LinearLayout>
 
         <ProgressBar

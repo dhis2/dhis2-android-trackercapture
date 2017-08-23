@@ -51,7 +51,6 @@ import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
-import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
@@ -163,6 +162,7 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
             }
             editableDataEntryRows = !editableDataEntryRows;
             proceed();
+            return true;
         }
         return super.onOptionsItemSelected(menuItem);
     }

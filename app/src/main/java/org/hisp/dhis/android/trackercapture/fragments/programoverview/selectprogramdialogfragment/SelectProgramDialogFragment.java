@@ -54,9 +54,9 @@ import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.sdk.utils.api.ProgramType;
 import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
 import org.hisp.dhis.android.trackercapture.fragments.programoverview
-        .registerrelationshipdialogfragment.RegisterRelationshipDialogFragment;
-import org.hisp.dhis.android.trackercapture.fragments.programoverview
         .registerrelationshipdialogfragment.RelationshipTypesDialogFragment;
+import org.hisp.dhis.android.trackercapture.fragments.search.OnlineSearchResultFragment;
+import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.Action;
 
 import java.util.Arrays;
 
@@ -69,22 +69,25 @@ public class SelectProgramDialogFragment extends DialogFragment
     protected CardTextViewButton mOrgUnitButton;
     protected CardTextViewButton mProgramButton;
     private FloatingActionButton searchAndDownloadButton;
+    private FloatingActionButton createNewTeiButton;
     private TextView mDialogLabel;
 
     protected SelectProgramFragmentState mState;
     protected SelectProgramFragmentPreferences mPrefs;
-    private static RegisterRelationshipDialogFragment.CallBack mCallBack;
+    private static OnlineSearchResultFragment.CallBack mCallBack;
 
     private static final String EXTRA_TRACKEDENTITYINSTANCEID = "extra:trackedEntityInstanceId";
     private static final String EXTRA_ARGUMENTS = "extra:Arguments";
     private static final String EXTRA_SAVED_INSTANCE_STATE = "extra:savedInstanceState";
-
-    public static SelectProgramDialogFragment newInstance(long trackedEntityInstanceId, RegisterRelationshipDialogFragment.CallBack callBack) {
+    private static final String EXTRA_SAVED_ACTION = "extra:savedAction";
+    public static SelectProgramDialogFragment newInstance(long trackedEntityInstanceId,
+            Action action, OnlineSearchResultFragment.CallBack callBack) {
         mCallBack=callBack;
         SelectProgramDialogFragment dialogFragment = new SelectProgramDialogFragment();
         Bundle args = new Bundle();
 
         args.putLong(EXTRA_TRACKEDENTITYINSTANCEID, trackedEntityInstanceId);
+        args.putSerializable(EXTRA_SAVED_ACTION, action);
         dialogFragment.setArguments(args);
         return dialogFragment;
     }
@@ -108,9 +111,21 @@ public class SelectProgramDialogFragment extends DialogFragment
     public void onViewCreated(View view, Bundle savedInstanceState) {
         mPrefs = new SelectProgramFragmentPreferences(
                 getActivity().getApplicationContext());
-        searchAndDownloadButton  = (FloatingActionButton) view
-                .findViewById(org.hisp.dhis.android.trackercapture.R.id.search_and_download_button);
-        searchAndDownloadButton.setOnClickListener(this);
+        Action action = (Action) getArguments().getSerializable(EXTRA_SAVED_ACTION);
+
+        if(action==Action.QUERY) {
+            searchAndDownloadButton = (FloatingActionButton) view
+                    .findViewById(
+                            org.hisp.dhis.android.trackercapture.R.id.search_and_download_button);
+            searchAndDownloadButton.setOnClickListener(this);
+            searchAndDownloadButton.setVisibility(View.VISIBLE);
+        }else if (action==Action.CREATE){
+            createNewTeiButton = (FloatingActionButton) view
+                    .findViewById(
+                            org.hisp.dhis.android.trackercapture.R.id.create_new_tei_button);
+            createNewTeiButton.setOnClickListener(this);
+            createNewTeiButton.setVisibility(View.VISIBLE);
+        }
 
         ImageView closeDialogButton = (ImageView) view
                 .findViewById(R.id.close_dialog_button);
@@ -213,6 +228,9 @@ public class SelectProgramDialogFragment extends DialogFragment
         } else if(v.getId() == org.hisp.dhis.android.trackercapture.R.id.search_and_download_button){
             HolderActivity.navigateToOnlineSearchFragment(getActivity(), mState.getProgramId(), mState.getOrgUnitId(), true, mCallBack);
             dismiss();
+        } else if(v.getId() == org.hisp.dhis.android.trackercapture.R.id.create_new_tei_button){
+            HolderActivity.navigateToTrackedEntityInstanceDataEntryFragment(getActivity(), mState.getProgramId(), mState.getOrgUnitId(), true, mCallBack);
+            dismiss();
         }
     }
 
@@ -262,8 +280,6 @@ public class SelectProgramDialogFragment extends DialogFragment
 
         mPrefs.putOrgUnit(new Pair<>(orgUnitId, orgUnitLabel));
         mPrefs.putProgram(null);
-
-        searchAndDownloadButton.hide();
     }
 
     public void onProgramSelected(String programId, String programName) {
@@ -271,7 +287,6 @@ public class SelectProgramDialogFragment extends DialogFragment
 
         mState.setProgram(programId, programName);
         mPrefs.putProgram(new Pair<>(programId, programName));
-        searchAndDownloadButton.show();
 
         // this call will trigger onCreateLoader method
     }

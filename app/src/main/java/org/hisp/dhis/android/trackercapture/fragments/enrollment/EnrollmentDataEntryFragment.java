@@ -379,7 +379,10 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             TrackedEntityAttribute trackedEntityAttribute =
                     MetaDataController.getTrackedEntityAttribute(
                             value.getTrackedEntityAttributeId());
-            if (trackedEntityAttribute.isUnique()) {
+            if (trackedEntityAttribute.isUnique() && !trackedEntityAttribute.isGenerated()) {
+                if(value.getValue()==null || value.getValue().isEmpty()){
+                    continue;
+                }
                 if (TrackerController.countTrackedEntityAttributeValue(value.getValue(),
                         value.getTrackedEntityAttributeId()) != 0) {
                     listOFUniqueFields.add(trackedEntityAttribute.getDisplayName());
@@ -396,11 +399,12 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
                 TrackedEntityAttribute trackedEntityAttribute =
                         MetaDataController.getTrackedEntityAttribute(
                                 value.getTrackedEntityAttributeId());
-                if (trackedEntityAttribute.isUnique()) {
+                if (trackedEntityAttribute.isUnique() && !trackedEntityAttribute.isGenerated()) {
+                    if(value.getValue()==null || value.getValue().isEmpty()){
+                        continue;
+                    }
                     if(TrackerController.countTrackedEntityAttributeValue(value.getValue(), value.getTrackedEntityAttributeId())!=0){
                         return false;
-                    }else{
-                        return  true;
                     }
                 }
             }

@@ -35,7 +35,6 @@ import org.hisp.dhis.android.sdk.controllers.DhisController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.job.JobExecutor;
 import org.hisp.dhis.android.sdk.job.NetworkJob;
-import org.hisp.dhis.android.sdk.network.APIException;
 import org.hisp.dhis.android.sdk.persistence.models.BaseSerializableModel;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
@@ -75,7 +74,7 @@ public class ItemStatusDialogFragment extends org.hisp.dhis.android.sdk.ui.dialo
             sendTrackedEntityInstance(trackedEntityInstance);
         } else if(item instanceof Enrollment) {
             Enrollment enrollment = (Enrollment) item;
-            sendEnrollment(enrollment);
+            sendTrackedEntityInstance(TrackerController.getTrackedEntityInstance(enrollment.getTrackedEntityInstance()));
         }
         else if(item instanceof Event)
         {

@@ -44,8 +44,10 @@ import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.sdk.controllers.DhisController;
+import org.hisp.dhis.android.sdk.controllers.ErrorType;
 import org.hisp.dhis.android.sdk.controllers.GpsController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
@@ -160,6 +162,7 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
             }
             editableDataEntryRows = !editableDataEntryRows;
             proceed();
+            return true;
         }
         return super.onOptionsItemSelected(menuItem);
     }
@@ -388,24 +391,37 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
     }
 
     @Override
-    protected ArrayList<String> getValidationErrors() {
-        ArrayList<String> errors = new ArrayList<>();
+    protected HashMap<ErrorType, ArrayList<String>> getValidationErrors() {
+        HashMap<ErrorType, ArrayList<String>> errors = new HashMap<>();
         if (form.getEnrollment() == null || form.getProgram() == null) {
             return errors;
         }
         if (isEmpty(form.getEnrollment().getEnrollmentDate())) {
             String dateOfEnrollmentDescription = form.getProgram().getEnrollmentDateLabel() == null ?
                     getString(R.string.report_date) : form.getProgram().getEnrollmentDateLabel();
-            errors.add(dateOfEnrollmentDescription);
+            if(!errors.containsKey(ErrorType.MANDATORY)){
+                errors.put(ErrorType.MANDATORY, new ArrayList<String>());
+            }
+            errors.get(ErrorType.MANDATORY).add(dateOfEnrollmentDescription);
         }
         Map<String, ProgramTrackedEntityAttribute> dataElements = toMap(
                 MetaDataController.getProgramTrackedEntityAttributes(form.getProgram().getUid())
         );
         for (TrackedEntityAttributeValue value : form.getEnrollment().getAttributes()) {
             ProgramTrackedEntityAttribute programTrackedEntityAttribute = dataElements.get(value.getTrackedEntityAttributeId());
-
             if (programTrackedEntityAttribute.getMandatory() && isEmpty(value.getValue())) {
-                errors.add(programTrackedEntityAttribute.getTrackedEntityAttribute().getName());
+                if(!errors.containsKey(ErrorType.MANDATORY)){
+                    errors.put(ErrorType.MANDATORY, new ArrayList<String>());
+                }
+                errors.get(ErrorType.MANDATORY).add(programTrackedEntityAttribute.getTrackedEntityAttribute().getName());
+            }
+            if(programTrackedEntityAttribute.getTrackedEntityAttribute().isUnique()){
+                if(TrackerController.countTrackedEntityAttributeValue(value.getValue(), value.getTrackedEntityAttributeId())!=0){
+                    if(!errors.containsKey(ErrorType.UNIQUE)){
+                        errors.put(ErrorType.UNIQUE, new ArrayList<String>());
+                    }
+                    errors.get(ErrorType.UNIQUE).add(programTrackedEntityAttribute.getTrackedEntityAttribute().getName());
+                }
             }
         }
         return errors;
@@ -459,16 +475,18 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
 
     private boolean validate() {
         ArrayList<String> programRulesValidationErrors = getProgramRuleFragmentHelper().getProgramRuleValidationErrors();
-        ArrayList<String> mandatoryValidationErrors = getValidationErrors();
+        HashMap<ErrorType, ArrayList<String>>  allErrors = getValidationErrors();
         ArrayList<String> validationErrors = new ArrayList<>();
         for(DataEntryRow dataEntryRow : form.getDataEntryRows()){
             if(dataEntryRow.getValidationError()!=null)
                 validationErrors.add(getContext().getString(dataEntryRow.getValidationError()));
         }
-        if (programRulesValidationErrors.isEmpty() && mandatoryValidationErrors.isEmpty() && validationErrors.isEmpty()) {
+        if (programRulesValidationErrors.isEmpty() && allErrors.isEmpty() && validationErrors.isEmpty()) {
             return true;
         } else {
-            showValidationErrorDialog(mandatoryValidationErrors, programRulesValidationErrors, validationErrors);
+            allErrors.put(ErrorType.PROGRAM_RULE, programRulesValidationErrors);
+            allErrors.put(ErrorType.INVALID_FIELD, validationErrors);
+            showValidationErrorDialog(allErrors);
             return false;
         }
     }

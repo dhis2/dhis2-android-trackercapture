@@ -42,6 +42,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -182,6 +183,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     private ProgramOverviewFragmentState mState;
     private ProgramOverviewFragmentForm mForm;
 
+    private OnProgramStageEventClick eventLongPressed;
+
     public ProgramOverviewFragment() {
         setProgramRuleFragmentHelper(new ProgramOverviewRuleHelper(this));
     }
@@ -281,6 +284,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         listView.addHeaderView(header, CLASS_TAG, false);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(this);
+        registerForContextMenu(listView);
 
         enrollmentServerStatus = (ImageView) header.findViewById(R.id.enrollmentstatus);
         enrollmentLayout = (LinearLayout) header.findViewById(R.id.enrollmentLayout);
@@ -827,9 +831,55 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             if (eventClick.getEvent() != null) {
                 showStatusDialog(eventClick.getEvent());
             }
+        } else if (eventClick.isLongPressed()) {
+            eventLongPressed = eventClick;
+            getActivity().openContextMenu(eventClick.getView());
         } else {
             showDataEntryFragment(eventClick.getEvent(), eventClick.getEvent().getProgramStageId());
         }
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v,
+            ContextMenu.ContextMenuInfo menuInfo) {
+        new MenuInflater(this.getActivity()).inflate(R.menu.long_click_event_menu, menu);
+
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        Event eventClicked = eventLongPressed.getEvent();
+
+        switch (item.getItemId()) {
+            case R.id.edit_event:
+                if (eventClicked != null) {
+                    showDataEntryFragment(eventClicked,
+                            eventClicked.getProgramStageId());
+                }
+                return true;
+            case R.id.delete_event:
+                if (eventClicked != null) {
+                    deleteEvent(eventClicked);
+                }
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
+
+    private void deleteEvent(final Event eventItemRow) {
+        UiUtils.showConfirmDialog(getActivity(), getActivity().getString(R.string.confirm),
+                getActivity().getString(R.string.warning_delete_event),
+                getActivity().getString(R.string.delete), getActivity().getString(R.string.cancel),
+                (R.drawable.ic_event_error),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        eventItemRow.setStatus(Event.STATUS_DELETED);
+                        eventItemRow.save();
+                        dialog.dismiss();
+                    }
+                });
     }
 
     public Map<Long, FailedItem> getFailedEvents() {

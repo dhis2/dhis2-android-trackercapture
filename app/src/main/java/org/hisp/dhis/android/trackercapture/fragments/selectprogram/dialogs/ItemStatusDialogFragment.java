@@ -47,12 +47,10 @@ import org.hisp.dhis.android.sdk.synchronization.data.enrollment.EnrollmentRepos
 import org.hisp.dhis.android.sdk.synchronization.data.event.EventLocalDataSource;
 import org.hisp.dhis.android.sdk.synchronization.data.event.EventRemoteDataSource;
 import org.hisp.dhis.android.sdk.synchronization.data.event.EventRepository;
-import org.hisp.dhis.android.sdk.synchronization.data.faileditem.FailedItemLocalDataSource;
 import org.hisp.dhis.android.sdk.synchronization.data.faileditem.FailedItemRepository;
 import org.hisp.dhis.android.sdk.synchronization.domain.enrollment.IEnrollmentRepository;
 import org.hisp.dhis.android.sdk.synchronization.domain.enrollment.SyncEnrollmentUseCase;
 import org.hisp.dhis.android.sdk.synchronization.domain.event.IEventRepository;
-import org.hisp.dhis.android.sdk.synchronization.domain.faileditem.IFailedItemRepository;
 
 /**
  * Created by erling on 9/21/15.
@@ -118,8 +116,7 @@ public class ItemStatusDialogFragment extends org.hisp.dhis.android.sdk.ui.dialo
                 IEnrollmentRepository enrollmentRepository = new EnrollmentRepository(enrollmentLocalDataSource, enrollmentRemoteDataSource);
                 IEventRepository eventRepository = new EventRepository(mLocalDataSource, mRemoteDataSource);
 
-                FailedItemLocalDataSource failedItemLocalDataSource = new FailedItemLocalDataSource();
-                IFailedItemRepository failedItemRepository = new FailedItemRepository(failedItemLocalDataSource);
+                FailedItemRepository  failedItemRepository = new FailedItemRepository ();
                 SyncEnrollmentUseCase enrollmentUseCase = new SyncEnrollmentUseCase(enrollmentRepository, eventRepository, failedItemRepository);
                 enrollmentUseCase.execute(enrollment);
                 return new Object();

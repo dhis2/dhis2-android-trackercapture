@@ -280,10 +280,13 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
 
             if (data.getProgram() != null && data.getProgram().isDisplayFrontPageList()) {
                 noRowsTextView.setVisibility(View.GONE);
-                item.setVisible(true);
+                if (item != null)
+                    item.setVisible(true);
             } else {
                 noRowsTextView.setVisibility(View.VISIBLE);
-                item.setVisible(false);
+
+                if (item != null)
+                    item.setVisible(false);
             }
         }
     }

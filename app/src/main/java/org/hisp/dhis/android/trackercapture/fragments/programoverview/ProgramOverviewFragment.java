@@ -876,7 +876,9 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         eventItemRow.setStatus(Event.STATUS_DELETED);
+                        eventItemRow.setFromServer(false);
                         eventItemRow.save();
+
                         dialog.dismiss();
                     }
                 });

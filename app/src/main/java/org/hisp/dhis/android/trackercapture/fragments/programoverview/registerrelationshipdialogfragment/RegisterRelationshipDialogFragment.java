@@ -33,6 +33,7 @@ package org.hisp.dhis.android.trackercapture.fragments.programoverview.registerr
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
@@ -361,6 +362,10 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
                     relationship.setTrackedEntityInstanceB(mForm.getTrackedEntityInstance().getTrackedEntityInstance());
                     relationship.setTrackedEntityInstanceA(relative.getTrackedEntityInstance());
                 }
+                Relationship relationship1 = new Select().from(Relationship.class).
+                        where(Condition.column(Relationship$Table.RELATIONSHIP).
+                                is(relationship.getRelationship())).querySingle();
+                relationship.setDisplayName(relationship1.getDisplayName());
 
                 //now we check if this relationship already exists
                 Relationship existingRelationship = new Select().from(Relationship.class).

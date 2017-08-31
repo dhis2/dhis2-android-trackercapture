@@ -33,6 +33,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.hisp.dhis.android.trackercapture.R;
@@ -43,7 +44,7 @@ import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceIt
  */
 public class SearchRelativeTrackedEntityInstanceItemRow extends TrackedEntityInstanceItemRow
 {
-    private String mFourthItem;
+    private String statusItem;
 
     public SearchRelativeTrackedEntityInstanceItemRow(Context context)
     {
@@ -57,10 +58,9 @@ public class SearchRelativeTrackedEntityInstanceItemRow extends TrackedEntityIns
 
         if (convertView == null) {
             view = inflater.inflate(org.hisp.dhis.android.sdk.R.layout.listview_trackedentityinstance_item, container, false);
+            LinearLayout rowContainer = (LinearLayout)view.findViewById(R.id.dynamic_column_container);
             holder = new ViewHolder(
-                    (TextView) view.findViewById(R.id.first_event_item),
-                    (TextView) view.findViewById(R.id.second_event_item),
-                    (TextView) view.findViewById(R.id.third_event_item),
+                    (LinearLayout) rowContainer.findViewById(R.id.dynamic_column_container),
                     (TextView) view.findViewById(R.id.status_text_view)
             );
             view.setTag(holder);
@@ -69,36 +69,31 @@ public class SearchRelativeTrackedEntityInstanceItemRow extends TrackedEntityIns
             holder = (ViewHolder) view.getTag();
         }
 
-        holder.firstItem.setText(mFirstItem);
-        holder.secondItem.setText(mSecondItem);
-        holder.thirdItem.setText(mThirdItem);
-        holder.fourthItem.setText(mFourthItem);
+        for(String column: columns){
+            View columnView = inflater.inflate(R.layout.search_item_column, holder.container, false);
+            TextView textView = (TextView) columnView.findViewById(R.id.column_name);
+            textView.setText(column);
+        }
+        holder.statusItem.setText(statusItem);
 
         return view;
     }
 
-    public String getmFourthItem() {
-        return mFourthItem;
+    public String getStatusItem() {
+        return statusItem;
     }
 
-    public void setFourthItem(String mFourthItem) {
-        this.mFourthItem = mFourthItem;
+    public void setStatusItem(String statusItem) {
+        this.statusItem = statusItem;
     }
 
     private static class ViewHolder {
-        public final TextView firstItem;
-        public final TextView secondItem;
-        public final TextView thirdItem;
-        public final TextView fourthItem;
+        public final LinearLayout container;
+        public final TextView statusItem;
 
-        private ViewHolder(TextView firstItem,
-                           TextView secondItem,
-                           TextView thirdItem,
-                           TextView fourthItem) {
-            this.firstItem = firstItem;
-            this.secondItem = secondItem;
-            this.thirdItem = thirdItem;
-            this.fourthItem = fourthItem;
+        private ViewHolder(LinearLayout container, TextView statusItem) {
+            this.container = container;
+            this.statusItem = statusItem;
         }
     }
 }

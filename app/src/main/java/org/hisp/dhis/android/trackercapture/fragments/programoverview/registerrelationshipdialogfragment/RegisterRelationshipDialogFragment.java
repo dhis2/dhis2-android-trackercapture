@@ -68,6 +68,7 @@ import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribut
 import org.hisp.dhis.android.sdk.persistence.models.Relationship;
 import org.hisp.dhis.android.sdk.persistence.models.Relationship$Table;
 import org.hisp.dhis.android.sdk.persistence.models.RelationshipType;
+import org.hisp.dhis.android.sdk.persistence.models.RelationshipType$Table;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
@@ -362,10 +363,12 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
                     relationship.setTrackedEntityInstanceB(mForm.getTrackedEntityInstance().getTrackedEntityInstance());
                     relationship.setTrackedEntityInstanceA(relative.getTrackedEntityInstance());
                 }
-                Relationship relationship1 = new Select().from(Relationship.class).
-                        where(Condition.column(Relationship$Table.RELATIONSHIP).
+                RelationshipType relationshipType = new Select().from(RelationshipType.class).
+                        where(Condition.column(RelationshipType$Table.ID).
                                 is(relationship.getRelationship())).querySingle();
-                relationship.setDisplayName(relationship1.getDisplayName());
+                if(relationshipType!=null) {
+                    relationship.setDisplayName(relationshipType.getDisplayName());
+                }
 
                 //now we check if this relationship already exists
                 Relationship existingRelationship = new Select().from(Relationship.class).

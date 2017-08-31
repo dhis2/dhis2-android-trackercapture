@@ -69,6 +69,7 @@ import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.events.UiEvent;
 import org.hisp.dhis.android.sdk.job.JobExecutor;
 import org.hisp.dhis.android.sdk.job.NetworkJob;
+import org.hisp.dhis.android.sdk.network.DhisApi;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.BaseSerializableModel;
@@ -1048,6 +1049,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         mForm.getEnrollment().setStatus(Enrollment.COMPLETED);
         mForm.getEnrollment().setFromServer(false);
         mForm.getEnrollment().async().save();
+        mForm.getTrackedEntityInstance().setFromServer(false);
+        mForm.getTrackedEntityInstance().async().save();
         clearViews();
     }
 
@@ -1060,6 +1063,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         mForm.getEnrollment().setStatus(Enrollment.CANCELLED);
         mForm.getEnrollment().setFromServer(false);
         mForm.getEnrollment().async().save();
+        mForm.getTrackedEntityInstance().setFromServer(false);
+        mForm.getTrackedEntityInstance().async().save();
         setTerminated();
         clearViews();
     }
@@ -1348,8 +1353,9 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 ResourceType.TRACKEDENTITYINSTANCE) {
             @Override
             public Object execute() {
+                DhisApi dhisApi = DhisController.getInstance().getDhisApi();
                 EnrollmentLocalDataSource enrollmentLocalDataSource = new EnrollmentLocalDataSource();
-                EnrollmentRemoteDataSource enrollmentRemoteDataSource = new EnrollmentRemoteDataSource(DhisController.getInstance().getDhisApi());
+                EnrollmentRemoteDataSource enrollmentRemoteDataSource = new EnrollmentRemoteDataSource(dhisApi);
                 IEnrollmentRepository enrollmentRepository = new EnrollmentRepository(enrollmentLocalDataSource, enrollmentRemoteDataSource);
 
                 EventLocalDataSource mLocalDataSource = new EventLocalDataSource();
@@ -1358,7 +1364,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 FailedItemRepository failedItemRepository = new FailedItemRepository();
 
                 TrackedEntityInstanceLocalDataSource trackedEntityInstanceLocalDataSource = new TrackedEntityInstanceLocalDataSource();
-                TrackedEntityInstanceRemoteDataSource trackedEntityInstanceRemoteDataSource = new TrackedEntityInstanceRemoteDataSource(DhisController.getInstance().getDhisApi());
+                TrackedEntityInstanceRemoteDataSource trackedEntityInstanceRemoteDataSource = new TrackedEntityInstanceRemoteDataSource(dhisApi);
                 ITrackedEntityInstanceRepository
                         trackedEntityInstanceRepository = new TrackedEntityInstanceRepository(trackedEntityInstanceLocalDataSource, trackedEntityInstanceRemoteDataSource);
                 SyncTrackedEntityInstanceUseCase syncTrackedEntityInstanceUseCase = new SyncTrackedEntityInstanceUseCase(trackedEntityInstanceRepository, enrollmentRepository, eventRepository, failedItemRepository);

@@ -1013,6 +1013,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 mForm.getProgram().getSelectIncidentDatesInFuture(),
                 mForm.getProgram().getEnrollmentDateLabel(),
                 mForm.getProgram().getIncidentDateLabel());
+
+        markParentsAsNonFromServer();
     }
 
     @Override
@@ -1053,11 +1055,20 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             return;
         }
         mForm.getEnrollment().setStatus(Enrollment.COMPLETED);
-        mForm.getEnrollment().setFromServer(false);
-        mForm.getEnrollment().async().save();
-        mForm.getTrackedEntityInstance().setFromServer(false);
-        mForm.getTrackedEntityInstance().async().save();
+        markParentsAsNonFromServer();
         clearViews();
+    }
+
+    private void markParentsAsNonFromServer() {
+        if (mForm.getEnrollment() != null) {
+            mForm.getEnrollment().setFromServer(false);
+            mForm.getEnrollment().async().save();
+        }
+
+        if (mForm.getTrackedEntityInstance() != null) {
+            mForm.getTrackedEntityInstance().setFromServer(false);
+            mForm.getTrackedEntityInstance().async().save();
+        }
     }
 
     public void terminateEnrollment() {
@@ -1067,10 +1078,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             return;
         }
         mForm.getEnrollment().setStatus(Enrollment.CANCELLED);
-        mForm.getEnrollment().setFromServer(false);
-        mForm.getEnrollment().async().save();
-        mForm.getTrackedEntityInstance().setFromServer(false);
-        mForm.getTrackedEntityInstance().async().save();
+        markParentsAsNonFromServer();
         setTerminated();
         clearViews();
     }
@@ -1085,10 +1093,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     public void toggleFollowup() {
         if (mForm == null || mForm.getEnrollment() == null) return;
         mForm.getEnrollment().setFollowup(!mForm.getEnrollment().getFollowup());
-        mForm.getEnrollment().setFromServer(false);
-        mForm.getEnrollment().async().save();
-        mForm.getTrackedEntityInstance().setFromServer(false);
-        mForm.getTrackedEntityInstance().async().save();
+        markParentsAsNonFromServer();
         setFollowupButton(mForm.getEnrollment().getFollowup());
     }
 
@@ -1146,8 +1151,11 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 Enrollment enrollment = getLastEnrollmentForTrackedEntityInstance();
                 if(enrollment!=null) {
                     enrollment.setStatus(Enrollment.ACTIVE);
+                    enrollment.setFromServer(false);
                     enrollment.async().save();
+                    markParentsAsNonFromServer();
                     refreshUi();
+
                 }
                 break;
             }

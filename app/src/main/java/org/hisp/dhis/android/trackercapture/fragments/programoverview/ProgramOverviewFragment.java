@@ -892,6 +892,12 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                     public void onClick(DialogInterface dialog, int which) {
                         eventItemRow.setStatus(Event.STATUS_DELETED);
                         eventItemRow.setFromServer(false);
+                        Enrollment enrollment = TrackerController.getEnrollment(eventItemRow.getEnrollment());
+                        enrollment.setFromServer(false);
+                        enrollment.save();
+                        TrackedEntityInstance trackedEntityInstance = TrackerController.getTrackedEntityInstance(enrollment.getTrackedEntityInstance());
+                        trackedEntityInstance.setFromServer(false);
+                        trackedEntityInstance.save();
                         eventItemRow.save();
 
                         dialog.dismiss();
@@ -1081,6 +1087,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         mForm.getEnrollment().setFollowup(!mForm.getEnrollment().getFollowup());
         mForm.getEnrollment().setFromServer(false);
         mForm.getEnrollment().async().save();
+        mForm.getTrackedEntityInstance().setFromServer(false);
+        mForm.getTrackedEntityInstance().async().save();
         setFollowupButton(mForm.getEnrollment().getFollowup());
     }
 

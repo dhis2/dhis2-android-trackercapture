@@ -3,6 +3,7 @@ package org.hisp.dhis.android.trackercapture.fragments.search;
 
 import android.app.Activity;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -195,6 +196,13 @@ public class LocalSearchResultFragment extends Fragment implements LoaderManager
         super.onResume();
         Dhis2Application.getEventBus().register(this);
     }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        getLoaderManager().restartLoader(LOADER_ID, getArguments(), this);
+    }
+
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);

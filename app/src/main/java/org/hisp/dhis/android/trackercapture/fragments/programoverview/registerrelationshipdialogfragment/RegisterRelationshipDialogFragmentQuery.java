@@ -42,6 +42,7 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
+import org.hisp.dhis.android.sdk.utils.ScreenSizeConfigurator;
 import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.SearchRelativeTrackedEntityInstanceItemRow;
 
 import java.util.ArrayList;
@@ -54,6 +55,7 @@ public class RegisterRelationshipDialogFragmentQuery implements Query<RegisterRe
 {
     public static final String TAG = RegisterRelationshipDialogFragmentQuery.class.getSimpleName();
     private long trackedEntityInstanceId;
+    private final int NUMBER_OF_ATTRIBUTES = 4;
 
     public RegisterRelationshipDialogFragmentQuery(long trackedEntityInstanceId)
     {
@@ -83,14 +85,14 @@ public class RegisterRelationshipDialogFragmentQuery implements Query<RegisterRe
                 continue;
             }
             teiRows.add(createTrackedEntityInstanceItem(context,
-                    tei));
+                    tei, NUMBER_OF_ATTRIBUTES));
         }
 
         form.setRows(teiRows);
         return form;
     }
 
-    private SearchRelativeTrackedEntityInstanceItemRow createTrackedEntityInstanceItem(Context context, TrackedEntityInstance trackedEntityInstance) {
+    private SearchRelativeTrackedEntityInstanceItemRow createTrackedEntityInstanceItem(Context context, TrackedEntityInstance trackedEntityInstance, int numberOfAttributes) {
         SearchRelativeTrackedEntityInstanceItemRow trackedEntityInstanceItemRow = new SearchRelativeTrackedEntityInstanceItemRow(context);
         trackedEntityInstanceItemRow.setTrackedEntityInstance(trackedEntityInstance);
         if(trackedEntityInstance.getAttributes()==null) {
@@ -110,12 +112,12 @@ public class RegisterRelationshipDialogFragmentQuery implements Query<RegisterRe
                 }
             }
             List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = program.getProgramTrackedEntityAttributes();
-            for(int i = 0; i<programTrackedEntityAttributes.size() && i<4; i++) {
+            for(int i = 0; i<programTrackedEntityAttributes.size() && i<numberOfAttributes; i++) {
                 attributesToShow.add(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute());
             }
         }
 
-        for(int i=0; i<4; i++)
+        for(int i=0; i<NUMBER_OF_ATTRIBUTES; i++)
         {
             String value = "";
             if(attributesToShow==null || attributesToShow.size()<=i) {
@@ -129,15 +131,7 @@ public class RegisterRelationshipDialogFragmentQuery implements Query<RegisterRe
                 }
             }
 
-            if (i == 0) {
-                trackedEntityInstanceItemRow.setFirstItem(value);
-            } else if (i == 1) {
-                trackedEntityInstanceItemRow.setSecondItem(value);
-            } else if (i == 2) {
-                trackedEntityInstanceItemRow.setThirdItem(value);
-            } else if (i == 3) {
-                trackedEntityInstanceItemRow.setFourthItem(value);
-            }
+            trackedEntityInstanceItemRow.addColumn(value);
         }
         return trackedEntityInstanceItemRow;
     }

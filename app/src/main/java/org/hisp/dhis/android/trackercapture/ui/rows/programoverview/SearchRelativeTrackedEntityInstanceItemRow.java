@@ -44,7 +44,8 @@ import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceIt
  */
 public class SearchRelativeTrackedEntityInstanceItemRow extends TrackedEntityInstanceItemRow
 {
-    private String statusItem;
+
+    private String mFourthItem;
 
     public SearchRelativeTrackedEntityInstanceItemRow(Context context)
     {
@@ -58,9 +59,10 @@ public class SearchRelativeTrackedEntityInstanceItemRow extends TrackedEntityIns
 
         if (convertView == null) {
             view = inflater.inflate(org.hisp.dhis.android.sdk.R.layout.listview_trackedentityinstance_item, container, false);
-            LinearLayout rowContainer = (LinearLayout)view.findViewById(R.id.dynamic_column_container);
             holder = new ViewHolder(
-                    (LinearLayout) rowContainer.findViewById(R.id.dynamic_column_container),
+                    (TextView) view.findViewById(R.id.first_event_item),
+                    (TextView) view.findViewById(R.id.second_event_item),
+                    (TextView) view.findViewById(R.id.third_event_item),
                     (TextView) view.findViewById(R.id.status_text_view)
             );
             view.setTag(holder);
@@ -68,32 +70,40 @@ public class SearchRelativeTrackedEntityInstanceItemRow extends TrackedEntityIns
             view = convertView;
             holder = (ViewHolder) view.getTag();
         }
-
-        for(String column: columns){
-            View columnView = inflater.inflate(R.layout.search_item_column, holder.container, false);
-            TextView textView = (TextView) columnView.findViewById(R.id.column_name);
-            textView.setText(column);
-        }
-        holder.statusItem.setText(statusItem);
+        if(columns.get(0)!=null)
+        holder.firstItem.setText(columns.get(0));
+        if(columns.get(1)!=null)
+        holder.secondItem.setText(columns.get(1));
+        if(columns.get(2)!=null)
+        holder.thirdItem.setText(columns.get(2));
+        if(columns.get(3)!=null)
+        holder.fourthItem.setText(columns.get(3));
 
         return view;
     }
 
-    public String getStatusItem() {
-        return statusItem;
+    public String getmFourthItem() {
+        return mFourthItem;
     }
 
-    public void setStatusItem(String statusItem) {
-        this.statusItem = statusItem;
+    public void setFourthItem(String mFourthItem) {
+        this.mFourthItem = mFourthItem;
     }
 
     private static class ViewHolder {
-        public final LinearLayout container;
-        public final TextView statusItem;
+        public final TextView firstItem;
+        public final TextView secondItem;
+        public final TextView thirdItem;
+        public final TextView fourthItem;
 
-        private ViewHolder(LinearLayout container, TextView statusItem) {
-            this.container = container;
-            this.statusItem = statusItem;
+        private ViewHolder(TextView firstItem,
+                TextView secondItem,
+                TextView thirdItem,
+                TextView fourthItem) {
+            this.firstItem = firstItem;
+            this.secondItem = secondItem;
+            this.thirdItem = thirdItem;
+            this.fourthItem = fourthItem;
         }
     }
 }

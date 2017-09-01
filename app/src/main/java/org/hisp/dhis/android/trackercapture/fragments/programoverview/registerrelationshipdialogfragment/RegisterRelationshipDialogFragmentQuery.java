@@ -55,6 +55,7 @@ public class RegisterRelationshipDialogFragmentQuery implements Query<RegisterRe
 {
     public static final String TAG = RegisterRelationshipDialogFragmentQuery.class.getSimpleName();
     private long trackedEntityInstanceId;
+    private final int NUMBER_OF_ATTRIBUTES = 4;
 
     public RegisterRelationshipDialogFragmentQuery(long trackedEntityInstanceId)
     {
@@ -84,7 +85,7 @@ public class RegisterRelationshipDialogFragmentQuery implements Query<RegisterRe
                 continue;
             }
             teiRows.add(createTrackedEntityInstanceItem(context,
-                    tei, ScreenSizeConfigurator.getInstance().getFields()));
+                    tei, NUMBER_OF_ATTRIBUTES));
         }
 
         form.setRows(teiRows);
@@ -111,12 +112,12 @@ public class RegisterRelationshipDialogFragmentQuery implements Query<RegisterRe
                 }
             }
             List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = program.getProgramTrackedEntityAttributes();
-            for(int i = 0; i<programTrackedEntityAttributes.size() && i<4; i++) {
+            for(int i = 0; i<programTrackedEntityAttributes.size() && i<numberOfAttributes; i++) {
                 attributesToShow.add(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute());
             }
         }
 
-        for(int i=0; i<numberOfAttributes; i++)
+        for(int i=0; i<NUMBER_OF_ATTRIBUTES; i++)
         {
             String value = "";
             if(attributesToShow==null || attributesToShow.size()<=i) {

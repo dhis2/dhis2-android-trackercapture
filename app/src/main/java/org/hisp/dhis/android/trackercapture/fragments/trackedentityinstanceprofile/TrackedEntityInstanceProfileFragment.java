@@ -416,7 +416,7 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
                 }
                 errors.get(ErrorType.MANDATORY).add(programTrackedEntityAttribute.getTrackedEntityAttribute().getName());
             }
-            if(programTrackedEntityAttribute.getTrackedEntityAttribute().isUnique() && !programTrackedEntityAttribute.getTrackedEntityAttribute().isGenerated()){
+            if(programTrackedEntityAttribute.getTrackedEntityAttribute().isUnique()){
                 if(value.getValue()==null || value.getValue().isEmpty()){
                     continue;
                 }

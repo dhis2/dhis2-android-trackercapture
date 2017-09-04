@@ -33,6 +33,7 @@ package org.hisp.dhis.android.trackercapture.fragments.programoverview.registerr
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
@@ -67,6 +68,7 @@ import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribut
 import org.hisp.dhis.android.sdk.persistence.models.Relationship;
 import org.hisp.dhis.android.sdk.persistence.models.Relationship$Table;
 import org.hisp.dhis.android.sdk.persistence.models.RelationshipType;
+import org.hisp.dhis.android.sdk.persistence.models.RelationshipType$Table;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
@@ -360,6 +362,12 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
                 } else {
                     relationship.setTrackedEntityInstanceB(mForm.getTrackedEntityInstance().getTrackedEntityInstance());
                     relationship.setTrackedEntityInstanceA(relative.getTrackedEntityInstance());
+                }
+                RelationshipType relationshipType = new Select().from(RelationshipType.class).
+                        where(Condition.column(RelationshipType$Table.ID).
+                                is(relationship.getRelationship())).querySingle();
+                if(relationshipType!=null) {
+                    relationship.setDisplayName(relationshipType.getDisplayName());
                 }
 
                 //now we check if this relationship already exists

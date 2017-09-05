@@ -689,7 +689,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                     @Override
                     public void onClick(View v) {
                         showConfirmDeleteRelationshipDialog(relationship,
-                                mForm.getTrackedEntityInstance(), getActivity());
+                                mForm.getTrackedEntityInstance(), mForm.getEnrollment(), getActivity());
                     }
                 });
                 RelationshipType relationshipType = MetaDataController.getRelationshipType(
@@ -824,7 +824,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
 
     public static void showConfirmDeleteRelationshipDialog(final Relationship relationship,
             final TrackedEntityInstance trackedEntityInstance,
-            Activity activity) {
+            final Enrollment enrollment, Activity activity) {
         if (activity == null) return;
         UiUtils.showConfirmDialog(activity, activity.getString(R.string.confirm),
                 activity.getString(R.string.confirm_delete_relationship),
@@ -835,6 +835,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                         relationship.delete();
                         trackedEntityInstance.setFromServer(false);
                         trackedEntityInstance.save();
+                        enrollment.setFromServer(false);
+                        enrollment.save();
                         dialog.dismiss();
                     }
                 });
@@ -1265,7 +1267,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         if (mForm == null || mForm.getTrackedEntityInstance() == null) return;
         RegisterRelationshipDialogFragment fragment =
                 RegisterRelationshipDialogFragment.newInstance(
-                        mForm.getTrackedEntityInstance().getLocalId());
+                        mForm.getTrackedEntityInstance().getLocalId(), mForm.getEnrollment().getLocalId());
         fragment.show(getChildFragmentManager(), CLASS_TAG);
     }
 

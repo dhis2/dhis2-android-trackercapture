@@ -29,6 +29,7 @@
 
 package org.hisp.dhis.android.trackercapture.fragments.programoverview.registerrelationshipdialogfragment;
 
+import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
 
@@ -40,6 +41,7 @@ import java.util.List;
 class RegisterRelationshipDialogFragmentForm
 {
     TrackedEntityInstance trackedEntityInstance;
+    Enrollment enrollment;
     List<EventRow> rows;
     private String queryString;
 
@@ -65,5 +67,13 @@ class RegisterRelationshipDialogFragmentForm
 
     public void setQueryString(String queryString) {
         this.queryString = queryString;
+    }
+
+    public Enrollment getEnrollment() {
+        return enrollment;
+    }
+
+    public void setEnrollment(Enrollment enrollment) {
+        this.enrollment = enrollment;
     }
 }

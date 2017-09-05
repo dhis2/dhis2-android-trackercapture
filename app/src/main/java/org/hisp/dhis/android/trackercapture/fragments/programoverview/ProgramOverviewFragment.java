@@ -69,6 +69,7 @@ import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.events.UiEvent;
 import org.hisp.dhis.android.sdk.job.JobExecutor;
 import org.hisp.dhis.android.sdk.job.NetworkJob;
+import org.hisp.dhis.android.sdk.network.DhisApi;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.BaseSerializableModel;
@@ -86,6 +87,20 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
+import org.hisp.dhis.android.sdk.synchronization.data.enrollment.EnrollmentLocalDataSource;
+import org.hisp.dhis.android.sdk.synchronization.data.enrollment.EnrollmentRemoteDataSource;
+import org.hisp.dhis.android.sdk.synchronization.data.enrollment.EnrollmentRepository;
+import org.hisp.dhis.android.sdk.synchronization.data.event.EventLocalDataSource;
+import org.hisp.dhis.android.sdk.synchronization.data.event.EventRemoteDataSource;
+import org.hisp.dhis.android.sdk.synchronization.data.event.EventRepository;
+import org.hisp.dhis.android.sdk.synchronization.data.faileditem.FailedItemRepository;
+import org.hisp.dhis.android.sdk.synchronization.data.trackedentityinstance
+        .TrackedEntityInstanceLocalDataSource;
+import org.hisp.dhis.android.sdk.synchronization.data.trackedentityinstance.TrackedEntityInstanceRemoteDataSource;
+import org.hisp.dhis.android.sdk.synchronization.data.trackedentityinstance.TrackedEntityInstanceRepository;
+import org.hisp.dhis.android.sdk.synchronization.domain.enrollment.IEnrollmentRepository;
+import org.hisp.dhis.android.sdk.synchronization.domain.trackedentityinstance.ITrackedEntityInstanceRepository;
+import org.hisp.dhis.android.sdk.synchronization.domain.trackedentityinstance.SyncTrackedEntityInstanceUseCase;
 import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.IndicatorRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.PlainTextRow;
@@ -674,7 +689,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                     @Override
                     public void onClick(View v) {
                         showConfirmDeleteRelationshipDialog(relationship,
-                                mForm.getTrackedEntityInstance(), getActivity());
+                                mForm.getTrackedEntityInstance(), mForm.getEnrollment(), getActivity());
                     }
                 });
                 RelationshipType relationshipType = MetaDataController.getRelationshipType(
@@ -809,7 +824,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
 
     public static void showConfirmDeleteRelationshipDialog(final Relationship relationship,
             final TrackedEntityInstance trackedEntityInstance,
-            Activity activity) {
+            final Enrollment enrollment, Activity activity) {
         if (activity == null) return;
         UiUtils.showConfirmDialog(activity, activity.getString(R.string.confirm),
                 activity.getString(R.string.confirm_delete_relationship),
@@ -820,6 +835,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                         relationship.delete();
                         trackedEntityInstance.setFromServer(false);
                         trackedEntityInstance.save();
+                        enrollment.setFromServer(false);
+                        enrollment.save();
                         dialog.dismiss();
                     }
                 });
@@ -877,6 +894,12 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                     public void onClick(DialogInterface dialog, int which) {
                         eventItemRow.setStatus(Event.STATUS_DELETED);
                         eventItemRow.setFromServer(false);
+                        Enrollment enrollment = TrackerController.getEnrollment(eventItemRow.getEnrollment());
+                        enrollment.setFromServer(false);
+                        enrollment.save();
+                        TrackedEntityInstance trackedEntityInstance = TrackerController.getTrackedEntityInstance(enrollment.getTrackedEntityInstance());
+                        trackedEntityInstance.setFromServer(false);
+                        trackedEntityInstance.save();
                         eventItemRow.save();
 
                         dialog.dismiss();
@@ -992,6 +1015,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 mForm.getProgram().getSelectIncidentDatesInFuture(),
                 mForm.getProgram().getEnrollmentDateLabel(),
                 mForm.getProgram().getIncidentDateLabel());
+
+        markParentsAsNonFromServer();
     }
 
     @Override
@@ -1032,9 +1057,20 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             return;
         }
         mForm.getEnrollment().setStatus(Enrollment.COMPLETED);
-        mForm.getEnrollment().setFromServer(false);
-        mForm.getEnrollment().async().save();
+        markParentsAsNonFromServer();
         clearViews();
+    }
+
+    private void markParentsAsNonFromServer() {
+        if (mForm.getEnrollment() != null) {
+            mForm.getEnrollment().setFromServer(false);
+            mForm.getEnrollment().async().save();
+        }
+
+        if (mForm.getTrackedEntityInstance() != null) {
+            mForm.getTrackedEntityInstance().setFromServer(false);
+            mForm.getTrackedEntityInstance().async().save();
+        }
     }
 
     public void terminateEnrollment() {
@@ -1044,8 +1080,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             return;
         }
         mForm.getEnrollment().setStatus(Enrollment.CANCELLED);
-        mForm.getEnrollment().setFromServer(false);
-        mForm.getEnrollment().async().save();
+        markParentsAsNonFromServer();
         setTerminated();
         clearViews();
     }
@@ -1060,8 +1095,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     public void toggleFollowup() {
         if (mForm == null || mForm.getEnrollment() == null) return;
         mForm.getEnrollment().setFollowup(!mForm.getEnrollment().getFollowup());
-        mForm.getEnrollment().setFromServer(false);
-        mForm.getEnrollment().async().save();
+        markParentsAsNonFromServer();
         setFollowupButton(mForm.getEnrollment().getFollowup());
     }
 
@@ -1119,8 +1153,11 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 Enrollment enrollment = getLastEnrollmentForTrackedEntityInstance();
                 if(enrollment!=null) {
                     enrollment.setStatus(Enrollment.ACTIVE);
+                    enrollment.setFromServer(false);
                     enrollment.async().save();
+                    markParentsAsNonFromServer();
                     refreshUi();
+
                 }
                 break;
             }
@@ -1230,7 +1267,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         if (mForm == null || mForm.getTrackedEntityInstance() == null) return;
         RegisterRelationshipDialogFragment fragment =
                 RegisterRelationshipDialogFragment.newInstance(
-                        mForm.getTrackedEntityInstance().getLocalId());
+                        mForm.getTrackedEntityInstance().getLocalId(), mForm.getEnrollment().getLocalId());
         fragment.show(getChildFragmentManager(), CLASS_TAG);
     }
 
@@ -1334,8 +1371,22 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 ResourceType.TRACKEDENTITYINSTANCE) {
             @Override
             public Object execute() {
-                TrackerController.sendTrackedEntityInstanceChanges(
-                        DhisController.getInstance().getDhisApi(), trackedEntityInstance, true);
+                DhisApi dhisApi = DhisController.getInstance().getDhisApi();
+                EnrollmentLocalDataSource enrollmentLocalDataSource = new EnrollmentLocalDataSource();
+                EnrollmentRemoteDataSource enrollmentRemoteDataSource = new EnrollmentRemoteDataSource(dhisApi);
+                IEnrollmentRepository enrollmentRepository = new EnrollmentRepository(enrollmentLocalDataSource, enrollmentRemoteDataSource);
+
+                EventLocalDataSource mLocalDataSource = new EventLocalDataSource();
+                EventRemoteDataSource mRemoteDataSource = new EventRemoteDataSource(DhisController.getInstance().getDhisApi());
+                EventRepository eventRepository = new EventRepository(mLocalDataSource, mRemoteDataSource);
+                FailedItemRepository failedItemRepository = new FailedItemRepository();
+
+                TrackedEntityInstanceLocalDataSource trackedEntityInstanceLocalDataSource = new TrackedEntityInstanceLocalDataSource();
+                TrackedEntityInstanceRemoteDataSource trackedEntityInstanceRemoteDataSource = new TrackedEntityInstanceRemoteDataSource(dhisApi);
+                ITrackedEntityInstanceRepository
+                        trackedEntityInstanceRepository = new TrackedEntityInstanceRepository(trackedEntityInstanceLocalDataSource, trackedEntityInstanceRemoteDataSource);
+                SyncTrackedEntityInstanceUseCase syncTrackedEntityInstanceUseCase = new SyncTrackedEntityInstanceUseCase(trackedEntityInstanceRepository, enrollmentRepository, eventRepository, failedItemRepository);
+                syncTrackedEntityInstanceUseCase.execute(trackedEntityInstance);
                 return new Object();
             }
         });

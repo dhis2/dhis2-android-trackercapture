@@ -42,7 +42,6 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
-import org.hisp.dhis.android.sdk.utils.ScreenSizeConfigurator;
 import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.SearchRelativeTrackedEntityInstanceItemRow;
 
 import java.util.ArrayList;
@@ -55,11 +54,13 @@ public class RegisterRelationshipDialogFragmentQuery implements Query<RegisterRe
 {
     public static final String TAG = RegisterRelationshipDialogFragmentQuery.class.getSimpleName();
     private long trackedEntityInstanceId;
+    private long enrollmentId;
     private final int NUMBER_OF_ATTRIBUTES = 4;
 
-    public RegisterRelationshipDialogFragmentQuery(long trackedEntityInstanceId)
+    public RegisterRelationshipDialogFragmentQuery(long trackedEntityInstanceId, long enrollmentId)
     {
         this.trackedEntityInstanceId = trackedEntityInstanceId;
+        this.enrollmentId = enrollmentId;
     }
 
     @Override
@@ -67,9 +68,11 @@ public class RegisterRelationshipDialogFragmentQuery implements Query<RegisterRe
     {
         RegisterRelationshipDialogFragmentForm form = new RegisterRelationshipDialogFragmentForm();
         TrackedEntityInstance trackedEntityInstance = TrackerController.getTrackedEntityInstance(trackedEntityInstanceId);
-        if(trackedEntityInstance==null) {
+        Enrollment enrollment = TrackerController.getEnrollment(enrollmentId);
+        if(trackedEntityInstance==null || enrollment==null) {
             return form;
         }
+        form.setEnrollment(enrollment);
         form.setTrackedEntityInstance(trackedEntityInstance);
 
         List<TrackedEntityInstance> trackedEntityInstances = new Select().from(TrackedEntityInstance.class).queryList();

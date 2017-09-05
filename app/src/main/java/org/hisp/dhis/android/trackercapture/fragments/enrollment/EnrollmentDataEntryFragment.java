@@ -536,11 +536,14 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             if (form.getEnrollment().getEvents() != null) {
                 for (Event event : form.getEnrollment().getEvents()) {
                     event.setFromServer(false);
+                    form.getEnrollment().setFromServer(false);
+                    form.getTrackedEntityInstance().setFromServer(false);
                 }
             }
 
             form.getEnrollment().setLocalTrackedEntityInstanceId(form.getTrackedEntityInstance().getLocalId());
             form.getEnrollment().setFromServer(false); //setting from server true to avoid sending to server before we finish editing
+            form.getTrackedEntityInstance().setFromServer(false);
             form.getEnrollment().save();
             flagDataChanged(false);
         }

@@ -67,6 +67,7 @@ import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribut
 import org.hisp.dhis.android.sdk.persistence.models.Relationship;
 import org.hisp.dhis.android.sdk.persistence.models.Relationship$Table;
 import org.hisp.dhis.android.sdk.persistence.models.RelationshipType;
+import org.hisp.dhis.android.sdk.persistence.models.RelationshipType$Table;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
@@ -76,8 +77,7 @@ import org.hisp.dhis.android.sdk.ui.views.CardTextViewButton;
 import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.sdk.ui.views.FontTextView;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
-import org.hisp.dhis.android.trackercapture.fragments.programoverview.selectprogramdialogfragment
-        .SelectProgramDialogFragment;
+import org.hisp.dhis.android.trackercapture.fragments.programoverview.selectprogramdialogfragment.SelectProgramDialogFragment;
 import org.hisp.dhis.android.trackercapture.fragments.search.OnlineSearchResultFragment;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.Action;
 import org.hisp.dhis.android.trackercapture.ui.adapters.RelationshipTypeAdapter;
@@ -108,14 +108,16 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
     private FloatingActionButton createNewTEIButton;
 
     private static final String EXTRA_TRACKEDENTITYINSTANCEID = "extra:trackedEntityInstanceId";
+    private static final String EXTRA_ENROLLMENTID = "extra:enrollmentId";
     private static final String EXTRA_ARGUMENTS = "extra:Arguments";
     private static final String EXTRA_SAVED_INSTANCE_STATE = "extra:savedInstanceState";
 
-    public static RegisterRelationshipDialogFragment newInstance(long trackedEntityInstanceId) {
+    public static RegisterRelationshipDialogFragment newInstance(long trackedEntityInstanceId, long enrollmentId) {
         RegisterRelationshipDialogFragment dialogFragment = new RegisterRelationshipDialogFragment();
         Bundle args = new Bundle();
 
         args.putLong(EXTRA_TRACKEDENTITYINSTANCEID, trackedEntityInstanceId);
+        args.putLong(EXTRA_ENROLLMENTID, enrollmentId);
         dialogFragment.setArguments(args);
         return dialogFragment;
     }
@@ -205,10 +207,11 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
             List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
             Bundle fragmentArguments = args.getBundle(EXTRA_ARGUMENTS);
             long teiId = fragmentArguments.getLong(EXTRA_TRACKEDENTITYINSTANCEID);
+            long enrollmentId = fragmentArguments.getLong(EXTRA_ENROLLMENTID);
 
             return new DbLoader<>(
                     getActivity().getBaseContext(), modelsToTrack, new RegisterRelationshipDialogFragmentQuery(
-                    teiId)
+                    teiId, enrollmentId)
             );
         }
         return null;
@@ -361,6 +364,12 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
                     relationship.setTrackedEntityInstanceB(mForm.getTrackedEntityInstance().getTrackedEntityInstance());
                     relationship.setTrackedEntityInstanceA(relative.getTrackedEntityInstance());
                 }
+                RelationshipType relationshipType = new Select().from(RelationshipType.class).
+                        where(Condition.column(RelationshipType$Table.ID).
+                                is(relationship.getRelationship())).querySingle();
+                if(relationshipType!=null) {
+                    relationship.setDisplayName(relationshipType.getDisplayName());
+                }
 
                 //now we check if this relationship already exists
                 Relationship existingRelationship = new Select().from(Relationship.class).
@@ -374,6 +383,8 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
                     relationship.save();
                     mForm.getTrackedEntityInstance().setFromServer(false);
                     mForm.getTrackedEntityInstance().update();
+                    mForm.getEnrollment().setFromServer(false);
+                    mForm.getEnrollment().update();
                     return 1;
                 } else {
                     return 0;

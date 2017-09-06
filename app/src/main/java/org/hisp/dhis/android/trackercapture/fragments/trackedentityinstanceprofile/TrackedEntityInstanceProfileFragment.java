@@ -417,7 +417,10 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
                 errors.get(ErrorType.MANDATORY).add(programTrackedEntityAttribute.getTrackedEntityAttribute().getName());
             }
             if(programTrackedEntityAttribute.getTrackedEntityAttribute().isUnique()){
-                if(TrackerController.countTrackedEntityAttributeValue(value.getValue(), value.getTrackedEntityAttributeId())!=0){
+                if(value.getValue()==null || value.getValue().isEmpty()) {
+                    continue;
+                }
+                if(TrackerController.countTrackedEntityAttributeValue(value)!=0){
                     if(!errors.containsKey(ErrorType.UNIQUE)){
                         errors.put(ErrorType.UNIQUE, new ArrayList<String>());
                     }

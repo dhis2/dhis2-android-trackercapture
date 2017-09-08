@@ -1,8 +1,7 @@
 package org.hisp.dhis.android.trackercapture.fragments.search;
 
-import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceColumnNamesRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceDynamicColumnRows;
 
 import java.util.List;
 
@@ -11,7 +10,7 @@ public class LocalSearchResultFragmentForm {
     private List<EventRow> eventRowList;
     private String programId;
     private String orgUnitId;
-    private TrackedEntityInstanceColumnNamesRow columnNames;
+    private TrackedEntityInstanceDynamicColumnRows columnNames;
 
     public LocalSearchResultFragmentForm(){}
 
@@ -39,11 +38,11 @@ public class LocalSearchResultFragmentForm {
         this.programId = programId;
     }
 
-    public TrackedEntityInstanceColumnNamesRow getColumnNames() {
+    public TrackedEntityInstanceDynamicColumnRows getColumnNames() {
         return columnNames;
     }
 
-    public void setColumnNames(TrackedEntityInstanceColumnNamesRow columnNames) {
+    public void setColumnNames(TrackedEntityInstanceDynamicColumnRows columnNames) {
         this.columnNames = columnNames;
     }
 }

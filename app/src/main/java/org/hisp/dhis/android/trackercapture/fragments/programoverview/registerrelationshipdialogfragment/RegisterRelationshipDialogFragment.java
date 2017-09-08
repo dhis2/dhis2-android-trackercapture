@@ -29,6 +29,7 @@
 
 package org.hisp.dhis.android.trackercapture.fragments.programoverview.registerrelationshipdialogfragment;
 
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -57,8 +58,8 @@ import com.raizlabs.android.dbflow.sql.language.Select;
 import com.raizlabs.android.dbflow.structure.Model;
 
 import org.hisp.dhis.android.sdk.R;
-import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
@@ -66,6 +67,7 @@ import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribut
 import org.hisp.dhis.android.sdk.persistence.models.Relationship;
 import org.hisp.dhis.android.sdk.persistence.models.Relationship$Table;
 import org.hisp.dhis.android.sdk.persistence.models.RelationshipType;
+import org.hisp.dhis.android.sdk.persistence.models.RelationshipType$Table;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
@@ -76,6 +78,8 @@ import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.sdk.ui.views.FontTextView;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.fragments.programoverview.selectprogramdialogfragment.SelectProgramDialogFragment;
+import org.hisp.dhis.android.trackercapture.fragments.search.OnlineSearchResultFragment;
+import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.Action;
 import org.hisp.dhis.android.trackercapture.ui.adapters.RelationshipTypeAdapter;
 import org.hisp.dhis.android.trackercapture.ui.adapters.TrackedEntityInstanceAdapter;
 
@@ -101,20 +105,20 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
     private int mDialogId;
     private ProgressBar mProgressBar;
     private static Bundle mSavedInstance;
+    private FloatingActionButton createNewTEIButton;
 
     private static final String EXTRA_TRACKEDENTITYINSTANCEID = "extra:trackedEntityInstanceId";
+    private static final String EXTRA_PROGRAM = "extra:programUid";
     private static final String EXTRA_ARGUMENTS = "extra:Arguments";
     private static final String EXTRA_SAVED_INSTANCE_STATE = "extra:savedInstanceState";
 
-    public interface CallBack {
-        void onSuccess();
-    }
-
-    public static RegisterRelationshipDialogFragment newInstance(long trackedEntityInstanceId) {
+    public static RegisterRelationshipDialogFragment newInstance(long trackedEntityInstanceId, String programUid) {
         RegisterRelationshipDialogFragment dialogFragment = new RegisterRelationshipDialogFragment();
         Bundle args = new Bundle();
 
         args.putLong(EXTRA_TRACKEDENTITYINSTANCEID, trackedEntityInstanceId);
+        args.putString(EXTRA_PROGRAM, programUid);
+
         dialogFragment.setArguments(args);
         return dialogFragment;
     }
@@ -152,6 +156,9 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
         searchAndDownloadButton  = (FloatingActionButton) view
                 .findViewById(org.hisp.dhis.android.trackercapture.R.id.search_and_download_button);
         searchAndDownloadButton.setOnClickListener(this);
+        createNewTEIButton  = (FloatingActionButton) view
+                .findViewById(org.hisp.dhis.android.trackercapture.R.id.create_new_tei_button);
+        createNewTEIButton.setOnClickListener(this);
         mDialogLabel = (TextView) view
                 .findViewById(R.id.dialog_label);
         InputMethodManager imm = (InputMethodManager)
@@ -201,10 +208,11 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
             List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
             Bundle fragmentArguments = args.getBundle(EXTRA_ARGUMENTS);
             long teiId = fragmentArguments.getLong(EXTRA_TRACKEDENTITYINSTANCEID);
+            String programUid = fragmentArguments.getString(EXTRA_PROGRAM);
 
             return new DbLoader<>(
                     getActivity().getBaseContext(), modelsToTrack, new RegisterRelationshipDialogFragmentQuery(
-                    teiId)
+                    teiId, programUid)
             );
         }
         return null;
@@ -305,7 +313,14 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
         } else if(v.getId() == R.id.close_dialog_button) {
             dismiss();
         } else if(v.getId() == org.hisp.dhis.android.trackercapture.R.id.search_and_download_button){
-            showSelectionProgramFragment(new CallBack() {
+            showSelectionProgramFragment(Action.QUERY, new OnlineSearchResultFragment.CallBack() {
+                @Override
+                public void onSuccess() {
+                    refresh();
+                }
+            });
+        } else if (v.getId() == org.hisp.dhis.android.trackercapture.R.id.create_new_tei_button){
+            showSelectionProgramFragment(Action.CREATE, new OnlineSearchResultFragment.CallBack() {
                 @Override
                 public void onSuccess() {
                     refresh();
@@ -318,9 +333,9 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
         getLoaderManager().restartLoader(LOADER_ID, mSavedInstance, this);
     }
 
-    private void showSelectionProgramFragment(CallBack callBack) {
+    private void showSelectionProgramFragment(Action action, OnlineSearchResultFragment.CallBack callBack) {
         if (mForm == null || mForm.getTrackedEntityInstance() == null) return;
-        SelectProgramDialogFragment fragment = SelectProgramDialogFragment.newInstance(mForm.getTrackedEntityInstance().getLocalId(), callBack);
+        SelectProgramDialogFragment fragment = SelectProgramDialogFragment.newInstance(mForm.getTrackedEntityInstance().getLocalId(), action, callBack);
         fragment.show(getChildFragmentManager(), TAG);
     }
 
@@ -349,6 +364,12 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
                 } else {
                     relationship.setTrackedEntityInstanceB(mForm.getTrackedEntityInstance().getTrackedEntityInstance());
                     relationship.setTrackedEntityInstanceA(relative.getTrackedEntityInstance());
+                }
+                RelationshipType relationshipType = new Select().from(RelationshipType.class).
+                        where(Condition.column(RelationshipType$Table.ID).
+                                is(relationship.getRelationship())).querySingle();
+                if(relationshipType!=null) {
+                    relationship.setDisplayName(relationshipType.getDisplayName());
                 }
 
                 //now we check if this relationship already exists

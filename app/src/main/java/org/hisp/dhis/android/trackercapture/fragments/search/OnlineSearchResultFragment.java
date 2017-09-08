@@ -59,6 +59,9 @@ import java.util.Map;
 public class OnlineSearchResultFragment extends Fragment implements AdapterView.OnItemClickListener, View.OnClickListener {
     public static final String TAG = OnlineSearchResultFragment.class.getSimpleName();
 
+    public interface CallBack {
+        void onSuccess();
+    }
 
     private EditText mFilter;
     private TextView mDialogLabel;
@@ -83,6 +86,7 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
     public static final String EXTRA_SELECTALL = "extra:selectAll";
     public static final String EXTRA_PROGRAM = "extra:Program";
     public static final String EXTRA_NAVIGATION = "extra:Navigation";
+
 
     public static OnlineSearchResultFragment newInstance(List<TrackedEntityInstance> trackedEntityInstances, String orgUnit) {
         OnlineSearchResultFragment dialogFragment = new OnlineSearchResultFragment();

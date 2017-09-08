@@ -31,6 +31,7 @@ package org.hisp.dhis.android.trackercapture.fragments.selectprogram;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
@@ -92,6 +93,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     private SelectProgramFragmentForm mForm;
     protected TextView noRowsTextView;
     private DownloadEventSnackbar snackbar;
+    private MenuItem item;
 
     @Override
     protected TrackedEntityInstanceAdapter getAdapter(Bundle savedInstanceState) {
@@ -142,9 +144,23 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
         };
     }
 
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        getLoaderManager().restartLoader(LOADER_ID, getArguments(), this);
+    }
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_select_program, menu);
+        item = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
+        MenuItemCompat.setOnActionExpandListener(item, this);
+        searchView.setOnQueryTextListener(this);
+        searchView.setOnQueryTextFocusChangeListener(this);
+        searchView.setOnCloseListener(this);
     }
 
     @Override
@@ -269,11 +285,16 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
             mForm = data;
             ((TrackedEntityInstanceAdapter) mAdapter).setData(data.getEventRowList());
             mAdapter.swapData(data.getEventRowList());
-            if (data.getProgram() != null && !data.getProgram().isDisplayFrontPageList()) {
-                // if no rows is selected - let the user know
-                noRowsTextView.setVisibility(View.VISIBLE);
-            } else {
+
+            if (data.getProgram() != null && data.getProgram().isDisplayFrontPageList()) {
                 noRowsTextView.setVisibility(View.GONE);
+                if (item != null)
+                    item.setVisible(true);
+            } else {
+                noRowsTextView.setVisibility(View.VISIBLE);
+
+                if (item != null)
+                    item.setVisible(false);
             }
         }
     }

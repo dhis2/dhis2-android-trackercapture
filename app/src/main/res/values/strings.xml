@@ -83,8 +83,10 @@
     <string name="enrollment_cancelled">Enrollment is cancelled</string>
 
     <string name="profile_form_empty">Form is empty, please fill at least one</string>
+    <string name="invalid_unique_value_form_empty">Invalid unique value: %s</string>
     <string name="events">EVENTS</string>
     <string name="upcoming_events">UPCOMING EVENTS</string>
     <string name="overdue_events">OVERDUE EVENTS</string>
     <string name="active_events">ACTIVE EVENTS</string>
+    <string name="events_title">Timeline Data Entry</string>
 </resources>

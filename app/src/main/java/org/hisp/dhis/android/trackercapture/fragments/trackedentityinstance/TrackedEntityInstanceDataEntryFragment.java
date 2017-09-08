@@ -27,7 +27,7 @@
  *
  */
 
-package org.hisp.dhis.android.trackercapture.fragments.enrollment;
+package org.hisp.dhis.android.trackercapture.fragments.trackedentityinstance;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -48,11 +48,8 @@ import org.hisp.dhis.android.sdk.controllers.GpsController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
-import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
-import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
-import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeGeneratedValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
@@ -76,22 +73,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDataEntryFragmentForm>
+public class TrackedEntityInstanceDataEntryFragment extends
+        DataEntryFragment<TrackedEntityInstanceDataEntryFragmentForm>
         implements OnBackPressedListener {
-    public static final String TAG = EnrollmentDataEntryFragment.class.getSimpleName();
+    public static final String TAG = TrackedEntityInstanceDataEntryFragment.class.getSimpleName();
     private static final String EMPTY_FIELD = "";
     public static final String ORG_UNIT_ID = "extra:orgUnitId";
     public static final String PROGRAM_ID = "extra:ProgramId";
-    public static final String ENROLLMENT_DATE = "extra:enrollmentDate";
-    public static final String INCIDENT_DATE = "extra:incidentDate";
     public static final String TRACKEDENTITYINSTANCE_ID = "extra:TrackedEntityInstanceId";
     public static final String PROGRAMRULES_FORCED_TRIGGER = "forced";
-    private EnrollmentDataEntryFragmentForm form;
+    public static final String EXTRA_NAVIGATION = "extra:Navigation";
+    public static boolean backNavigation;
+    private TrackedEntityInstanceDataEntryFragmentForm form;
     private SaveThread saveThread;
     private Map<String, List<ProgramRule>> programRulesForTrackedEntityAttributes;
-
-    //the enrollment before anything is changed, used to backtrack
-    private Enrollment originalEnrollment;
 
     //the TEI before anything is changed, used to backtrack
     private TrackedEntityInstance originalTrackedEntityInstance;
@@ -99,29 +94,28 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     //the trackedEntityAttributeValues before anything is changed, used to backtrack
     private Map<String, TrackedEntityAttributeValue> originalTrackedEntityAttributeValueMap;
 
-    public EnrollmentDataEntryFragment() {
-        originalEnrollment = null;
+    public TrackedEntityInstanceDataEntryFragment() {
         originalTrackedEntityInstance = null;
-        setProgramRuleFragmentHelper(new EnrollmentDataEntryRuleHelper(this));
+        setProgramRuleFragmentHelper(new TrackedEntityInstanceDataEntryRuleHelper(this));
     }
 
-    public static EnrollmentDataEntryFragment newInstance(String unitId, String programId, String enrollmentDate, String incidentDate) {
-        EnrollmentDataEntryFragment fragment = new EnrollmentDataEntryFragment();
+    public static TrackedEntityInstanceDataEntryFragment newInstance(String unitId,
+            String programId, String enrollmentDate, String incidentDate) {
+        TrackedEntityInstanceDataEntryFragment
+                fragment = new TrackedEntityInstanceDataEntryFragment();
         Bundle args = new Bundle();
-        args.putString(ENROLLMENT_DATE, enrollmentDate);
-        args.putString(INCIDENT_DATE, incidentDate);
-        args.putString(ORG_UNIT_ID, unitId);
         args.putString(ORG_UNIT_ID, unitId);
         args.putString(PROGRAM_ID, programId);
         fragment.setArguments(args);
         return fragment;
     }
 
-    public static EnrollmentDataEntryFragment newInstance(String unitId, String programId, long trackedEntityInstanceId, String enrollmentDate, String incidentDate) {
-        EnrollmentDataEntryFragment fragment = new EnrollmentDataEntryFragment();
+    public static TrackedEntityInstanceDataEntryFragment newInstance(String unitId,
+            String programId, long trackedEntityInstanceId, String enrollmentDate,
+            String incidentDate) {
+        TrackedEntityInstanceDataEntryFragment
+                fragment = new TrackedEntityInstanceDataEntryFragment();
         Bundle args = new Bundle();
-        args.putString(ENROLLMENT_DATE, enrollmentDate);
-        args.putString(INCIDENT_DATE, incidentDate);
         args.putString(ORG_UNIT_ID, unitId);
         args.putString(PROGRAM_ID, programId);
         args.putLong(TRACKEDENTITYINSTANCE_ID, trackedEntityInstanceId);
@@ -162,7 +156,7 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     }
 
     @Override
-    public Loader<EnrollmentDataEntryFragmentForm> onCreateLoader(int id, Bundle args) {
+    public Loader<TrackedEntityInstanceDataEntryFragmentForm> onCreateLoader(int id, Bundle args) {
         if (LOADER_ID == id && isAdded()) {
             // Adding Tables for tracking here is dangerous (since MetaData updates in background
             // can trigger reload of values from db which will reset all fields).
@@ -171,36 +165,38 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             Bundle fragmentArguments = args.getBundle(EXTRA_ARGUMENTS);
             String orgUnitId = fragmentArguments.getString(ORG_UNIT_ID);
             String programId = fragmentArguments.getString(PROGRAM_ID);
-            String enrollmentDate = fragmentArguments.getString(ENROLLMENT_DATE);
-            String incidentDate = fragmentArguments.getString(INCIDENT_DATE);
             long trackedEntityInstance = fragmentArguments.getLong(TRACKEDENTITYINSTANCE_ID, -1);
 
             return new DbLoader<>(
-                    getActivity().getBaseContext(), modelsToTrack, new EnrollmentDataEntryFragmentQuery(
-                    orgUnitId, programId, trackedEntityInstance, enrollmentDate, incidentDate)
+                    getActivity().getBaseContext(), modelsToTrack,
+                    new TrackedEntityInstanceDataEntryFragmentQuery(
+                            orgUnitId, programId, trackedEntityInstance)
             );
         }
         return null;
     }
 
     @Override
-    public void onLoadFinished(Loader<EnrollmentDataEntryFragmentForm> loader, EnrollmentDataEntryFragmentForm data) {
+    public void onLoadFinished(Loader<TrackedEntityInstanceDataEntryFragmentForm> loader,
+            TrackedEntityInstanceDataEntryFragmentForm data) {
         if (loader.getId() == LOADER_ID && isAdded()) {
             progressBar.setVisibility(View.GONE);
             listView.setVisibility(View.VISIBLE);
 
-            if (originalEnrollment == null) {
-                originalEnrollment = new Enrollment(data.getEnrollment());
-            }
             form = data;
             if (data.getTrackedEntityInstance().getLocalId() >= 0) {
-                originalTrackedEntityInstance = new TrackedEntityInstance(data.getTrackedEntityInstance());
+                originalTrackedEntityInstance = new TrackedEntityInstance(
+                        data.getTrackedEntityInstance());
             }
             if (originalTrackedEntityAttributeValueMap == null) {
                 originalTrackedEntityAttributeValueMap = new HashMap<>();
-                for (TrackedEntityAttributeValue trackedEntityAttributeValue : form.getTrackedEntityAttributeValueMap().values()) {
-                    TrackedEntityAttributeValue copiedTrackedEntityAttributeValue = new TrackedEntityAttributeValue(trackedEntityAttributeValue);
-                    originalTrackedEntityAttributeValueMap.put(copiedTrackedEntityAttributeValue.getTrackedEntityAttributeId(), copiedTrackedEntityAttributeValue);
+                for (TrackedEntityAttributeValue trackedEntityAttributeValue : form
+                        .getTrackedEntityAttributeValueMap().values()) {
+                    TrackedEntityAttributeValue copiedTrackedEntityAttributeValue =
+                            new TrackedEntityAttributeValue(trackedEntityAttributeValue);
+                    originalTrackedEntityAttributeValueMap.put(
+                            copiedTrackedEntityAttributeValue.getTrackedEntityAttributeId(),
+                            copiedTrackedEntityAttributeValue);
                 }
             }
             if (data.getProgram() != null) {
@@ -212,7 +208,8 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
                 }
                 UiUtils.showErrorDialog(getActivity(),
                         getString(R.string.error_message),
-                        getString(org.hisp.dhis.android.trackercapture.R.string.out_of_generated_ids),
+                        getString(
+                                org.hisp.dhis.android.trackercapture.R.string.out_of_generated_ids),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -241,7 +238,7 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     }
 
     @Override
-    public void onLoaderReset(Loader<EnrollmentDataEntryFragmentForm> loader) {
+    public void onLoaderReset(Loader<TrackedEntityInstanceDataEntryFragmentForm> loader) {
         if (loader.getId() == LOADER_ID) {
             if (listViewAdapter != null) {
                 listViewAdapter.swapData(null);
@@ -254,17 +251,21 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     }
 
     @Override
-    protected HashMap<ErrorType, ArrayList<String>> getValidationErrors() {
+    protected HashMap<ErrorType, ArrayList<String>>  getValidationErrors() {
         HashMap<ErrorType, ArrayList<String>> errors = new HashMap<>();
 
-        if (form.getEnrollment() == null || form.getProgram() == null || form.getOrganisationUnit() == null) {
+        if (form.getEnrollment() == null || form.getProgram() == null
+                || form.getOrganisationUnit() == null) {
             return errors;
         }
 
         if (isEmpty(form.getEnrollment().getEnrollmentDate())) {
-            String dateOfEnrollmentDescription = form.getProgram().getEnrollmentDateLabel() == null ?
-                    getString(R.string.report_date) : form.getProgram().getEnrollmentDateLabel();
-            if(!errors.containsKey(ErrorType.MANDATORY)){
+            String dateOfEnrollmentDescription =
+                    form.getProgram().getEnrollmentDateLabel() == null ?
+                            getString(R.string.report_date)
+                            : form.getProgram().getEnrollmentDateLabel();
+
+            if (!errors.containsKey(ErrorType.MANDATORY)) {
                 errors.put(ErrorType.MANDATORY, new ArrayList<String>());
             }
             errors.get(ErrorType.MANDATORY).add(dateOfEnrollmentDescription);
@@ -275,10 +276,11 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
         );
 
         for (TrackedEntityAttributeValue value : form.getEnrollment().getAttributes()) {
-            ProgramTrackedEntityAttribute programTrackedEntityAttribute = dataElements.get(value.getTrackedEntityAttributeId());
+            ProgramTrackedEntityAttribute programTrackedEntityAttribute = dataElements.get(
+                    value.getTrackedEntityAttributeId());
 
             if (programTrackedEntityAttribute.getMandatory() && isEmpty(value.getValue())) {
-                if(!errors.containsKey(ErrorType.MANDATORY)){
+                if (!errors.containsKey(ErrorType.MANDATORY)) {
                     errors.put(ErrorType.MANDATORY, new ArrayList<String>());
                 }
                 errors.get(ErrorType.MANDATORY).add(programTrackedEntityAttribute.getTrackedEntityAttribute().getName());
@@ -289,11 +291,7 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
 
     @Override
     public boolean isValid() {
-        if (form.getEnrollment() == null || form.getProgram() == null || form.getOrganisationUnit() == null) {
-            return false;
-        }
-
-        if (isEmpty(form.getEnrollment().getEnrollmentDate())) {
+        if (form.getProgram() == null || form.getOrganisationUnit() == null) {
             return false;
         }
 
@@ -302,7 +300,8 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
         );
 
         for (TrackedEntityAttributeValue value : form.getEnrollment().getAttributes()) {
-            ProgramTrackedEntityAttribute programTrackedEntityAttribute = dataElements.get(value.getTrackedEntityAttributeId());
+            ProgramTrackedEntityAttribute programTrackedEntityAttribute = dataElements.get(
+                    value.getTrackedEntityAttributeId());
             if (programTrackedEntityAttribute.getMandatory() && isEmpty(value.getValue())) {
                 return false;
             }
@@ -310,7 +309,8 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
         return true;
     }
 
-    private static Map<String, ProgramTrackedEntityAttribute> toMap(List<ProgramTrackedEntityAttribute> attributes) {
+    private static Map<String, ProgramTrackedEntityAttribute> toMap(
+            List<ProgramTrackedEntityAttribute> attributes) {
         Map<String, ProgramTrackedEntityAttribute> attributeMap = new HashMap<>();
         if (attributes != null && !attributes.isEmpty()) {
             for (ProgramTrackedEntityAttribute attribute : attributes) {
@@ -321,93 +321,48 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     }
 
     @Override
-    protected void save() {}
+    protected void save() {
+    }
 
     @Override
     protected void proceed() {
         if (validate()) {
             confirmSave();
-            showProgramOverviewFragment();
+            HolderActivity.mCallBack.onSuccess();
             getActivity().finish();
         }
     }
 
-    private void showProgramOverviewFragment() {
-        HolderActivity.navigateToProgramOverviewFragment(getActivity(), form.getOrganisationUnit().getId(), form.getProgram().getUid(), form.getTrackedEntityInstance().getLocalId());
-    }
-
     private boolean validate() {
         if (isMapEmpty(form.getTrackedEntityAttributeValueMap())) {
-            UiUtils.showErrorDialog(getActivity(), getContext().getString(org.hisp.dhis.android.trackercapture.R.string.error_message),
-                    getContext().getString(org.hisp.dhis.android.trackercapture.R.string.profile_form_empty));
+            UiUtils.showErrorDialog(getActivity(), getContext().getString(
+                    org.hisp.dhis.android.trackercapture.R.string.error_message),
+                    getContext().getString(
+                            org.hisp.dhis.android.trackercapture.R.string.profile_form_empty));
             return false;
         }
-        if(!validateUniqueValues(form.getTrackedEntityAttributeValueMap())){
-            List<String> listOfUniqueInvalidFields = getNotValidatedUniqueValues(form.getTrackedEntityAttributeValueMap());
-            String listOfInvalidAttributes = " ";
-            for(String value:listOfUniqueInvalidFields){
-                listOfInvalidAttributes += value + " ";
-            }
-            UiUtils.showErrorDialog(getActivity(), getContext().getString(org.hisp.dhis.android.trackercapture.R.string.error_message),
-                    String.format(getContext().getString(org.hisp.dhis.android.trackercapture.R.string.invalid_unique_value_form_empty), listOfInvalidAttributes));
-            return false;
-        }
-        ArrayList<String> programRulesValidationErrors =
-                getProgramRuleFragmentHelper().getProgramRuleValidationErrors();
-        HashMap<ErrorType, ArrayList<String>> allErrors = getValidationErrors();
 
-        ArrayList<String> validationErrors = new ArrayList<>();
-        for(DataEntryRow dataEntryRow : form.getDataEntryRows()){
-            if(dataEntryRow.getValidationError()!=null)
-                validationErrors.add(getContext().getString(dataEntryRow.getValidationError()));
+        HashMap<ErrorType, ArrayList<String>>  allErrors = getValidationErrors();
+
+        allErrors.put(ErrorType.PROGRAM_RULE, getProgramRuleFragmentHelper().getProgramRuleValidationErrors());
+
+        allErrors.put(ErrorType.INVALID_FIELD, new ArrayList<String>());
+
+        for (DataEntryRow dataEntryRow : form.getDataEntryRows()) {
+            if (dataEntryRow.getValidationError() != null) {
+                allErrors.get(ErrorType.INVALID_FIELD).add(getContext().getString(dataEntryRow.getValidationError()));
+            }
         }
-        if (programRulesValidationErrors.isEmpty() && allErrors.isEmpty() && validationErrors.isEmpty()) {
-            return true;
-        } else {
-            allErrors.put(ErrorType.PROGRAM_RULE, programRulesValidationErrors);
-            allErrors.put(ErrorType.INVALID_FIELD, validationErrors);
+
+        if (allErrors != null &&
+                (allErrors.get(ErrorType.INVALID_FIELD) != null && allErrors.get(ErrorType.INVALID_FIELD).size() > 0) ||
+                (allErrors.get(ErrorType.MANDATORY) != null && allErrors.get(ErrorType.MANDATORY).size() > 0) ||
+                (allErrors.get(ErrorType.PROGRAM_RULE) != null && allErrors.get(ErrorType.PROGRAM_RULE).size() > 0)) {
             showValidationErrorDialog(allErrors);
             return false;
+        } else {
+            return true;
         }
-    }
-
-    private List<String> getNotValidatedUniqueValues(
-            Map<String, TrackedEntityAttributeValue> trackedEntityAttributeValueMap) {
-        List<String> listOFUniqueFields = new ArrayList<>();
-        for (String key : trackedEntityAttributeValueMap.keySet()) {
-            TrackedEntityAttributeValue value = trackedEntityAttributeValueMap.get(key);
-            TrackedEntityAttribute trackedEntityAttribute =
-                    MetaDataController.getTrackedEntityAttribute(
-                            value.getTrackedEntityAttributeId());
-            if (trackedEntityAttribute.isUnique()) {
-                if(value.getValue()==null || value.getValue().isEmpty()){
-                    continue;
-                }
-                if (TrackerController.countTrackedEntityAttributeValue(value)!=0) {
-                    listOFUniqueFields.add(trackedEntityAttribute.getDisplayName());
-                }
-            }
-        }
-        return listOFUniqueFields;
-    }
-
-    private boolean validateUniqueValues(
-            Map<String, TrackedEntityAttributeValue> trackedEntityAttributeValueMap) {
-        for (String key : trackedEntityAttributeValueMap.keySet()) {
-            TrackedEntityAttributeValue value = trackedEntityAttributeValueMap.get(key);
-                TrackedEntityAttribute trackedEntityAttribute =
-                        MetaDataController.getTrackedEntityAttribute(
-                                value.getTrackedEntityAttributeId());
-                if (trackedEntityAttribute.isUnique()) {
-                    if(value.getValue()==null || value.getValue().isEmpty()){
-                        continue;
-                    }
-                    if(TrackerController.countTrackedEntityAttributeValue(value) !=0){
-                        return false;
-                    }
-                }
-            }
-        return true;
     }
 
     private boolean isMapEmpty(
@@ -426,7 +381,7 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
         if (trackedEntityAttribute == null || form == null) {
             return;
         }
-        if(PROGRAMRULES_FORCED_TRIGGER.equals(trackedEntityAttribute)) {
+        if (PROGRAMRULES_FORCED_TRIGGER.equals(trackedEntityAttribute)) {
             getProgramRuleFragmentHelper().getProgramRuleValidationErrors().clear();
             initiateEvaluateProgramRules();
         }
@@ -452,7 +407,8 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             evaluateRules(event.getId());
         }
 
-        if (DataEntryRowTypes.ENROLLMENT_DATE.toString().equals(event.getRowType()) || DataEntryRowTypes.EVENT_DATE.toString().equals(event.getRowType())) {
+        if (DataEntryRowTypes.ENROLLMENT_DATE.toString().equals(event.getRowType())
+                || DataEntryRowTypes.EVENT_DATE.toString().equals(event.getRowType())) {
             evaluateRules(PROGRAMRULES_FORCED_TRIGGER);
         }
 
@@ -487,11 +443,11 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
         this.saveThread = saveThread;
     }
 
-    public EnrollmentDataEntryFragmentForm getForm() {
+    public TrackedEntityInstanceDataEntryFragmentForm getForm() {
         return form;
     }
 
-    public void setForm(EnrollmentDataEntryFragmentForm form) {
+    public void setForm(TrackedEntityInstanceDataEntryFragmentForm form) {
         this.form = form;
     }
 
@@ -499,15 +455,16 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
         return programRulesForTrackedEntityAttributes;
     }
 
-    public void setProgramRulesForTrackedEntityAttributes(Map<String, List<ProgramRule>> programRulesForTrackedEntityAttributes) {
+    public void setProgramRulesForTrackedEntityAttributes(
+            Map<String, List<ProgramRule>> programRulesForTrackedEntityAttributes) {
         this.programRulesForTrackedEntityAttributes = programRulesForTrackedEntityAttributes;
     }
 
     private void showConfirmDiscardDialog() {
         UiUtils.showConfirmDialog(getActivity(),
-                getString(org.hisp.dhis.android.sdk.R.string.discard), getString(org.hisp.dhis.android.sdk.R.string.discard_confirm_changes),
-                getString(org.hisp.dhis.android.sdk.R.string.discard),
-                getString(org.hisp.dhis.android.sdk.R.string.cancel), new DialogInterface.OnClickListener() {
+                getString(R.string.discard), getString(R.string.discard_confirm_changes),
+                getString(R.string.discard),
+                getString(R.string.cancel), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //discard
@@ -529,35 +486,42 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     private void confirmSave() {
         if (form != null && form.getTrackedEntityInstance() != null) {
             if (form.getTrackedEntityInstance().getLocalId() < 0) {
-                //saving tei first to get auto-increment reference for enrollment
                 form.getTrackedEntityInstance().setFromServer(false);
                 form.getTrackedEntityInstance().save();
             }
-            if (form.getEnrollment().getEvents() != null) {
-                for (Event event : form.getEnrollment().getEvents()) {
-                    event.setFromServer(false);
-                    form.getEnrollment().setFromServer(false);
-                    form.getTrackedEntityInstance().setFromServer(false);
+
+            for (String key : form.getTrackedEntityAttributeValueMap().keySet()) {
+                TrackedEntityAttributeValue trackedEntityAttributeValue =
+                        form.getTrackedEntityAttributeValueMap().get(key);
+                trackedEntityAttributeValue.setLocalTrackedEntityInstanceId(
+                        form.getTrackedEntityInstance().getLocalId());
+                trackedEntityAttributeValue.setTrackedEntityInstanceId(
+                        form.getTrackedEntityInstance().getTrackedEntityInstance());
+                if (trackedEntityAttributeValue.getValue() != null
+                        && !trackedEntityAttributeValue.getValue().equals("")) {
+                    trackedEntityAttributeValue.save();
                 }
             }
 
-            form.getEnrollment().setLocalTrackedEntityInstanceId(form.getTrackedEntityInstance().getLocalId());
-            form.getEnrollment().setFromServer(false); //setting from server true to avoid sending to server before we finish editing
-            form.getTrackedEntityInstance().setFromServer(false);
-            form.getEnrollment().save();
             flagDataChanged(false);
         }
 
-        for (ProgramTrackedEntityAttribute ptea : form.getProgram().getProgramTrackedEntityAttributes()) {
+        for (ProgramTrackedEntityAttribute ptea : form.getProgram()
+                .getProgramTrackedEntityAttributes()) {
             if (ptea.getTrackedEntityAttribute().isGenerated()) {
                 TrackedEntityAttributeValue attributeValue = TrackerController
-                        .getTrackedEntityAttributeValue(ptea.getTrackedEntityAttributeId(), form.getTrackedEntityInstance().getUid());
+                        .getTrackedEntityAttributeValue(ptea.getTrackedEntityAttributeId(),
+                                form.getTrackedEntityInstance().getUid());
 
-                TrackedEntityAttributeGeneratedValue trackedEntityAttributeGeneratedValue = MetaDataController.getTrackedEntityAttributeGeneratedValue(attributeValue.getValue());
+                TrackedEntityAttributeGeneratedValue trackedEntityAttributeGeneratedValue =
+                        MetaDataController.getTrackedEntityAttributeGeneratedValue(
+                                attributeValue.getValue());
                 if (trackedEntityAttributeGeneratedValue != null) {
                     trackedEntityAttributeGeneratedValue.delete();
                 } else {
-                    trackedEntityAttributeGeneratedValue = MetaDataController.getTrackedEntityAttributeGeneratedValue(ptea.getTrackedEntityAttributeId());
+                    trackedEntityAttributeGeneratedValue =
+                            MetaDataController.getTrackedEntityAttributeGeneratedValue(
+                                    ptea.getTrackedEntityAttributeId());
                     if (trackedEntityAttributeGeneratedValue != null) {
                         trackedEntityAttributeGeneratedValue.delete();
                     }
@@ -567,34 +531,16 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     }
 
     private void discardChanges() {
-        if(form == null) {
+        if (form == null) {
             return;
-        }
-        if (originalEnrollment == null && form.getEnrollment() != null) {
-            form.getEnrollment().delete();
-            List<Event> events = form.getEnrollment().getEvents();
-            if (events != null) {
-                for (Event event : events) {
-                    event.delete();
-                }
-            }
-        }
-        if (originalEnrollment != null && originalEnrollment.getLocalId() != form.getEnrollment().getLocalId()) {
-            form.getEnrollment().delete();
-            List<Event> events = form.getEnrollment().getEvents();
-            if (events != null)
-                for (Event event : events) {
-                    event.delete();
-                }
-        }
-        if (originalEnrollment != null && !originalEnrollment.equals(form.getEnrollment())) {
-            originalEnrollment.save();
         }
         if (originalTrackedEntityInstance == null && form.getTrackedEntityInstance() != null) {
             form.getTrackedEntityInstance().delete();
         }
-        for (TrackedEntityAttributeValue newValue : form.getTrackedEntityAttributeValueMap().values()) {
-            TrackedEntityAttributeValue originalValue = originalTrackedEntityAttributeValueMap.get(newValue.getTrackedEntityAttributeId());
+        for (TrackedEntityAttributeValue newValue : form.getTrackedEntityAttributeValueMap()
+                .values()) {
+            TrackedEntityAttributeValue originalValue = originalTrackedEntityAttributeValueMap.get(
+                    newValue.getTrackedEntityAttributeId());
             if (originalValue == null) {
                 newValue.delete();
             } else if (newValue.getValue() == null && originalValue.getValue() == null) {
@@ -612,14 +558,10 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             return false;
         }
 
-        if (originalEnrollment != null && !originalEnrollment.equals(form.getEnrollment())) {
-            return true;
-        }
-        if (originalEnrollment != null && originalEnrollment.getLocalId() != form.getEnrollment().getLocalId()) {
-            return true;
-        }
-        for (TrackedEntityAttributeValue newValue : form.getTrackedEntityAttributeValueMap().values()) {
-            TrackedEntityAttributeValue originalValue = originalTrackedEntityAttributeValueMap.get(newValue.getTrackedEntityAttributeId());
+        for (TrackedEntityAttributeValue newValue : form.getTrackedEntityAttributeValueMap()
+                .values()) {
+            TrackedEntityAttributeValue originalValue = originalTrackedEntityAttributeValueMap.get(
+                    newValue.getTrackedEntityAttributeId());
             if (originalValue == null) {
                 return true;
             } else if (newValue.getValue() == null && originalValue.getValue() == null) {

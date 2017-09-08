@@ -70,13 +70,13 @@ public class SearchRelativeTrackedEntityInstanceItemRow extends TrackedEntityIns
             view = convertView;
             holder = (ViewHolder) view.getTag();
         }
-        if(columns.get(0)!=null)
+        if(columns.size()>=1 && columns.get(0)!=null)
         holder.firstItem.setText(columns.get(0));
-        if(columns.get(1)!=null)
+        if(columns.size()>=2 == (columns.get(1)!=null))
         holder.secondItem.setText(columns.get(1));
-        if(columns.get(2)!=null)
+        if(columns.size()>=3 && columns.get(2)!=null)
         holder.thirdItem.setText(columns.get(2));
-        if(columns.get(3)!=null)
+        if(columns.size()>=4 && columns.get(3)!=null)
         holder.fourthItem.setText(columns.get(3));
 
         return view;

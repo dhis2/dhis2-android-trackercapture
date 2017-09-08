@@ -96,11 +96,15 @@ import org.hisp.dhis.android.sdk.synchronization.data.event.EventRepository;
 import org.hisp.dhis.android.sdk.synchronization.data.faileditem.FailedItemRepository;
 import org.hisp.dhis.android.sdk.synchronization.data.trackedentityinstance
         .TrackedEntityInstanceLocalDataSource;
-import org.hisp.dhis.android.sdk.synchronization.data.trackedentityinstance.TrackedEntityInstanceRemoteDataSource;
-import org.hisp.dhis.android.sdk.synchronization.data.trackedentityinstance.TrackedEntityInstanceRepository;
+import org.hisp.dhis.android.sdk.synchronization.data.trackedentityinstance
+        .TrackedEntityInstanceRemoteDataSource;
+import org.hisp.dhis.android.sdk.synchronization.data.trackedentityinstance
+        .TrackedEntityInstanceRepository;
 import org.hisp.dhis.android.sdk.synchronization.domain.enrollment.IEnrollmentRepository;
-import org.hisp.dhis.android.sdk.synchronization.domain.trackedentityinstance.ITrackedEntityInstanceRepository;
-import org.hisp.dhis.android.sdk.synchronization.domain.trackedentityinstance.SyncTrackedEntityInstanceUseCase;
+import org.hisp.dhis.android.sdk.synchronization.domain.trackedentityinstance
+        .ITrackedEntityInstanceRepository;
+import org.hisp.dhis.android.sdk.synchronization.domain.trackedentityinstance
+        .SyncTrackedEntityInstanceUseCase;
 import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.IndicatorRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.PlainTextRow;
@@ -688,8 +692,15 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 deleteButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        Enrollment enrollment;
+                        if (mForm.getEnrollment() != null) {
+                            enrollment = mForm.getEnrollment();
+                        } else {
+                            enrollment = TrackerController.getEnrollments(
+                                    mForm.getTrackedEntityInstance()).get(0);
+                        }
                         showConfirmDeleteRelationshipDialog(relationship,
-                                mForm.getTrackedEntityInstance(), mForm.getEnrollment(), getActivity());
+                                mForm.getTrackedEntityInstance(), enrollment, getActivity());
                     }
                 });
                 RelationshipType relationshipType = MetaDataController.getRelationshipType(

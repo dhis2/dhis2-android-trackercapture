@@ -31,6 +31,7 @@ package org.hisp.dhis.android.trackercapture.fragments.selectprogram;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
@@ -141,6 +142,13 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
         return new ProgramType[]{
                 ProgramType.WITH_REGISTRATION
         };
+    }
+
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        getLoaderManager().restartLoader(LOADER_ID, getArguments(), this);
     }
 
     @Override

@@ -1265,9 +1265,15 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
 
     private void showAddRelationshipFragment() {
         if (mForm == null || mForm.getTrackedEntityInstance() == null) return;
+        long enrollmentId;
+        if(mForm.getEnrollment()!=null) {
+            enrollmentId = mForm.getEnrollment().getLocalId();
+        }else{
+            enrollmentId = TrackerController.getEnrollments(mForm.getTrackedEntityInstance()).get(0).getLocalId();
+        }
         RegisterRelationshipDialogFragment fragment =
                 RegisterRelationshipDialogFragment.newInstance(
-                        mForm.getTrackedEntityInstance().getLocalId(), mForm.getEnrollment().getLocalId());
+                        mForm.getTrackedEntityInstance().getLocalId(), enrollmentId);
         fragment.show(getChildFragmentManager(), CLASS_TAG);
     }
 

@@ -692,15 +692,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 deleteButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Enrollment enrollment;
-                        if (mForm.getEnrollment() != null) {
-                            enrollment = mForm.getEnrollment();
-                        } else {
-                            enrollment = TrackerController.getEnrollments(
-                                    mForm.getTrackedEntityInstance()).get(0);
-                        }
                         showConfirmDeleteRelationshipDialog(relationship,
-                                mForm.getTrackedEntityInstance(), enrollment, getActivity());
+                                mForm.getTrackedEntityInstance(), getActivity());
                     }
                 });
                 RelationshipType relationshipType = MetaDataController.getRelationshipType(
@@ -834,8 +827,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     }
 
     public static void showConfirmDeleteRelationshipDialog(final Relationship relationship,
-            final TrackedEntityInstance trackedEntityInstance,
-            final Enrollment enrollment, Activity activity) {
+            final TrackedEntityInstance trackedEntityInstance, Activity activity) {
         if (activity == null) return;
         UiUtils.showConfirmDialog(activity, activity.getString(R.string.confirm),
                 activity.getString(R.string.confirm_delete_relationship),
@@ -846,8 +838,6 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                         relationship.delete();
                         trackedEntityInstance.setFromServer(false);
                         trackedEntityInstance.save();
-                        enrollment.setFromServer(false);
-                        enrollment.save();
                         dialog.dismiss();
                     }
                 });
@@ -1276,15 +1266,9 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
 
     private void showAddRelationshipFragment() {
         if (mForm == null || mForm.getTrackedEntityInstance() == null) return;
-        long enrollmentId;
-        if(mForm.getEnrollment()!=null) {
-            enrollmentId = mForm.getEnrollment().getLocalId();
-        }else{
-            enrollmentId = TrackerController.getEnrollments(mForm.getTrackedEntityInstance()).get(0).getLocalId();
-        }
         RegisterRelationshipDialogFragment fragment =
                 RegisterRelationshipDialogFragment.newInstance(
-                        mForm.getTrackedEntityInstance().getLocalId(), enrollmentId);
+                        mForm.getTrackedEntityInstance().getLocalId(), mForm.getProgram().getUid());
         fragment.show(getChildFragmentManager(), CLASS_TAG);
     }
 

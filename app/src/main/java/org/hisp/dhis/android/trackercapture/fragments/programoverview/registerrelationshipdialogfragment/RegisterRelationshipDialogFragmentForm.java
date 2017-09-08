@@ -68,12 +68,4 @@ class RegisterRelationshipDialogFragmentForm
     public void setQueryString(String queryString) {
         this.queryString = queryString;
     }
-
-    public Enrollment getEnrollment() {
-        return enrollment;
-    }
-
-    public void setEnrollment(Enrollment enrollment) {
-        this.enrollment = enrollment;
-    }
 }

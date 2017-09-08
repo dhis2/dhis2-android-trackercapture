@@ -108,16 +108,17 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
     private FloatingActionButton createNewTEIButton;
 
     private static final String EXTRA_TRACKEDENTITYINSTANCEID = "extra:trackedEntityInstanceId";
-    private static final String EXTRA_ENROLLMENTID = "extra:enrollmentId";
+    private static final String EXTRA_PROGRAM = "extra:programUid";
     private static final String EXTRA_ARGUMENTS = "extra:Arguments";
     private static final String EXTRA_SAVED_INSTANCE_STATE = "extra:savedInstanceState";
 
-    public static RegisterRelationshipDialogFragment newInstance(long trackedEntityInstanceId, long enrollmentId) {
+    public static RegisterRelationshipDialogFragment newInstance(long trackedEntityInstanceId, String programUid) {
         RegisterRelationshipDialogFragment dialogFragment = new RegisterRelationshipDialogFragment();
         Bundle args = new Bundle();
 
         args.putLong(EXTRA_TRACKEDENTITYINSTANCEID, trackedEntityInstanceId);
-        args.putLong(EXTRA_ENROLLMENTID, enrollmentId);
+        args.putString(EXTRA_PROGRAM, programUid);
+
         dialogFragment.setArguments(args);
         return dialogFragment;
     }
@@ -207,11 +208,11 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
             List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
             Bundle fragmentArguments = args.getBundle(EXTRA_ARGUMENTS);
             long teiId = fragmentArguments.getLong(EXTRA_TRACKEDENTITYINSTANCEID);
-            long enrollmentId = fragmentArguments.getLong(EXTRA_ENROLLMENTID);
+            String programUid = fragmentArguments.getString(EXTRA_PROGRAM);
 
             return new DbLoader<>(
                     getActivity().getBaseContext(), modelsToTrack, new RegisterRelationshipDialogFragmentQuery(
-                    teiId, enrollmentId)
+                    teiId, programUid)
             );
         }
         return null;
@@ -383,8 +384,6 @@ public class RegisterRelationshipDialogFragment extends DialogFragment
                     relationship.save();
                     mForm.getTrackedEntityInstance().setFromServer(false);
                     mForm.getTrackedEntityInstance().update();
-                    mForm.getEnrollment().setFromServer(false);
-                    mForm.getEnrollment().update();
                     return 1;
                 } else {
                     return 0;

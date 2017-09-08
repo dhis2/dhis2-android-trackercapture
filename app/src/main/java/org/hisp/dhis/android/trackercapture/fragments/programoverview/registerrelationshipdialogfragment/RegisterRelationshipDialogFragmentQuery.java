@@ -55,13 +55,13 @@ public class RegisterRelationshipDialogFragmentQuery implements Query<RegisterRe
 {
     public static final String TAG = RegisterRelationshipDialogFragmentQuery.class.getSimpleName();
     private long trackedEntityInstanceId;
-    private long enrollmentId;
+    private String activeProgramUid;
     private final int NUMBER_OF_ATTRIBUTES = 4;
 
-    public RegisterRelationshipDialogFragmentQuery(long trackedEntityInstanceId, long enrollmentId)
+    public RegisterRelationshipDialogFragmentQuery(long trackedEntityInstanceId, String activeProgramUid)
     {
         this.trackedEntityInstanceId = trackedEntityInstanceId;
-        this.enrollmentId = enrollmentId;
+        this.activeProgramUid = activeProgramUid;
     }
 
     @Override
@@ -69,11 +69,9 @@ public class RegisterRelationshipDialogFragmentQuery implements Query<RegisterRe
     {
         RegisterRelationshipDialogFragmentForm form = new RegisterRelationshipDialogFragmentForm();
         TrackedEntityInstance trackedEntityInstance = TrackerController.getTrackedEntityInstance(trackedEntityInstanceId);
-        Enrollment enrollment = TrackerController.getEnrollment(enrollmentId);
-        if(trackedEntityInstance==null || enrollment==null) {
+        if(trackedEntityInstance==null) {
             return form;
         }
-        form.setEnrollment(enrollment);
         form.setTrackedEntityInstance(trackedEntityInstance);
 
         List<TrackedEntityInstance> trackedEntityInstances = new Select().from(TrackedEntityInstance.class).queryList();
@@ -89,14 +87,14 @@ public class RegisterRelationshipDialogFragmentQuery implements Query<RegisterRe
                 continue;
             }
             teiRows.add(createTrackedEntityInstanceItem(context,
-                    tei, NUMBER_OF_ATTRIBUTES, enrollmentId));
+                    tei, NUMBER_OF_ATTRIBUTES, activeProgramUid));
         }
 
         form.setRows(teiRows);
         return form;
     }
 
-    private SearchRelativeTrackedEntityInstanceItemRow createTrackedEntityInstanceItem(Context context, TrackedEntityInstance trackedEntityInstance, int numberOfAttributes, long enrollmentId) {
+    private SearchRelativeTrackedEntityInstanceItemRow createTrackedEntityInstanceItem(Context context, TrackedEntityInstance trackedEntityInstance, int numberOfAttributes, String activeProgramUid) {
         SearchRelativeTrackedEntityInstanceItemRow trackedEntityInstanceItemRow = new SearchRelativeTrackedEntityInstanceItemRow(context);
         trackedEntityInstanceItemRow.setTrackedEntityInstance(trackedEntityInstance);
         if(trackedEntityInstance.getAttributes()==null) {
@@ -106,7 +104,7 @@ public class RegisterRelationshipDialogFragmentQuery implements Query<RegisterRe
         //checking if the tei has an enrollment so that we can order the displayed attributes
         //in some logical fashion
         List<Enrollment> enrollments = TrackerController.getEnrollments(trackedEntityInstance);
-        Program activeProgram = TrackerController.getEnrollment(enrollmentId).getProgram();
+        Program activeProgram = MetaDataController.getProgram(activeProgramUid);
 
         List<TrackedEntityAttribute> attributesToShow = new ArrayList<>();
         if(enrollments!=null && !enrollments.isEmpty()) {

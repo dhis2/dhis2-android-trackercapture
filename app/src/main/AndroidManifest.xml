@@ -102,7 +102,7 @@
             android:value="a5caa46009119f5e584e4964c30a922095b1075c" />
         <provider
             android:name="org.hisp.dhis.android.trackercapture.export.DBProvider"
-            android:authorities="org.hisp.dhis.android.trackercapture.export.ExportData"
+            android:authorities="${applicationId}.export.ExportData"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

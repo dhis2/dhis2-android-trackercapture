@@ -37,6 +37,7 @@ ext {
 
     configuration = [
             package          : "org.hisp.dhis.android.trackercapture",
+            applicationId    : "org.hisp.dhis.android.trackercapture_dev",
             buildToolsVersion: "23.0.2",
             minSdkVersion    : 15,
             compileSdkVersion: 23,

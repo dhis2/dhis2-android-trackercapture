@@ -251,7 +251,7 @@ public class ExportData {
         Log.d(TAG, data.toURI() + "");
         data.setReadable(true, false);
         final Uri uri = FileProvider.getUriForFile(activity,
-                "org.hisp.dhis.android.trackercapture.export.ExportData", data);
+                "org.hisp.dhis.android.trackercapture_dev.export.ExportData", data);
 
         final Intent chooser = ShareCompat.IntentBuilder.from(activity)
                 .setType("application/zip")

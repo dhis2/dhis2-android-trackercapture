@@ -334,6 +334,7 @@ public class SelectProgramFragmentQuery implements Query<SelectProgramFragmentFo
                 " IS '" + programId + "' AND " + Enrollment$Table.ORGUNIT + " IS '" + organisationUnitId + "'" +
                 ") t2 " +
                 "ON t1." + TrackedEntityInstance$Table.LOCALID + "=t2." + Enrollment$Table.LOCALTRACKEDENTITYINSTANCEID +
+                " GROUP BY t1."+TrackedEntityInstance$Table.LOCALID+" "+
                 " ORDER BY t2." + Enrollment$Table.LASTUPDATED + " ASC";
 
         return query;

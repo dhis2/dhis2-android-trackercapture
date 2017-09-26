@@ -28,5 +28,5 @@
   ~  */
   -->
 <resources>
-    <string name="app_name" translatable="false">DHIS 2 Tracker Capture (dev)</string>
+    <string name="app_name" translatable="false">DHIS 2 Tracker Capture</string>
 </resources>

@@ -51,6 +51,8 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode rootProject.ext.versionCode
         versionName rootProject.ext.versionName
+        applicationId rootProject.ext.configuration.applicationId
+        multiDexEnabled true
     }
 
     buildTypes {
@@ -90,4 +92,6 @@ dependencies {
     compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
         transitive = true;
     }
+
+    compile 'com.android.support:multidex:1.0.1'
 }

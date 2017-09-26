@@ -33,6 +33,7 @@ import android.content.Context;
 
 import com.raizlabs.android.dbflow.sql.language.Select;
 
+import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
@@ -54,10 +55,13 @@ public class RegisterRelationshipDialogFragmentQuery implements Query<RegisterRe
 {
     public static final String TAG = RegisterRelationshipDialogFragmentQuery.class.getSimpleName();
     private long trackedEntityInstanceId;
+    private String activeProgramUid;
+    private final int NUMBER_OF_ATTRIBUTES = 4;
 
-    public RegisterRelationshipDialogFragmentQuery(long trackedEntityInstanceId)
+    public RegisterRelationshipDialogFragmentQuery(long trackedEntityInstanceId, String activeProgramUid)
     {
         this.trackedEntityInstanceId = trackedEntityInstanceId;
+        this.activeProgramUid = activeProgramUid;
     }
 
     @Override
@@ -83,14 +87,14 @@ public class RegisterRelationshipDialogFragmentQuery implements Query<RegisterRe
                 continue;
             }
             teiRows.add(createTrackedEntityInstanceItem(context,
-                    tei));
+                    tei, NUMBER_OF_ATTRIBUTES, activeProgramUid));
         }
 
         form.setRows(teiRows);
         return form;
     }
 
-    private SearchRelativeTrackedEntityInstanceItemRow createTrackedEntityInstanceItem(Context context, TrackedEntityInstance trackedEntityInstance) {
+    private SearchRelativeTrackedEntityInstanceItemRow createTrackedEntityInstanceItem(Context context, TrackedEntityInstance trackedEntityInstance, int numberOfAttributes, String activeProgramUid) {
         SearchRelativeTrackedEntityInstanceItemRow trackedEntityInstanceItemRow = new SearchRelativeTrackedEntityInstanceItemRow(context);
         trackedEntityInstanceItemRow.setTrackedEntityInstance(trackedEntityInstance);
         if(trackedEntityInstance.getAttributes()==null) {
@@ -100,43 +104,56 @@ public class RegisterRelationshipDialogFragmentQuery implements Query<RegisterRe
         //checking if the tei has an enrollment so that we can order the displayed attributes
         //in some logical fashion
         List<Enrollment> enrollments = TrackerController.getEnrollments(trackedEntityInstance);
+        Program activeProgram = MetaDataController.getProgram(activeProgramUid);
+
         List<TrackedEntityAttribute> attributesToShow = new ArrayList<>();
         if(enrollments!=null && !enrollments.isEmpty()) {
             Program program = null;
             for(Enrollment e: enrollments) {
                 if(e!=null && e.getProgram()!=null && e.getProgram().getProgramTrackedEntityAttributes()!=null) {
                     program = e.getProgram();
-                    break;
+                    if(program.getUid().equals(activeProgram.getUid())) {
+                        break;
+                    }
                 }
             }
             List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = program.getProgramTrackedEntityAttributes();
-            for(int i = 0; i<programTrackedEntityAttributes.size() && i<4; i++) {
+            for(int i = 0; i<programTrackedEntityAttributes.size() && i<numberOfAttributes; i++) {
                 attributesToShow.add(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute());
             }
         }
 
-        for(int i=0; i<4; i++)
+        List<TrackedEntityAttributeValue> attributes = new ArrayList<>();
+        for(int i=0; i<NUMBER_OF_ATTRIBUTES; i++)
         {
             String value = "";
             if(attributesToShow==null || attributesToShow.size()<=i) {
                 if(trackedEntityInstance.getAttributes().size()>i && trackedEntityInstance.getAttributes().get(i) != null && trackedEntityInstance.getAttributes().get(i).getValue()!=null) {
-                    value = trackedEntityInstance.getAttributes().get(i).getValue();
+                    attributes.add(trackedEntityInstance.getAttributes().get(i));
                 }
             } else {
                 TrackedEntityAttributeValue av = TrackerController.getTrackedEntityAttributeValue(attributesToShow.get(i).getUid(), trackedEntityInstance.getLocalId());
                 if(av!=null && av.getValue()!=null) {
                     value = av.getValue();
+                    trackedEntityInstanceItemRow.addColumn(value);
                 }
             }
-
-            if (i == 0) {
-                trackedEntityInstanceItemRow.setFirstItem(value);
-            } else if (i == 1) {
-                trackedEntityInstanceItemRow.setSecondItem(value);
-            } else if (i == 2) {
-                trackedEntityInstanceItemRow.setThirdItem(value);
-            } else if (i == 3) {
-                trackedEntityInstanceItemRow.setFourthItem(value);
+        }
+        List<ProgramTrackedEntityAttribute> programAttributesOrdered = MetaDataController.getProgramTrackedEntityAttributes(activeProgram.getUid());
+        for(ProgramTrackedEntityAttribute programTrackedEntityAttribute : programAttributesOrdered){
+            boolean hasAttribute = false;
+            for(TrackedEntityAttributeValue attributeValue:attributes){
+                if(programTrackedEntityAttribute.getTrackedEntityAttributeId().equals(attributeValue.getTrackedEntityAttributeId())){
+                    String value="";
+                    if(attributeValue.getValue()!=null) {
+                        value = attributeValue.getValue();
+                        hasAttribute=true;
+                    }
+                    trackedEntityInstanceItemRow.addColumn(value);
+                }
+            }
+            if(!hasAttribute){
+                trackedEntityInstanceItemRow.addColumn("");
             }
         }
         return trackedEntityInstanceItemRow;

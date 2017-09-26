@@ -30,45 +30,34 @@
 package org.hisp.dhis.android.trackercapture.fragments.selectprogram;
 
 import android.content.Context;
-import android.util.Log;
 
-import com.raizlabs.android.dbflow.sql.builder.Condition;
 import com.raizlabs.android.dbflow.sql.language.Select;
 import com.raizlabs.android.dbflow.sql.queriable.StringQuery;
 
-import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.events.OnRowClick;
-import org.hisp.dhis.android.sdk.persistence.models.DataElement;
-import org.hisp.dhis.android.sdk.persistence.models.Enrollment$Table;
-import org.hisp.dhis.android.sdk.persistence.models.Event;
-import org.hisp.dhis.android.sdk.persistence.models.Event$Table;
-import org.hisp.dhis.android.sdk.persistence.models.FailedItem$Table;
-import org.hisp.dhis.android.sdk.persistence.models.OptionSet;
-import org.hisp.dhis.android.sdk.persistence.models.OrganisationUnit;
-import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
-import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue$Table;
-import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance$Table;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventItemRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceColumnNamesRow;
-import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
+import org.hisp.dhis.android.sdk.persistence.models.Enrollment$Table;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
+import org.hisp.dhis.android.sdk.persistence.models.FailedItem$Table;
 import org.hisp.dhis.android.sdk.persistence.models.Option;
+import org.hisp.dhis.android.sdk.persistence.models.OptionSet;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue$Table;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance$Table;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceDynamicColumnRows;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceItemRow;
-import org.hisp.dhis.android.sdk.utils.comparators.EnrollmentDateComparator;
-import org.hisp.dhis.android.sdk.utils.comparators.EnrollmentLocalIdComparator;
-import org.hisp.dhis.android.sdk.utils.comparators.EventDateComparator;
+import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
+import org.hisp.dhis.android.sdk.utils.ScreenSizeConfigurator;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -113,19 +102,16 @@ public class SelectProgramFragmentQuery implements Query<SelectProgramFragmentFo
 
         List<String> attributesToShow = new ArrayList<>();
         Map<String, TrackedEntityAttribute> attributesToShowMap = new HashMap<>();
-        TrackedEntityInstanceColumnNamesRow columnNames = new TrackedEntityInstanceColumnNamesRow();
-
+        TrackedEntityInstanceDynamicColumnRows columnNames = new TrackedEntityInstanceDynamicColumnRows();
+        TrackedEntityInstanceDynamicColumnRows attributeNames = new TrackedEntityInstanceDynamicColumnRows();
         for (ProgramTrackedEntityAttribute attribute : attributes) {
-            if (attribute.getDisplayInList() && attributesToShow.size() < 3) {
+            if (attribute.getDisplayInList() && attributesToShow.size() < ScreenSizeConfigurator.getInstance().getFields()) {
                 attributesToShow.add(attribute.getTrackedEntityAttributeId());
                 if (attribute.getTrackedEntityAttribute() != null) {
                     String name = attribute.getTrackedEntityAttribute().getName();
-                    if (attributesToShow.size() == 1) {
-                        columnNames.setFirstItem(name);
-                    } else if (attributesToShow.size() == 2) {
-                        columnNames.setSecondItem(name);
-                    } else if (attributesToShow.size() == 3) {
-                        columnNames.setThirdItem(name);
+                    if (attributesToShow.size() <= ScreenSizeConfigurator.getInstance().getFields()) {
+                        columnNames.addColumn(name);
+                        attributeNames.addColumn(attribute.getTrackedEntityAttribute().getShortName());
                     }
                     attributesToShowMap.put(attribute.getTrackedEntityAttributeId(), attribute.getTrackedEntityAttribute());
                 }
@@ -180,6 +166,7 @@ public class SelectProgramFragmentQuery implements Query<SelectProgramFragmentFo
         fragmentForm.setEventRowList(teiRows);
         fragmentForm.setColumnNames(columnNames);
 
+        fragmentForm.setColumnNames(attributeNames);
         if(selectedProgram.getTrackedEntity() != null) {
             columnNames.setTrackedEntity(selectedProgram.getTrackedEntity().getName());
             columnNames.setTitle(selectedProgram.getTrackedEntity().getName() + " (" + ( teiRows.size() - 1 ) + ")") ;
@@ -218,21 +205,25 @@ public class SelectProgramFragmentQuery implements Query<SelectProgramFragmentFo
                     teav = trackedEntityAttributeValueMapForTrackedEntityInstance.get(attributeUid);
                 }
 
+                String value;
                 TrackedEntityAttribute trackedEntityAttribute = trackedEntityAttributeMap.get(attributeUid);
                 if (teav == null || trackedEntityAttribute == null) {
+                    trackedEntityInstanceItemRow.addColumn("");
                     continue;
                 }
 
-                String value = teav.getValue();
+                value = teav.getValue();
 
                 if (trackedEntityAttribute.isOptionSetValue()) {
                     if (trackedEntityAttribute.getOptionSet() == null) {
+                        trackedEntityInstanceItemRow.addColumn("");
                         continue;
                     }
 
                     String optionSetId = trackedEntityAttribute.getOptionSet();
                     Map<String, Option> optionsMap = optionsForOptionSetMap.get(optionSetId);
                     if(optionsMap == null) {
+                        trackedEntityInstanceItemRow.addColumn("");
                         continue;
                     }
                     Option optionWithMatchingValue = optionsMap.get(value);
@@ -241,14 +232,7 @@ public class SelectProgramFragmentQuery implements Query<SelectProgramFragmentFo
                     }
 
                 }
-
-                if (i == 0) {
-                    trackedEntityInstanceItemRow.setFirstItem(value);
-                } else if (i == 1) {
-                    trackedEntityInstanceItemRow.setSecondItem(value);
-                } else if (i == 2) {
-                    trackedEntityInstanceItemRow.setThirdItem(value);
-                }
+                trackedEntityInstanceItemRow.addColumn(value);
             }
         }
         return trackedEntityInstanceItemRow;
@@ -350,6 +334,7 @@ public class SelectProgramFragmentQuery implements Query<SelectProgramFragmentFo
                 " IS '" + programId + "' AND " + Enrollment$Table.ORGUNIT + " IS '" + organisationUnitId + "'" +
                 ") t2 " +
                 "ON t1." + TrackedEntityInstance$Table.LOCALID + "=t2." + Enrollment$Table.LOCALTRACKEDENTITYINSTANCEID +
+                " GROUP BY t1."+TrackedEntityInstance$Table.LOCALID+" "+
                 " ORDER BY t2." + Enrollment$Table.LASTUPDATED + " ASC";
 
         return query;

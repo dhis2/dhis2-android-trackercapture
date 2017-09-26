@@ -79,6 +79,9 @@ public class ProgramStageEventRow implements ProgramStageRow {
             holder = new EventViewHolder(orgUnit, eventDateTextView, statusButton, new OnProgramStageEventInternalClickListener());
 
             root.findViewById(org.hisp.dhis.android.sdk.R.id.eventbackground).setOnClickListener(holder.listener);
+            root.findViewById(
+                    org.hisp.dhis.android.sdk.R.id.eventbackground).setOnLongClickListener(
+                    holder.listener);
 
             root.setTag(holder);
             view = root;
@@ -231,7 +234,8 @@ public class ProgramStageEventRow implements ProgramStageRow {
         return message;
     }
 
-    private static class OnProgramStageEventInternalClickListener implements View.OnClickListener {
+    private static class OnProgramStageEventInternalClickListener implements View.OnClickListener,
+            View.OnLongClickListener {
         private Event event;
         private ImageButton statusButton;
         private String message;
@@ -256,10 +260,23 @@ public class ProgramStageEventRow implements ProgramStageRow {
         @Override
         public void onClick(View view) {
             if(view.getId() == org.hisp.dhis.android.sdk.R.id.eventbackground) {
-                Dhis2Application.getEventBus().post(new OnProgramStageEventClick(event, statusButton,false, "", status));
+                Dhis2Application.getEventBus().post(
+                        new OnProgramStageEventClick(event, statusButton, false, "", status,
+                                false, view));
             } else if(view.getId() == org.hisp.dhis.android.sdk.R.id.statusButton) {
-                Dhis2Application.getEventBus().post(new OnProgramStageEventClick(event, statusButton, true, message, status));
+                Dhis2Application.getEventBus().post(
+                        new OnProgramStageEventClick(event, statusButton, true, message, status,
+                                false, view));
             }
         }
+
+        @Override
+        public boolean onLongClick(View view) {
+            Dhis2Application.getEventBus().post(
+                    new OnProgramStageEventClick(event, statusButton, false, "", status,
+                            true, view));
+            return true;
+        }
     }
+
 }

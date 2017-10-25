@@ -1259,12 +1259,9 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     }
 
     private void editTrackedEntityInstanceProfile() {
-        if(mForm.getEnrollment()!=null) {
-            HolderActivity.navigateToTrackedEntityInstanceProfileFragment(getActivity(),
+        HolderActivity.navigateToTrackedEntityInstanceProfileFragment(getActivity(),
                     getArguments().
-                            getLong(TRACKEDENTITYINSTANCE_ID), getArguments().getString(PROGRAM_ID),
-                    mForm.getEnrollment().getLocalId());
-        }
+                            getLong(TRACKEDENTITYINSTANCE_ID), getArguments().getString(PROGRAM_ID));
     }
 
     private void showAddRelationshipFragment() {

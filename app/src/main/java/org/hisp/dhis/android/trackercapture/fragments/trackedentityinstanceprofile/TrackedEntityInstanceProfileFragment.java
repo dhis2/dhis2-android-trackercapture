@@ -49,6 +49,7 @@ import org.hisp.dhis.android.sdk.controllers.GpsController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
+import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
@@ -81,7 +82,6 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
     public static final String TAG = TrackedEntityInstanceProfileFragment.class.getName();
     public static final String TRACKEDENTITYINSTANCE_ID = "extra:TrackedEntityInstanceId";
     public static final String PROGRAM_ID = "extra:ProgramId";
-    public static final String ENROLLMENT_ID = "extra:EnrollmentID";
 
     private static final String EXTRA_ARGUMENTS = "extra:Arguments";
     private static final String EXTRA_SAVED_INSTANCE_STATE = "extra:savedInstanceState";
@@ -109,7 +109,6 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
         Bundle fragmentArgs = new Bundle();
         fragmentArgs.putLong(TRACKEDENTITYINSTANCE_ID, mTrackedEntityInstanceId);
         fragmentArgs.putString(PROGRAM_ID, mProgramId);
-        fragmentArgs.putLong(ENROLLMENT_ID, enrollmentId);
         fragment.setArguments(fragmentArgs);
         return fragment;
     }
@@ -227,15 +226,13 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
             List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
             Bundle fragmentArguments = args.getBundle(EXTRA_ARGUMENTS);
             String programId = fragmentArguments.getString(PROGRAM_ID);
-            long enrollmentId = fragmentArguments.getLong(ENROLLMENT_ID);
             long trackedEntityInstance = fragmentArguments.getLong(TRACKEDENTITYINSTANCE_ID, -1);
             return new DbLoader<>(
                     getActivity().getBaseContext(),
                     modelsToTrack,
                     new TrackedEntityInstanceProfileFragmentQuery(
                             trackedEntityInstance,
-                            programId,
-                            enrollmentId));
+                            programId));
         }
         return null;
     }

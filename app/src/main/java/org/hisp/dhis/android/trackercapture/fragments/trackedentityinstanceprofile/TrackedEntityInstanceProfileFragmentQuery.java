@@ -57,14 +57,11 @@ public class TrackedEntityInstanceProfileFragmentQuery implements
     private String mProgramId;
     private TrackedEntityInstance currentTrackedEntityInstance;
     private boolean editable;
-    private long enrollmentId;
-    private Enrollment currentEnrollment;
 
     public TrackedEntityInstanceProfileFragmentQuery(long mTrackedEntityInstanceId,
-            String mProgramId, long enrollmentId) {
+            String mProgramId) {
         this.mTrackedEntityInstanceId = mTrackedEntityInstanceId;
         this.mProgramId = mProgramId;
-        this.enrollmentId = enrollmentId;
     }
 
     @Override
@@ -78,7 +75,6 @@ public class TrackedEntityInstanceProfileFragmentQuery implements
         if (mProgram == null || mTrackedEntityInstance == null) {
             return mForm;
         }
-        currentEnrollment = TrackerController.getEnrollment(enrollmentId);
         currentTrackedEntityInstance = mTrackedEntityInstance;
         mForm.setProgram(mProgram);
         mForm.setTrackedEntityInstance(mTrackedEntityInstance);
@@ -93,7 +89,6 @@ public class TrackedEntityInstanceProfileFragmentQuery implements
         if (trackedEntityAttributeValues == null && programTrackedEntityAttributes == null) {
             return mForm;
         }
-        currentEnrollment.setAttributes(trackedEntityAttributeValues);
         mForm.setTrackedEntityAttributeValues(trackedEntityAttributeValues);
         List<Row> dataEntryRows = new ArrayList<>();
         for (int i = 0; i < programTrackedEntityAttributes.size(); i++) {
@@ -127,7 +122,6 @@ public class TrackedEntityInstanceProfileFragmentQuery implements
             }
         }
         mForm.setDataEntryRows(dataEntryRows);
-        mForm.setEnrollment(currentEnrollment);
         return mForm;
     }
 

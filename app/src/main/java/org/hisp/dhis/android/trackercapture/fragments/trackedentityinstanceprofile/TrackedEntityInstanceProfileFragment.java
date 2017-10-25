@@ -405,7 +405,7 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
         Map<String, ProgramTrackedEntityAttribute> dataElements = toMap(
                 MetaDataController.getProgramTrackedEntityAttributes(form.getProgram().getUid())
         );
-        for (TrackedEntityAttributeValue value : form.getEnrollment().getAttributes()) {
+        for (TrackedEntityAttributeValue value : form.getTrackedEntityInstance().getAttributes()) {
             ProgramTrackedEntityAttribute programTrackedEntityAttribute = dataElements.get(value.getTrackedEntityAttributeId());
             if (programTrackedEntityAttribute.getMandatory() && isEmpty(value.getValue())) {
                 if(!errors.containsKey(ErrorType.MANDATORY)){

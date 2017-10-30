@@ -730,23 +730,14 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                     relativeLabel.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            if(!relationship.getTrackedEntityInstanceA().equals(mForm.getTrackedEntityInstance().getUid())) {
-                                moveToRelative(relationship.getTrackedEntityInstanceA(), getActivity());
-                            }
-                            else{
-                                moveToRelative(relationship.getTrackedEntityInstanceB(), getActivity());
-                            }
+                            moveToRelative(relationship);
                         }
                     });
                     ll.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             if (relative != null) {
-                                ProgramOverviewFragment fragment = ProgramOverviewFragment.
-                                        newInstance(getArguments().getString(ORG_UNIT_ID),
-                                                getArguments().getString(PROGRAM_ID),
-                                                relative.getLocalId());
-//                                mNavigationHandler.switchFragment(fragment, CLASS_TAG, true);
+                                moveToRelative(relationship);
                             }
                         }
                     });
@@ -764,8 +755,16 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         }
     }
 
+    private void moveToRelative(Relationship relationship) {
+        if(!relationship.getTrackedEntityInstanceA().equals(mForm.getTrackedEntityInstance().getUid())) {
+            moveToRelative(relationship.getTrackedEntityInstanceA(), getActivity());
+        }
+        else{
+            moveToRelative(relationship.getTrackedEntityInstanceB(), getActivity());
+        }
+    }
+
     private void moveToRelative(String trackedEntityInstanceUid, FragmentActivity activity) {
-        activity.finish();
         TrackedEntityInstance trackedEntityInstance =TrackerController.getTrackedEntityInstance(trackedEntityInstanceUid);
         HolderActivity.navigateToProgramOverviewFragment(activity, mState.getOrgUnitId(), mState.getProgramId(), trackedEntityInstance.getLocalId());
     }

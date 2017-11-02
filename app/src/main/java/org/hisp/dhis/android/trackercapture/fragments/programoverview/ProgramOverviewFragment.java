@@ -545,8 +545,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 enrollmentLayout.setVisibility(View.VISIBLE);
                 missingEnrollmentLayout.setVisibility(View.GONE);
                 profileCardView.setClickable(
-                        true); //is set to false when TEI doesn't have an applicable enrollment.
-                // todo why?
+                        true);
                 profileButton.setClickable(true);
             }
             enrollmentDateLabel.setText(data.getDateOfEnrollmentLabel());

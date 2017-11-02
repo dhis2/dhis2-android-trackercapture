@@ -1007,6 +1007,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         if (incidentDate != null) {
             incidentDateString = incidentDate.toString();
         }
+        getActivity().finish();
         if (trackedEntityInstance == null) {
             HolderActivity.navigateToEnrollmentDataEntryFragment(getActivity(),
                     mState.getOrgUnitId(), mState.getProgramId(), enrollmentDateString,

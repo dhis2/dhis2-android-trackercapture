@@ -4,11 +4,9 @@ import android.support.design.widget.Snackbar;
 import android.view.View;
 
 import org.hisp.dhis.android.sdk.events.OnTeiDownloadedEvent;
+import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.SelectProgramFragment;
 
-/**
- * Created by thomaslindsjorn on 26/07/16.
- */
 public class DownloadEventSnackbar {
 
     private final SelectProgramFragment selectProgramFragment;
@@ -30,8 +28,8 @@ public class DownloadEventSnackbar {
             case END:
                 if (errorHasOccured) {
                     downloadEvent.setErrorHasOccured(true);
-                    showSnackbar(downloadEvent.getUserFriendlyMessage(), downloadEvent.getMessageDuration());
-                    snackbar.setAction("Retry", new View.OnClickListener() {
+                    showSnackbar(downloadEvent.getUserFriendlyMessage(selectProgramFragment.getContext()), downloadEvent.getMessageDuration());
+                    snackbar.setAction(selectProgramFragment.getContext().getString(R.string.retry), new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             selectProgramFragment.showOnlineSearchFragment();
@@ -40,7 +38,7 @@ public class DownloadEventSnackbar {
                     return;
                 }
             default:
-                showSnackbar(downloadEvent.getUserFriendlyMessage(), downloadEvent.getMessageDuration());
+                showSnackbar(downloadEvent.getUserFriendlyMessage(selectProgramFragment.getContext()), downloadEvent.getMessageDuration());
         }
     }
 

@@ -102,7 +102,7 @@ public class EnrollmentDateSetterHelper {
         if(!enrollmentDatesInFuture) {
             enrollmentDatePickerDialog.getDatePicker().setMaxDate(DateTime.now().getMillis());
         }
-        enrollmentDatePickerDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK",
+        enrollmentDatePickerDialog.setButton(DialogInterface.BUTTON_POSITIVE, context.getString(R.string.ok_option),
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -118,7 +118,7 @@ public class EnrollmentDateSetterHelper {
                         }
                     }
                 });
-        enrollmentDatePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel",
+        enrollmentDatePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.cancel_option),
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -140,7 +140,7 @@ public class EnrollmentDateSetterHelper {
         if(!incidentDatesInFuture) {
             incidentDatePickerDialog.getDatePicker().setMaxDate(DateTime.now().getMillis());
         }
-        incidentDatePickerDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK",
+        incidentDatePickerDialog.setButton(DialogInterface.BUTTON_POSITIVE, context.getString(R.string.ok_option),
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -151,7 +151,7 @@ public class EnrollmentDateSetterHelper {
                         showEnrollmentFragment();
                     }
                 });
-        incidentDatePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel",
+        incidentDatePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.cancel_option),
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

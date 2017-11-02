@@ -76,7 +76,7 @@
     <string name="generic_error">Erreur. Prière de réessayer</string>
     <string name="re_open">Rouvrir</string>
 
-    <string name="download_entities_title">Télécharger entités</string>
+    <string name="download_entities_title">Téléchargement des entités</string>
     <string name="enrollment_complete">Enregistrement complété</string>
     <string name="profile_form_empty">Le formulaire est vide, veuillez remplir au moins un</string>
     <string name="invalid_unique_value_form_empty">Valeur unique non valide: %s</string>
@@ -85,5 +85,5 @@
     <string name="overdue_events">ÉVÉNEMENTS EN RETARD</string>
     <string name="active_events">ÉVÉNEMENTS ACTIFS</string>
     <string name="enrollment_cancelled">Enregistrement annulé</string>
-    <string name="events_title">Entrée de données de la chronologie</string>
+    <string name="events_title">Chronologie de l\'entrée de données</string>
 </resources>

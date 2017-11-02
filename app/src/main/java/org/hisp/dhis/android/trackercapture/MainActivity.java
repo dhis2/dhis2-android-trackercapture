@@ -44,14 +44,11 @@ import android.view.MenuItem;
 import android.view.View;
 
 import org.hisp.dhis.android.sdk.controllers.DhisController;
-import org.hisp.dhis.android.sdk.controllers.DhisService;
-import org.hisp.dhis.android.sdk.controllers.LoadingController;
 import org.hisp.dhis.android.sdk.controllers.PeriodicSynchronizerController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.network.Session;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.models.UserAccount;
-import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
 import org.hisp.dhis.android.sdk.utils.ScreenSizeConfigurator;
 import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.SelectProgramFragment;
@@ -93,15 +90,6 @@ public class MainActivity extends AbsHomeActivity {
             finish();
             return;
         }
-
-        LoadingController.enableLoading(this, ResourceType.ASSIGNEDPROGRAMS);
-        LoadingController.enableLoading(this, ResourceType.OPTIONSETS);
-        LoadingController.enableLoading(this, ResourceType.PROGRAMS);
-        LoadingController.enableLoading(this, ResourceType.CONSTANTS);
-        LoadingController.enableLoading(this, ResourceType.PROGRAMRULES);
-        LoadingController.enableLoading(this, ResourceType.PROGRAMRULEVARIABLES);
-        LoadingController.enableLoading(this, ResourceType.PROGRAMRULEACTIONS);
-        LoadingController.enableLoading(this, ResourceType.RELATIONSHIPTYPES);
         Dhis2Application.bus.register(this);
 
         PeriodicSynchronizerController.activatePeriodicSynchronizer(this);
@@ -161,10 +149,6 @@ public class MainActivity extends AbsHomeActivity {
         return false;
     }
 
-    public void loadInitialData() {
-        DhisService.loadInitialData(MainActivity.this);
-    }
-
     @Override
     public void onPause() {
         super.onPause();
@@ -176,7 +160,6 @@ public class MainActivity extends AbsHomeActivity {
         super.onResume();
         ScreenSizeConfigurator.init(getWindowManager());
         Dhis2Application.getEventBus().register(this);
-        loadInitialData();
     }
 
     @Override

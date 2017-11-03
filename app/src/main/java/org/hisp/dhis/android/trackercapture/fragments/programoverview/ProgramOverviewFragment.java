@@ -545,8 +545,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 enrollmentLayout.setVisibility(View.VISIBLE);
                 missingEnrollmentLayout.setVisibility(View.GONE);
                 profileCardView.setClickable(
-                        true); //is set to false when TEI doesn't have an applicable enrollment.
-                // todo why?
+                        true);
                 profileButton.setClickable(true);
             }
             enrollmentDateLabel.setText(data.getDateOfEnrollmentLabel());
@@ -730,23 +729,14 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                     relativeLabel.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            if(!relationship.getTrackedEntityInstanceA().equals(mForm.getTrackedEntityInstance().getUid())) {
-                                moveToRelative(relationship.getTrackedEntityInstanceA(), getActivity());
-                            }
-                            else{
-                                moveToRelative(relationship.getTrackedEntityInstanceB(), getActivity());
-                            }
+                            moveToRelative(relationship);
                         }
                     });
                     ll.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             if (relative != null) {
-                                ProgramOverviewFragment fragment = ProgramOverviewFragment.
-                                        newInstance(getArguments().getString(ORG_UNIT_ID),
-                                                getArguments().getString(PROGRAM_ID),
-                                                relative.getLocalId());
-//                                mNavigationHandler.switchFragment(fragment, CLASS_TAG, true);
+                                moveToRelative(relationship);
                             }
                         }
                     });
@@ -764,8 +754,16 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         }
     }
 
+    private void moveToRelative(Relationship relationship) {
+        if(!relationship.getTrackedEntityInstanceA().equals(mForm.getTrackedEntityInstance().getUid())) {
+            moveToRelative(relationship.getTrackedEntityInstanceA(), getActivity());
+        }
+        else{
+            moveToRelative(relationship.getTrackedEntityInstanceB(), getActivity());
+        }
+    }
+
     private void moveToRelative(String trackedEntityInstanceUid, FragmentActivity activity) {
-        activity.finish();
         TrackedEntityInstance trackedEntityInstance =TrackerController.getTrackedEntityInstance(trackedEntityInstanceUid);
         HolderActivity.navigateToProgramOverviewFragment(activity, mState.getOrgUnitId(), mState.getProgramId(), trackedEntityInstance.getLocalId());
     }
@@ -971,25 +969,6 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                     }
                 }
             }
-
-            List<Enrollment> enrollmentsForTEI = TrackerController.getEnrollments(
-                    TrackerController.getTrackedEntityInstance(
-                            mState.getTrackedEntityInstanceId()));
-            for (Enrollment enrollment : enrollmentsForTEI) {
-                Program selectedProgram = (Program) mSpinner.getSelectedItem();
-
-                if (selectedProgram.getUid().equals(enrollment.getProgram().getUid())) {
-                    profileCardView.setClickable(false); // Enrollment attributes is applicable.
-                    profileButton.setClickable(false);
-                    break;
-                } else {
-                    profileCardView.setClickable(
-                            false); // Enrollment attributes not applicable. Clickable(false) to
-                    // prevent crash
-
-                    profileButton.setClickable(false);
-                }
-            }
         }
     }
 
@@ -1028,6 +1007,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         if (incidentDate != null) {
             incidentDateString = incidentDate.toString();
         }
+        getActivity().finish();
         if (trackedEntityInstance == null) {
             HolderActivity.navigateToEnrollmentDataEntryFragment(getActivity(),
                     mState.getOrgUnitId(), mState.getProgramId(), enrollmentDateString,
@@ -1259,9 +1239,9 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     }
 
     private void editTrackedEntityInstanceProfile() {
-        HolderActivity.navigateToTrackedEntityInstanceProfileFragment(getActivity(), getArguments().
-                        getLong(TRACKEDENTITYINSTANCE_ID), getArguments().getString(PROGRAM_ID),
-                mForm.getEnrollment().getLocalId());
+        HolderActivity.navigateToTrackedEntityInstanceProfileFragment(getActivity(),
+                    getArguments().
+                            getLong(TRACKEDENTITYINSTANCE_ID), getArguments().getString(PROGRAM_ID));
     }
 
     private void showAddRelationshipFragment() {

@@ -71,6 +71,7 @@
     <string name="search_results">Resultados de la búsqueda</string>
     <string name="search_online">¿No encuentras lo que estabas buscando? Búqueda en línea</string>
     <string name="local_search">Búsqueda local</string>
+    <string name="search_error">Error. Por favor, inténtelo de nuevo</string>
 
     <string name="out_of_generated_ids">Se te han acabado los IDs generados automáticamente. Por favor sincroniza para descargar más</string>
     <string name="generic_error">Error. Por favor intenta de nuevo</string>

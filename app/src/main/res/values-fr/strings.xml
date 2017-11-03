@@ -71,12 +71,13 @@
     <string name="search_results">Résultats de votre recherche</string>
     <string name="search_online">Vous ne trouvez pas ce que vous recherchez ? Recherche en ligne</string>
     <string name="local_search">Recherche locale</string>
+    <string name="search_error">Erreur. Veuillez reessayer</string>
 
     <string name="out_of_generated_ids">Il n\'y a plus d\'identifiants automatiquement générés. Prière de synchroniser pour en télecharger de nouveaux</string>
     <string name="generic_error">Erreur. Prière de réessayer</string>
     <string name="re_open">Rouvrir</string>
 
-    <string name="download_entities_title">Télécharger entités</string>
+    <string name="download_entities_title">Téléchargement des entités</string>
     <string name="enrollment_complete">Enregistrement complété</string>
     <string name="profile_form_empty">Le formulaire est vide, veuillez remplir au moins un</string>
     <string name="invalid_unique_value_form_empty">Valeur unique non valide: %s</string>
@@ -85,5 +86,5 @@
     <string name="overdue_events">ÉVÉNEMENTS EN RETARD</string>
     <string name="active_events">ÉVÉNEMENTS ACTIFS</string>
     <string name="enrollment_cancelled">Enregistrement annulé</string>
-    <string name="events_title">Entrée de données de la chronologie</string>
+    <string name="events_title">Chronologie de l\'entrée de données</string>
 </resources>

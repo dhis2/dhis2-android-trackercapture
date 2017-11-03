@@ -23,7 +23,7 @@ When cloning from zero, it's strongly recommended to do it as follows:
 
 ```
 git clone --recursive -b 2.23-legacy git@github.com:dhis2/dhis2-android-trackercapture.git
-cd sdk
+cd dhis2-android-trackercapture/sdk
 git checkout tracker-capture
 ```
 

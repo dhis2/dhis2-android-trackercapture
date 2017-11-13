@@ -30,7 +30,6 @@
 package org.hisp.dhis.android.trackercapture.fragments.enrollment;
 
 import android.support.v4.app.Fragment;
-import android.util.Log;
 
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.models.DataValue;
@@ -40,6 +39,7 @@ import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramRuleAction;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 import org.hisp.dhis.android.sdk.ui.fragments.common.IProgramRuleFragmentHelper;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.ValidationErrorDialog;
 import org.hisp.dhis.android.sdk.utils.services.ProgramRuleService;
@@ -144,6 +144,11 @@ public class EnrollmentDataEntryRuleHelper implements IProgramRuleFragmentHelper
     @Override
     public void saveTrackedEntityAttribute(String id) {
         enrollmentDataEntryFragment.getSaveThread().schedule();
+    }
+
+    @Override
+    public List<Row> getFormRows() {
+        return enrollmentDataEntryFragment.getForm().getDataEntryRows();
     }
 
     @Override

@@ -38,6 +38,7 @@ import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramRuleAction;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 import org.hisp.dhis.android.sdk.ui.fragments.common.IProgramRuleFragmentHelper;
 
 import java.util.ArrayList;
@@ -149,6 +150,11 @@ class ProgramOverviewRuleHelper implements IProgramRuleFragmentHelper {
     @Override
     public void saveTrackedEntityAttribute(String uid) {
         //do nothing
+    }
+
+    @Override
+    public List<Row> getFormRows() {
+        return new ArrayList<>();
     }
 
     @Override

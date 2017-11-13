@@ -10,6 +10,7 @@ import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramRuleAction;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 import org.hisp.dhis.android.sdk.ui.fragments.common.IProgramRuleFragmentHelper;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.ValidationErrorDialog;
 import org.hisp.dhis.android.sdk.utils.services.ProgramRuleService;
@@ -181,6 +182,11 @@ public class TrackedEntityInstanceProfileRuleHelper implements IProgramRuleFragm
     @Override
     public void saveTrackedEntityAttribute(String uid) {
         fragment.getSaveThread().schedule();
+    }
+
+    @Override
+    public List<Row> getFormRows() {
+        return fragment.getForm().getDataEntryRows();
     }
 
     @Override

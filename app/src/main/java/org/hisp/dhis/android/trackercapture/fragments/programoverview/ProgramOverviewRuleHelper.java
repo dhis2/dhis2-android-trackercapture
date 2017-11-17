@@ -127,6 +127,26 @@ class ProgramOverviewRuleHelper implements IProgramRuleFragmentHelper {
     }
 
     @Override
+    public void applySetMandatoryFieldRuleAction(ProgramRuleAction programRuleAction) {
+
+    }
+
+    @Override
+    public void applyHideProgramStageRuleAction(ProgramRuleAction programRuleAction) {
+
+    }
+
+    @Override
+    public void applyWarningOnCompleteRuleAction(ProgramRuleAction programRuleAction) {
+
+    }
+
+    @Override
+    public void applyErrorOnCompleteRuleAction(ProgramRuleAction programRuleAction) {
+
+    }
+
+    @Override
     public DataValue getDataElementValue(String uid) {
         return null;
     }

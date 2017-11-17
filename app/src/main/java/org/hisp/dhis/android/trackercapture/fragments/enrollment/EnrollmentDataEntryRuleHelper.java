@@ -122,6 +122,26 @@ public class EnrollmentDataEntryRuleHelper implements IProgramRuleFragmentHelper
     }
 
     @Override
+    public void applySetMandatoryFieldRuleAction(ProgramRuleAction programRuleAction) {
+        enrollmentDataEntryFragment.getListViewAdapter().addMandatoryOnIndex(programRuleAction.getTrackedEntityAttribute());
+    }
+
+    @Override
+    public void applyHideProgramStageRuleAction(ProgramRuleAction programRuleAction) {
+
+    }
+
+    @Override
+    public void applyWarningOnCompleteRuleAction(ProgramRuleAction programRuleAction) {
+
+    }
+
+    @Override
+    public void applyErrorOnCompleteRuleAction(ProgramRuleAction programRuleAction) {
+
+    }
+
+    @Override
     public Enrollment getEnrollment() {
         return enrollmentDataEntryFragment.getForm().getEnrollment();
     }

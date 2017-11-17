@@ -160,6 +160,26 @@ public class TrackedEntityInstanceProfileRuleHelper implements IProgramRuleFragm
     }
 
     @Override
+    public void applySetMandatoryFieldRuleAction(ProgramRuleAction programRuleAction) {
+        fragment.getListViewAdapter().addMandatoryOnIndex(programRuleAction.getTrackedEntityAttribute());
+    }
+
+    @Override
+    public void applyHideProgramStageRuleAction(ProgramRuleAction programRuleAction) {
+
+    }
+
+    @Override
+    public void applyWarningOnCompleteRuleAction(ProgramRuleAction programRuleAction) {
+
+    }
+
+    @Override
+    public void applyErrorOnCompleteRuleAction(ProgramRuleAction programRuleAction) {
+
+    }
+
+    @Override
     public DataValue getDataElementValue(String uid) {
         return null;
     }

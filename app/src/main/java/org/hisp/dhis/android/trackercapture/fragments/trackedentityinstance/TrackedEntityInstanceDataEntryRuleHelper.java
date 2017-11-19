@@ -39,7 +39,6 @@ import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramRuleAction;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 import org.hisp.dhis.android.sdk.ui.fragments.common.IProgramRuleFragmentHelper;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.ValidationErrorDialog;
 import org.hisp.dhis.android.sdk.utils.services.ProgramRuleService;
@@ -147,11 +146,6 @@ public class TrackedEntityInstanceDataEntryRuleHelper implements IProgramRuleFra
     }
 
     @Override
-    public List<Row> getFormRows() {
-        return mTrackedEntityInstanceDataEntryFragment.getForm().getDataEntryRows();
-    }
-
-    @Override
     public boolean blockingSpinnerNeeded() {
         return true;
     }
@@ -228,6 +222,11 @@ public class TrackedEntityInstanceDataEntryRuleHelper implements IProgramRuleFra
         if (mTrackedEntityInstanceDataEntryFragment.containsValue(getTrackedEntityAttributeValue(programRuleAction.getTrackedEntityAttribute()))) {
             affectedFieldsWithValue.add(programRuleAction.getTrackedEntityAttribute());
         }
+    }
+
+    @Override
+    public void disableCalculatedFields(ProgramRuleAction programRuleAction) {
+        mTrackedEntityInstanceDataEntryFragment.getListViewAdapter().disableIndex(programRuleAction.getTrackedEntityAttribute());
     }
 
     @Override

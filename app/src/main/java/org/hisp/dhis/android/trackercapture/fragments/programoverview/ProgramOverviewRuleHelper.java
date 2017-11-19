@@ -38,7 +38,6 @@ import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramRuleAction;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 import org.hisp.dhis.android.sdk.ui.fragments.common.IProgramRuleFragmentHelper;
 
 import java.util.ArrayList;
@@ -153,11 +152,6 @@ class ProgramOverviewRuleHelper implements IProgramRuleFragmentHelper {
     }
 
     @Override
-    public List<Row> getFormRows() {
-        return new ArrayList<>();
-    }
-
-    @Override
     public boolean blockingSpinnerNeeded() {
         return true;
     }
@@ -165,6 +159,12 @@ class ProgramOverviewRuleHelper implements IProgramRuleFragmentHelper {
     @Override
     public void applyHideFieldRuleAction(ProgramRuleAction programRuleAction, List affectedFieldsWithValue) {
         //do nothing
+    }
+
+    @Override
+    public void disableCalculatedFields(ProgramRuleAction programRuleAction) {
+        //do nothing
+
     }
 
     @Override

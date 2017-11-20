@@ -162,6 +162,12 @@ class ProgramOverviewRuleHelper implements IProgramRuleFragmentHelper {
     }
 
     @Override
+    public void disableCalculatedFields(ProgramRuleAction programRuleAction) {
+        //do nothing
+
+    }
+
+    @Override
     public void showWarningHiddenValuesDialog(Fragment fragment, ArrayList affectedValues) {
         //do nothing
     }

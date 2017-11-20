@@ -144,6 +144,11 @@ public class TrackedEntityInstanceProfileRuleHelper implements IProgramRuleFragm
     }
 
     @Override
+    public void disableCalculatedFields(ProgramRuleAction programRuleAction) {
+        fragment.getListViewAdapter().disableIndex(programRuleAction.getDataElement());
+    }
+
+    @Override
     public void applyHideSectionRuleAction(ProgramRuleAction programRuleAction) {
     }
 

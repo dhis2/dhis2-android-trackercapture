@@ -375,6 +375,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     @Override
     public void onResume() {
         super.onResume();
+        reloadProgramRules();
         Dhis2Application.getEventBus().register(this);
     }
 
@@ -597,7 +598,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
 
             final Map<Long, FailedItem> failedEvents = getFailedEvents();
 
-            evaluateAndApplyProgramRules();
+            reloadProgramRules();
             for(int i=mForm.getProgramStageRows().size()-1; i>=0;i--){
                 if(mForm.getProgramStageRows().get(i) instanceof  ProgramStageLabelRow) {
                     String programStageUid = ((ProgramStageLabelRow) mForm.getProgramStageRows().get(i)).getProgramStage().getUid();
@@ -654,7 +655,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                             null, programEventsLayout);
                     programEventsLayout.addView(view);
             }
-            evaluateAndApplyProgramRules();
+            reloadProgramRules();
         }
     }
 
@@ -1393,6 +1394,13 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
 
     public void setForm(ProgramOverviewFragmentForm mForm) {
         this.mForm = mForm;
+    }
+
+    public void reloadProgramRules(){
+        programRuleFragmentHelper.getHideProgramStages().clear();
+        if(mForm!=null) {
+            evaluateAndApplyProgramRules();
+        }
     }
 
     @Override

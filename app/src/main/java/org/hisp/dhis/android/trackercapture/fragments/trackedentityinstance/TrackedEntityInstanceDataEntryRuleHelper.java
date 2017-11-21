@@ -63,6 +63,16 @@ public class TrackedEntityInstanceDataEntryRuleHelper implements IProgramRuleFra
     }
 
     @Override
+    public ArrayList<String> getShowOnCompleteErrors() {
+        return null;
+    }
+
+    @Override
+    public ArrayList<String> getShowOnCompleteWarningErrors() {
+        return null;
+    }
+
+    @Override
     public void recycle() {
         mTrackedEntityInstanceDataEntryFragment = null;
     }

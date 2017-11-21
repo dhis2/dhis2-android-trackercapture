@@ -255,6 +255,11 @@ public class TrackedEntityInstanceDataEntryRuleHelper implements IProgramRuleFra
     }
 
     @Override
+    public void disableCalculatedFields(ProgramRuleAction programRuleAction) {
+        mTrackedEntityInstanceDataEntryFragment.getListViewAdapter().disableIndex(programRuleAction.getTrackedEntityAttribute());
+    }
+
+    @Override
     public void applyHideSectionRuleAction(ProgramRuleAction programRuleAction) {
     }
 }

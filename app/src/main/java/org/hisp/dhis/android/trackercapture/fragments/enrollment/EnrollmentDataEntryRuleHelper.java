@@ -30,7 +30,6 @@
 package org.hisp.dhis.android.trackercapture.fragments.enrollment;
 
 import android.support.v4.app.Fragment;
-import android.util.Log;
 
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.models.DataValue;
@@ -253,6 +252,11 @@ public class EnrollmentDataEntryRuleHelper implements IProgramRuleFragmentHelper
         if (enrollmentDataEntryFragment.containsValue(getTrackedEntityAttributeValue(programRuleAction.getTrackedEntityAttribute()))) {
             affectedFieldsWithValue.add(programRuleAction.getTrackedEntityAttribute());
         }
+    }
+
+    @Override
+    public void disableCalculatedFields(ProgramRuleAction programRuleAction) {
+        enrollmentDataEntryFragment.getListViewAdapter().disableIndex(programRuleAction.getTrackedEntityAttribute());
     }
 
     @Override

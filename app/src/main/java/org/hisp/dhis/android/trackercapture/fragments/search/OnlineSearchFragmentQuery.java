@@ -53,10 +53,14 @@ public class OnlineSearchFragmentQuery implements Query<OnlineSearchFragmentForm
                         !ptea.getMandatory()); // HACK to skip mandatory fields in search form
             }
 
+            boolean isRadioButton = program.getDataEntryMethod();
+            if(!isRadioButton){
+                isRadioButton = ptea.isRenderOptionsAsRadio();
+            }
             Row row = DataEntryRowFactory.createDataEntryView(ptea.getMandatory(),
                     ptea.getAllowFutureDate(), trackedEntityAttribute.getOptionSet(),
                     trackedEntityAttribute.getName(), value, trackedEntityAttribute.getValueType(),
-                    true, false, program.getDataEntryMethod());
+                    true, false, isRadioButton);
             dataEntryRows.add(row);
         }
         form.setTrackedEntityAttributeValues(values);

@@ -73,6 +73,11 @@ public class TrackedEntityInstanceDataEntryRuleHelper implements IProgramRuleFra
     }
 
     @Override
+    public ArrayList<String> getHideProgramStages() {
+        return null;
+    }
+
+    @Override
     public void recycle() {
         mTrackedEntityInstanceDataEntryFragment = null;
     }

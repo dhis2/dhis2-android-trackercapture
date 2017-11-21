@@ -73,6 +73,11 @@ public class EnrollmentDataEntryRuleHelper implements IProgramRuleFragmentHelper
     }
 
     @Override
+    public ArrayList<String> getHideProgramStages() {
+        return null;
+    }
+
+    @Override
     public void recycle() {
         enrollmentDataEntryFragment = null;
     }

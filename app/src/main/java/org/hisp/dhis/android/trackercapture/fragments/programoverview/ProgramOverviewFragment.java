@@ -597,7 +597,21 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
 
             final Map<Long, FailedItem> failedEvents = getFailedEvents();
 
-            for (ProgramStageRow row : data.getProgramStageRows()) {
+            evaluateAndApplyProgramRules();
+            for(int i=mForm.getProgramStageRows().size()-1; i>=0;i--){
+                if(mForm.getProgramStageRows().get(i) instanceof  ProgramStageLabelRow) {
+                    String programStageUid = ((ProgramStageLabelRow) mForm.getProgramStageRows().get(i)).getProgramStage().getUid();
+                    if (programRuleFragmentHelper.getHideProgramStages().contains(programStageUid)){
+                        mForm.getProgramStageRows().remove(i);
+                    }
+                }else if(mForm.getProgramStageRows().get(i) instanceof  ProgramStageEventRow) {
+                    String programStageUid = ((ProgramStageEventRow)mForm.getProgramStageRows().get(i)).getEvent().getProgramStageId();
+                    if (programRuleFragmentHelper.getHideProgramStages().contains(programStageUid)){
+                        mForm.getProgramStageRows().remove(i);
+                    }
+                }
+            }
+            for (ProgramStageRow row : mForm.getProgramStageRows()) {
                 if (row instanceof ProgramStageLabelRow) {
                     ProgramStageLabelRow stageRow = (ProgramStageLabelRow) row;
                     if (stageRow.getProgramStage().getRepeatable()) {
@@ -634,7 +648,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                         getLayoutInflater(getArguments()), null, programIndicatorLayout);
                 programIndicatorLayout.addView(view);
             }
-            for (ProgramStageRow programStageRow :data.getProgramStageRows()) {
+            for (ProgramStageRow programStageRow :mForm.getProgramStageRows()) {
                     ProgramStageRow programStageEventRow = programStageRow;
                     View view = programStageEventRow.getView(getLayoutInflater(getArguments()),
                             null, programEventsLayout);
@@ -1401,5 +1415,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                         dialog.dismiss();
                     }
                 });
+    }
+
+    public void hideProgramStage(ProgramRuleAction programRuleAction) {
     }
 }

@@ -46,9 +46,11 @@ import java.util.List;
 class ProgramOverviewRuleHelper implements IProgramRuleFragmentHelper {
 
     private ProgramOverviewFragment programOverviewFragment;
+    private ArrayList<String> hideProgramStages;
 
     ProgramOverviewRuleHelper(ProgramOverviewFragment programOverviewFragment) {
         this.programOverviewFragment = programOverviewFragment;
+        hideProgramStages = new ArrayList<>();
     }
 
     @Override
@@ -97,6 +99,11 @@ class ProgramOverviewRuleHelper implements IProgramRuleFragmentHelper {
     }
 
     @Override
+    public ArrayList<String> getHideProgramStages(){
+        return hideProgramStages;
+    }
+
+    @Override
     public Enrollment getEnrollment() {
         return programOverviewFragment.getForm().getEnrollment();
     }
@@ -138,22 +145,24 @@ class ProgramOverviewRuleHelper implements IProgramRuleFragmentHelper {
 
     @Override
     public void applySetMandatoryFieldRuleAction(ProgramRuleAction programRuleAction) {
-
+        //do nothing
     }
 
     @Override
     public void applyHideProgramStageRuleAction(ProgramRuleAction programRuleAction) {
-
+        if (!hideProgramStages.contains(programRuleAction.getProgramStage())) {
+            hideProgramStages.add(programRuleAction.getProgramStage());
+        }
     }
 
     @Override
     public void applyWarningOnCompleteRuleAction(ProgramRuleAction programRuleAction) {
-
+        //do nothing
     }
 
     @Override
     public void applyErrorOnCompleteRuleAction(ProgramRuleAction programRuleAction) {
-
+        //do nothing
     }
 
     @Override

@@ -44,6 +44,11 @@ public class TrackedEntityInstanceProfileRuleHelper implements IProgramRuleFragm
     }
 
     @Override
+    public ArrayList<String> getHideProgramStages() {
+        return null;
+    }
+
+    @Override
     public void recycle() {
         fragment = null;
         programRuleValidationErrors.clear();

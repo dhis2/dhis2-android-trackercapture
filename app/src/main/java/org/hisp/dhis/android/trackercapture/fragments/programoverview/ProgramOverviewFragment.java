@@ -517,6 +517,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     public void onLoadFinished(Loader<ProgramOverviewFragmentForm> loader,
             ProgramOverviewFragmentForm data) {
         if (LOADER_ID == loader.getId()) {
+            clearViews();
             mForm = data;
             mProgressBar.setVisibility(View.GONE);
             setRefreshing(false);
@@ -604,23 +605,20 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 programIndicatorLayout.addView(view);
             }
 
-            List<ProgramStageRow> hidenRows = new ArrayList<>();
+            reloadProgramRules();
+            List<ProgramStageRow> validRows = new ArrayList<>();
             for(ProgramStageRow programStageRow : mForm.getProgramStageRows()){
                 if(programStageRow instanceof  ProgramStageLabelRow) {
-                    String programStageUid = ((ProgramStageLabelRow) programStageRow).getProgramStage().getUid();
-                    if (programRuleFragmentHelper.getHideProgramStages().contains(programStageUid)){
-                        hidenRows.add(programStageRow);
+                    if (!programRuleFragmentHelper.getHideProgramStages().contains(((ProgramStageLabelRow) programStageRow).getProgramStage().getUid())){
+                        validRows.add(programStageRow);
                     }
                 }else if(programStageRow instanceof  ProgramStageEventRow) {
-                    String programStageUid = ((ProgramStageEventRow) programStageRow).getEvent().getProgramStageId();
-                    if (programRuleFragmentHelper.getHideProgramStages().contains(programStageUid)){
-                        hidenRows.add(programStageRow);
+                    if (!programRuleFragmentHelper.getHideProgramStages().contains(((ProgramStageEventRow) programStageRow).getEvent().getProgramStageId())){
+                        validRows.add(programStageRow);
                     }
                 }
             }
-            mForm.getProgramStageRows().removeAll(hidenRows);
-
-            reloadProgramRules();
+            mForm.setProgramStageRows(validRows);
             for (ProgramStageRow row : mForm.getProgramStageRows()) {
                 if (row instanceof ProgramStageLabelRow) {
                     ProgramStageLabelRow stageRow = (ProgramStageLabelRow) row;
@@ -1415,8 +1413,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     }
 
     public void reloadProgramRules(){
-        programRuleFragmentHelper.getHideProgramStages().clear();
         if(mForm!=null) {
+            programRuleFragmentHelper.getHideProgramStages().clear();
             evaluateAndApplyProgramRules();
         }
     }

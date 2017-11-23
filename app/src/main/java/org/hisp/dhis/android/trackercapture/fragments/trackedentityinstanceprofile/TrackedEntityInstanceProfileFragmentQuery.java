@@ -100,6 +100,10 @@ public class TrackedEntityInstanceProfileFragmentQuery implements
                     i).getTrackedEntityAttribute().getValueType())) {
                 GpsController.activateGps(context);
             }
+            boolean isRadioButton = mProgram.getDataEntryMethod();
+            if(!isRadioButton){
+                isRadioButton = programTrackedEntityAttributes.get(i).isRenderOptionsAsRadio();
+            }
             Row row = DataEntryRowFactory.createDataEntryView(
                     programTrackedEntityAttributes.get(i).getMandatory(),
                     programTrackedEntityAttributes.get(i).getAllowFutureDate(),
@@ -110,7 +114,7 @@ public class TrackedEntityInstanceProfileFragmentQuery implements
                             i).getTrackedEntityAttribute().getUid(),
                             trackedEntityAttributeValues), programTrackedEntityAttributes.get(
                             i).getTrackedEntityAttribute().getValueType(), false,
-                    shouldNeverBeEdited, mProgram.getDataEntryMethod());
+                    shouldNeverBeEdited, isRadioButton);
             dataEntryRows.add(row);
         }
         if (trackedEntityAttributeValues != null) {

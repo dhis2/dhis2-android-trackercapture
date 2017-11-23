@@ -30,7 +30,6 @@
 package org.hisp.dhis.android.trackercapture.fragments.enrollment;
 
 import android.support.v4.app.Fragment;
-import android.util.Log;
 
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.persistence.models.DataValue;
@@ -61,6 +60,21 @@ public class EnrollmentDataEntryRuleHelper implements IProgramRuleFragmentHelper
     @Override
     public ArrayList<String> getProgramRuleValidationErrors() {
         return programRuleValidationErrors;
+    }
+
+    @Override
+    public ArrayList<String> getShowOnCompleteErrors() {
+        return null;
+    }
+
+    @Override
+    public ArrayList<String> getShowOnCompleteWarningErrors() {
+        return null;
+    }
+
+    @Override
+    public ArrayList<String> getHideProgramStages() {
+        return null;
     }
 
     @Override
@@ -118,6 +132,26 @@ public class EnrollmentDataEntryRuleHelper implements IProgramRuleFragmentHelper
 
     @Override
     public void applyDisplayTextRuleAction(ProgramRuleAction programRuleAction) {
+
+    }
+
+    @Override
+    public void applySetMandatoryFieldRuleAction(ProgramRuleAction programRuleAction) {
+        enrollmentDataEntryFragment.getListViewAdapter().addMandatoryOnIndex(programRuleAction.getTrackedEntityAttribute());
+    }
+
+    @Override
+    public void applyHideProgramStageRuleAction(ProgramRuleAction programRuleAction) {
+
+    }
+
+    @Override
+    public void applyWarningOnCompleteRuleAction(ProgramRuleAction programRuleAction) {
+
+    }
+
+    @Override
+    public void applyErrorOnCompleteRuleAction(ProgramRuleAction programRuleAction) {
 
     }
 
@@ -223,6 +257,11 @@ public class EnrollmentDataEntryRuleHelper implements IProgramRuleFragmentHelper
         if (enrollmentDataEntryFragment.containsValue(getTrackedEntityAttributeValue(programRuleAction.getTrackedEntityAttribute()))) {
             affectedFieldsWithValue.add(programRuleAction.getTrackedEntityAttribute());
         }
+    }
+
+    @Override
+    public void disableCalculatedFields(ProgramRuleAction programRuleAction) {
+        enrollmentDataEntryFragment.getListViewAdapter().disableIndex(programRuleAction.getTrackedEntityAttribute());
     }
 
     @Override

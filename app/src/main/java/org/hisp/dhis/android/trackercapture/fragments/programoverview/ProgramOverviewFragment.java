@@ -375,6 +375,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     @Override
     public void onResume() {
         super.onResume();
+        reloadProgramRules();
         Dhis2Application.getEventBus().register(this);
     }
 
@@ -597,7 +598,30 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
 
             final Map<Long, FailedItem> failedEvents = getFailedEvents();
 
-            for (ProgramStageRow row : data.getProgramStageRows()) {
+            for (IndicatorRow indicatorRow : mForm.getProgramIndicatorRows().values()) {
+                View view = indicatorRow.getView(getChildFragmentManager(),
+                        getLayoutInflater(getArguments()), null, programIndicatorLayout);
+                programIndicatorLayout.addView(view);
+            }
+
+            List<ProgramStageRow> hidenRows = new ArrayList<>();
+            for(ProgramStageRow programStageRow : mForm.getProgramStageRows()){
+                if(programStageRow instanceof  ProgramStageLabelRow) {
+                    String programStageUid = ((ProgramStageLabelRow) programStageRow).getProgramStage().getUid();
+                    if (programRuleFragmentHelper.getHideProgramStages().contains(programStageUid)){
+                        hidenRows.add(programStageRow);
+                    }
+                }else if(programStageRow instanceof  ProgramStageEventRow) {
+                    String programStageUid = ((ProgramStageEventRow) programStageRow).getEvent().getProgramStageId();
+                    if (programRuleFragmentHelper.getHideProgramStages().contains(programStageUid)){
+                        hidenRows.add(programStageRow);
+                    }
+                }
+            }
+            mForm.getProgramStageRows().removeAll(hidenRows);
+
+            reloadProgramRules();
+            for (ProgramStageRow row : mForm.getProgramStageRows()) {
                 if (row instanceof ProgramStageLabelRow) {
                     ProgramStageLabelRow stageRow = (ProgramStageLabelRow) row;
                     if (stageRow.getProgramStage().getRepeatable()) {
@@ -629,18 +653,12 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                     }
                 }
             }
-            for (IndicatorRow indicatorRow : mForm.getProgramIndicatorRows().values()) {
-                View view = indicatorRow.getView(getChildFragmentManager(),
-                        getLayoutInflater(getArguments()), null, programIndicatorLayout);
-                programIndicatorLayout.addView(view);
-            }
-            for (ProgramStageRow programStageRow :data.getProgramStageRows()) {
+            for (ProgramStageRow programStageRow :mForm.getProgramStageRows()) {
                     ProgramStageRow programStageEventRow = programStageRow;
                     View view = programStageEventRow.getView(getLayoutInflater(getArguments()),
                             null, programEventsLayout);
                     programEventsLayout.addView(view);
             }
-            evaluateAndApplyProgramRules();
         }
     }
 
@@ -1260,7 +1278,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         FlowLayout.LayoutParams layoutParams = new FlowLayout.LayoutParams(10, 10);
         View view = keyValueView.getView(getLayoutInflater(getArguments()), programIndicatorLayout);
         view.setLayoutParams(layoutParams);
-        programIndicatorLayout.addView(view);
+        view.setTag(programRuleAction.getUid());
+        addProgramRuleActionToView(programRuleAction, programIndicatorLayout, view);
     }
 
     void displayText(ProgramRuleAction programRuleAction) {
@@ -1272,7 +1291,21 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 null, programIndicatorLayout);
         view.findViewById(R.id.text_label).setVisibility(View.GONE);
         view.findViewById(R.id.detailed_info_button_layout).setVisibility(View.GONE);
-        programIndicatorLayout.addView(view);
+        addProgramRuleActionToView(programRuleAction, programIndicatorLayout, view);
+    }
+
+    private void addProgramRuleActionToView(ProgramRuleAction programRuleAction,
+            ViewGroup programIndicatorLayout, View view) {
+        view.setTag(programRuleAction.getUid());
+        boolean isAdded = false;
+        for(int i=0;i<programIndicatorLayout.getChildCount();i++){
+            if(programIndicatorLayout.getChildAt(i).getTag().equals(view.getTag())){
+                isAdded = true;
+            }
+        }
+        if(!isAdded) {
+            programIndicatorLayout.addView(view);
+        }
     }
 
     @Override
@@ -1381,6 +1414,13 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         this.mForm = mForm;
     }
 
+    public void reloadProgramRules(){
+        programRuleFragmentHelper.getHideProgramStages().clear();
+        if(mForm!=null) {
+            evaluateAndApplyProgramRules();
+        }
+    }
+
     @Override
     public boolean doBack() {
         getActivity().finish();
@@ -1401,5 +1441,8 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                         dialog.dismiss();
                     }
                 });
+    }
+
+    public void hideProgramStage(ProgramRuleAction programRuleAction) {
     }
 }

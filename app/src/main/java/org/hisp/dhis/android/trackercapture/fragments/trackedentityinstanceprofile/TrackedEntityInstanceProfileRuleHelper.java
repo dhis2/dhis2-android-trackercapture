@@ -34,6 +34,21 @@ public class TrackedEntityInstanceProfileRuleHelper implements IProgramRuleFragm
     }
 
     @Override
+    public ArrayList<String> getShowOnCompleteErrors() {
+        return null;
+    }
+
+    @Override
+    public ArrayList<String> getShowOnCompleteWarningErrors() {
+        return null;
+    }
+
+    @Override
+    public ArrayList<String> getHideProgramStages() {
+        return null;
+    }
+
+    @Override
     public void recycle() {
         fragment = null;
         programRuleValidationErrors.clear();
@@ -162,6 +177,26 @@ public class TrackedEntityInstanceProfileRuleHelper implements IProgramRuleFragm
 
     @Override
     public void applyDisplayTextRuleAction(ProgramRuleAction programRuleAction) {
+    }
+
+    @Override
+    public void applySetMandatoryFieldRuleAction(ProgramRuleAction programRuleAction) {
+        fragment.getListViewAdapter().addMandatoryOnIndex(programRuleAction.getTrackedEntityAttribute());
+    }
+
+    @Override
+    public void applyHideProgramStageRuleAction(ProgramRuleAction programRuleAction) {
+
+    }
+
+    @Override
+    public void applyWarningOnCompleteRuleAction(ProgramRuleAction programRuleAction) {
+
+    }
+
+    @Override
+    public void applyErrorOnCompleteRuleAction(ProgramRuleAction programRuleAction) {
+
     }
 
     @Override

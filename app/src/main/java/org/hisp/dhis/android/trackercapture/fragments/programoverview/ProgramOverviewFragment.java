@@ -609,11 +609,11 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             List<ProgramStageRow> validRows = new ArrayList<>();
             for(ProgramStageRow programStageRow : mForm.getProgramStageRows()){
                 if(programStageRow instanceof  ProgramStageLabelRow) {
-                    if (!programRuleFragmentHelper.getHideProgramStages().contains(((ProgramStageLabelRow) programStageRow).getProgramStageUId())){
+                    if (!programRuleFragmentHelper.getHideProgramStages().contains(((ProgramStageLabelRow) programStageRow).getProgramStage().getUid())){
                         validRows.add(programStageRow);
                     }
                 }else if(programStageRow instanceof  ProgramStageEventRow) {
-                    if (!programRuleFragmentHelper.getHideProgramStages().contains(((ProgramStageEventRow) programStageRow).getProgramStageUId())){
+                    if (!programRuleFragmentHelper.getHideProgramStages().contains(((ProgramStageEventRow) programStageRow).getEvent().getProgramStageId())){
                         validRows.add(programStageRow);
                     }
                 }

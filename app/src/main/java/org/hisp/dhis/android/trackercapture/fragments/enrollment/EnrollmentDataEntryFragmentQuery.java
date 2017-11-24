@@ -161,6 +161,11 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
                     i).getTrackedEntityAttribute().getValueType())) {
                 GpsController.activateGps(context);
             }
+            boolean isRadioButton = mProgram.getDataEntryMethod();
+            if(!isRadioButton){
+                isRadioButton = programTrackedEntityAttributes.get(
+                        i).isRenderOptionsAsRadio();
+            }
             Row row = DataEntryRowFactory.createDataEntryView(
                     programTrackedEntityAttributes.get(i).getMandatory(),
                     programTrackedEntityAttributes.get(i).getAllowFutureDate(),
@@ -171,7 +176,7 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
                             getTrackedEntityAttribute().getUid(), trackedEntityAttributeValues),
                     programTrackedEntityAttributes.get(
                             i).getTrackedEntityAttribute().getValueType(),
-                    editable, shouldNeverBeEdited, mProgram.getDataEntryMethod());
+                    editable, shouldNeverBeEdited, isRadioButton);
             dataEntryRows.add(row);
         }
         for (TrackedEntityAttributeValue trackedEntityAttributeValue :

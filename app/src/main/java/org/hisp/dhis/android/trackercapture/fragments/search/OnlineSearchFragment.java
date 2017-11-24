@@ -347,7 +347,7 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
 
     private void showQueryError() {
         progressBar.setVisibility(View.INVISIBLE);
-        Toast.makeText(getContext(), "Error. Please retry", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(), getContext().getString(R.string.search_error), Toast.LENGTH_SHORT).show();
     }
 
     /**

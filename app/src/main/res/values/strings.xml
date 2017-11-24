@@ -73,6 +73,7 @@
     <string name="search_results">Search results</string>
     <string name="search_online">Did not find what you were looking for? Search online</string>
     <string name="local_search">Local search</string>
+    <string name="search_error">Error. Please retry</string>
 
     <string name="out_of_generated_ids">You are out of automatically generated IDs. Please synchronise to download new ones</string>
     <string name="generic_error">Error. Please retry</string>

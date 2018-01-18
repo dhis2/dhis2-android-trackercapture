@@ -58,10 +58,10 @@ public class EnrollmentDateFragmentQuery implements Query<EnrollmentDateFragment
             return fragmentForm;
 
         List<Row> dataEntryRows = new ArrayList<>();
-        dataEntryRows.add(new EnrollmentDatePickerRow(enrollment.getProgram().getEnrollmentDateLabel(), enrollment, enrollment.getEnrollmentDate()));
+        dataEntryRows.add(new EnrollmentDatePickerRow(enrollment.getProgram().getEnrollmentDateLabel(), enrollment));
 
         if (enrollment.getProgram().getDisplayIncidentDate()) {
-            dataEntryRows.add(new IncidentDatePickerRow(enrollment.getProgram().getIncidentDateLabel(), enrollment, enrollment.getIncidentDate()));
+            dataEntryRows.add(new IncidentDatePickerRow(enrollment.getProgram().getIncidentDateLabel(), enrollment));
         }
 
         fragmentForm.setEnrollment(enrollment);

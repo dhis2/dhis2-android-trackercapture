@@ -33,6 +33,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.hisp.dhis.android.trackercapture.R;
@@ -43,6 +44,7 @@ import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceIt
  */
 public class SearchRelativeTrackedEntityInstanceItemRow extends TrackedEntityInstanceItemRow
 {
+
     private String mFourthItem;
 
     public SearchRelativeTrackedEntityInstanceItemRow(Context context)
@@ -68,11 +70,14 @@ public class SearchRelativeTrackedEntityInstanceItemRow extends TrackedEntityIns
             view = convertView;
             holder = (ViewHolder) view.getTag();
         }
-
-        holder.firstItem.setText(mFirstItem);
-        holder.secondItem.setText(mSecondItem);
-        holder.thirdItem.setText(mThirdItem);
-        holder.fourthItem.setText(mFourthItem);
+        if(columns.size()>=1 && columns.get(0)!=null)
+        holder.firstItem.setText(columns.get(0));
+        if(columns.size()>=2 == (columns.get(1)!=null))
+        holder.secondItem.setText(columns.get(1));
+        if(columns.size()>=3 && columns.get(2)!=null)
+        holder.thirdItem.setText(columns.get(2));
+        if(columns.size()>=4 && columns.get(3)!=null)
+        holder.fourthItem.setText(columns.get(3));
 
         return view;
     }
@@ -92,9 +97,9 @@ public class SearchRelativeTrackedEntityInstanceItemRow extends TrackedEntityIns
         public final TextView fourthItem;
 
         private ViewHolder(TextView firstItem,
-                           TextView secondItem,
-                           TextView thirdItem,
-                           TextView fourthItem) {
+                TextView secondItem,
+                TextView thirdItem,
+                TextView fourthItem) {
             this.firstItem = firstItem;
             this.secondItem = secondItem;
             this.thirdItem = thirdItem;

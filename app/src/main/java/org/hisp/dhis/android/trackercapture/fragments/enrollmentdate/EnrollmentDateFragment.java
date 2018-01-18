@@ -40,7 +40,10 @@ import android.widget.AdapterView;
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
+import org.hisp.dhis.android.sdk.controllers.ErrorType;
+import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.adapters.SectionAdapter;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.DataEntryFragment;
@@ -49,6 +52,7 @@ import org.hisp.dhis.android.sdk.ui.fragments.dataentry.SaveThread;
 import org.hisp.dhis.android.trackercapture.R;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Deprecated
@@ -57,7 +61,7 @@ import java.util.List;
  */
 public class EnrollmentDateFragment extends DataEntryFragment<EnrollmentDateFragmentForm>
 {
-    private static final String ENROLLMENT_ID = "extra:EnrollmentId";
+    public static final String ENROLLMENT_ID = "extra:EnrollmentId";
     private static final String EXTRA_ARGUMENTS = "extra:Arguments";
     private static final String EXTRA_SAVED_INSTANCE_STATE = "extra:savedInstanceState";
     public static final String TAG = EnrollmentDateFragment.class.getSimpleName();
@@ -97,20 +101,16 @@ public class EnrollmentDateFragment extends DataEntryFragment<EnrollmentDateFrag
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        getActionBar().setDisplayShowTitleEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
+        getActionBar().setTitle(R.string.enrollment);
     }
 
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
     {
-        inflater.inflate(org.hisp.dhis.android.sdk.R.menu.menu_data_entry, menu);
-
-        final MenuItem editFormButton = menu.findItem(org.hisp.dhis.android.sdk.R.id.action_new_event);
-
-        editFormButton.setEnabled(true);
-        editFormButton.setIcon(R.drawable.ic_edit);
-        editFormButton.getIcon().setAlpha(0xFF);
     }
 
     @Override
@@ -120,7 +120,8 @@ public class EnrollmentDateFragment extends DataEntryFragment<EnrollmentDateFrag
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem) {
         if (menuItem.getItemId() == android.R.id.home) {
-            getFragmentManager().popBackStack();
+//            getFragmentManager().popBackStack();
+            getActivity().finish();
         }
         else if (menuItem.getItemId() == org.hisp.dhis.android.sdk.R.id.action_new_event)
         {
@@ -161,6 +162,7 @@ public class EnrollmentDateFragment extends DataEntryFragment<EnrollmentDateFrag
         if (mForm == null ) {
             return;
         }
+        edit = true;
         save();
 
     }
@@ -171,7 +173,7 @@ public class EnrollmentDateFragment extends DataEntryFragment<EnrollmentDateFrag
     }
 
     @Override
-    protected ArrayList<String> getValidationErrors() {
+    protected HashMap<ErrorType, ArrayList<String>> getValidationErrors() {
         return null;
     }
 
@@ -189,14 +191,32 @@ public class EnrollmentDateFragment extends DataEntryFragment<EnrollmentDateFrag
         if(mForm!=null && isAdded())
         {
             mForm.getEnrollment().setFromServer(false);
+            TrackedEntityInstance trackedEntityInstance = TrackerController.getTrackedEntityInstance(mForm.getEnrollment().getTrackedEntityInstance());
+            trackedEntityInstance.setFromServer(false);
             mForm.getEnrollment().save();
+
         }
+        edit = false;
     }
 
     @Override
     protected void proceed() {
 
     }
+
+
+    //@Override
+    protected boolean goBack() {
+        if(isValid()) {
+            goBackToPreviousActivity();
+        }
+        return false;
+    }
+
+    private void goBackToPreviousActivity() {
+        getActivity().finish();
+    }
+
 
     @Override
     public void onLoadFinished(Loader<EnrollmentDateFragmentForm> loader, EnrollmentDateFragmentForm data)

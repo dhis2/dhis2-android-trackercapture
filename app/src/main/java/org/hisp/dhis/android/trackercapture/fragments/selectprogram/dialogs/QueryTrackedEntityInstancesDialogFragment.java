@@ -36,7 +36,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
@@ -58,6 +57,7 @@ import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.sdk.R;
 import org.hisp.dhis.android.sdk.controllers.DhisController;
+import org.hisp.dhis.android.sdk.controllers.GpsController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.events.UiEvent;
 import org.hisp.dhis.android.sdk.job.JobExecutor;
@@ -69,7 +69,7 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.adapters.DataValueAdapter;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.AbsTextWatcher;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.CoordinatesRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EventCoordinatesRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.IndicatorRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.StatusRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnDetailedInfoButtonClick;
@@ -77,7 +77,6 @@ import org.hisp.dhis.android.sdk.ui.dialogs.QueryTrackedEntityInstancesResultDia
 import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -160,8 +159,8 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
         detailedSearchButton.setOnClickListener(this);
         mListView.addHeaderView(header, TAG, false);
 
-        ImageView loadDialogButton = (ImageView) view
-                .findViewById(R.id.load_dialog_button);
+        //ImageView loadDialogButton = (ImageView) view
+          //      .findViewById(R.id.load_dialog_button);
         ImageView closeDialogButton = (ImageView) view
                 .findViewById(R.id.close_dialog_button);
         mFilter = (EditText) view
@@ -172,7 +171,8 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
                 getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mFilter.getWindowToken(), 0);
 
-        mAdapter = new DataValueAdapter(getChildFragmentManager(), getActivity().getLayoutInflater());
+        mAdapter = new DataValueAdapter(getChildFragmentManager(),
+                getActivity().getLayoutInflater(), mListView, getContext());
         mListView.setAdapter(mAdapter);
 
         mFilter.addTextChangedListener(new AbsTextWatcher() {
@@ -189,7 +189,7 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
             }
         });
 
-        loadDialogButton.setOnClickListener(this);
+        //loadDialogButton.setOnClickListener(this);
 
         setDialogLabel(R.string.query_tracked_entity_instances);
     }
@@ -250,7 +250,7 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
     {
         String message = "";
 
-        if (eventClick.getRow() instanceof CoordinatesRow)
+        if (eventClick.getRow() instanceof EventCoordinatesRow)
             message = getResources().getString(R.string.detailed_info_coordinate_row);
         else if (eventClick.getRow() instanceof StatusRow)
             message = getResources().getString(R.string.detailed_info_status_row);
@@ -324,10 +324,11 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.load_dialog_button) {
-            dismiss();
-            runQuery();
-        } else if (v.getId() == org.hisp.dhis.android.trackercapture.R.id.detailed_search_button) {
+        //if (v.getId() == R.id.load_dialog_button) {
+          //  dismiss();
+            //runQuery();
+        //} else
+            if (v.getId() == org.hisp.dhis.android.trackercapture.R.id.detailed_search_button) {
             toggleDetailedSearch(v);
         }
     }
@@ -394,5 +395,11 @@ public class QueryTrackedEntityInstancesDialogFragment extends DialogFragment
                 this.activity = (FragmentActivity) activity;
             }
         }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        GpsController.disableGps();
     }
 }

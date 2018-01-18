@@ -35,13 +35,33 @@ import org.hisp.dhis.android.sdk.controllers.DhisController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.job.JobExecutor;
 import org.hisp.dhis.android.sdk.job.NetworkJob;
-import org.hisp.dhis.android.sdk.network.APIException;
 import org.hisp.dhis.android.sdk.persistence.models.BaseSerializableModel;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
+import org.hisp.dhis.android.sdk.synchronization.data.enrollment.EnrollmentLocalDataSource;
+import org.hisp.dhis.android.sdk.synchronization.data.enrollment.EnrollmentRemoteDataSource;
+import org.hisp.dhis.android.sdk.synchronization.data.enrollment.EnrollmentRepository;
+import org.hisp.dhis.android.sdk.synchronization.data.event.EventLocalDataSource;
+import org.hisp.dhis.android.sdk.synchronization.data.event.EventRemoteDataSource;
+import org.hisp.dhis.android.sdk.synchronization.data.event.EventRepository;
+import org.hisp.dhis.android.sdk.synchronization.data.faileditem.FailedItemRepository;
+import org.hisp.dhis.android.sdk.synchronization.data.trackedentityinstance
+        .TrackedEntityInstanceLocalDataSource;
+import org.hisp.dhis.android.sdk.synchronization.data.trackedentityinstance
+        .TrackedEntityInstanceRemoteDataSource;
+import org.hisp.dhis.android.sdk.synchronization.data.trackedentityinstance
+        .TrackedEntityInstanceRepository;
+import org.hisp.dhis.android.sdk.synchronization.domain.enrollment.IEnrollmentRepository;
+import org.hisp.dhis.android.sdk.synchronization.domain.enrollment.SyncEnrollmentUseCase;
+import org.hisp.dhis.android.sdk.synchronization.domain.event.IEventRepository;
+import org.hisp.dhis.android.sdk.synchronization.domain.event.SyncEventUseCase;
+import org.hisp.dhis.android.sdk.synchronization.domain.trackedentityinstance
+        .ITrackedEntityInstanceRepository;
+import org.hisp.dhis.android.sdk.synchronization.domain.trackedentityinstance
+        .SyncTrackedEntityInstanceUseCase;
 
 /**
  * Created by erling on 9/21/15.
@@ -88,7 +108,21 @@ public class ItemStatusDialogFragment extends org.hisp.dhis.android.sdk.ui.dialo
                 ResourceType.TRACKEDENTITYINSTANCE) {
             @Override
             public Object execute() {
-                TrackerController.sendTrackedEntityInstanceChanges(DhisController.getInstance().getDhisApi(), trackedEntityInstance, true);
+
+                EnrollmentLocalDataSource enrollmentLocalDataSource = new EnrollmentLocalDataSource();
+                EnrollmentRemoteDataSource enrollmentRemoteDataSource = new EnrollmentRemoteDataSource(DhisController.getInstance().getDhisApi());
+                IEnrollmentRepository enrollmentRepository = new EnrollmentRepository(enrollmentLocalDataSource, enrollmentRemoteDataSource);
+
+                EventLocalDataSource mLocalDataSource = new EventLocalDataSource();
+                EventRemoteDataSource mRemoteDataSource = new EventRemoteDataSource(DhisController.getInstance().getDhisApi());
+                EventRepository eventRepository = new EventRepository(mLocalDataSource, mRemoteDataSource);
+                FailedItemRepository failedItemRepository = new FailedItemRepository();
+
+                TrackedEntityInstanceLocalDataSource trackedEntityInstanceLocalDataSource = new TrackedEntityInstanceLocalDataSource();
+                TrackedEntityInstanceRemoteDataSource trackedEntityInstanceRemoteDataSource = new TrackedEntityInstanceRemoteDataSource(DhisController.getInstance().getDhisApi());
+                ITrackedEntityInstanceRepository trackedEntityInstanceRepository = new TrackedEntityInstanceRepository(trackedEntityInstanceLocalDataSource, trackedEntityInstanceRemoteDataSource);
+                SyncTrackedEntityInstanceUseCase syncTrackedEntityInstanceUseCase = new SyncTrackedEntityInstanceUseCase(trackedEntityInstanceRepository, enrollmentRepository, eventRepository, failedItemRepository);
+                syncTrackedEntityInstanceUseCase.execute(trackedEntityInstance);
                 return new Object();
             }
         });
@@ -99,7 +133,21 @@ public class ItemStatusDialogFragment extends org.hisp.dhis.android.sdk.ui.dialo
 
             @Override
             public Object execute()  {
-                TrackerController.sendEnrollmentChanges(DhisController.getInstance().getDhisApi(), enrollment, true);
+                EventLocalDataSource mLocalDataSource = new EventLocalDataSource();
+                EventRemoteDataSource mRemoteDataSource = new EventRemoteDataSource(DhisController.getInstance().getDhisApi());
+                EnrollmentLocalDataSource enrollmentLocalDataSource = new EnrollmentLocalDataSource();
+
+                EnrollmentRemoteDataSource enrollmentRemoteDataSource = new EnrollmentRemoteDataSource(DhisController.getInstance().getDhisApi());
+                IEnrollmentRepository enrollmentRepository = new EnrollmentRepository(enrollmentLocalDataSource, enrollmentRemoteDataSource);
+                IEventRepository eventRepository = new EventRepository(mLocalDataSource, mRemoteDataSource);
+
+                TrackedEntityInstanceRemoteDataSource trackedEntityInstanceRemoteDataSource = new TrackedEntityInstanceRemoteDataSource(DhisController.getInstance().getDhisApi());
+                TrackedEntityInstanceLocalDataSource trackedEntityInstanceLocalDataSource = new TrackedEntityInstanceLocalDataSource();
+                TrackedEntityInstanceRepository trackedEntityInstanceRepository = new TrackedEntityInstanceRepository(trackedEntityInstanceLocalDataSource, trackedEntityInstanceRemoteDataSource);
+
+                FailedItemRepository  failedItemRepository = new FailedItemRepository ();
+                SyncEnrollmentUseCase enrollmentUseCase = new SyncEnrollmentUseCase(enrollmentRepository, eventRepository, trackedEntityInstanceRepository, failedItemRepository);
+                enrollmentUseCase.execute(enrollment);
                 return new Object();
             }
         });

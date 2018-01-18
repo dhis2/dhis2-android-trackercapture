@@ -29,6 +29,7 @@
 
 package org.hisp.dhis.android.trackercapture.ui.rows.programoverview;
 
+import android.view.View;
 import android.widget.ImageButton;
 
 import org.hisp.dhis.android.sdk.events.OnRowClick;
@@ -43,14 +44,20 @@ public class OnProgramStageEventClick extends OnRowClick<Event>
     private final ImageButton hasFailedButton;
     private final boolean hasPressedFailedButton;
     private final String errorMessage;
+    private final boolean isLongPressed;
+    private final View view;
 
-    public OnProgramStageEventClick(Event event, ImageButton hasFailedButton, boolean hasPressedFailedButton, String errorMessage, ITEM_STATUS status)
+    public OnProgramStageEventClick(Event event, ImageButton hasFailedButton,
+            boolean hasPressedFailedButton, String errorMessage, ITEM_STATUS status,
+            boolean isLongPressed, View view)
     {
         super(status, event);
         this.event = event;
         this.hasFailedButton = hasFailedButton;
         this.hasPressedFailedButton = hasPressedFailedButton;
         this.errorMessage = errorMessage;
+        this.isLongPressed = isLongPressed;
+        this.view = view;
     }
     public boolean isHasPressedFailedButton() {
         return hasPressedFailedButton;
@@ -65,5 +72,13 @@ public class OnProgramStageEventClick extends OnRowClick<Event>
     }
     public String getErrorMessage() {
         return errorMessage;
+    }
+
+    public boolean isLongPressed() {
+        return isLongPressed;
+    }
+
+    public View getView() {
+        return view;
     }
 }

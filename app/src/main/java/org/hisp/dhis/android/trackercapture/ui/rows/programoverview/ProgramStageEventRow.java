@@ -39,6 +39,7 @@ import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.events.OnRowClick;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
+import org.hisp.dhis.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis.android.sdk.utils.Utils;
 import org.hisp.dhis.android.sdk.utils.support.DateUtils;
 import org.joda.time.LocalDate;
@@ -78,6 +79,9 @@ public class ProgramStageEventRow implements ProgramStageRow {
             holder = new EventViewHolder(orgUnit, eventDateTextView, statusButton, new OnProgramStageEventInternalClickListener());
 
             root.findViewById(org.hisp.dhis.android.sdk.R.id.eventbackground).setOnClickListener(holder.listener);
+            root.findViewById(
+                    org.hisp.dhis.android.sdk.R.id.eventbackground).setOnLongClickListener(
+                    holder.listener);
 
             root.setTag(holder);
             view = root;
@@ -95,8 +99,8 @@ public class ProgramStageEventRow implements ProgramStageRow {
             } else if (!isSynchronized()) {
                 holder.statusButton.setEnabled(true);
                 holder.statusButton.setVisibility(View.VISIBLE);
-                holder.statusButton.setBackgroundResource(org.hisp.dhis.android.sdk.R.drawable.ic_offline);
-                holder.statusButton.setTag(org.hisp.dhis.android.sdk.R.drawable.ic_offline);
+                holder.statusButton.setBackgroundResource(org.hisp.dhis.android.sdk.R.drawable.ic_legacy_offline);
+                holder.statusButton.setTag(org.hisp.dhis.android.sdk.R.drawable.ic_legacy_offline);
                 holder.listener.setStatusButton(statusButton);
                 holder.listener.setStatus(OnRowClick.ITEM_STATUS.OFFLINE);
                 holder.statusButton.setOnClickListener(holder.listener);
@@ -114,7 +118,10 @@ public class ProgramStageEventRow implements ProgramStageRow {
         holder.listener.setEvent(getEvent());
         holder.listener.setMessage(getMessage());
         if(event.getOrganisationUnitId()!=null) {
-            holder.orgUnit.setText(MetaDataController.getOrganisationUnit(event.getOrganisationUnitId()).getLabel());
+            OrganisationUnit organisationUnit = MetaDataController.getOrganisationUnit(event.getOrganisationUnitId());
+            if(organisationUnit != null) {
+                holder.orgUnit.setText(organisationUnit.getLabel());
+            }
         } else {
             holder.orgUnit.setText("");
         }
@@ -227,7 +234,8 @@ public class ProgramStageEventRow implements ProgramStageRow {
         return message;
     }
 
-    private static class OnProgramStageEventInternalClickListener implements View.OnClickListener {
+    private static class OnProgramStageEventInternalClickListener implements View.OnClickListener,
+            View.OnLongClickListener {
         private Event event;
         private ImageButton statusButton;
         private String message;
@@ -252,10 +260,23 @@ public class ProgramStageEventRow implements ProgramStageRow {
         @Override
         public void onClick(View view) {
             if(view.getId() == org.hisp.dhis.android.sdk.R.id.eventbackground) {
-                Dhis2Application.getEventBus().post(new OnProgramStageEventClick(event, statusButton,false, "", status));
+                Dhis2Application.getEventBus().post(
+                        new OnProgramStageEventClick(event, statusButton, false, "", status,
+                                false, view));
             } else if(view.getId() == org.hisp.dhis.android.sdk.R.id.statusButton) {
-                Dhis2Application.getEventBus().post(new OnProgramStageEventClick(event, statusButton, true, message, status));
+                Dhis2Application.getEventBus().post(
+                        new OnProgramStageEventClick(event, statusButton, true, message, status,
+                                false, view));
             }
         }
+
+        @Override
+        public boolean onLongClick(View view) {
+            Dhis2Application.getEventBus().post(
+                    new OnProgramStageEventClick(event, statusButton, false, "", status,
+                            true, view));
+            return true;
+        }
     }
+
 }

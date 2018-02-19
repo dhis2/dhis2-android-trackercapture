@@ -90,21 +90,57 @@ public class MainActivity extends AbsHomeActivity {
         setUpNavigationView(savedInstanceState);
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+            String permissions[], int[] grantResults) {
+        if (requestCode == REQUEST_ACCESS_FINE_LOCATION) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                checkStorage();
+            } else {
+                askForLocationPermission();
+            }
+        }
+        if( requestCode == REQUEST_ACCESS_FINE_STORAGE) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // permission was granted, yay! Do the
+                // contacts-related task you need to do.
+            } else {
+                askForStoragePermission();
+            }
+        }
+    }
+
     private void checkPermissions() {
         boolean hasPermissionLocation = (ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED);
         if (!hasPermissionLocation) {
-            ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    REQUEST_ACCESS_FINE_LOCATION);
+            askForLocationPermission();
+        }
+        else{
+            checkStorage();
         }
 
+    }
+
+    private void askForLocationPermission() {
+        ActivityCompat.requestPermissions(MainActivity.this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                REQUEST_ACCESS_FINE_LOCATION);
+    }
+
+    private void askForStoragePermission() {
+        ActivityCompat.requestPermissions(MainActivity.this,
+                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                REQUEST_ACCESS_FINE_STORAGE);
+    }
+
+    private void checkStorage() {
         boolean hasPermissionStorage = (ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
         if (!hasPermissionStorage) {
-            ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    REQUEST_ACCESS_FINE_STORAGE);
+            askForStoragePermission();
         }
     }
 
@@ -170,7 +206,6 @@ public class MainActivity extends AbsHomeActivity {
     @Override
     public void onResume() {
         super.onResume();
-        checkPermissions();
         ScreenSizeConfigurator.init(getWindowManager());
         Dhis2Application.getEventBus().register(this);
     }

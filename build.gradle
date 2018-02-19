@@ -5,11 +5,12 @@ buildscript {
         jcenter()
         maven { url "https://raw.github.com/Raizlabs/maven-releases/master/releases" }
         maven { url 'https://maven.fabric.io/public' }
+        google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.3'
+        classpath 'com.android.tools.build:gradle:3.0.1'
         classpath 'com.raizlabs:Griddle:1.0.3'
-        classpath 'io.fabric.tools:gradle:1.+'
+        classpath 'io.fabric.tools:gradle:1.25.1'
         classpath 'com.dicedmelon.gradle:jacoco-android:0.1.1'
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -22,12 +23,13 @@ allprojects {
         jcenter()
         maven { url "https://raw.github.com/Raizlabs/maven-releases/master/releases" }
         maven { url 'https://maven.fabric.io/public' }
+        google()
     }
 }
 
 
 ext {
-    buildToolsVersion = "23.0.2"
+    buildToolsVersion = "26.0.2"
     minSdkVersion = 15
     compileSdkVersion = 23
     targetSdkVersion = 23
@@ -37,7 +39,7 @@ ext {
     configuration = [
             package          : "org.hisp.dhis.android.trackercapture",
             applicationId    : "org.hisp.dhis.android.trackercapture_dev",
-            buildToolsVersion: "23.0.2",
+            buildToolsVersion: "26.0.2",
             minSdkVersion    : 15,
             compileSdkVersion: 23,
             targetSdkVersion : 23,

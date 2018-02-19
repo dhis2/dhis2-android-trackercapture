@@ -77,7 +77,6 @@ public class MainActivity extends AbsHomeActivity {
         super.onCreate(savedInstanceState);
         ScreenSizeConfigurator.init(getWindowManager());
 
-        checkPermissions();
         if ((getIntent().getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {
             // Activity was brought to front and not created,
             // Thus finishing this will get us to the last viewed activity
@@ -90,59 +89,24 @@ public class MainActivity extends AbsHomeActivity {
         setUpNavigationView(savedInstanceState);
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-            String permissions[], int[] grantResults) {
-        if (requestCode == REQUEST_ACCESS_FINE_LOCATION) {
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                checkStorage();
-            } else {
-                askForLocationPermission();
-            }
-        }
-        if( requestCode == REQUEST_ACCESS_FINE_STORAGE) {
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // permission was granted, yay! Do the
-                // contacts-related task you need to do.
-            } else {
-                askForStoragePermission();
-            }
-        }
-    }
-
     private void checkPermissions() {
         boolean hasPermissionLocation = (ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED);
         if (!hasPermissionLocation) {
-            askForLocationPermission();
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_ACCESS_FINE_LOCATION);
         }
-        else{
-            checkStorage();
-        }
 
-    }
-
-    private void askForLocationPermission() {
-        ActivityCompat.requestPermissions(MainActivity.this,
-                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                REQUEST_ACCESS_FINE_LOCATION);
-    }
-
-    private void askForStoragePermission() {
-        ActivityCompat.requestPermissions(MainActivity.this,
-                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                REQUEST_ACCESS_FINE_STORAGE);
-    }
-
-    private void checkStorage() {
         boolean hasPermissionStorage = (ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
         if (!hasPermissionStorage) {
-            askForStoragePermission();
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    REQUEST_ACCESS_FINE_STORAGE);
         }
     }
+
 
     private void setUpNavigationView(Bundle savedInstanceState) {
         removeMenuItem(R.id.drawer_item_profile);
@@ -191,7 +155,8 @@ public class MainActivity extends AbsHomeActivity {
     @Override
     protected boolean onItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == 11) {
-            attachFragment(WrapperFragment.newInstance(SelectProgramFragment.class, getString(R.string.app_name)));
+            attachFragment(WrapperFragment.newInstance(SelectProgramFragment.class,
+                    getString(R.string.app_name)));
             return true;
         }
         return false;
@@ -206,6 +171,9 @@ public class MainActivity extends AbsHomeActivity {
     @Override
     public void onResume() {
         super.onResume();
+
+        checkPermissions();
+
         ScreenSizeConfigurator.init(getWindowManager());
         Dhis2Application.getEventBus().register(this);
     }
@@ -236,7 +204,8 @@ public class MainActivity extends AbsHomeActivity {
             isSelected = openApp(APPS_EVENT_CAPTURE_PACKAGE);
         } else if (menuItemId == org.hisp.dhis.client.sdk.ui.R.id.drawer_item_tracker_capture) {
             isSelected = openApp(APPS_TRACKER_CAPTURE_PACKAGE);
-        } else if (menuItemId == org.hisp.dhis.client.sdk.ui.R.id.drawer_item_tracker_capture_reports) {
+        } else if (menuItemId
+                == org.hisp.dhis.client.sdk.ui.R.id.drawer_item_tracker_capture_reports) {
             isSelected = openApp(APPS_TRACKER_CAPTURE_REPORTS_PACKAGE);
         } else if (menuItemId == org.hisp.dhis.client.sdk.ui.R.id.drawer_item_profile) {
             attachFragmentDelayed(getProfileFragment());

@@ -32,16 +32,6 @@ apply plugin: 'io.fabric'
 apply plugin: 'jacoco-android'
 
 android {
-//    compileSdkVersion rootProject.ext.configuration.compileSdkVersion
-//    buildToolsVersion rootProject.ext.configuration.buildToolsVersion
-//
-//    defaultConfig {
-//        applicationId "org.hisp.dhis.android.trackercapture"
-//        minSdkVersion 15
-//        targetSdkVersion 21
-//        versionCode 22
-//        versionName "0.3.4-2.22"
-//    }
 
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -93,5 +83,5 @@ dependencies {
         transitive = true;
     }
 
-    compile 'com.android.support:multidex:1.0.1'
+    compile 'com.android.support:multidex:1.0.2'
 }

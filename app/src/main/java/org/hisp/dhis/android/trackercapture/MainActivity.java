@@ -69,20 +69,12 @@ public class MainActivity extends AbsHomeActivity {
             "org.hisp.dhis.android.trackercapture";
     private static final String APPS_TRACKER_CAPTURE_REPORTS_PACKAGE =
             "org.hispindia.bidtrackerreports";
-    private static final int REQUEST_ACCESS_FINE_LOCATION = 1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ScreenSizeConfigurator.init(getWindowManager());
-
-        boolean hasPermissionLocation = (ContextCompat.checkSelfPermission(MainActivity.this,
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED);
-        if (!hasPermissionLocation) {
-            ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    REQUEST_ACCESS_FINE_LOCATION);
-        }
 
         if ((getIntent().getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {
             // Activity was brought to front and not created,
@@ -94,6 +86,7 @@ public class MainActivity extends AbsHomeActivity {
 
         PeriodicSynchronizerController.activatePeriodicSynchronizer(this);
         setUpNavigationView(savedInstanceState);
+
     }
 
     private void setUpNavigationView(Bundle savedInstanceState) {
@@ -143,11 +136,19 @@ public class MainActivity extends AbsHomeActivity {
     @Override
     protected boolean onItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == 11) {
-            attachFragment(WrapperFragment.newInstance(SelectProgramFragment.class, getString(R.string.app_name)));
+            attachFragment(WrapperFragment.newInstance(SelectProgramFragment.class,
+                    getString(R.string.app_name)));
             return true;
         }
         return false;
     }
+
+    @Override
+    public void onStart() {
+        super.onResume();
+
+    }
+
 
     @Override
     public void onPause() {
@@ -158,6 +159,7 @@ public class MainActivity extends AbsHomeActivity {
     @Override
     public void onResume() {
         super.onResume();
+
         ScreenSizeConfigurator.init(getWindowManager());
         Dhis2Application.getEventBus().register(this);
     }
@@ -188,7 +190,8 @@ public class MainActivity extends AbsHomeActivity {
             isSelected = openApp(APPS_EVENT_CAPTURE_PACKAGE);
         } else if (menuItemId == org.hisp.dhis.client.sdk.ui.R.id.drawer_item_tracker_capture) {
             isSelected = openApp(APPS_TRACKER_CAPTURE_PACKAGE);
-        } else if (menuItemId == org.hisp.dhis.client.sdk.ui.R.id.drawer_item_tracker_capture_reports) {
+        } else if (menuItemId
+                == org.hisp.dhis.client.sdk.ui.R.id.drawer_item_tracker_capture_reports) {
             isSelected = openApp(APPS_TRACKER_CAPTURE_REPORTS_PACKAGE);
         } else if (menuItemId == org.hisp.dhis.client.sdk.ui.R.id.drawer_item_profile) {
             attachFragmentDelayed(getProfileFragment());

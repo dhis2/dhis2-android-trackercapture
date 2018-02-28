@@ -177,7 +177,8 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
 
             return new DbLoader<>(
                     getActivity().getBaseContext(), modelsToTrack, new EnrollmentDataEntryFragmentQuery(
-                    orgUnitId, programId, trackedEntityInstance, enrollmentDate, incidentDate)
+                    orgUnitId, programId, trackedEntityInstance, enrollmentDate, incidentDate,
+                    EnrollmentDataEntryFragment.this)
             );
         }
         return null;

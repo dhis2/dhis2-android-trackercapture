@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ * Copyright (c) 2016, University of Oslo
+  ~  * All rights reserved.
+  ~  *
+  ~  * Redistribution and use in source and binary forms, with or without
+  ~  * modification, are permitted provided that the following conditions are met:
+  ~  * Redistributions of source code must retain the above copyright notice, this
+  ~  * list of conditions and the following disclaimer.
+  ~  *
+  ~  * Redistributions in binary form must reproduce the above copyright notice,
+  ~  * this list of conditions and the following disclaimer in the documentation
+  ~  * and/or other materials provided with the distribution.
+  ~  * Neither the name of the HISP project nor the names of its contributors may
+  ~  * be used to endorse or promote products derived from this software without
+  ~  * specific prior written permission.
+  ~  *
+  ~  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ~  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  ~  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  ~  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+  ~  * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  ~  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  ~  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+  ~  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ~  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  ~  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  ~  */
+  -->
+
+<resources>
+
+    <string name="action_settings">Paramètres</string>
+    <string name="register_new_event">Enregistrer un nouvel événement</string>
+    <string name="registered_events">Événements enregistrés</string>
+    <string name="register_relationship">Enregistrer une rélation</string>
+    <string name="new_event">Nouvel événement</string>
+    <string name="enroll">Enregistrer</string>
+
+    <string name="is">est</string>
+    <string name="please_enter">Prière d\'introduir</string>
+
+    <string name="report_date">Date du rapport</string>
+    <string name="event_sent">Envoyé</string>
+    <string name="event_offline">Hors ligne</string>
+    <string name="event_error">Erreur</string>
+
+    <string name="error_401_description">Identifiant ou mot de passe modifiés. Prière de se déconnecter et se reconnecter. \nNote! L\'évènement sera perdu</string>
+    <string name="error_408_description">Connection faible. Prière de synchroniser plus tard</string>
+    <string name="error_series_400_description">Erreur d\'application 40x</string>
+    <string name="error_series_500_description">Erreur de serveur 50x. Prière de synchroniser plus tard.</string>
+    <string name="unknown_error">Erreur inconnue</string>
+
+    <string name="confirm_complete_enrollment">Souhaitez-vous vraiment désinscription l\'enregistrement?\n        Vous ne pourrez plus éditer ultérierement</string>
+    <string name="confirm_terminate_enrollment">Souhaitez-vous vraiment annuler cette\n        enregistrement ? Vous ne pourrez plus revenir en arrière.</string>
+    <string name="confirm_delete_relationship">Souhaitez-vous vraiment supprimer cette relation ?</string>
+    <string name="no_active_enrollment">Pas d\'enregistrement actif</string>
+    <string name="select_relationship_type">Sélectionnez le type de rélation</string>
+
+    <string name="search">Rechercher</string>
+    <string name="http_error_400">Requête incorrecte</string>
+    <string name="http_error_401">Non autorisé</string>
+    <string name="http_error_403">Interdit</string>
+    <string name="http_error_409">Conflit</string>
+    <string name="http_error_500">Erreur interne du serveur</string>
+    <string name="http_error_501">Non développé</string>
+    <string name="http_error_502">Passerelle invalide</string>
+    <string name="http_error_503">Service indisponible</string>
+    <string name="http_error_504">Connection à la passerelle expirée</string>
+
+    <string name="search_results">Résultats de votre recherche</string>
+    <string name="search_online">Vous ne trouvez pas ce que vous recherchez ? Recherche en ligne</string>
+    <string name="local_search">Recherche locale</string>
+    <string name="search_error">Erreur. Veuillez reessayer</string>
+
+    <string name="out_of_generated_ids">Il n\'y a plus d\'identifiants automatiquement générés. Prière de synchroniser pour en télecharger de nouveaux</string>
+    <string name="generic_error">Erreur. Prière de réessayer</string>
+    <string name="re_open">Rouvrir</string>
+
+    <string name="download_entities_title">Téléchargement des entités</string>
+    <string name="enrollment_complete">Enregistrement complété</string>
+    <string name="profile_form_empty">Le formulaire est vide, veuillez remplir au moins un</string>
+    <string name="invalid_unique_value_form_empty">Valeur unique non valide: %s</string>
+    <string name="events">ÉVÉNEMENTS</string>
+    <string name="upcoming_events">PROCHAINS ÉVÉNEMENTS</string>
+    <string name="overdue_events">ÉVÉNEMENTS EN RETARD</string>
+    <string name="active_events">ÉVÉNEMENTS ACTIFS</string>
+    <string name="enrollment_cancelled">Enregistrement annulé</string>
+    <string name="events_title">Chronologie de l\'entrée de données</string>
+</resources>

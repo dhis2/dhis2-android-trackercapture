@@ -1,114 +1,87 @@
-apply plugin: 'com.android.application'
-apply plugin: 'com.neenbedankt.android-apt'
-apply plugin: 'io.fabric'
+/*
+ *  Copyright (c) 2016, University of Oslo
+ *  * All rights reserved.
+ *  *
+ *  * Redistribution and use in source and binary forms, with or without
+ *  * modification, are permitted provided that the following conditions are met:
+ *  * Redistributions of source code must retain the above copyright notice, this
+ *  * list of conditions and the following disclaimer.
+ *  *
+ *  * Redistributions in binary form must reproduce the above copyright notice,
+ *  * this list of conditions and the following disclaimer in the documentation
+ *  * and/or other materials provided with the distribution.
+ *  * Neither the name of the HISP project nor the names of its contributors may
+ *  * be used to endorse or promote products derived from this software without
+ *  * specific prior written permission.
+ *  *
+ *  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ *  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ *  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ *  * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ *  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
 
-def cfg = rootProject.ext.configuration
-def libs = rootProject.ext.libraries
+apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
+apply plugin: 'jacoco-android'
 
 android {
-    compileSdkVersion cfg.compileSdkVersion
-    buildToolsVersion cfg.buildToolsVersion
+
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        applicationId cfg.package
-        minSdkVersion cfg.minSdkVersion
-        targetSdkVersion cfg.targetSdkVersion
-        versionCode cfg.versionCode
-        versionName cfg.versionName
-
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode rootProject.ext.versionCode
+        versionName rootProject.ext.versionName
+        applicationId rootProject.ext.configuration.applicationId
         multiDexEnabled true
-        //for gradle plugin 1.5: Vector Drawables
-        generatedDensities = []
-    }
-
-    aaptOptions {
-        additionalParameters "--no-version-vectors"
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
     }
 
     buildTypes {
-        debug {
-            buildConfigField "String", "SERVER_URL", '"https://play.dhis2.org/dev"'
-            buildConfigField "String", "USERNAME", '"android"'
-            buildConfigField "String", "PASSWORD", '"Android123"'
-
-            // reading fabric.properties file from current directory
-            Properties properties = new Properties()
-            properties.load(file("fabric.properties").newDataInputStream())
-
-            // merging api key into manifest
-            manifestPlaceholders = [fabric_api_key: properties.getProperty('apiKey')]
-
-            // disabling crashlytics for debug builds
-            ext.enableCrashlytics = false
-        }
         release {
-            buildConfigField "String", "SERVER_URL", '""'
-            buildConfigField "String", "USERNAME", '""'
-            buildConfigField "String", "PASSWORD", '""'
-
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            shrinkResources true
-
-            // reading fabric.properties file from current directory
-            Properties properties = new Properties()
-            properties.load(file("fabric.properties").newDataInputStream())
-
-            // merging api key into manifest
-            manifestPlaceholders = [fabric_api_key: properties.getProperty('apiKey')]
-
-            // enabling crashlytics for debug builds
-            ext.enableCrashlytics = true
         }
+        debug {
+            testCoverageEnabled true
+        }
+    }
+
+    lintOptions {
+        disable 'RtlSymmetry', 'RtlHardcoded'
+        abortOnError false
     }
 
     packagingOptions {
-        exclude 'META-INF/DEPENDENCIES'
-        exclude 'META-INF/NOTICE'
-        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/DEPENDENCIES.txt'
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE.txt'
-    }
-
-    dexOptions {
-        javaMaxHeapSize "2g"
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/dependencies.txt'
+        exclude 'META-INF/LGPL2.1'
     }
 }
 
 dependencies {
-    // Local
-    compile project(":core-rules")
-    compile project(":ui-bindings")
+    compile project(':core')
+    compile project(':ui')
 
 
-    // Dependencies for testing
-    testCompile "junit:junit:${libs.jUnitVersion}"
-
-    // Google
-    compile "com.android.support:appcompat-v7:${libs.supportVersion}"
-
-    // Dagger dependencies
-    provided "com.google.dagger:dagger-compiler:${libs.dagger}"
-    apt "com.google.dagger:dagger-compiler:${libs.dagger}"
-    compile "com.google.dagger:dagger:${libs.dagger}"
-
-    // Smooth progress bar:
-    compile "com.github.castorflex.smoothprogressbar:library:${libs.smoothProgressBarVersion}"
-
-    // Square/Jake Wharton
-    compile "com.jakewharton.timber:timber:${libs.timberVersion}"
-    compile "com.squareup.okhttp3:logging-interceptor:${libs.okhttpVersion}"
-
-    // Fabric
-    compile("com.crashlytics.sdk.android:crashlytics:${libs.crashlyticsVersion}@aar") {
+    compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
         transitive = true;
     }
 
-    // Multidex:
-    compile "com.android.support:multidex:${libs.multidex}"
+    compile 'com.android.support:multidex:1.0.2'
 }

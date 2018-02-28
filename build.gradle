@@ -1,75 +1,58 @@
-ext {
-    configuration = [
-            package          : "org.hisp.dhis.android.trackercapture",
-            buildToolsVersion: "23.0.2",
-            minSdkVersion    : 15,
-            compileSdkVersion: 23,
-            targetSdkVersion : 23,
-            versionCode      : 21,
-            versionName      : "0.0.1"
-    ]
-    libraries = [
-            // dhis libs
-            dhisCommonsVersion : "1.1",
-
-            // android libs
-            supportVersion          : "23.4.0",
-            rxAndroidVersion        : "1.1.0",
-            dbFlowVersion           : "3.0.1",
-            progressBarVersion      : "1.2.0",
-            smoothProgressBarVersion: "1.1.0",
-            crashlyticsVersion      : "2.5.5",
-            stethoVersion           : "1.3.1",
-            multidex                : "1.0.1",
-
-            // java libs
-            timberVersion           : "4.1.0",
-            okhttpVersion           : "3.2.0",
-            retrofitVersion         : "2.0.0",
-            jacksonVersion          : "2.7.4",
-            jodaTimeVersion         : "2.9.2",
-            jexlVersion             : "2.1.1",
-            commonsLang3Version     : "3.3.2",
-            commonsMath3Version     : "3.6",
-            dagger                  : "2.2",
-
-            // testing libs
-            jUnitVersion            : "4.12",
-            mockitoVersion          : "1.10.19",
-            powerMockVersion        : "1.6.3",
-    ]
-}
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
     repositories {
         jcenter()
-
-        maven {
-            url 'https://maven.fabric.io/public'
-        }
+        maven { url "https://raw.github.com/Raizlabs/maven-releases/master/releases" }
+        maven { url 'https://maven.fabric.io/public' }
+        google()
     }
-
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.0'
-        classpath 'io.fabric.tools:gradle:1.21.2'
-        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath 'com.raizlabs:Griddle:1.0.3'
+        classpath 'io.fabric.tools:gradle:1.25.1'
+        classpath 'com.dicedmelon.gradle:jacoco-android:0.1.1'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
     }
 }
 
 allprojects {
     repositories {
         jcenter()
-
-        maven {
-            url 'https://maven.fabric.io/public'
-        }
-
-        maven {
-            url "https://jitpack.io"
-        }
+        maven { url "https://raw.github.com/Raizlabs/maven-releases/master/releases" }
+        maven { url 'https://maven.fabric.io/public' }
+        google()
     }
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+
+ext {
+    buildToolsVersion = "26.0.2"
+    minSdkVersion = 15
+    compileSdkVersion = 23
+    targetSdkVersion = 23
+    versionCode = 60
+    versionName = "0.5.2"
+
+    configuration = [
+            package          : "org.hisp.dhis.android.trackercapture",
+            applicationId    : "org.hisp.dhis.android.trackercapture_dev",
+            buildToolsVersion: "26.0.2",
+            minSdkVersion    : 15,
+            compileSdkVersion: 23,
+            targetSdkVersion : 23,
+            versionCode      : 58,
+            versionName      : "0.5.0"
+    ]
+
+    libraries = [
+            // android libs
+            supportVersion    : "23.3.0",
+            progressBarVersion: "1.2.0",
+
+            // testing libs
+            jUnitVersion      : "4.12"
+    ]
 }

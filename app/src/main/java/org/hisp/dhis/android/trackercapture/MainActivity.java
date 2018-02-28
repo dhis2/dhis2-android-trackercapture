@@ -69,8 +69,7 @@ public class MainActivity extends AbsHomeActivity {
             "org.hisp.dhis.android.trackercapture";
     private static final String APPS_TRACKER_CAPTURE_REPORTS_PACKAGE =
             "org.hispindia.bidtrackerreports";
-    private static final int REQUEST_ACCESS_FINE_LOCATION = 1;
-    private static final int REQUEST_ACCESS_FINE_STORAGE = 2;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,26 +86,8 @@ public class MainActivity extends AbsHomeActivity {
 
         PeriodicSynchronizerController.activatePeriodicSynchronizer(this);
         setUpNavigationView(savedInstanceState);
+
     }
-
-    private void checkPermissions() {
-        boolean hasPermissionLocation = (ContextCompat.checkSelfPermission(MainActivity.this,
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED);
-        if (!hasPermissionLocation) {
-            ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    REQUEST_ACCESS_FINE_LOCATION);
-        }
-
-        boolean hasPermissionStorage = (ContextCompat.checkSelfPermission(MainActivity.this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
-        if (!hasPermissionStorage) {
-            ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    REQUEST_ACCESS_FINE_STORAGE);
-        }
-    }
-
 
     private void setUpNavigationView(Bundle savedInstanceState) {
         removeMenuItem(R.id.drawer_item_profile);
@@ -163,6 +144,13 @@ public class MainActivity extends AbsHomeActivity {
     }
 
     @Override
+    public void onStart() {
+        super.onResume();
+
+    }
+
+
+    @Override
     public void onPause() {
         super.onPause();
         Dhis2Application.getEventBus().unregister(this);
@@ -171,8 +159,6 @@ public class MainActivity extends AbsHomeActivity {
     @Override
     public void onResume() {
         super.onResume();
-
-        checkPermissions();
 
         ScreenSizeConfigurator.init(getWindowManager());
         Dhis2Application.getEventBus().register(this);

@@ -1,7 +1,6 @@
 package org.hisp.dhis.android.trackercapture.fragments.search;
 
 import android.content.Context;
-import android.content.res.Configuration;
 
 import com.raizlabs.android.dbflow.sql.language.Select;
 import com.raizlabs.android.dbflow.sql.queriable.StringQuery;
@@ -317,33 +316,29 @@ public class LocalSearchResultFragmentFormQuery implements Query<LocalSearchResu
                 + TrackedEntityInstance$Table.TRACKEDENTITYINSTANCE + " IN (SELECT " +
                 TrackedEntityAttributeValue$Table.TRACKEDENTITYINSTANCEID + " FROM " +
                 TrackedEntityAttributeValue.class.getSimpleName() + " WHERE " + TrackedEntityAttributeValue$Table.TRACKEDENTITYATTRIBUTEID +
-                " IS '" + firstId + "' AND " + TrackedEntityAttributeValue$Table.VALUE + ' ' + firstCompareOperator +' ' + "'" + firstValue + "'";
-
-        int closingParenthesis = 1;
+                " IS '" + firstId + "' AND " + TrackedEntityAttributeValue$Table.VALUE + ' ' + firstCompareOperator +' ' + "'" + firstValue + "')";
 
         while (attributesIdsUsedInQueryIterator.hasNext()) {
             String attributeId = attributesIdsUsedInQueryIterator.next();
             String attributeValue;
-            TrackedEntityAttribute trackedEntityAttribute = trackedEntityAttributeMap.get(attributeId);
+            TrackedEntityAttribute trackedEntityAttribute = trackedEntityAttributeMap.get(
+                    attributeId);
             String compareOperator;
-            if(trackedEntityAttribute.getOptionSet() != null) {
+            if (trackedEntityAttribute.getOptionSet() != null) {
                 compareOperator = "IS";
                 attributeValue = attributesWithValuesMap.get(attributeId);
             } else {
                 compareOperator = "LIKE";
                 attributeValue = '%' + attributesWithValuesMap.get(attributeId) + '%';
             }
-
-            String queryToAppend = " AND " + TrackedEntityAttributeValue$Table.TRACKEDENTITYINSTANCEID +
-                    " IN ( SELECT " + TrackedEntityAttributeValue$Table.TRACKEDENTITYINSTANCEID +
-                    " FROM " + TrackedEntityAttributeValue.class.getSimpleName() + " WHERE " + TrackedEntityAttributeValue$Table.TRACKEDENTITYATTRIBUTEID +
-                    " IS '" + attributeId + "' AND " + TrackedEntityAttributeValue$Table.VALUE + ' ' + compareOperator +' ' + "'" + attributeValue + "'";
-            query += queryToAppend;
-            closingParenthesis++;
-        }
-
-        for(int i = 0; i<closingParenthesis; i++) {
-            query += ')';
+            query += "INTERSECT SELECT * FROM " + TrackedEntityInstance.class.getSimpleName()
+                    + " WHERE "
+                    + TrackedEntityInstance$Table.TRACKEDENTITYINSTANCE + " IN (SELECT " +
+                    TrackedEntityAttributeValue$Table.TRACKEDENTITYINSTANCEID + " FROM " +
+                    TrackedEntityAttributeValue.class.getSimpleName() + " WHERE "
+                    + TrackedEntityAttributeValue$Table.TRACKEDENTITYATTRIBUTEID +" "+ compareOperator
+                    +" '"+ attributeId + "' AND " + TrackedEntityAttributeValue$Table.VALUE + ' '
+                    + compareOperator + ' ' + "'" + attributeValue + "')";
         }
         query += ';';
         return query;

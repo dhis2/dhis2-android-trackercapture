@@ -63,15 +63,17 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
     private String incidentDate;
     private TrackedEntityInstance currentTrackedEntityInstance;
     private Enrollment currentEnrollment;
+    private EnrollmentDataEntryFragment mFragment;
 
     EnrollmentDataEntryFragmentQuery(String mOrgUnitId, String mProgramId,
             long mTrackedEntityInstanceId,
-            String enrollmentDate, String incidentDate) {
+            String enrollmentDate, String incidentDate, EnrollmentDataEntryFragment fragment) {
         this.mOrgUnitId = mOrgUnitId;
         this.mProgramId = mProgramId;
         this.mTrackedEntityInstanceId = mTrackedEntityInstanceId;
         this.enrollmentDate = enrollmentDate;
         this.incidentDate = incidentDate;
+        mFragment = fragment;
     }
 
     @Override
@@ -156,6 +158,8 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
             if (programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().isGenerated()) {
                 editable = false;
                 shouldNeverBeEdited = true;
+                mFragment.getListViewAdapter().disableIndex(programTrackedEntityAttributes.get(
+                        i).getTrackedEntityAttribute().getUid());
             }
             if (ValueType.COORDINATE.equals(programTrackedEntityAttributes.get(
                     i).getTrackedEntityAttribute().getValueType())) {

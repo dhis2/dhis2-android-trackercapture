@@ -103,7 +103,7 @@ public class TrackedEntityInstanceProfileRuleHelper implements IProgramRuleFragm
                     parentFragment.getString(org.hisp.dhis.android.sdk.R.string.warning_hidefieldwithvalue),
                     dataElementNames);
             fragment.setValidationErrorDialog(validationErrorDialog);
-            if (parentFragment.isAdded()) {
+            if (parentFragment.isAdded() && parentFragment.isVisible()) {
                 fragment.getValidationErrorDialog().show(parentFragment.getChildFragmentManager());
             }
         }

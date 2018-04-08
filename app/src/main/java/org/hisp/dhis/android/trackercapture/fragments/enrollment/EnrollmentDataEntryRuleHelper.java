@@ -214,7 +214,7 @@ public class EnrollmentDataEntryRuleHelper implements IProgramRuleFragmentHelper
                     .newInstance(fragment.getString(org.hisp.dhis.android.sdk.R.string.warning_hidefieldwithvalue), trackedEntityAttributeNames
                     );
             enrollmentDataEntryFragment.setValidationErrorDialog(validationErrorDialog);
-            if (fragment.isAdded()) {
+            if (fragment.isAdded() && fragment.isVisible()) {
                 enrollmentDataEntryFragment.getValidationErrorDialog().show(fragment.getChildFragmentManager());
             }
         }

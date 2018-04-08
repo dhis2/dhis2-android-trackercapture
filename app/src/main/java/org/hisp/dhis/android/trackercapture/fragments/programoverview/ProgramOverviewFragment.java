@@ -186,6 +186,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     private ImageButton followupButton;
     private ImageButton profileButton;
     private ImageView enrollmentServerStatus;
+    private TextView enrollmentServerStatusText;
     private Button completeButton;
     private Button reOpenButton;
     private Button terminateButton;
@@ -306,6 +307,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         registerForContextMenu(listView);
 
         enrollmentServerStatus = (ImageView) header.findViewById(R.id.enrollmentstatus);
+        enrollmentServerStatusText = (TextView) header.findViewById(R.id.enrollmentstatus_text);
         enrollmentLayout = (LinearLayout) header.findViewById(R.id.enrollmentLayout);
         enrollmentDateLabel = (TextView) header.findViewById(R.id.dateOfEnrollmentLabel);
         enrollmentDateValue = (TextView) header.findViewById(R.id.dateOfEnrollmentValue);
@@ -565,10 +567,13 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
 
             if (failedItem != null && failedItem.getHttpStatusCode() >= 0) {
                 enrollmentServerStatus.setImageResource(R.drawable.ic_event_error);
+                enrollmentServerStatusText.setText(R.string.event_error);
             } else if (!mForm.getEnrollment().isFromServer()) {
                 enrollmentServerStatus.setImageResource(R.drawable.ic_legacy_offline);
+                enrollmentServerStatusText.setText(R.string.event_offline);
             } else {
                 enrollmentServerStatus.setImageResource(R.drawable.ic_from_server);
+                enrollmentServerStatusText.setText(R.string.event_sent);
             }
 
             refreshRelationshipButton.setEnabled(mForm.getEnrollment().isFromServer());

@@ -43,8 +43,8 @@ ext {
             minSdkVersion    : 15,
             compileSdkVersion: 23,
             targetSdkVersion : 23,
-            versionCode      : 59,
-            versionName      : "0.5.1"
+            versionCode      : 62,
+            versionName      : "0.5.4"
     ]
 
     libraries = [

@@ -603,10 +603,12 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             }
 
             final Map<Long, FailedItem> failedEvents = getFailedEvents();
-
             for (IndicatorRow indicatorRow : mForm.getProgramIndicatorRows().values()) {
                 View view = indicatorRow.getView(getChildFragmentManager(),
                         getLayoutInflater(getArguments()), null, programIndicatorLayout);
+                if(indicatorRow.getIndicator().isDisplayInForm()){
+                    programIndicatorCardView.setVisibility(View.VISIBLE);
+                }
                 programIndicatorLayout.addView(view);
             }
 
@@ -677,6 +679,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     }
 
     private void initializeIndicatorViews(LinearLayout programIndicatorLayout) {
+        programIndicatorCardView.setVisibility(View.GONE);
         programIndicatorLayout.removeAllViews();
         FlowLayout keyValueLayout = (FlowLayout) programIndicatorCardView.findViewById(
                 R.id.keyvaluelayout);

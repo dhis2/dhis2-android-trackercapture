@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+  <string name="app_name">Bộ Theo Dõi DHIS 2</string>
+  <string name="hello_world">Xin chào!</string>
+  <string name="action_settings">Cài đặt</string>
+  <string name="register_new_event">Đăng ký sự kiện mới</string>
+  <string name="registered_events">Sự kiện đã đăng ký</string>
+  <string name="register_relationship">Đăng ký quan hệ</string>
+  <string name="new_event">Sự kiện mới</string>
+  <string name="is">là</string>
+  <string name="please_enter">Xin vui lòng nhập</string>
+  <string name="report_date">Ngày báo cáo</string>
+  <string name="event_sent">Đã gửi</string>
+  <string name="event_offline">Ngoại tuyến</string>
+  <string name="event_error">Lỗi</string>
+  <string name="error_401_description">Tên đăng nhập hoặc mật khẩu đã thay đổi. Xin vui lòng đăng xuất và đăng nhập lại. \nChú ý! Sự kiện sẽ bị mất</string>
+  <string name="error_408_description">Kết nối chậm. Xin vui lòng thử đồng bộ sau</string>
+  <string name="error_series_400_description">40x lỗi ứng dụng</string>
+  <string name="error_series_500_description">50x lỗi máy chủ. Xin vui lòng đồng bộ sau</string>
+  <string name="unknown_error">Lỗi chưa xác định</string>
+  <string name="confirm_complete_enrollment">"Bạn có chắc muốn hoàn tất đăng ký này? Bạn không thể chỉnh sửa được nữa. "</string>
+  <string name="confirm_terminate_enrollment">Bạn có muốn hủy bỏ đăng ký hiện tại? Điều này không thể hoàn lại.</string>
+  <string name="confirm_delete_relationship">Bạn có chắc muốn xóa quan hệ này không?</string>
+  <string name="no_active_enrollment">Không có đăng ký hoạt động</string>
+  <string name="select_relationship_type">Chọn quan hệ</string>
+  <string name="search">Tìm kiếm</string>
+  <string name="http_error_400">Yêu cầu sai</string>
+  <string name="http_error_401">Không cho phép</string>
+  <string name="http_error_403">Cấm</string>
+  <string name="http_error_409">Xung đột</string>
+  <string name="http_error_500">Lỗi nội bộ máy chủ</string>
+  <string name="http_error_501">Chưa thực hiện</string>
+  <string name="http_error_502">Cổng ra sai</string>
+  <string name="http_error_503">Dịch vụ không sẵn sàng</string>
+  <string name="http_error_504">Cổng ra quá thời gian</string>
+</resources>

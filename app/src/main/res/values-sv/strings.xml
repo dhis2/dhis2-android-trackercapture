@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+  <string name="app_name">DHIS 2 Tracker Capture</string>
+  <string name="hello_world">Hej världen!</string>
+  <string name="action_settings">Inställningar</string>
+  <string name="register_new_event">Registrera ny händelse</string>
+  <string name="registered_events">Registrerade händelser</string>
+  <string name="register_relationship">Registrera relation</string>
+  <string name="new_event">Ny händelse</string>
+  <string name="is">är</string>
+  <string name="please_enter">Mata in</string>
+  <string name="report_date">Rapportdatum</string>
+  <string name="event_sent">Skickat</string>
+  <string name="event_offline">Frånkopplad</string>
+  <string name="event_error">Fel</string>
+  <string name="error_401_description">Användarnamn eller lösenord har ändrats. Vänligen logga ut och logga in igen. \n Obs! Händelsen kommer att bli förlorade</string>
+  <string name="error_408_description">Långsam anslutning. Snälla, försök att synkronisera senare</string>
+  <string name="error_series_400_description">40x programfel.</string>
+  <string name="error_series_500_description">50x serverfel. Vänligen försök att synkronisera senare.</string>
+  <string name="unknown_error">Okänt fel</string>
+  <string name="confirm_complete_enrollment">Är du säker på att du vill slutföra den aktuella inskrivning? Redigering kommer att vara möjligt.</string>
+  <string name="confirm_terminate_enrollment">Är du säker på att du vill avbryta den aktuella inskrivning? Detta går inte att ångra.</string>
+  <string name="confirm_delete_relationship">Är du säker på att du vill radera detta förhållande?</string>
+  <string name="no_active_enrollment">Inga aktiva inskrivning</string>
+  <string name="select_relationship_type">Välj typ av relation</string>
+  <string name="search">Sök</string>
+  <string name="http_error_400">Felaktig begäran</string>
+  <string name="http_error_401">Inte behörig</string>
+  <string name="http_error_403">Förbjudet</string>
+  <string name="http_error_409">Konflikt</string>
+  <string name="http_error_500">Internt serverfel</string>
+  <string name="http_error_501">Inte implementerat</string>
+  <string name="http_error_502">Felaktig gateway</string>
+  <string name="http_error_503">Tjänsten otillgänglig</string>
+  <string name="http_error_504">Kunde inte nå gateway</string>
+</resources>

@@ -41,6 +41,7 @@ import org.hisp.dhis.android.trackercapture.R;
  * Created by araz on 03.04.2015.
  */
 public class UpcomingEventsColumnNamesRow implements EventRow {
+    private String mTitle;
     private String mFirstItem;
     private String mSecondItem;
 
@@ -52,6 +53,7 @@ public class UpcomingEventsColumnNamesRow implements EventRow {
         if (convertView == null) {
             view = inflater.inflate(R.layout.listview_upcomingevents_column_names_item, container, false);
             holder = new ViewHolder(
+                    (TextView) view.findViewById(R.id.title_column_name),
                     (TextView) view.findViewById(R.id.first_column_name),
                     (TextView) view.findViewById(R.id.second_column_name)
             );
@@ -60,7 +62,7 @@ public class UpcomingEventsColumnNamesRow implements EventRow {
             view = convertView;
             holder = (ViewHolder) view.getTag();
         }
-
+        holder.title.setText(mTitle);
         holder.firstItem.setText(mFirstItem);
         holder.secondItem.setText(mSecondItem);
 
@@ -82,6 +84,10 @@ public class UpcomingEventsColumnNamesRow implements EventRow {
         return false;
     }
 
+    public void setTitle(String mTitle) {
+        this.mTitle = mTitle;
+    }
+
     public void setSecondItem(String secondItem) {
         this.mSecondItem = secondItem;
     }
@@ -91,11 +97,14 @@ public class UpcomingEventsColumnNamesRow implements EventRow {
     }
 
     private static class ViewHolder {
+        public final TextView title;
         public final TextView firstItem;
         public final TextView secondItem;
 
-        private ViewHolder(TextView firstItem,
+
+        private ViewHolder(TextView title, TextView firstItem,
                            TextView secondItem) {
+            this.title = title;
             this.firstItem = firstItem;
             this.secondItem = secondItem;
         }

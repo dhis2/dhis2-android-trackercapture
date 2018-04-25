@@ -27,8 +27,7 @@
   ~  */
   -->
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -55,37 +54,25 @@
             android:textAllCaps="true"
             android:textColor="@color/white"
             android:textSize="19sp"
-            app:font="@string/condensed_font_name"/>
-
-        <ImageView
-            android:id="@+id/load_dialog_button"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:adjustViewBounds="true"
-            android:background="@drawable/transparent_selector"
-            android:clickable="true"
-            android:contentDescription="@string/description"
-            android:padding="8dp"
-            android:src="@drawable/ic_post"/>
-
+            app:font="@string/condensed_font_name" />
 
         <ImageView
             android:id="@+id/close_dialog_button"
             android:layout_width="56dp"
-            android:layout_height="56dp"
+            android:layout_height="46dp"
             android:adjustViewBounds="true"
             android:background="@drawable/transparent_selector"
             android:clickable="true"
             android:contentDescription="@string/description"
             android:padding="8dp"
-            android:src="@drawable/ic_close_dialog"/>
+            android:src="@drawable/ic_close_dialog" />
 
     </LinearLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1px"
-        android:background="@color/dark_navy_blue"/>
+        android:background="@color/dark_navy_blue" />
 
     <org.hisp.dhis.android.sdk.ui.views.CardTextViewButton
         android:id="@+id/relationshiptypebutton"
@@ -93,77 +80,110 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="4dp"
         app:hint="@string/select_relationship_type" />
-    
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <org.hisp.dhis.android.sdk.ui.views.FontTextView
-            android:id="@+id/tei_label"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:gravity="center_vertical"
-            android:padding="16dp"
-            android:singleLine="true"
-            android:textAllCaps="true"
-            android:textSize="19sp"
-            android:text=""
-            app:font="@string/condensed_font_name"/>
+            android:orientation="vertical">
 
-        <org.hisp.dhis.android.sdk.ui.views.FontTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:gravity="center_vertical"
-            android:padding="16dp"
-            android:singleLine="true"
-            android:textAllCaps="true"
-            android:textSize="19sp"
-            android:text="@string/is"
-            app:font="@string/condensed_font_name"/>
+            <org.hisp.dhis.android.sdk.ui.views.FontTextView
+                android:id="@+id/tei_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:padding="16dp"
+                android:singleLine="true"
+                android:text=""
+                android:textAllCaps="true"
+                android:textSize="19sp"
+                app:font="@string/condensed_font_name" />
 
-        <Spinner
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:id="@+id/spinner"
-            android:layout_gravity="right|center_horizontal" />
-
+            <org.hisp.dhis.android.sdk.ui.views.FontTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:padding="16dp"
+                android:singleLine="true"
+                android:text="@string/is"
+                android:textAllCaps="true"
+                android:textSize="19sp"
+                app:font="@string/condensed_font_name" />
 
         </LinearLayout>
 
+        <Spinner
+            android:id="@+id/spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|center_horizontal"
+            android:gravity="center_vertical" />
+    </LinearLayout>
 
-    <org.hisp.dhis.android.sdk.ui.views.FontEditText
-        android:id="@+id/filter_options"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_margin="16dp"
-        android:drawableRight ="@drawable/ic_search"
-        android:singleLine="true"
-        android:drawablePadding="4dp"
-        android:imeOptions="actionSearch"
-        android:inputType="text"
-        android:hint="@string/search"
-        app:font="@string/light_font_name"/>
-
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="28dp"
-        android:layout_gravity="center_horizontal"
-        android:indeterminate="true" />
+        android:orientation="vertical">
 
-    <ListView
-        android:id="@+id/simple_listview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:cacheColorHint="@color/transparent"
-        android:divider="@color/darker_grey"
-        android:dividerHeight="1px"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <org.hisp.dhis.android.sdk.ui.views.FontEditText
+                android:id="@+id/filter_options"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.8"
+                android:layout_margin="16dp"
+                android:drawablePadding="4dp"
+                android:drawableRight="@drawable/ic_search"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:hint="@string/search"
+                app:font="@string/light_font_name"/>
+            <org.hisp.dhis.android.sdk.ui.views.FloatingActionButton
+                android:id="@+id/create_new_tei_button"
+                android:layout_width="28dp"
+                android:layout_height="48dp"
+                android:layout_weight="0.1"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_menu_add" />
+        <org.hisp.dhis.android.sdk.ui.views.FloatingActionButton
+            android:id="@+id/search_and_download_button"
+            android:layout_width="28dp"
+            android:layout_height="48dp"
+            android:layout_weight="0.1"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_search_server" />
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="28dp"
+            android:indeterminate="true" />
+
+        <ListView
+            android:id="@+id/simple_listview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:cacheColorHint="@color/transparent"
+            android:divider="@color/darker_grey"
+            android:dividerHeight="1px" />
+    </LinearLayout>
 
 </LinearLayout>

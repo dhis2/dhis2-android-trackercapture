@@ -1,2 +1,4 @@
-include ':app'
-include ':app', '..:dhis2-android-sdk:app'
+include ':app', ':core', ':ui', ':utils'
+project(':core').projectDir = new File(settingsDir, 'sdk/core')
+project(':ui').projectDir = new File(settingsDir, 'sdk/ui')
+project(':utils').projectDir = new File(settingsDir, 'sdk/utils')

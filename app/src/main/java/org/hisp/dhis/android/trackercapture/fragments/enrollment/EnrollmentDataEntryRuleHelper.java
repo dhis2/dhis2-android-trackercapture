@@ -32,12 +32,12 @@ package org.hisp.dhis.android.trackercapture.fragments.enrollment;
 import android.support.v4.app.Fragment;
 
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
-import org.hisp.dhis.android.sdk.persistence.models.DataElement;
 import org.hisp.dhis.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramRuleAction;
+import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.ui.fragments.common.IProgramRuleFragmentHelper;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.ValidationErrorDialog;
@@ -63,6 +63,21 @@ public class EnrollmentDataEntryRuleHelper implements IProgramRuleFragmentHelper
     }
 
     @Override
+    public ArrayList<String> getShowOnCompleteErrors() {
+        return null;
+    }
+
+    @Override
+    public ArrayList<String> getShowOnCompleteWarningErrors() {
+        return null;
+    }
+
+    @Override
+    public ArrayList<String> getHideProgramStages() {
+        return null;
+    }
+
+    @Override
     public void recycle() {
         enrollmentDataEntryFragment = null;
     }
@@ -76,10 +91,10 @@ public class EnrollmentDataEntryRuleHelper implements IProgramRuleFragmentHelper
     @Override
     public void mapFieldsToRulesAndIndicators() {
         enrollmentDataEntryFragment.setProgramRulesForTrackedEntityAttributes(new HashMap<String, List<ProgramRule>>());
-        for(ProgramRule programRule: enrollmentDataEntryFragment.getForm().getProgram().getProgramRules()) {
-            for(String trackedEntityAttribute: ProgramRuleService.getTrackedEntityAttributesInRule(programRule)) {
+        for (ProgramRule programRule : enrollmentDataEntryFragment.getForm().getProgram().getProgramRules()) {
+            for (String trackedEntityAttribute : ProgramRuleService.getTrackedEntityAttributesInRule(programRule)) {
                 List<ProgramRule> rulesForTrackedEntityAttribute = enrollmentDataEntryFragment.getProgramRulesForTrackedEntityAttributes().get(trackedEntityAttribute);
-                if(rulesForTrackedEntityAttribute == null) {
+                if (rulesForTrackedEntityAttribute == null) {
                     rulesForTrackedEntityAttribute = new ArrayList<>();
                     rulesForTrackedEntityAttribute.add(programRule);
                     enrollmentDataEntryFragment.getProgramRulesForTrackedEntityAttributes().put(trackedEntityAttribute, rulesForTrackedEntityAttribute);
@@ -121,6 +136,26 @@ public class EnrollmentDataEntryRuleHelper implements IProgramRuleFragmentHelper
     }
 
     @Override
+    public void applySetMandatoryFieldRuleAction(ProgramRuleAction programRuleAction) {
+        enrollmentDataEntryFragment.getListViewAdapter().addMandatoryOnIndex(programRuleAction.getTrackedEntityAttribute());
+    }
+
+    @Override
+    public void applyHideProgramStageRuleAction(ProgramRuleAction programRuleAction) {
+
+    }
+
+    @Override
+    public void applyWarningOnCompleteRuleAction(ProgramRuleAction programRuleAction) {
+
+    }
+
+    @Override
+    public void applyErrorOnCompleteRuleAction(ProgramRuleAction programRuleAction) {
+
+    }
+
+    @Override
     public Enrollment getEnrollment() {
         return enrollmentDataEntryFragment.getForm().getEnrollment();
     }
@@ -146,6 +181,11 @@ public class EnrollmentDataEntryRuleHelper implements IProgramRuleFragmentHelper
     }
 
     @Override
+    public boolean blockingSpinnerNeeded() {
+        return true;
+    }
+
+    @Override
     public void updateUi() {
 
     }
@@ -153,27 +193,28 @@ public class EnrollmentDataEntryRuleHelper implements IProgramRuleFragmentHelper
     /**
      * Displays a warning dialog to the user, indicating the data entry rows with values in them
      * are being hidden due to program rules.
+     *
      * @param fragment
      * @param affectedValues
      */
     @Override
     public void showWarningHiddenValuesDialog(Fragment fragment, ArrayList<String> affectedValues) {
-        ArrayList<String> dataElementNames = new ArrayList<>();
+        ArrayList<String> trackedEntityAttributeNames = new ArrayList<>();
         for (String s : affectedValues) {
-            DataElement de = MetaDataController.getDataElement(s);
-            if (de != null) {
-                dataElementNames.add(de.getDisplayName());
+            TrackedEntityAttribute tea = MetaDataController.getTrackedEntityAttribute(s);
+            if (tea != null) {
+                trackedEntityAttributeNames.add(tea.getDisplayName());
             }
         }
-        if(dataElementNames.isEmpty()) {
+        if (trackedEntityAttributeNames.isEmpty()) {
             return;
         }
         if (enrollmentDataEntryFragment.getValidationErrorDialog() == null || !enrollmentDataEntryFragment.getValidationErrorDialog().isVisible()) {
             ValidationErrorDialog validationErrorDialog = ValidationErrorDialog
-                    .newInstance(fragment.getString(org.hisp.dhis.android.sdk.R.string.warning_hidefieldwithvalue), dataElementNames
+                    .newInstance(fragment.getString(org.hisp.dhis.android.sdk.R.string.warning_hidefieldwithvalue), trackedEntityAttributeNames
                     );
             enrollmentDataEntryFragment.setValidationErrorDialog(validationErrorDialog);
-            if(fragment.isAdded()) {
+            if (fragment.isAdded() && fragment.isVisible()) {
                 enrollmentDataEntryFragment.getValidationErrorDialog().show(fragment.getChildFragmentManager());
             }
         }
@@ -187,7 +228,7 @@ public class EnrollmentDataEntryRuleHelper implements IProgramRuleFragmentHelper
     @Override
     public void applyShowWarningRuleAction(ProgramRuleAction programRuleAction) {
         String uid = programRuleAction.getDataElement();
-        if(uid == null) {
+        if (uid == null) {
             uid = programRuleAction.getTrackedEntityAttribute();
         }
         enrollmentDataEntryFragment.getListViewAdapter().showWarningOnIndex(uid, programRuleAction.getContent());
@@ -195,25 +236,35 @@ public class EnrollmentDataEntryRuleHelper implements IProgramRuleFragmentHelper
 
     @Override
     public void applyShowErrorRuleAction(ProgramRuleAction programRuleAction) {
-        String uid = programRuleAction.getDataElement();
-        if(uid == null) {
-            uid = programRuleAction.getTrackedEntityAttribute();
-        }
+        String uid = programRuleAction.getTrackedEntityAttribute();
         enrollmentDataEntryFragment.getListViewAdapter().showErrorOnIndex(uid, programRuleAction.getContent());
-        if(!programRuleValidationErrors.contains(programRuleAction.getContent())) {
-            programRuleValidationErrors.add(programRuleAction.getContent());
+        if (!programRuleValidationErrors.contains(programRuleAction.getContent())) {
+            TrackedEntityAttributeValue value = getTrackedEntityAttributeValue(uid);
+            String stringValue;
+            if(value != null) {
+                stringValue = value.getValue();
+            } else {
+                stringValue = "";
+            }
+            programRuleValidationErrors.add(programRuleAction.getContent() + " " + stringValue);
         }
     }
 
 
     @Override
     public void applyHideFieldRuleAction(ProgramRuleAction programRuleAction, List<String> affectedFieldsWithValue) {
-        enrollmentDataEntryFragment.getListViewAdapter().hideIndex(programRuleAction.getDataElement());
-        if(enrollmentDataEntryFragment.containsValue(getDataElementValue(programRuleAction.getDataElement()))) {// form.getDataValues().get(programRuleAction.getDataElement()))) {
-            affectedFieldsWithValue.add(programRuleAction.getDataElement());
+        enrollmentDataEntryFragment.getListViewAdapter().hideIndex(programRuleAction.getTrackedEntityAttribute());
+        if (enrollmentDataEntryFragment.containsValue(getTrackedEntityAttributeValue(programRuleAction.getTrackedEntityAttribute()))) {
+            affectedFieldsWithValue.add(programRuleAction.getTrackedEntityAttribute());
         }
     }
 
     @Override
-    public void applyHideSectionRuleAction(ProgramRuleAction programRuleAction) {}
+    public void disableCalculatedFields(ProgramRuleAction programRuleAction) {
+        enrollmentDataEntryFragment.getListViewAdapter().disableIndex(programRuleAction.getTrackedEntityAttribute());
+    }
+
+    @Override
+    public void applyHideSectionRuleAction(ProgramRuleAction programRuleAction) {
+    }
 }

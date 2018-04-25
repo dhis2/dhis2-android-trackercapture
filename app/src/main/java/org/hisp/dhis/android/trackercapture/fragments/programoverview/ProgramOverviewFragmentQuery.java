@@ -31,8 +31,8 @@ package org.hisp.dhis.android.trackercapture.fragments.programoverview;
 
 import android.content.Context;
 
-import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
@@ -43,13 +43,16 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.IndicatorRow;
 import org.hisp.dhis.android.sdk.utils.Utils;
+import org.hisp.dhis.android.sdk.utils.comparators.EventDateComparator;
 import org.hisp.dhis.android.sdk.utils.services.ProgramIndicatorService;
 import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.ProgramStageEventRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.ProgramStageLabelRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.ProgramStageRow;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm> {
@@ -67,6 +70,7 @@ class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm>
     @Override
     public ProgramOverviewFragmentForm query(Context context) {
         ProgramOverviewFragmentForm programOverviewFragmentForm = new ProgramOverviewFragmentForm();
+        programOverviewFragmentForm.setProgramIndicatorRows(new LinkedHashMap<ProgramIndicator, IndicatorRow>());
         Program program = MetaDataController.getProgram(mProgramId);
         TrackedEntityInstance trackedEntityInstance = TrackerController.getTrackedEntityInstance(mTrackedEntityInstanceId);
 
@@ -94,19 +98,20 @@ class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm>
         programOverviewFragmentForm.setEnrollment(activeEnrollment);
         programOverviewFragmentForm.setDateOfEnrollmentValue(Utils.removeTimeFromDateString(activeEnrollment.getEnrollmentDate()));
         programOverviewFragmentForm.setIncidentDateValue(Utils.removeTimeFromDateString(activeEnrollment.getIncidentDate()));
-        List<TrackedEntityAttributeValue> attributeValues = activeEnrollment.getAttributes();
-        if(attributeValues!=null) {
-            if(attributeValues.size() > 0) {
+        List<TrackedEntityAttributeValue> trackedEntityAttributeValues =
+                TrackerController.getVisibleTrackedEntityAttributeValues(trackedEntityInstance.getLocalId());
+        if(trackedEntityAttributeValues!=null) {
+            if(trackedEntityAttributeValues.size() > 0) {
                 programOverviewFragmentForm.setAttribute1Label(MetaDataController.
-                        getTrackedEntityAttribute(attributeValues.get(0).getTrackedEntityAttributeId()).
+                        getTrackedEntityAttribute(trackedEntityAttributeValues.get(0).getTrackedEntityAttributeId()).
                         getName());
-                programOverviewFragmentForm.setAttribute1Value(attributeValues.get(0).getValue());
+                programOverviewFragmentForm.setAttribute1Value(trackedEntityAttributeValues.get(0).getValue());
             }
-            if(attributeValues.size() > 1) {
+            if(trackedEntityAttributeValues.size() > 1) {
                 programOverviewFragmentForm.setAttribute2Label(MetaDataController.
-                        getTrackedEntityAttribute(attributeValues.get(1).getTrackedEntityAttributeId()).
+                        getTrackedEntityAttribute(trackedEntityAttributeValues.get(1).getTrackedEntityAttributeId()).
                         getName());
-                programOverviewFragmentForm.setAttribute2Value(attributeValues.get(1).getValue());
+                programOverviewFragmentForm.setAttribute2Value(trackedEntityAttributeValues.get(1).getValue());
             }
         }
 
@@ -114,13 +119,22 @@ class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm>
         programOverviewFragmentForm.setProgramStageRows(programStageRows);
 
         List<ProgramIndicator> programIndicators = programOverviewFragmentForm.getProgram().getProgramIndicators();
-        programOverviewFragmentForm.setProgramIndicatorRows(new HashMap<ProgramIndicator, IndicatorRow>());
         if(programIndicators != null ) {
             for(ProgramIndicator programIndicator : programIndicators) {
+                if(!programIndicator.isDisplayInForm()){
+                    continue;
+                }
                 String value = ProgramIndicatorService.getProgramIndicatorValue(programOverviewFragmentForm.getEnrollment(), programIndicator);
-                IndicatorRow indicatorRow = new IndicatorRow(programIndicator, value);
-                programOverviewFragmentForm.getProgramIndicatorRows().put(programIndicator, indicatorRow);
+                if(value==null) {
+                    continue;
+                }
+                IndicatorRow indicatorRow = new IndicatorRow(programIndicator, value,
+                        programIndicator.getDisplayDescription());
+                programOverviewFragmentForm.getProgramIndicatorRows().put(programIndicator,
+                        indicatorRow);
             }
+        }else{
+            programOverviewFragmentForm.getProgramIndicatorRows().clear();
         }
         return programOverviewFragmentForm;
     }
@@ -142,7 +156,13 @@ class ProgramOverviewFragmentQuery implements Query<ProgramOverviewFragmentForm>
             List<Event> eventsForStage = eventsByStage.get(programStage.getUid());
             ProgramStageLabelRow labelRow = new ProgramStageLabelRow(programStage);
             rows.add(labelRow);
-            if(eventsForStage==null) continue;
+            if(eventsForStage==null) {
+                continue;
+            }
+            else {
+                EventDateComparator comparator = new EventDateComparator();
+                Collections.sort(eventsForStage, comparator);
+            }
             for(Event event: eventsForStage) {
                 ProgramStageEventRow row = new ProgramStageEventRow(event);
                 row.setLabelRow(labelRow);

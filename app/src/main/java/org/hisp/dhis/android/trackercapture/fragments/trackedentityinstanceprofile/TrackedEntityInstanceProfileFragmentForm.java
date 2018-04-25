@@ -37,6 +37,7 @@ import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by erling on 5/18/15.
@@ -48,7 +49,9 @@ public class TrackedEntityInstanceProfileFragmentForm
     private TrackedEntityInstance mTrackedEntityInstance;
     private List<Row> mDataEntryRows;
     private List<TrackedEntityAttributeValue> trackedEntityAttributeValues;
-
+    //for the program rules:
+    private Map<String, TrackedEntityAttributeValue> trackedEntityAttributeValueMap; //value storage
+    private boolean outOfTrackedEntityAttributeGeneratedValues; //?
 
     public List<TrackedEntityAttributeValue> getTrackedEntityAttributeValues() {
         return trackedEntityAttributeValues;
@@ -89,4 +92,20 @@ public class TrackedEntityInstanceProfileFragmentForm
     public void setDataEntryRows(List<Row> mDataEntryRows) {
         this.mDataEntryRows = mDataEntryRows;
     }
+    public Map<String, TrackedEntityAttributeValue> getTrackedEntityAttributeValueMap() {
+        return trackedEntityAttributeValueMap;
+    }
+
+    public void setTrackedEntityAttributeValueMap(Map<String, TrackedEntityAttributeValue> trackedEntityAttributeValueMap) {
+        this.trackedEntityAttributeValueMap = trackedEntityAttributeValueMap;
+    }
+
+    public void setOutOfTrackedEntityAttributeGeneratedValues(boolean outOfTrackedEntityAttributeGeneratedValues) {
+        this.outOfTrackedEntityAttributeGeneratedValues = outOfTrackedEntityAttributeGeneratedValues;
+    }
+
+    public boolean isOutOfTrackedEntityAttributeGeneratedValues() {
+        return outOfTrackedEntityAttributeGeneratedValues;
+    }
+
 }

@@ -1,0 +1,4 @@
+[submodule "sdk"]
+	path = sdk
+	url = https://github.com/dhis2/dhis2-android-sdk
+	branch = tracker-capture

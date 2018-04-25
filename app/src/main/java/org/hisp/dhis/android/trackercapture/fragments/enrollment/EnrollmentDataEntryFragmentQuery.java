@@ -113,12 +113,12 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
 
         dataEntryRows.add(
                 new EnrollmentDatePickerRow(currentEnrollment.getProgram().getEnrollmentDateLabel(),
-                        currentEnrollment));
+                        currentEnrollment, true));
 
         if (currentEnrollment.getProgram().getDisplayIncidentDate()) {
             dataEntryRows.add(
                     new IncidentDatePickerRow(currentEnrollment.getProgram().getIncidentDateLabel(),
-                            currentEnrollment));
+                            currentEnrollment, true));
         }
 
         for (ProgramTrackedEntityAttribute ptea : programTrackedEntityAttributes) {

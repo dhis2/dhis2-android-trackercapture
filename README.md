@@ -7,7 +7,7 @@ https://github.com/dhis2/dhis2-android-trackercapture/releases
 
 # Testing
 If you want to try the application out with a demo database, you can use the following:
-- Server: https://apps.dhis2.org/demo
+- Server: https://play.dhis2.org/demo
 - Username: android
 - Password: Android123
 

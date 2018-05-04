@@ -214,7 +214,7 @@ public class TrackedEntityInstanceDataEntryRuleHelper implements IProgramRuleFra
                     .newInstance(fragment.getString(org.hisp.dhis.android.sdk.R.string.warning_hidefieldwithvalue), trackedEntityAttributeNames
                     );
             mTrackedEntityInstanceDataEntryFragment.setValidationErrorDialog(validationErrorDialog);
-            if (fragment.isAdded()) {
+            if (fragment.isAdded() && fragment.isVisible()) {
                 mTrackedEntityInstanceDataEntryFragment.getValidationErrorDialog().show(fragment.getChildFragmentManager());
             }
         }

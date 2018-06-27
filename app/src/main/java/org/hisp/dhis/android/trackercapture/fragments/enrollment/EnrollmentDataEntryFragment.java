@@ -343,8 +343,8 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
                     getContext().getString(org.hisp.dhis.android.trackercapture.R.string.profile_form_empty));
             return false;
         }
-        if(!validateUniqueValues(form.getTrackedEntityAttributeValueMap())){
-            List<String> listOfUniqueInvalidFields = getNotValidatedUniqueValues(form.getTrackedEntityAttributeValueMap());
+        if(!TrackerController.validateUniqueValues(form.getTrackedEntityAttributeValueMap(), form.getOrganisationUnit().getId())){
+            List<String> listOfUniqueInvalidFields = TrackerController.getNotValidatedUniqueValues(form.getTrackedEntityAttributeValueMap(), form.getOrganisationUnit().getId());
             String listOfInvalidAttributes = " ";
             for(String value:listOfUniqueInvalidFields){
                 listOfInvalidAttributes += value + " ";
@@ -370,45 +370,6 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             showValidationErrorDialog(allErrors);
             return false;
         }
-    }
-
-    private List<String> getNotValidatedUniqueValues(
-            Map<String, TrackedEntityAttributeValue> trackedEntityAttributeValueMap) {
-        List<String> listOFUniqueFields = new ArrayList<>();
-        for (String key : trackedEntityAttributeValueMap.keySet()) {
-            TrackedEntityAttributeValue value = trackedEntityAttributeValueMap.get(key);
-            TrackedEntityAttribute trackedEntityAttribute =
-                    MetaDataController.getTrackedEntityAttribute(
-                            value.getTrackedEntityAttributeId());
-            if (trackedEntityAttribute.isUnique()) {
-                if(value.getValue()==null || value.getValue().isEmpty()){
-                    continue;
-                }
-                if (TrackerController.countTrackedEntityAttributeValue(value)!=0) {
-                    listOFUniqueFields.add(trackedEntityAttribute.getDisplayName());
-                }
-            }
-        }
-        return listOFUniqueFields;
-    }
-
-    private boolean validateUniqueValues(
-            Map<String, TrackedEntityAttributeValue> trackedEntityAttributeValueMap) {
-        for (String key : trackedEntityAttributeValueMap.keySet()) {
-            TrackedEntityAttributeValue value = trackedEntityAttributeValueMap.get(key);
-                TrackedEntityAttribute trackedEntityAttribute =
-                        MetaDataController.getTrackedEntityAttribute(
-                                value.getTrackedEntityAttributeId());
-                if (trackedEntityAttribute.isUnique()) {
-                    if(value.getValue()==null || value.getValue().isEmpty()){
-                        continue;
-                    }
-                    if(TrackerController.countTrackedEntityAttributeValue(value) !=0){
-                        return false;
-                    }
-                }
-            }
-        return true;
     }
 
     private boolean isMapEmpty(

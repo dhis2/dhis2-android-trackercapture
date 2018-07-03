@@ -32,14 +32,12 @@ package org.hisp.dhis.android.trackercapture.fragments.enrollment;
 import android.content.Context;
 import android.util.Log;
 
+import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.controllers.GpsController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
-import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
-import org.hisp.dhis.android.sdk.persistence.models.Constant;
 import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
-import org.hisp.dhis.android.sdk.persistence.models.OptionSet;
 import org.hisp.dhis.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
@@ -49,64 +47,48 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.persistence.models.UserAccount;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowFactory;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.autocompleterow.AutoCompleteRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.CheckBoxRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowTypes;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DatePickerRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EditTextRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EnrollmentDatePickerRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.IncidentDatePickerRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.RadioButtonsRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
-import org.hisp.dhis.android.sdk.ui.fragments.dataentry.RefreshListViewEvent;
-import org.hisp.dhis.android.sdk.ui.fragments.dataentry.RowValueChangedEvent;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.ShortTextEditTextRow;
 import org.hisp.dhis.android.sdk.utils.api.ValueType;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.autocompleterow.AutoCompleteRow;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Map;
 
+import org.hisp.dhis.android.sdk.ui.fragments.dataentry.RowValueChangedEvent;
 class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragmentForm> {
     public static final String CLASS_TAG = EnrollmentDataEntryFragmentQuery.class.getSimpleName();
-    private static String appliedValue;
     private final String mOrgUnitId;
-    private final String AUTOIDPREFIX="m-PLAN-";
     private final String mProgramId;
     private final long mTrackedEntityInstanceId;
     private final String enrollmentDate;
     private String incidentDate;
-
-//    private String  DOHID="yeI6AOQjrqg";
-//    private String  SETTLEMENTID="iRJYMHN0Rel";
-
-      private String PROJECT_DONOR_TZ="o94ggG6Mhx8";
-      private String PROJECT_DONOR_PH="KLSVjftH2xS";
-      private String BEN_ID="L2doMQ7OtUB";
-
     private TrackedEntityInstance currentTrackedEntityInstance;
     private Enrollment currentEnrollment;
-    private List<OrganisationUnit> assignedOrganisationUnits;
-    private UserAccount userAccounts;
-
-
+    private static String appliedValue;
+    private final String AUTOIDPREFIX="m-PLAN-";
+    private String PROJECT_DONOR_TZ="o94ggG6Mhx8";
+    private String PROJECT_DONOR_PH="KLSVjftH2xS";
+    private String TZ_LANG="sw";
+    private String TZ_ENROLLMENT_DATE="Tarehe ya Kuandikishwa";
+    private String TZ_INCIDENT_DATE="Tarehe ya Tukio";
+    private String BEN_ID="L2doMQ7OtUB";
 
     List<String> fieldsToDisable = new ArrayList<String>(
             Arrays.asList(BEN_ID));
     EnrollmentDataEntryFragmentQuery(String mOrgUnitId, String mProgramId,
-                                     long mTrackedEntityInstanceId,
-                                     String enrollmentDate, String incidentDate) {
+            long mTrackedEntityInstanceId,
+            String enrollmentDate, String incidentDate) {
         this.mOrgUnitId = mOrgUnitId;
         this.mProgramId = mProgramId;
         this.mTrackedEntityInstanceId = mTrackedEntityInstanceId;
         this.enrollmentDate = enrollmentDate;
         this.incidentDate = incidentDate;
-        appliedValue =null;
-
     }
 
     @Override
@@ -114,7 +96,8 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
         EnrollmentDataEntryFragmentForm mForm = new EnrollmentDataEntryFragmentForm();
         final Program mProgram = MetaDataController.getProgram(mProgramId);
         final OrganisationUnit mOrgUnit = MetaDataController.getOrganisationUnit(mOrgUnitId);
-
+//        final UserSettings uslocal=MetaDataController.getUserLocalLang();
+        final UserAccount uslocal=MetaDataController.getUserLocalLang();
         if (mProgram == null || mOrgUnit == null) {
             return mForm;
         }
@@ -122,12 +105,15 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
         if (mTrackedEntityInstanceId < 0) {
             currentTrackedEntityInstance = new TrackedEntityInstance(mProgram, mOrgUnitId);
         } else {
-            currentTrackedEntityInstance = TrackerController.getTrackedEntityInstance(mTrackedEntityInstanceId);
+            currentTrackedEntityInstance = TrackerController.getTrackedEntityInstance(
+                    mTrackedEntityInstanceId);
         }
         if ("".equals(incidentDate)) {
             incidentDate = null;
         }
-        currentEnrollment = new Enrollment(mOrgUnitId, currentTrackedEntityInstance.getTrackedEntityInstance(), mProgram, enrollmentDate, incidentDate);
+        currentEnrollment = new Enrollment(mOrgUnitId,
+                currentTrackedEntityInstance.getTrackedEntityInstance(), mProgram, enrollmentDate,
+                incidentDate);
 
         mForm.setProgram(mProgram);
         mForm.setOrganisationUnit(mOrgUnit);
@@ -137,30 +123,61 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
         mForm.setTrackedEntityAttributeValueMap(new HashMap<String, TrackedEntityAttributeValue>());
 
         List<TrackedEntityAttributeValue> trackedEntityAttributeValues = new ArrayList<>();
-        final List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = mProgram.getProgramTrackedEntityAttributes();
+        List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes =
+                mProgram.getProgramTrackedEntityAttributes();
         List<Row> dataEntryRows = new ArrayList<>();
+        String user_locallang=uslocal.getUserSettings().toString();
+        String localdblang=user_locallang;
+        if(localdblang.equals(TZ_LANG))
+        {
+            dataEntryRows.add(
+                    //ToDO @Sou userdb language based keyywords
+                    new EnrollmentDatePickerRow(TZ_ENROLLMENT_DATE,
+                            currentEnrollment));
+        }
+        else {
+            dataEntryRows.add(
+                    new EnrollmentDatePickerRow(currentEnrollment.getProgram().getEnrollmentDateLabel(),
+                            currentEnrollment));
+        }
 
-//        dataEntryRows.add(new EnrollmentDatePickerRow(currentEnrollment.getProgram().getEnrollmentDateLabel(), currentEnrollment));
+        if (currentEnrollment.getProgram().getDisplayIncidentDate()) {
+            if(localdblang.equals(TZ_LANG))
+            {
+                dataEntryRows.add(
+                        new IncidentDatePickerRow(TZ_INCIDENT_DATE,
+                                currentEnrollment));
+            }
+            else {
+                dataEntryRows.add(
+                        new IncidentDatePickerRow(currentEnrollment.getProgram().getIncidentDateLabel(),
+                                currentEnrollment));
+            }
 
-//        if (currentEnrollment.getProgram().getDisplayIncidentDate()) {
-//            dataEntryRows.add(new IncidentDatePickerRow(currentEnrollment.getProgram().getIncidentDateLabel(), currentEnrollment));
-//        }
-
+        }
         for (ProgramTrackedEntityAttribute ptea : programTrackedEntityAttributes) {
-            TrackedEntityAttributeValue value = TrackerController.getTrackedEntityAttributeValue(ptea.getTrackedEntityAttributeId(), currentTrackedEntityInstance.getLocalId());
+            TrackedEntityAttributeValue value = TrackerController.getTrackedEntityAttributeValue(
+                    ptea.getTrackedEntityAttributeId(), currentTrackedEntityInstance.getLocalId());
             if (value != null) {
                 trackedEntityAttributeValues.add(value);
             } else {
-                TrackedEntityAttribute trackedEntityAttribute = MetaDataController.getTrackedEntityAttribute(ptea.getTrackedEntityAttributeId());
+                TrackedEntityAttribute trackedEntityAttribute =
+                        MetaDataController.getTrackedEntityAttribute(
+                                ptea.getTrackedEntityAttributeId());
                 if (trackedEntityAttribute.isGenerated()) {
                     TrackedEntityAttributeGeneratedValue trackedEntityAttributeGeneratedValue =
-                            MetaDataController.getTrackedEntityAttributeGeneratedValue(ptea.getTrackedEntityAttribute());
+                            MetaDataController.getTrackedEntityAttributeGeneratedValue(
+                                    ptea.getTrackedEntityAttribute());
 
                     if (trackedEntityAttributeGeneratedValue != null) {
-                        TrackedEntityAttributeValue trackedEntityAttributeValue = new TrackedEntityAttributeValue();
-                        trackedEntityAttributeValue.setTrackedEntityAttributeId(ptea.getTrackedEntityAttribute().getUid());
-                        trackedEntityAttributeValue.setTrackedEntityInstanceId(currentTrackedEntityInstance.getUid());
-                        trackedEntityAttributeValue.setValue(trackedEntityAttributeGeneratedValue.getValue());
+                        TrackedEntityAttributeValue trackedEntityAttributeValue =
+                                new TrackedEntityAttributeValue();
+                        trackedEntityAttributeValue.setTrackedEntityAttributeId(
+                                ptea.getTrackedEntityAttribute().getUid());
+                        trackedEntityAttributeValue.setTrackedEntityInstanceId(
+                                currentTrackedEntityInstance.getUid());
+                        trackedEntityAttributeValue.setValue(
+                                trackedEntityAttributeGeneratedValue.getValue());
                         trackedEntityAttributeValues.add(trackedEntityAttributeValue);
                     } else {
                         mForm.setOutOfTrackedEntityAttributeGeneratedValues(true);
@@ -172,31 +189,40 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
         int paddingForIndex = dataEntryRows.size();
         int project_dtz_RowIndex = 0;//added to manupulate or dynamicly change the row value based on user input for the other
 //        int dobRowIndex = -1;//added to manupulate or dynamicly change the row value based on user input for the other
-        int benRowIndex = 1;//added to manupulate or dynamicly change the row value based on user input for the other
+        int benRowIndex = 1;
         for (int i = 0; i < programTrackedEntityAttributes.size(); i++) {
             boolean editable = true;
             boolean shouldNeverBeEdited = false;
-            if(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().isGenerated()) {
+            if (programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().isGenerated()) {
                 editable = false;
                 shouldNeverBeEdited = true;
             }
-//
             if(fieldsToDisable.contains(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getUid())){
                 editable=false;
                 shouldNeverBeEdited=true;
             }
-            //change ends here
 
-            if(ValueType.COORDINATE.equals(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getValueType())) {
+            if (ValueType.COORDINATE.equals(programTrackedEntityAttributes.get(
+                    i).getTrackedEntityAttribute().getValueType())) {
                 GpsController.activateGps(context);
             }
-            Row row = DataEntryRowFactory.createDataEntryView(programTrackedEntityAttributes.get(i).getMandatory(),
-                    programTrackedEntityAttributes.get(i).getAllowFutureDate(), programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getOptionSet(),
+            boolean isRadioButton = mProgram.getDataEntryMethod();
+            if(!isRadioButton){
+                isRadioButton = programTrackedEntityAttributes.get(
+                        i).isRenderOptionsAsRadio();
+            }
+            Row row = DataEntryRowFactory.createDataEntryView(
+                    programTrackedEntityAttributes.get(i).getMandatory(),
+                    programTrackedEntityAttributes.get(i).getAllowFutureDate(),
+                    programTrackedEntityAttributes.get(
+                            i).getTrackedEntityAttribute().getOptionSet(),
                     programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getName(),
                     getTrackedEntityDataValue(programTrackedEntityAttributes.get(i).
                             getTrackedEntityAttribute().getUid(), trackedEntityAttributeValues),
-                    programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getValueType(),
-                    editable, shouldNeverBeEdited);
+                    programTrackedEntityAttributes.get(
+                            i).getTrackedEntityAttribute().getValueType(),
+                    editable, shouldNeverBeEdited, isRadioButton);
+
 
             if(programTrackedEntityAttributes.get(i).
                     getTrackedEntityAttribute().getUid().equals(PROJECT_DONOR_TZ)||programTrackedEntityAttributes.get(i).
@@ -212,15 +238,17 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
 
             dataEntryRows.add(row);
         }
-        for (TrackedEntityAttributeValue trackedEntityAttributeValue : trackedEntityAttributeValues) {
-            mForm.getTrackedEntityAttributeValueMap().put(trackedEntityAttributeValue.getTrackedEntityAttributeId(), trackedEntityAttributeValue);
+        for (TrackedEntityAttributeValue trackedEntityAttributeValue :
+                trackedEntityAttributeValues) {
+            mForm.getTrackedEntityAttributeValueMap().put(
+                    trackedEntityAttributeValue.getTrackedEntityAttributeId(),
+                    trackedEntityAttributeValue);
         }
         mForm.setDataEntryRows(dataEntryRows);
         mForm.setEnrollment(currentEnrollment);
 
-
         final AutoCompleteRow project_donor_tz_Row = (AutoCompleteRow) dataEntryRows.get(paddingForIndex+project_dtz_RowIndex);
-        final EditTextRow ben_Row = (EditTextRow) dataEntryRows.get(paddingForIndex+benRowIndex);
+        final ShortTextEditTextRow ben_Row = (ShortTextEditTextRow) dataEntryRows.get(paddingForIndex+benRowIndex);
 
         final String project_tz_UID =programTrackedEntityAttributes.get(project_dtz_RowIndex).getTrackedEntityAttribute().getUid();
 
@@ -245,21 +273,21 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
                     Row row = event.getRow();
                     if(appliedValue==null || !appliedValue.equals(project_donor_tz_Row.getValue().getValue()) ){
 
-                            //Log.i(" Called ",row.getValue().getValue());
-                            try {
-                                List<TrackedEntityInstance> tei_list= MetaDataController.getTrackedEntityInstancesFromLocal();
-                                int count=tei_list.size();
-                                String seq_count = String.format ("%05d", count+1);
-                                int year = Calendar.getInstance().get(Calendar.YEAR);
-                                String year_=String.valueOf(year);
-                                String nimhans_="-"+year_.toString()+"-"+seq_count;
-                                project_donor_tz_Row.getValue();
-                                ben_Row.getValue().setValue(AUTOIDPREFIX+project_donor_tz_Row.getmSelectedOptionName()+nimhans_);
-                                EnrollmentDataEntryFragment.refreshListView();
-                            } catch (Exception ex) {
-                                Log.i("Exception ", "Converting to integer not possible");
+                        //Log.i(" Called ",row.getValue().getValue());
+                        try {
+//                            List<TrackedEntityInstance> tei_list= MetaDataController.getTrackedEntityInstancesFromLocal();
+//                            int count=tei_list.size();
+//                            String seq_count = String.format ("%05d", count+1);
+                            String val = ""+((int)(Math.random()*900)+100000);
+                            int year = Calendar.getInstance().get(Calendar.YEAR);
+                            String year_=String.valueOf(year);
+                            String nimhans_="-"+val;
+                            project_donor_tz_Row.getValue();
+                            ben_Row.getValue().setValue(AUTOIDPREFIX+project_donor_tz_Row.getmSelectedOptionName()+nimhans_);
+                            EnrollmentDataEntryFragment.refreshListView();
+                        } catch (Exception ex) {
 
-                            }
+                        }
 
                     }
 
@@ -272,20 +300,22 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
     }
 
 
-    public TrackedEntityAttributeValue getTrackedEntityDataValue(String trackedEntityAttribute, List<TrackedEntityAttributeValue> trackedEntityAttributeValues) {
-        for (TrackedEntityAttributeValue trackedEntityAttributeValue : trackedEntityAttributeValues) {
-            if (trackedEntityAttributeValue.getTrackedEntityAttributeId().equals(trackedEntityAttribute))
+
+    public TrackedEntityAttributeValue getTrackedEntityDataValue(String trackedEntityAttribute,
+            List<TrackedEntityAttributeValue> trackedEntityAttributeValues) {
+        for (TrackedEntityAttributeValue trackedEntityAttributeValue :
+                trackedEntityAttributeValues) {
+            if (trackedEntityAttributeValue.getTrackedEntityAttributeId().equals(
+                    trackedEntityAttribute)) {
                 return trackedEntityAttributeValue;
+            }
         }
 
-        //for Doh id:
-
-        TrackedEntityAttributeValue trackedEntityAttributeValue = new TrackedEntityAttributeValue();
-
-        trackedEntityAttributeValue.setTrackedEntityAttributeId(trackedEntityAttribute);
         //the datavalue didnt exist for some reason. Create a new one.
+        TrackedEntityAttributeValue trackedEntityAttributeValue = new TrackedEntityAttributeValue();
         trackedEntityAttributeValue.setTrackedEntityAttributeId(trackedEntityAttribute);
-        trackedEntityAttributeValue.setTrackedEntityInstanceId(currentTrackedEntityInstance.getTrackedEntityInstance());
+        trackedEntityAttributeValue.setTrackedEntityInstanceId(
+                currentTrackedEntityInstance.getTrackedEntityInstance());
         trackedEntityAttributeValue.setValue("");
         trackedEntityAttributeValues.add(trackedEntityAttributeValue);
         return trackedEntityAttributeValue;

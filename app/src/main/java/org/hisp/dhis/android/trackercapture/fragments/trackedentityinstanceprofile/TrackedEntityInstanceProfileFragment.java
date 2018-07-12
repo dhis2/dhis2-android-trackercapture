@@ -49,7 +49,6 @@ import org.hisp.dhis.android.sdk.controllers.GpsController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
-import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
@@ -65,7 +64,6 @@ import org.hisp.dhis.android.sdk.ui.fragments.dataentry.HideLoadingDialogEvent;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.RefreshListViewEvent;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.RowValueChangedEvent;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.SaveThread;
-import org.hisp.dhis.android.sdk.utils.ScreenSizeConfigurator;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.R;
 
@@ -482,6 +480,18 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
             if(dataEntryRow.getValidationError()!=null)
                 validationErrors.add(getContext().getString(dataEntryRow.getValidationError()));
         }
+
+        if(!TrackerController.validateUniqueValues(form.getTrackedEntityAttributeValueMap(), form.getTrackedEntityInstance().getOrgUnit())){
+            List<String> listOfUniqueInvalidFields = TrackerController.getNotValidatedUniqueValues(form.getTrackedEntityAttributeValueMap(), form.getTrackedEntityInstance().getOrgUnit());
+            String listOfInvalidAttributes = " ";
+            for(String value:listOfUniqueInvalidFields){
+                listOfInvalidAttributes += value + " ";
+            }
+            UiUtils.showErrorDialog(getActivity(), getContext().getString(org.hisp.dhis.android.trackercapture.R.string.error_message),
+                    String.format(getContext().getString(org.hisp.dhis.android.trackercapture.R.string.invalid_unique_value_form_empty), listOfInvalidAttributes));
+            return false;
+        }
+
         if (programRulesValidationErrors.isEmpty() && allErrors.isEmpty() && validationErrors.isEmpty()) {
             return true;
         } else {

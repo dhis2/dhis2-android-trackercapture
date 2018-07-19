@@ -56,6 +56,7 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.ui.adapters.SectionAdapter;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowTypes;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.RunProgramRulesEvent;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnDetailedInfoButtonClick;
@@ -243,6 +244,13 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
             form = data;
             listViewAdapter.swapData(form.getDataEntryRows());
             programRuleFragmentHelper.mapFieldsToRulesAndIndicators();
+            if (data.getDataEntryRows() != null && !data.getDataEntryRows().isEmpty()) {
+                listViewAdapter.swapData(data.getDataEntryRows());
+            }
+            if (data.getProgram().getProgramRules() != null &&
+                    !data.getProgram().getProgramRules().isEmpty()) {
+                initiateEvaluateProgramRules();
+            }
         }
     }
 

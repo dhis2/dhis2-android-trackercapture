@@ -155,9 +155,11 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
         for (int i = 0; i < programTrackedEntityAttributes.size(); i++) {
             boolean editable = true;
             boolean shouldNeverBeEdited = false;
+            ValueType valueType = programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getValueType();
             if (programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().isGenerated()) {
                 editable = false;
                 shouldNeverBeEdited = true;
+                valueType = ValueType.TEXT;
                 mFragment.getListViewAdapter().disableIndex(programTrackedEntityAttributes.get(
                         i).getTrackedEntityAttribute().getUid());
             }
@@ -178,8 +180,7 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
                     programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getName(),
                     getTrackedEntityDataValue(programTrackedEntityAttributes.get(i).
                             getTrackedEntityAttribute().getUid(), trackedEntityAttributeValues),
-                    programTrackedEntityAttributes.get(
-                            i).getTrackedEntityAttribute().getValueType(),
+                    valueType,
                     editable, shouldNeverBeEdited, isRadioButton);
             dataEntryRows.add(row);
         }

@@ -42,6 +42,7 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowFactory;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
+import org.hisp.dhis.android.sdk.utils.Utils;
 import org.hisp.dhis.android.sdk.utils.api.ValueType;
 
 import java.util.ArrayList;
@@ -90,6 +91,21 @@ public class TrackedEntityInstanceProfileFragmentQuery implements
             return mForm;
         }
         mForm.setTrackedEntityAttributeValues(trackedEntityAttributeValues);
+
+        List<Enrollment> enrollments = TrackerController.getEnrollments(mProgramId, mTrackedEntityInstance);
+        Enrollment activeEnrollment = null;
+        if(enrollments!=null) {
+            for(Enrollment enrollment: enrollments) {
+                if(enrollment.getStatus().equals(Enrollment.ACTIVE)) {
+                    activeEnrollment = enrollment;
+                }
+            }
+        }
+        if (activeEnrollment==null) {
+            return mForm;
+        }
+
+
         List<Row> dataEntryRows = new ArrayList<>();
         for (int i = 0; i < programTrackedEntityAttributes.size(); i++) {
             boolean shouldNeverBeEdited = false;
@@ -125,6 +141,8 @@ public class TrackedEntityInstanceProfileFragmentQuery implements
                         trackedEntityAttributeValue);
             }
         }
+        activeEnrollment.setAttributes(trackedEntityAttributeValues);
+        mForm.setEnrollment(activeEnrollment);
         mForm.setDataEntryRows(dataEntryRows);
         return mForm;
     }

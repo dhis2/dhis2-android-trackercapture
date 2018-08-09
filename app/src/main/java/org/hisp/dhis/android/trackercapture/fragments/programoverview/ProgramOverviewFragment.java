@@ -86,6 +86,7 @@ import org.hisp.dhis.android.sdk.persistence.models.RelationshipType;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
+import org.hisp.dhis.android.sdk.persistence.models.UserAccount;
 import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
 import org.hisp.dhis.android.sdk.synchronization.data.enrollment.EnrollmentLocalDataSource;
 import org.hisp.dhis.android.sdk.synchronization.data.enrollment.EnrollmentRemoteDataSource;
@@ -132,6 +133,7 @@ import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.ProgramStage
 import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.ProgramStageLabelRow;
 import org.hisp.dhis.android.trackercapture.ui.rows.programoverview.ProgramStageRow;
 import org.joda.time.DateTime;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -157,6 +159,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     private static final String ORG_UNIT_ID = "extra:orgUnitId";
     private static final String PROGRAM_ID = "extra:ProgramId";
     private static final String TRACKEDENTITYINSTANCE_ID = "extra:TrackedEntityInstanceId";
+
 
     private ListView listView;
     private ProgressBar mProgressBar;
@@ -204,6 +207,35 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
 
     private OnProgramStageEventClick eventLongPressed;
 
+    private static final String TZ_PROFILE = "Wasifu";
+    private static final String VI_PROFILE = "Hồ sơ";
+    private static final String TZ_RELATIONSHIPS = "Mahusiano";
+    private static final String VI_RELATIONSHIPS = "Quan hệ";
+    private static final String TZ_INDICATORS = "Kiashiria";
+    private static final String VI_INDICATORS = "Chỉ số";
+    private static final String TZ_TIMELINE= "Ingiza data ya wakati";
+    private static final String VI_TIMELINE= "Ngày nhập dữ liệu";
+    private static final String TZ_LANG= "sw";
+    private static final String VI_LANG= "vi";
+    private static final String TZ_REFRESH= "furahisha kompyuta";
+    private static final String VI_REFRESH= "Làm mới";
+    private static final String TZ_NEW= "Mpya";
+    private static final String VI_NEW= "Mới";
+    private static final String TZ_ENROLL= "Usajiri";
+    private static final String VI_ENROLL= "Nhập học";
+    private static final String VI_UN_ENROLL= "Rút khỏi khóa học";
+    private static final String TZ_CANCEL= "Kufuta";
+    private static final String VI_CANCEL= "Hủy bỏ";
+    private static final String TZ_ENROLL_DATE= "tarehe ya Usajiri";
+    private static final String VI_ENROLL_DATE= "Ngày nhập học";
+    private static final String TZ_COMPLETE_BUTTON= "Kitufe cha kuhitimisha/maliza";
+
+    private TextView data_entry;
+    private TextView profile;
+    private TextView relationships;
+    private TextView indicators;
+    private TextView enrollment;
+
     public ProgramOverviewFragment() {
         setProgramRuleFragmentHelper(new ProgramOverviewRuleHelper(this));
     }
@@ -223,7 +255,6 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         getLoaderManager().initLoader(LOADER_ID, getArguments(), this);
-
         mProgressBar.setVisibility(View.VISIBLE);
     }
 
@@ -255,6 +286,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
     }
 
     @Override
@@ -276,7 +308,11 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             getActionBar().setDisplayHomeAsUpEnabled(true);
             getActionBar().setHomeButtonEnabled(true);
         }
+        final UserAccount uslocal=MetaDataController.getUserLocalLang();
+        String user_locallang=uslocal.getUserSettings().toString();
 
+//        String localdblang=user_locallang.substring(12,14);
+        String localdblang=user_locallang;
         listView = (ListView) view.findViewById(R.id.listview);
         View header = getLayoutInflater(savedInstanceState).inflate(
                 R.layout.fragment_programoverview_header, listView, false
@@ -292,9 +328,18 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 R.id.relationships_linearlayout);
 
         refreshRelationshipButton = (Button) header.findViewById(R.id.pullrelationshipbutton);
+
+        //TODO
         refreshRelationshipButton.setOnClickListener(this);
         newRelationshipButton = (Button) header.findViewById(R.id.addrelationshipbutton);
         newRelationshipButton.setOnClickListener(this);
+        data_entry=(TextView) header.findViewById(R.id.timelinedataentry_id);
+        profile=(TextView) header.findViewById(R.id.profile_id);
+        relationships=(TextView) header.findViewById(R.id.relationship_id);
+        indicators=(TextView) header.findViewById(R.id.indicators_id);
+        enrollment=(TextView) header.findViewById(R.id.tz_enrollment);
+
+
 
         mProgressBar = (ProgressBar) header.findViewById(R.id.progress_bar);
         mProgressBar.setVisibility(View.GONE);
@@ -322,6 +367,35 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         terminateButton = (Button) header.findViewById(R.id.terminate);
         followupButton = (ImageButton) header.findViewById(R.id.followupButton);
         profileButton = (ImageButton) header.findViewById(R.id.profile_button);
+
+        if(localdblang.equals(TZ_LANG))
+        {
+            data_entry.setText(TZ_TIMELINE);
+            profile.setText(TZ_PROFILE);
+            relationships.setText(TZ_RELATIONSHIPS);
+            indicators.setText(TZ_INDICATORS);
+            enrollment.setText(TZ_ENROLL);
+            completeButton.setText(TZ_COMPLETE_BUTTON);
+            refreshRelationshipButton.setText(TZ_REFRESH);
+            newRelationshipButton.setText(TZ_NEW);
+            enrollmentDateLabel.setText(TZ_ENROLL_DATE);
+            terminateButton.setText(TZ_CANCEL);
+            reOpenButton.setText("Fungua");
+        }
+        else if(localdblang.equals(VI_LANG))
+        {
+            data_entry.setText(VI_TIMELINE);
+            profile.setText(VI_PROFILE);
+            relationships.setText(VI_RELATIONSHIPS);
+            indicators.setText(VI_INDICATORS);
+            enrollment.setText(VI_ENROLL);
+            completeButton.setText(VI_UN_ENROLL);
+            refreshRelationshipButton.setText(VI_REFRESH);
+            newRelationshipButton.setText(VI_NEW);
+            enrollmentDateLabel.setText(VI_ENROLL_DATE);
+            terminateButton.setText(VI_CANCEL);
+            reOpenButton.setText("Mở lại");
+        }
         completeButton.setOnClickListener(this);
         reOpenButton.setOnClickListener(this);
         terminateButton.setOnClickListener(this);
@@ -550,7 +624,23 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                         true);
                 profileButton.setClickable(true);
             }
-            enrollmentDateLabel.setText(data.getDateOfEnrollmentLabel());
+            final UserAccount uslocal=MetaDataController.getUserLocalLang();
+            String user_locallang=uslocal.getUserSettings().toString();
+
+            String localdblang=user_locallang;
+            if(localdblang.equals(TZ_LANG))
+            {
+                enrollmentDateLabel.setText(TZ_ENROLL_DATE);
+            }
+            else if(localdblang.equals(VI_LANG))
+            {
+                enrollmentDateLabel.setText(VI_ENROLL_DATE);
+            }
+            else
+            {
+                enrollmentDateLabel.setText(data.getDateOfEnrollmentLabel());
+            }
+
             enrollmentDateValue.setText(data.getDateOfEnrollmentValue());
 
             if (!(data.getProgram().getDisplayIncidentDate())) {
@@ -941,7 +1031,24 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         //start values
         reOpenButton.setVisibility(View.VISIBLE);
         newEnrollmentButton.setVisibility(View.VISIBLE);
-        noActiveEnrollment.setText(R.string.no_active_enrollment);
+        //@Sou ToDO trans for no_acive_enroll
+
+        final UserAccount uslocal=MetaDataController.getUserLocalLang();
+        String user_locallang=uslocal.getUserSettings().toString();
+        String localdblang=user_locallang;
+        if(localdblang.equals(TZ_LANG))
+        {
+            noActiveEnrollment.setText("Hakuna alieandikishwa");
+        }
+        else if(localdblang.equals(VI_LANG))
+        {
+            noActiveEnrollment.setText("Chưa tham gia khóa học nào");
+        }
+        else
+        {
+            noActiveEnrollment.setText(R.string.no_active_enrollment);
+        }
+
 
         missingEnrollmentLayout.setVisibility(View.VISIBLE);
         Enrollment lastEnrollment = TrackerController.getLastEnrollment(mForm.getProgram().getUid(),
@@ -1133,17 +1240,52 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             }
 
             case R.id.complete: {
-                UiUtils.showConfirmDialog(getActivity(),
-                        getString(R.string.un_enroll),
-                        getString(R.string.confirm_complete_enrollment),
-                        getString(R.string.un_enroll),
-                        getString(R.string.cancel),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                completeEnrollment();
-                            }
-                        });
+                final UserAccount uslocal=MetaDataController.getUserLocalLang();
+                String user_locallang=uslocal.getUserSettings().toString();
+                String localdblang=user_locallang;
+                if(localdblang.equals(VI_LANG))
+                {
+                    UiUtils.showConfirmDialog(getActivity(),
+                            getString(R.string.un_enroll_vi),
+                            getString(R.string.confirm_complete_enrollment),
+                            getString(R.string.un_enroll_vi),
+                            getString(R.string.vi_cancel),
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    completeEnrollment();
+                                }
+                            });
+                }
+                else if(localdblang.equals(TZ_LANG))
+                {
+                    UiUtils.showConfirmDialog(getActivity(),
+                            "unjili",
+                            "Una uhakika unataka kuandikisha usajili wa sasa? Hakuna uhariri zaidi utawezekana",
+                            "unjili",
+                            "kufuta",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    completeEnrollment();
+                                }
+                            });
+                }
+                else
+                {
+                    UiUtils.showConfirmDialog(getActivity(),
+                            getString(R.string.un_enroll),
+                            getString(R.string.confirm_complete_enrollment),
+                            getString(R.string.un_enroll),
+                            getString(R.string.cancel),
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    completeEnrollment();
+                                }
+                            });
+                }
+
                 break;
             }
             case R.id.re_open: {
@@ -1160,17 +1302,53 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             }
 
             case R.id.terminate: {
-                UiUtils.showConfirmDialog(getActivity(),
-                        getString(R.string.terminate),
-                        getString(R.string.confirm_terminate_enrollment),
-                        getString(R.string.yes),
-                        getString(R.string.no),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                terminateEnrollment();
-                            }
-                        });
+                final UserAccount uslocal=MetaDataController.getUserLocalLang();
+                String user_locallang=uslocal.getUserSettings().toString();
+                String localdblang=user_locallang;
+                if(localdblang.equals(VI_LANG))
+                {
+                    UiUtils.showConfirmDialog(getActivity(),
+                            "hủy bỏ",
+                            "Bạn có chắc chắn muốn hủy đăng ký hiện tại không? Điều này không thể được hoàn tác.",
+                            "Vâng",
+                            "Không",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    terminateEnrollment();
+                                }
+                            });
+                }
+                else if(localdblang.equals(TZ_LANG))
+                {
+                    UiUtils.showConfirmDialog(getActivity(),
+                            "kufuta",
+                            "Una uhakika unataka kufuta usajili wa sasa? Hii haiwezi kufutwa.",
+                            "ndiyo",
+                            "Hapana",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    terminateEnrollment();
+                                }
+                            });
+                }
+                else
+                {
+                    UiUtils.showConfirmDialog(getActivity(),
+                            getString(R.string.terminate),
+                            getString(R.string.confirm_terminate_enrollment),
+                            getString(R.string.yes),
+                            getString(R.string.no),
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    terminateEnrollment();
+                                }
+                            });
+                }
+
+
                 break;
             }
 

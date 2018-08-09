@@ -27,490 +27,323 @@
  *
  */
 
-package org.hisp.dhis.android.trackercapture.fragments.selectprogram;
+package org.hisp.dhis.android.trackercapture.fragments.programoverview.selectprogramdialogfragment;
 
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.res.Configuration;
+
+
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
-import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.ContextMenu;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+import android.util.Pair;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.raizlabs.android.dbflow.structure.Model;
-import com.squareup.otto.Subscribe;
-
-import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
-import org.hisp.dhis.android.sdk.events.OnRowClick;
-import org.hisp.dhis.android.sdk.events.OnTeiDownloadedEvent;
-import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
-import org.hisp.dhis.android.sdk.events.UiEvent;
-import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
-import org.hisp.dhis.android.sdk.persistence.models.BaseSerializableModel;
-import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
-import org.hisp.dhis.android.sdk.persistence.models.Event;
-import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
-import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnTrackedEntityInstanceColumnClick;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceItemRow;
-import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
+import org.hisp.dhis.android.sdk.R;
+import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis.android.sdk.persistence.models.UserAccount;
+import org.hisp.dhis.android.sdk.ui.dialogs.AutoCompleteDialogFragment;
+import org.hisp.dhis.android.sdk.ui.dialogs.OrgUnitDialogFragment;
+import org.hisp.dhis.android.sdk.ui.dialogs.ProgramDialogFragment;
+import org.hisp.dhis.android.sdk.ui.dialogs.UpcomingEventsDialogFilter;
+import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentPreferences;
+import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentState;
+import org.hisp.dhis.android.sdk.ui.views.CardTextViewButton;
 import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
-import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.sdk.utils.api.ProgramType;
-import org.hisp.dhis.android.trackercapture.R;
 import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
-import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.ItemStatusDialogFragment;
-import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.QueryTrackedEntityInstancesDialogFragment;
-import org.hisp.dhis.android.trackercapture.ui.DownloadEventSnackbar;
-import org.hisp.dhis.android.trackercapture.ui.adapters.TrackedEntityInstanceAdapter;
-import org.joda.time.DateTime;
+import org.hisp.dhis.android.trackercapture.fragments.programoverview
+        .registerrelationshipdialogfragment.RelationshipTypesDialogFragment;
+import org.hisp.dhis.android.trackercapture.fragments.search.OnlineSearchResultFragment;
+import org.hisp.dhis.android.trackercapture.fragments.selectprogram.dialogs.Action;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
-public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragment
-        implements SearchView.OnQueryTextListener, SearchView.OnFocusChangeListener, SearchView.OnCloseListener,
-        MenuItemCompat.OnActionExpandListener, LoaderManager.LoaderCallbacks<SelectProgramFragmentForm>, IEnroller {
-    public static final String TAG = SelectProgramFragment.class.getSimpleName();
+public class SelectProgramDialogFragment extends DialogFragment
+        implements View.OnClickListener  ,AutoCompleteDialogFragment.OnOptionSelectedListener  {
+    private static final String TAG = SelectProgramDialogFragment.class.getSimpleName();
 
-    private FloatingActionButton mRegisterEventButton;
-    private FloatingActionButton mQueryTrackedEntityInstancesButton;
-    private FloatingActionButton mUpcomingEventsButton;
-    private FloatingActionButton mLocalSearchButton;
-    private SelectProgramFragmentForm mForm;
-    protected TextView noRowsTextView;
-    private DownloadEventSnackbar snackbar;
-    private MenuItem item;
+    protected final String STATE = "state:SelectProgramFragment";
 
-    @Override
-    protected TrackedEntityInstanceAdapter getAdapter(Bundle savedInstanceState) {
-        return new TrackedEntityInstanceAdapter(getLayoutInflater(savedInstanceState));
+    protected CardTextViewButton mOrgUnitButton;
+    protected CardTextViewButton mProgramButton;
+    private FloatingActionButton searchAndDownloadButton;
+    private FloatingActionButton createNewTeiButton;
+    private TextView mDialogLabel;
+    private static final String TZ_LANG= "sw";
+    private static final String VI_LANG= "vi";
+    private static final String TZ_CHOOSE_ORG= "Chagua vitengo vya shirika";
+    private static final String VI_CHOOSE_ORG= "Chọn đơn vị tổ chức";
+    private static final String TZ_CHOOSE_PROGRAM= "chagua programu";
+    private static final String VI_CHOOSE_PROGRAM= "Chọn chương trình";
+    private static final String CHOOSE_PROGRAM= "Choose Program";
+    private static final String CHOOSE_ORGANNISATION= "Choose organisation unit";
+    protected SelectProgramFragmentState mState;
+    protected SelectProgramFragmentPreferences mPrefs;
+    private static OnlineSearchResultFragment.CallBack mCallBack;
+
+    private static final String EXTRA_TRACKEDENTITYINSTANCEID = "extra:trackedEntityInstanceId";
+    private static final String EXTRA_ARGUMENTS = "extra:Arguments";
+    private static final String EXTRA_SAVED_INSTANCE_STATE = "extra:savedInstanceState";
+    private static final String EXTRA_SAVED_ACTION = "extra:savedAction";
+    public static SelectProgramDialogFragment newInstance(long trackedEntityInstanceId,
+            Action action, OnlineSearchResultFragment.CallBack callBack) {
+        mCallBack=callBack;
+        SelectProgramDialogFragment dialogFragment = new SelectProgramDialogFragment();
+        Bundle args = new Bundle();
+
+        args.putLong(EXTRA_TRACKEDENTITYINSTANCEID, trackedEntityInstanceId);
+        args.putSerializable(EXTRA_SAVED_ACTION, action);
+        dialogFragment.setArguments(args);
+        return dialogFragment;
     }
 
     @Override
-    protected View getListViewHeader(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setStyle(DialogFragment.STYLE_NO_TITLE,
+                R.style.Theme_AppCompat_Light_Dialog);
+    }
 
-        if (getActivity() instanceof AppCompatActivity) {
-            Toolbar toolbar = getParentToolbar();
-            ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    toggleNavigationDrawer();
-                }
-            });
+    @Override
+    public View onCreateView(LayoutInflater inflater,
+                             ViewGroup container, Bundle savedInstanceState) {
+        getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+        final UserAccount uslocal= MetaDataController.getUserLocalLang();
+        String user_locallang=uslocal.getUserSettings().toString();
+        String localdblang=user_locallang;
+
+        mOrgUnitButton = (CardTextViewButton) container.findViewById(R.id.select_organisation_unit);
+        mProgramButton = (CardTextViewButton) container.findViewById(R.id.select_program);
+        if(localdblang.equals(TZ_LANG))
+        {
+            mOrgUnitButton.setText(TZ_CHOOSE_ORG);
+            mProgramButton.setText(TZ_CHOOSE_PROGRAM);
+        }
+        else if(localdblang.equals(VI_LANG))
+        {
+            mOrgUnitButton.setText(VI_CHOOSE_ORG);
+            mProgramButton.setText(VI_CHOOSE_PROGRAM);
+        }
+        else
+        {
+            mOrgUnitButton.setText(CHOOSE_ORGANNISATION);
+            mProgramButton.setText(CHOOSE_PROGRAM);
+        }
+        return inflater.inflate(org.hisp.dhis.android.trackercapture.R.layout.dialog_fragment_selection_program, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        mPrefs = new SelectProgramFragmentPreferences(
+                getActivity().getApplicationContext());
+        Action action = (Action) getArguments().getSerializable(EXTRA_SAVED_ACTION);
+
+        if(action==Action.QUERY) {
+            searchAndDownloadButton = (FloatingActionButton) view
+                    .findViewById(
+                            org.hisp.dhis.android.trackercapture.R.id.search_and_download_button);
+            searchAndDownloadButton.setOnClickListener(this);
+            searchAndDownloadButton.setVisibility(View.VISIBLE);
+        }else if (action==Action.CREATE){
+            createNewTeiButton = (FloatingActionButton) view
+                    .findViewById(
+                            org.hisp.dhis.android.trackercapture.R.id.create_new_tei_button);
+            createNewTeiButton.setOnClickListener(this);
+            createNewTeiButton.setVisibility(View.VISIBLE);
         }
 
-        View header = getLayoutInflater(savedInstanceState).inflate(
-                R.layout.fragment_select_program_header, mListView, false
-        );
-        mRegisterEventButton = (FloatingActionButton) header.findViewById(R.id.register_new_event);
-        mQueryTrackedEntityInstancesButton = (FloatingActionButton) header.findViewById(R.id.query_trackedentityinstances_button);
-        mUpcomingEventsButton = (FloatingActionButton) header.findViewById(R.id.upcoming_events_button);
-        mLocalSearchButton = (FloatingActionButton) header.findViewById(R.id.local_search_button);
-        noRowsTextView = (TextView) header.findViewById(R.id.textview_no_items);
-        noRowsTextView.setText(getString(R.string.specify_search_criteria));
+        ImageView closeDialogButton = (ImageView) view
+                .findViewById(R.id.close_dialog_button);
+        closeDialogButton.setOnClickListener(this);
+        mDialogLabel = (TextView) view
+                .findViewById(R.id.dialog_label);
+        setDialogLabel(org.hisp.dhis.android.trackercapture.R.string.download_entities_title);
 
-        mRegisterEventButton.setOnClickListener(this);
-        mQueryTrackedEntityInstancesButton.setOnClickListener(this);
-        mUpcomingEventsButton.setOnClickListener(this);
-        mLocalSearchButton.setOnClickListener(this);
+        setOUAndProgramButtons(view);
 
-        mRegisterEventButton.hide();
-        mUpcomingEventsButton.hide();
-        mQueryTrackedEntityInstancesButton.hide();
-        mLocalSearchButton.hide();
-        noRowsTextView.setVisibility(View.GONE);
-        return header;
+        setState(savedInstanceState);
+    }
+
+    private void setState(Bundle savedInstanceState) {
+
+        if (savedInstanceState != null &&
+                savedInstanceState.getParcelable(STATE) != null) {
+            mState = savedInstanceState.getParcelable(STATE);
+        }
+
+        if (mState == null) {
+            // restoring last selection of program
+            Pair<String, String> orgUnit = mPrefs.getOrgUnit();
+            Pair<String, String> program = mPrefs.getProgram();
+            Pair<String, String> filter = mPrefs.getFilter();
+            mState = new SelectProgramFragmentState();
+            if (orgUnit != null) {
+                mState.setOrgUnit(orgUnit.first, orgUnit.second);
+                if (program != null) {
+                    mState.setProgram(program.first, program.second);
+                }
+                if(filter != null) {
+                    mState.setFilter(filter.first, filter.second);
+                }
+                else {
+                    mState.setFilter("0", Arrays.asList(UpcomingEventsDialogFilter.Type.values()).get(0).toString());
+                }
+
+
+            }
+        }
+
+        onRestoreState(true);
+    }
+
+    private void setOUAndProgramButtons(View view) {
+
+        final UserAccount uslocal= MetaDataController.getUserLocalLang();
+        String user_locallang=uslocal.getUserSettings().toString();
+        String localdblang=user_locallang;
+
+        mOrgUnitButton = (CardTextViewButton) view.findViewById(R.id.select_organisation_unit);
+        mProgramButton = (CardTextViewButton) view.findViewById(R.id.select_program);
+
+        if(localdblang.equals(TZ_LANG))
+        {
+            mOrgUnitButton.setText(TZ_CHOOSE_ORG);
+            mProgramButton.setText(TZ_CHOOSE_PROGRAM);
+        }
+        else if(localdblang.equals(VI_LANG))
+        {
+            mOrgUnitButton.setText(VI_CHOOSE_ORG);
+            mProgramButton.setText(VI_CHOOSE_PROGRAM);
+        }
+        else
+        {
+            mOrgUnitButton.setText(CHOOSE_ORGANNISATION);
+            mProgramButton.setText(CHOOSE_PROGRAM);
+        }
+
+        mOrgUnitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                OrgUnitDialogFragment fragment = OrgUnitDialogFragment
+                        .newInstance(SelectProgramDialogFragment.this, getProgramTypes());
+                fragment.show(getChildFragmentManager());
+            }
+        });
+        mProgramButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ProgramDialogFragment fragment = ProgramDialogFragment
+                        .newInstance(SelectProgramDialogFragment.this, mState.getOrgUnitId(),
+                                getProgramTypes());
+                fragment.show(getChildFragmentManager());
+            }
+        });
+
+        mOrgUnitButton.setEnabled(true);
+        mProgramButton.setEnabled(false);
+    }
+
+    /* This method must be called only after onViewCreated() */
+    public void setDialogLabel(int resourceId) {
+        if (mDialogLabel != null) {
+            mDialogLabel.setText(resourceId);
+        }
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState)
+    {
+        super.onActivityCreated(savedInstanceState);
+        Bundle argumentsBundle = new Bundle();
+        argumentsBundle.putBundle(EXTRA_ARGUMENTS, getArguments());
+        argumentsBundle.putBundle(EXTRA_SAVED_INSTANCE_STATE, savedInstanceState);
+    }
+
+    public void show(FragmentManager fragmentManager) {
+        show(fragmentManager, TAG);
+    }
+
+    @Override
+    public void onClick(View v) {
+        if(v.getId() == org.hisp.dhis.android.trackercapture.R.id.relationshiptypebutton ) {
+            RelationshipTypesDialogFragment fragment = RelationshipTypesDialogFragment
+                    .newInstance(this);
+            fragment.show(getChildFragmentManager());
+        } else if(v.getId() == R.id.close_dialog_button) {
+            dismiss();
+        } else if(v.getId() == org.hisp.dhis.android.trackercapture.R.id.search_and_download_button){
+            HolderActivity.navigateToOnlineSearchFragment(getActivity(), mState.getProgramId(), mState.getOrgUnitId(), true, mCallBack);
+            dismiss();
+        } else if(v.getId() == org.hisp.dhis.android.trackercapture.R.id.create_new_tei_button){
+            HolderActivity.navigateToTrackedEntityInstanceDataEntryFragment(getActivity(), mState.getProgramId(), mState.getOrgUnitId(), true, mCallBack);
+            dismiss();
+        }
+    }
+
+    @Override
+    public void onOptionSelected(int dialogId, int position, String id, String name) {
+        switch (dialogId) {
+            case OrgUnitDialogFragment.ID: {
+                onUnitSelected(id, name);
+                break;
+            }
+            case ProgramDialogFragment.ID: {
+                onProgramSelected(id, name);
+                break;
+            }
+        }
+    }
+
+    public void onRestoreState(boolean hasUnits) {
+        mOrgUnitButton.setEnabled(hasUnits);
+        if (!hasUnits) {
+            return;
+        }
+
+        SelectProgramFragmentState backedUpState = new SelectProgramFragmentState(mState);
+        if (!backedUpState.isOrgUnitEmpty()) {
+            onUnitSelected(
+                    backedUpState.getOrgUnitId(),
+                    backedUpState.getOrgUnitLabel()
+            );
+
+            if (!backedUpState.isProgramEmpty()) {
+                onProgramSelected(
+                        backedUpState.getProgramId(),
+                        backedUpState.getProgramName()
+                );
+            }
+        }
+
+    }
+
+    public void onUnitSelected(String orgUnitId, String orgUnitLabel) {
+        mOrgUnitButton.setText(orgUnitLabel);
+        mProgramButton.setEnabled(true);
+
+        mState.setOrgUnit(orgUnitId, orgUnitLabel);
+        mState.resetProgram();
+
+        mPrefs.putOrgUnit(new Pair<>(orgUnitId, orgUnitLabel));
+        mPrefs.putProgram(null);
+    }
+
+    public void onProgramSelected(String programId, String programName) {
+        mProgramButton.setText(programName);
+
+        mState.setProgram(programId, programName);
+        mPrefs.putProgram(new Pair<>(programId, programName));
+
+        // this call will trigger onCreateLoader method
+    }
+
     protected ProgramType[] getProgramTypes() {
         return new ProgramType[]{
                 ProgramType.WITH_REGISTRATION
         };
     }
-
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        getLoaderManager().restartLoader(LOADER_ID, getArguments(), this);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.menu_select_program, menu);
-        item = menu.findItem(R.id.action_search);
-        SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
-        MenuItemCompat.setOnActionExpandListener(item, this);
-        searchView.setOnQueryTextListener(this);
-        searchView.setOnQueryTextFocusChangeListener(this);
-        searchView.setOnCloseListener(this);
-    }
-
-    @Override
-    public Loader<SelectProgramFragmentForm> onCreateLoader(int id, Bundle args) {
-        if (LOADER_ID == id && isAdded()) {
-            List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
-            modelsToTrack.add(TrackedEntityInstance.class);
-            modelsToTrack.add(Enrollment.class);
-            modelsToTrack.add(Event.class);
-            modelsToTrack.add(FailedItem.class);
-            return new DbLoader<>(
-                    getActivity().getBaseContext(), modelsToTrack,
-                    new SelectProgramFragmentQuery(mState.getOrgUnitId(), mState.getProgramId()));
-        }
-        return null;
-    }
-
-    @Subscribe
-    public void onItemClick(OnTrackerItemClick eventClick) {
-        if (eventClick.isOnDescriptionClick()) {
-            HolderActivity.navigateToProgramOverviewFragment(getActivity(), mState.getOrgUnitId(), mState.getProgramId(),
-                    eventClick.getItem().getLocalId());
-        } else {
-            showStatusDialog(eventClick.getItem());
-        }
-    }
-
-    @Subscribe
-    public void onReceivedUiEvent(UiEvent uiEvent) {
-        if (uiEvent.getEventType() == UiEvent.UiEventType.SYNCING_END) {
-            getLoaderManager().restartLoader(LOADER_ID, getArguments(), this);
-        }
-        super.onReceivedUiEvent(uiEvent);
-    }
-
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.register_new_event: {
-                createEnrollment();
-                break;
-            }
-            case R.id.upcoming_events_button: {
-                HolderActivity.navigateToUpcomingEventsFragment(getActivity());
-                break;
-            }
-            case R.id.query_trackedentityinstances_button: {
-                showOnlineSearchFragment(mState.getOrgUnitId(), mState.getProgramId());
-                break;
-            }
-            case R.id.local_search_button: {
-                HolderActivity.navigateToLocalSearchFragment(getActivity(), mState.getOrgUnitId(), mState.getProgramId());
-                break;
-            }
-        }
-    }
-
-    private void createEnrollment() {
-        if (mForm != null && mForm.getProgram() != null) {
-            EnrollmentDateSetterHelper.createEnrollment(this, getActivity(), mForm.getProgram().
-                            getDisplayIncidentDate(), mForm.getProgram().getSelectEnrollmentDatesInFuture(),
-                    mForm.getProgram().getSelectIncidentDatesInFuture(), mForm.getProgram().getEnrollmentDateLabel(),
-                    mForm.getProgram().getIncidentDateLabel());
-        }
-    }
-
-    public void showEnrollmentFragment(TrackedEntityInstance trackedEntityInstance, DateTime enrollmentDate, DateTime incidentDate) {
-        String enrollmentDateString = enrollmentDate.toString();
-        String incidentDateString = null;
-        if (incidentDate != null) {
-            incidentDateString = incidentDate.toString();
-        }
-        if (trackedEntityInstance == null) {
-            HolderActivity.navigateToEnrollmentDataEntryFragment(getActivity(), mState.getOrgUnitId(), mState.getProgramId(), enrollmentDateString, incidentDateString);
-
-        } else {
-            HolderActivity.navigateToEnrollmentDataEntryFragment(getActivity(), mState.getOrgUnitId(), mState.getProgramId(), trackedEntityInstance.getLocalId(), enrollmentDateString, incidentDateString);
-
-        }
-
-    }
-
-    private static final void showQueryTrackedEntityInstancesDialog(FragmentManager fragmentManager, String orgUnit, String program) {
-        QueryTrackedEntityInstancesDialogFragment dialog = QueryTrackedEntityInstancesDialogFragment.newInstance(program, orgUnit);
-        dialog.show(fragmentManager);
-    }
-
-    public final void showOnlineSearchFragment() {
-        showOnlineSearchFragment(mState.getOrgUnitId(), mState.getProgramId());
-    }
-
-    private final void showOnlineSearchFragment(String orgUnit, String program) {
-        HolderActivity.navigateToOnlineSearchFragment(getActivity(), program, orgUnit, false, null);
-    }
-
-    public void showStatusDialog(BaseSerializableModel model) {
-        ItemStatusDialogFragment fragment = ItemStatusDialogFragment.newInstance(model);
-        fragment.show(getChildFragmentManager());
-    }
-
-    protected void handleViews(int level) {
-        mAdapter.swapData(null);
-        switch (level) {
-            case 0:
-                mRegisterEventButton.hide();
-                mUpcomingEventsButton.hide();
-                mQueryTrackedEntityInstancesButton.hide();
-                mLocalSearchButton.hide();
-                break;
-            case 1:
-                mRegisterEventButton.show();
-                mUpcomingEventsButton.show();
-                mQueryTrackedEntityInstancesButton.show();
-                mLocalSearchButton.show();
-        }
-    }
-
-    @Override
-    public void onLoadFinished(Loader<SelectProgramFragmentForm> loader, SelectProgramFragmentForm data) {
-        if (LOADER_ID == loader.getId()) {
-            mProgressBar.setVisibility(View.GONE);
-            mForm = data;
-            ((TrackedEntityInstanceAdapter) mAdapter).setData(data.getEventRowList());
-            mAdapter.swapData(data.getEventRowList());
-
-            if (data.getProgram() != null && data.getProgram().isDisplayFrontPageList()) {
-                noRowsTextView.setVisibility(View.GONE);
-                if (item != null)
-                    item.setVisible(true);
-            } else {
-                noRowsTextView.setVisibility(View.VISIBLE);
-
-                if (item != null)
-                    item.setVisible(false);
-            }
-        }
-    }
-
-    @Override
-    public boolean onQueryTextSubmit(String query) {
-        Log.d(TAG, query);
-        View view = getActivity().getCurrentFocus();
-        //hide keyboard
-        if (view != null) {
-            InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-        }
-
-
-        return true;
-    }
-
-    @Override
-    public boolean onQueryTextChange(String newText) {
-        Log.d(TAG, newText);
-        ((TrackedEntityInstanceAdapter) mAdapter).getFilter().filter(TrackedEntityInstanceAdapter.FILTER_SEARCH + newText);
-
-        return true;
-    }
-
-    @Override
-    public void onFocusChange(View view, boolean hasFocus) {
-        if (view instanceof SearchView) {
-            SearchView searchView = (SearchView) view;
-
-            if (searchView.getQuery().length() == 0) {
-                ((TrackedEntityInstanceAdapter) mAdapter).getFilter().filter(""); //show all rows
-            }
-        }
-    }
-
-    private void setFocusSortColumn(int column) {
-        TrackedEntityInstanceAdapter teiAdapter = (TrackedEntityInstanceAdapter) mAdapter;
-        View view = mForm.getColumnNames().getView();
-
-        switch (column) {
-            //todo put UI stuff inside here when list is sorted either ascending or descending
-            //first column
-            case 1: {
-                if (teiAdapter.getFilteredColumn() == column) {
-
-                } else if (teiAdapter.isListIsReversed(column)) {
-
-                }
-                break;
-            }
-            // second column
-            case 2: {
-                break;
-            }
-            // third column
-            case 3: {
-                break;
-            }
-            // status column
-            case 4: {
-                break;
-            }
-        }
-    }
-
-    @Subscribe
-    public void onItemClick(OnTrackedEntityInstanceColumnClick eventClick) {
-        Log.d(TAG, "COLUMN CLICKED : " + eventClick.getColumnClicked());
-        switch (eventClick.getColumnClicked()) {
-            case OnTrackedEntityInstanceColumnClick.FIRST_COLUMN: {
-                Log.d(TAG, "Filter column " + TrackedEntityInstanceAdapter.FILTER_FIRST_COLUMN);
-                ((TrackedEntityInstanceAdapter) mAdapter).getFilter().filter(TrackedEntityInstanceAdapter.FILTER_FIRST_COLUMN + "");
-                setFocusSortColumn(1);
-                break;
-
-            }
-            case OnTrackedEntityInstanceColumnClick.SECOND_COLUMN: {
-                Log.d(TAG, "Filter column " + TrackedEntityInstanceAdapter.FILTER_SECOND_COLUMN);
-                ((TrackedEntityInstanceAdapter) mAdapter).getFilter().filter(TrackedEntityInstanceAdapter.FILTER_SECOND_COLUMN + "");
-                break;
-
-            }
-            case OnTrackedEntityInstanceColumnClick.THIRD_COLUMN: {
-                Log.d(TAG, "Filter column " + TrackedEntityInstanceAdapter.FILTER_THIRD_COLUMN);
-                ((TrackedEntityInstanceAdapter) mAdapter).getFilter().filter(TrackedEntityInstanceAdapter.FILTER_THIRD_COLUMN + "");
-                break;
-
-            }
-            case OnTrackedEntityInstanceColumnClick.STATUS_COLUMN: {
-                Log.d(TAG, "Filter column " + TrackedEntityInstanceAdapter.FILTER_STATUS);
-                ((TrackedEntityInstanceAdapter) mAdapter).getFilter().filter(TrackedEntityInstanceAdapter.FILTER_STATUS + "");
-                break;
-            }
-        }
-    }
-
-    @Subscribe
-    public void onTeiDownloaded(OnTeiDownloadedEvent event) {
-        if (getActivity() == null || !isAdded()) {
-            return;
-        }
-
-        if (snackbar == null) {
-            snackbar = new DownloadEventSnackbar(this);
-        }
-
-        snackbar.show(event);
-
-    }
-
-    @Override
-    public boolean onMenuItemActionExpand(MenuItem item) {
-        Log.d(TAG, "onMenuItemActionExpand");
-        return true; //return true to expand
-    }
-
-    @Override
-    public boolean onMenuItemActionCollapse(MenuItem item) {
-        ((TrackedEntityInstanceAdapter) mAdapter).getFilter().filter(""); //showing all rows
-        return true;
-    }
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        new MenuInflater(this.getActivity()).inflate(org.hisp.dhis.android.sdk.R.menu.menu_selected_trackedentityinstance, menu);
-
-        // If item has been sent to server, set deletion menu item label as "Remove from device" instead of "delete"
-        MenuItem menuItem = menu.findItem(R.id.action_delete);
-        if (menuItem != null) {
-            AdapterView.AdapterContextMenuInfo info =
-                    (AdapterView.AdapterContextMenuInfo) menuItem.getMenuInfo();
-            final TrackedEntityInstanceItemRow itemRow = (TrackedEntityInstanceItemRow) mListView.getItemAtPosition(info.position);
-            if (itemRow != null && itemRow.getStatus().equals(OnRowClick.ITEM_STATUS.SENT)) {
-                menuItem.setTitle(R.string.remove);
-            }
-        }
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info =
-                (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-
-        final TrackedEntityInstanceItemRow itemRow = (TrackedEntityInstanceItemRow) mListView.getItemAtPosition(info.position);
-
-        Log.d(TAG, "" + itemRow.getTrackedEntityInstance().getTrackedEntityInstance());
-
-
-        if (item.getItemId() == R.id.action_overview) {
-            HolderActivity.navigateToProgramOverviewFragment(getActivity(),
-                    mState.getOrgUnitId(), mState.getProgramId(), itemRow.getTrackedEntityInstance().getLocalId());
-        } else if (item.getItemId() == R.id.action_delete) {
-            // if not sent to server, show dialog with error icon
-            if (!(itemRow.getStatus().equals(OnRowClick.ITEM_STATUS.SENT))) {
-                UiUtils.showConfirmDialog(getActivity(), getActivity().getString(R.string.confirm),
-                        getActivity().getString(R.string.warning_delete_unsent_tei),
-                        getActivity().getString(R.string.delete), getActivity().getString(R.string.cancel),
-                        (R.drawable.ic_event_error),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                performSoftDeleteOfTrackedEntityInstance(itemRow.getTrackedEntityInstance());
-                                dialog.dismiss();
-                            }
-                        });
-            } else {
-                // if not sent to server, show dialog with warning icon
-                UiUtils.showConfirmDialog(getActivity(), getActivity().getString(R.string.remove_report_entity_dialog_title),
-                        getActivity().getString(R.string.remove_report_entity_dialog_message),
-                        getActivity().getString(R.string.remove), getActivity().getString(R.string.cancel),
-                        (R.drawable.ic_warning_black_24dp),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                performSoftDeleteOfTrackedEntityInstance(itemRow.getTrackedEntityInstance());
-                                dialog.dismiss();
-                            }
-                        });
-            }
-        }
-        return true;
-    }
-
-    public void performSoftDeleteOfTrackedEntityInstance(TrackedEntityInstance trackedEntityInstance) {
-        List<Enrollment> enrollments = TrackerController.getEnrollments(mState.getProgramId(), trackedEntityInstance);
-        Enrollment activeEnrollment = null;
-        for (Enrollment enrollment : enrollments) {
-            if (Enrollment.ACTIVE.equals(enrollment.getStatus())) {
-                activeEnrollment = enrollment;
-            }
-        }
-
-        if (activeEnrollment != null) {
-            List<Event> eventsForActiveEnrollment = TrackerController.getEventsByEnrollment(activeEnrollment.getLocalId());
-
-            if (eventsForActiveEnrollment != null) {
-                for (Event event : eventsForActiveEnrollment) {
-                    event.delete();
-                }
-            }
-
-            activeEnrollment.delete();
-        }
-    }
-
-    @Override
-    public boolean onClose() {
-        ((TrackedEntityInstanceAdapter) mAdapter).getFilter().filter(""); //show all rows
-        return false;
-    }
-
-    @Override
-    public void stateChanged() {
-        super.stateChanged();
-    }
-
 }

@@ -47,13 +47,16 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.persistence.models.UserAccount;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowFactory;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DatePickerRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.EnrollmentDatePickerRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.IncidentDatePickerRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.NumberEditTextRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.ShortTextEditTextRow;
 import org.hisp.dhis.android.sdk.utils.api.ValueType;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.autocompleterow.AutoCompleteRow;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Arrays;
@@ -75,7 +78,9 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
     private String PROJECT_DONOR_TZ="o94ggG6Mhx8";
     private String PROJECT_DONOR_PH="KLSVjftH2xS";
     private String TZ_LANG="sw";
+    private String VI_LANG="vi";
     private String TZ_ENROLLMENT_DATE="Tarehe ya Kuandikishwa";
+    private String VI_ENROLLMENT_DATE="Ngày đăng ký";
     private String TZ_INCIDENT_DATE="Tarehe ya Tukio";
     private String BEN_ID="L2doMQ7OtUB";
 
@@ -135,6 +140,13 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
                     new EnrollmentDatePickerRow(TZ_ENROLLMENT_DATE,
                             currentEnrollment));
         }
+        else if(localdblang.equals(VI_LANG))
+        {
+            dataEntryRows.add(
+                    //ToDO @Sou userdb language based keyywords
+                    new EnrollmentDatePickerRow(VI_ENROLLMENT_DATE,
+                            currentEnrollment));
+        }
         else {
             dataEntryRows.add(
                     new EnrollmentDatePickerRow(currentEnrollment.getProgram().getEnrollmentDateLabel(),
@@ -186,117 +198,322 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
             }
         }
         currentEnrollment.setAttributes(trackedEntityAttributeValues);
-        int paddingForIndex = dataEntryRows.size();
-        int project_dtz_RowIndex = 0;//added to manupulate or dynamicly change the row value based on user input for the other
+        if(mProgram.getUid().equals("Fcyldy4VqSt"))
+        {
+            int paddingForIndex = dataEntryRows.size();
+            int project_dtz_RowIndex = 0;//added to manupulate or dynamicly change the row value based on user input for the other
 //        int dobRowIndex = -1;//added to manupulate or dynamicly change the row value based on user input for the other
-        int benRowIndex = 1;
-        for (int i = 0; i < programTrackedEntityAttributes.size(); i++) {
-            boolean editable = true;
-            boolean shouldNeverBeEdited = false;
-            if (programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().isGenerated()) {
-                editable = false;
-                shouldNeverBeEdited = true;
-            }
-            if(fieldsToDisable.contains(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getUid())){
-                editable=false;
-                shouldNeverBeEdited=true;
-            }
-
-            if (ValueType.COORDINATE.equals(programTrackedEntityAttributes.get(
-                    i).getTrackedEntityAttribute().getValueType())) {
-                GpsController.activateGps(context);
-            }
-            boolean isRadioButton = mProgram.getDataEntryMethod();
-            if(!isRadioButton){
-                isRadioButton = programTrackedEntityAttributes.get(
-                        i).isRenderOptionsAsRadio();
-            }
-            Row row = DataEntryRowFactory.createDataEntryView(
-                    programTrackedEntityAttributes.get(i).getMandatory(),
-                    programTrackedEntityAttributes.get(i).getAllowFutureDate(),
-                    programTrackedEntityAttributes.get(
-                            i).getTrackedEntityAttribute().getOptionSet(),
-                    programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getName(),
-                    getTrackedEntityDataValue(programTrackedEntityAttributes.get(i).
-                            getTrackedEntityAttribute().getUid(), trackedEntityAttributeValues),
-                    programTrackedEntityAttributes.get(
-                            i).getTrackedEntityAttribute().getValueType(),
-                    editable, shouldNeverBeEdited, isRadioButton);
-
-
-            if(programTrackedEntityAttributes.get(i).
-                    getTrackedEntityAttribute().getUid().equals(PROJECT_DONOR_TZ)||programTrackedEntityAttributes.get(i).
-                    getTrackedEntityAttribute().getUid().equals(PROJECT_DONOR_PH))
-            {
-                project_dtz_RowIndex = i;
-            }
-            else if(programTrackedEntityAttributes.get(i).
-                    getTrackedEntityAttribute().getUid().equals(BEN_ID))
-            {
-                benRowIndex = i;
-            }
-
-            dataEntryRows.add(row);
-        }
-        for (TrackedEntityAttributeValue trackedEntityAttributeValue :
-                trackedEntityAttributeValues) {
-            mForm.getTrackedEntityAttributeValueMap().put(
-                    trackedEntityAttributeValue.getTrackedEntityAttributeId(),
-                    trackedEntityAttributeValue);
-        }
-        mForm.setDataEntryRows(dataEntryRows);
-        mForm.setEnrollment(currentEnrollment);
-
-        final AutoCompleteRow project_donor_tz_Row = (AutoCompleteRow) dataEntryRows.get(paddingForIndex+project_dtz_RowIndex);
-        final ShortTextEditTextRow ben_Row = (ShortTextEditTextRow) dataEntryRows.get(paddingForIndex+benRowIndex);
-
-        final String project_tz_UID =programTrackedEntityAttributes.get(project_dtz_RowIndex).getTrackedEntityAttribute().getUid();
-
-        try{
-            Dhis2Application.getEventBus().unregister(new DobAgeSync() {
-                @com.squareup.otto.Subscribe
-                @Override
-                public void eventHandler(RowValueChangedEvent event) {
-
+            int benRowIndex = 1;
+            int dobRowIndex = -1;
+            int ageRowIndex = -1;
+            for (int i = 0; i < programTrackedEntityAttributes.size(); i++) {
+                boolean editable = true;
+                boolean shouldNeverBeEdited = false;
+                if (programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().isGenerated()) {
+                    editable = false;
+                    shouldNeverBeEdited = true;
                 }
-            });
+                if(fieldsToDisable.contains(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getUid())){
+                    editable=false;
+                    shouldNeverBeEdited=true;
+                }
 
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-        Dhis2Application.getEventBus().register(new DobAgeSync(){
-            @Override
-            @com.squareup.otto.Subscribe
-            public void eventHandler(RowValueChangedEvent event){
-                // Log.i(" Called ",event.getBaseValue().getValue()+"");
-                if(event.getId()!=null && event.getId().equals(project_tz_UID)){
-                    Row row = event.getRow();
-                    if(appliedValue==null || !appliedValue.equals(project_donor_tz_Row.getValue().getValue()) ){
+                if (ValueType.COORDINATE.equals(programTrackedEntityAttributes.get(
+                        i).getTrackedEntityAttribute().getValueType())) {
+                    GpsController.activateGps(context);
+                }
+                boolean isRadioButton = mProgram.getDataEntryMethod();
+                if(!isRadioButton){
+                    isRadioButton = programTrackedEntityAttributes.get(
+                            i).isRenderOptionsAsRadio();
+                }
+                Log.d("tracker--tt",programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getName());
+                Row row = DataEntryRowFactory.createDataEntryView(
+                        programTrackedEntityAttributes.get(i).getMandatory(),
+                        programTrackedEntityAttributes.get(i).getAllowFutureDate(),
+                        programTrackedEntityAttributes.get(
+                                i).getTrackedEntityAttribute().getOptionSet(),
+                        programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getName(),
+                        getTrackedEntityDataValue(programTrackedEntityAttributes.get(i).
+                                getTrackedEntityAttribute().getUid(), trackedEntityAttributeValues),
+                        programTrackedEntityAttributes.get(
+                                i).getTrackedEntityAttribute().getValueType(),
+                        editable, shouldNeverBeEdited, isRadioButton);
 
-                        //Log.i(" Called ",row.getValue().getValue());
-                        try {
+
+                if(programTrackedEntityAttributes.get(i).
+                        getTrackedEntityAttribute().getUid().equals(PROJECT_DONOR_TZ)||programTrackedEntityAttributes.get(i).
+                        getTrackedEntityAttribute().getUid().equals(PROJECT_DONOR_PH))
+                {
+                    project_dtz_RowIndex = i;
+                }
+                else if(programTrackedEntityAttributes.get(i).
+                        getTrackedEntityAttribute().getUid().equals(BEN_ID))
+                {
+                    benRowIndex = i;
+                }
+                else if(programTrackedEntityAttributes.get(i).
+                        getTrackedEntityAttribute().getUid().equals("Zgi47Dql2Ei"))
+                {
+                    dobRowIndex = i;
+                }
+                else if(programTrackedEntityAttributes.get(i).
+                        getTrackedEntityAttribute().getUid().equals("Xp8fcfaGdfk"))
+                {
+                    ageRowIndex = i;
+                }
+
+                dataEntryRows.add(row);
+            }
+            for (TrackedEntityAttributeValue trackedEntityAttributeValue :
+                    trackedEntityAttributeValues) {
+                mForm.getTrackedEntityAttributeValueMap().put(
+                        trackedEntityAttributeValue.getTrackedEntityAttributeId(),
+                        trackedEntityAttributeValue);
+            }
+            mForm.setDataEntryRows(dataEntryRows);
+            mForm.setEnrollment(currentEnrollment);
+            final AutoCompleteRow project_donor_tz_Row = (AutoCompleteRow) dataEntryRows.get(paddingForIndex+project_dtz_RowIndex);
+            final ShortTextEditTextRow ben_Row = (ShortTextEditTextRow) dataEntryRows.get(paddingForIndex+benRowIndex);
+            final DatePickerRow dobROw = (DatePickerRow) dataEntryRows.get(paddingForIndex+dobRowIndex);
+            final NumberEditTextRow ageRow = (NumberEditTextRow) dataEntryRows.get(paddingForIndex+ageRowIndex);
+            final String project_tz_UID =programTrackedEntityAttributes.get(project_dtz_RowIndex).getTrackedEntityAttribute().getUid();
+            final String dob_uid =programTrackedEntityAttributes.get(dobRowIndex).getTrackedEntityAttribute().getUid();
+            try{
+                Dhis2Application.getEventBus().unregister(new DobAgeSync() {
+                    @com.squareup.otto.Subscribe
+                    @Override
+                    public void eventHandler(RowValueChangedEvent event) {
+
+                    }
+                });
+
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+            Dhis2Application.getEventBus().register(new DobAgeSync(){
+                @Override
+                @com.squareup.otto.Subscribe
+                public void eventHandler(RowValueChangedEvent event){
+                    // Log.i(" Called ",event.getBaseValue().getValue()+"");
+                    if(event.getId()!=null && event.getId().equals(project_tz_UID)){
+                        Row row = event.getRow();
+                        if(appliedValue==null || !appliedValue.equals(project_donor_tz_Row.getValue().getValue()) ){
+
+                            //Log.i(" Called ",row.getValue().getValue());
+                            try {
 //                            List<TrackedEntityInstance> tei_list= MetaDataController.getTrackedEntityInstancesFromLocal();
 //                            int count=tei_list.size();
 //                            String seq_count = String.format ("%05d", count+1);
-                            String val = ""+((int)(Math.random()*900)+100000);
-                            int year = Calendar.getInstance().get(Calendar.YEAR);
-                            String year_=String.valueOf(year);
-                            String nimhans_="-"+val;
-                            project_donor_tz_Row.getValue();
-                            ben_Row.getValue().setValue(AUTOIDPREFIX+project_donor_tz_Row.getmSelectedOptionName()+nimhans_);
-                            EnrollmentDataEntryFragment.refreshListView();
-                        } catch (Exception ex) {
+                                String val = ""+((int)(Math.random()*900)+100000);
+                                int year = Calendar.getInstance().get(Calendar.YEAR);
+                                String year_=String.valueOf(year);
+                                String nimhans_="-"+val;
+                                project_donor_tz_Row.getValue();
+                                ben_Row.getValue().setValue(AUTOIDPREFIX+project_donor_tz_Row.getmSelectedOptionName()+nimhans_);
+                                ben_Row.setEditable(false);
+                                ben_Row.isShouldNeverBeEdited();
+                                EnrollmentDataEntryFragment.refreshListView();
+                            } catch (Exception ex) {
+
+                            }
 
                         }
 
                     }
 
+                    else if(event.getId()!=null && event.getId().equals(dob_uid)){
+                        Row row = event.getRow();
+                        if(appliedValue==null || !appliedValue.equals(ageRow.getValue().getValue()) ){
+                            //Log.i(" Called ",row.getValue().getValue());
+                            try {
+
+                                String test_=enrollmentDate.substring(0,4);
+                                String test_2=dobROw.getValue().getValue().substring(0,4);
+                                int test6=Integer.parseInt(test_)-Integer.parseInt(test_2);
+                                ageRow.getValue().setValue(Integer.toString(test6));
+
+                                EnrollmentDataEntryFragment.refreshListView();
+                            } catch (Exception ex) {
+
+                            }
+
+
+                        }
+                    }
+
                 }
 
-            }
+            });
+            return mForm;
+        }
+        else if(mProgram.getUid().equals("y6lXVg8TdOj"))
+        {
+            int paddingForIndex = dataEntryRows.size();
 
-        });
-        return mForm;
+            int dobRowIndex = -1;
+            int ageRowIndex = -1;
+            for (int i = 0; i < programTrackedEntityAttributes.size(); i++) {
+                boolean editable = true;
+                boolean shouldNeverBeEdited = false;
+                if (programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().isGenerated()) {
+                    editable = false;
+                    shouldNeverBeEdited = true;
+                }
+                if(fieldsToDisable.contains(programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getUid())){
+                    editable=false;
+                    shouldNeverBeEdited=true;
+                }
+
+                if (ValueType.COORDINATE.equals(programTrackedEntityAttributes.get(
+                        i).getTrackedEntityAttribute().getValueType())) {
+                    GpsController.activateGps(context);
+                }
+                boolean isRadioButton = mProgram.getDataEntryMethod();
+                if(!isRadioButton){
+                    isRadioButton = programTrackedEntityAttributes.get(
+                            i).isRenderOptionsAsRadio();
+                }
+                Log.d("tracker--tt",programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getName());
+                Row row = DataEntryRowFactory.createDataEntryView(
+                        programTrackedEntityAttributes.get(i).getMandatory(),
+                        programTrackedEntityAttributes.get(i).getAllowFutureDate(),
+                        programTrackedEntityAttributes.get(
+                                i).getTrackedEntityAttribute().getOptionSet(),
+                        programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getName(),
+                        getTrackedEntityDataValue(programTrackedEntityAttributes.get(i).
+                                getTrackedEntityAttribute().getUid(), trackedEntityAttributeValues),
+                        programTrackedEntityAttributes.get(
+                                i).getTrackedEntityAttribute().getValueType(),
+                        editable, shouldNeverBeEdited, isRadioButton);
+
+                if(programTrackedEntityAttributes.get(i).
+                        getTrackedEntityAttribute().getUid().equals("Zgi47Dql2Ei"))
+                {
+                    dobRowIndex = i;
+                }
+                else if(programTrackedEntityAttributes.get(i).
+                        getTrackedEntityAttribute().getUid().equals("Xp8fcfaGdfk"))
+                {
+                    ageRowIndex = i;
+                }
+
+                dataEntryRows.add(row);
+            }
+            for (TrackedEntityAttributeValue trackedEntityAttributeValue :
+                    trackedEntityAttributeValues) {
+                mForm.getTrackedEntityAttributeValueMap().put(
+                        trackedEntityAttributeValue.getTrackedEntityAttributeId(),
+                        trackedEntityAttributeValue);
+            }
+            mForm.setDataEntryRows(dataEntryRows);
+            mForm.setEnrollment(currentEnrollment);
+
+            final DatePickerRow dobROw = (DatePickerRow) dataEntryRows.get(paddingForIndex+dobRowIndex);
+            final NumberEditTextRow ageRow = (NumberEditTextRow) dataEntryRows.get(paddingForIndex+ageRowIndex);
+            final String dob_uid =programTrackedEntityAttributes.get(dobRowIndex).getTrackedEntityAttribute().getUid();
+            try{
+                Dhis2Application.getEventBus().unregister(new DobAgeSync() {
+                    @com.squareup.otto.Subscribe
+                    @Override
+                    public void eventHandler(RowValueChangedEvent event) {
+
+                    }
+                });
+
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+            Dhis2Application.getEventBus().register(new DobAgeSync(){
+                @Override
+                @com.squareup.otto.Subscribe
+                public void eventHandler(RowValueChangedEvent event){
+                    // Log.i(" Called ",event.getBaseValue().getValue()+"");
+
+
+                    if(event.getId()!=null && event.getId().equals(dob_uid)){
+                        Row row = event.getRow();
+                        if(appliedValue==null || !appliedValue.equals(ageRow.getValue().getValue()) ){
+                            //Log.i(" Called ",row.getValue().getValue());
+                            try {
+
+                                String test_=enrollmentDate.substring(0,4);
+                                String test_2=dobROw.getValue().getValue().substring(0,4);
+                                int test6=Integer.parseInt(test_)-Integer.parseInt(test_2);
+                                ageRow.getValue().setValue(Integer.toString(test6));
+
+                                EnrollmentDataEntryFragment.refreshListView();
+                            } catch (Exception ex) {
+
+                            }
+                        }
+                    }
+
+                }
+
+            });
+            return mForm;
+        }
+        else
+        {
+            for (int i = 0; i < programTrackedEntityAttributes.size(); i++) {
+                boolean editable = true;
+                boolean shouldNeverBeEdited = false;
+                if (programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().isGenerated()) {
+                    editable = false;
+                    shouldNeverBeEdited = true;
+                }
+
+
+                if (ValueType.COORDINATE.equals(programTrackedEntityAttributes.get(
+                        i).getTrackedEntityAttribute().getValueType())) {
+                    GpsController.activateGps(context);
+                }
+                boolean isRadioButton = mProgram.getDataEntryMethod();
+                if(!isRadioButton){
+                    isRadioButton = programTrackedEntityAttributes.get(
+                            i).isRenderOptionsAsRadio();
+                }
+                Log.d("tracker--tt",programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getName());
+                Row row = DataEntryRowFactory.createDataEntryView(
+                        programTrackedEntityAttributes.get(i).getMandatory(),
+                        programTrackedEntityAttributes.get(i).getAllowFutureDate(),
+                        programTrackedEntityAttributes.get(
+                                i).getTrackedEntityAttribute().getOptionSet(),
+                        programTrackedEntityAttributes.get(i).getTrackedEntityAttribute().getName(),
+                        getTrackedEntityDataValue(programTrackedEntityAttributes.get(i).
+                                getTrackedEntityAttribute().getUid(), trackedEntityAttributeValues),
+                        programTrackedEntityAttributes.get(
+                                i).getTrackedEntityAttribute().getValueType(),
+                        editable, shouldNeverBeEdited, isRadioButton);
+
+
+
+                dataEntryRows.add(row);
+            }
+            for (TrackedEntityAttributeValue trackedEntityAttributeValue :
+                    trackedEntityAttributeValues) {
+                mForm.getTrackedEntityAttributeValueMap().put(
+                        trackedEntityAttributeValue.getTrackedEntityAttributeId(),
+                        trackedEntityAttributeValue);
+            }
+            mForm.setDataEntryRows(dataEntryRows);
+            mForm.setEnrollment(currentEnrollment);
+            try{
+                Dhis2Application.getEventBus().unregister(new DobAgeSync() {
+                    @com.squareup.otto.Subscribe
+                    @Override
+                    public void eventHandler(RowValueChangedEvent event) {
+
+                    }
+                });
+
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+            return mForm;
+        }
+
     }
 
 

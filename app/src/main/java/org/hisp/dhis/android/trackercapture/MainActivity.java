@@ -27,22 +27,22 @@
  *
  */
 
+
 package org.hisp.dhis.android.trackercapture;
-
 import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
-
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-
 import org.hisp.dhis.android.sdk.controllers.DhisController;
 import org.hisp.dhis.android.sdk.controllers.PeriodicSynchronizerController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
@@ -57,8 +57,16 @@ import org.hisp.dhis.client.sdk.ui.fragments.InformationFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.WrapperFragment;
 
 public class MainActivity extends AbsHomeActivity {
+    private NavigationView navigationView;
     public final static String TAG = MainActivity.class.getSimpleName();
-
+    private static final String TZ_LANG= "sw";
+    private static final String VI_LANG= "vi";
+    private static final String TZ_SETTINGS= "Panga/kuweka";
+    private static final String VI_SETTINGS= "Cài đặt hệ thống";
+    private static final String TZ_INFORMATION= "Taarifa";
+    private static final String VI_INFORMATION= "Thông tin";
+    private static final String TZ_ENROLL= "Andikisha";
+    private static final String VI_ENROLL= "Nhập học";
     private static final String APPS_DASHBOARD_PACKAGE =
             "org.hisp.dhis.android.dashboard";
     private static final String APPS_DATA_CAPTURE_PACKAGE =
@@ -75,7 +83,36 @@ public class MainActivity extends AbsHomeActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ScreenSizeConfigurator.init(getWindowManager());
-
+        navigationView = (NavigationView) findViewById(org.hisp.dhis.client.sdk.ui.R.id.navigation_view);
+        final UserAccount uslocal=MetaDataController.getUserLocalLang();
+        String user_locallang=uslocal.getUserSettings().toString();
+        String localdblang=user_locallang;
+        if(localdblang.equals(TZ_LANG))
+        {
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_status)
+                    .setTitle("Hali ya tukio");
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_apps)
+                    .setTitle("Programu");
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_other)
+                    .setTitle("Nyinginezo");
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_synchronized)
+                    .setTitle("Imetumwa/imezamishwa");
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_settings).setTitle(TZ_SETTINGS);
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_information).setTitle(TZ_INFORMATION);
+        }
+        else if(localdblang.equals(VI_LANG))
+        {
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_status)
+                    .setTitle("Tình trạng");
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_apps)
+                    .setTitle("ứng dụng");
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_other)
+                    .setTitle("khác");
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_synchronized)
+                    .setTitle("Đã đồng bộ hóa");
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_settings).setTitle(VI_SETTINGS);
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_information).setTitle(VI_INFORMATION);
+        }
         boolean hasPermissionLocation = (ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED);
         if (!hasPermissionLocation) {
@@ -98,7 +135,26 @@ public class MainActivity extends AbsHomeActivity {
 
     private void setUpNavigationView(Bundle savedInstanceState) {
         removeMenuItem(R.id.drawer_item_profile);
-        addMenuItem(11, R.drawable.ic_add, R.string.enroll);
+        final UserAccount uslocal=MetaDataController.getUserLocalLang();
+        String user_locallang=uslocal.getUserSettings().toString();
+
+        String localdblang=user_locallang;
+        if(localdblang.equals(TZ_LANG)) {
+            addMenuItem(11, R.drawable.ic_add, R.string.tz_enroll);
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_synchronized)
+                    .setTitle("Imetumwa/imezamishwa");
+
+        }
+        else if(localdblang.equals(VI_LANG)) {
+            addMenuItem(11, R.drawable.ic_add, R.string.vz_enroll);
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_synchronized)
+                    .setTitle("Đã đồng bộ hóa");
+        }
+        else
+        {
+            addMenuItem(11, R.drawable.ic_add, R.string.enroll);
+        }
+
         if (savedInstanceState == null) {
             onNavigationItemSelected(getNavigationView().getMenu()
                     .findItem(11));
@@ -139,7 +195,6 @@ public class MainActivity extends AbsHomeActivity {
 //        return WrapperFragment.newInstance(SettingsFragment.class,
 //                getString(R.string.drawer_item_settings));
     }
-
     @Override
     protected boolean onItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == 11) {
@@ -171,15 +226,38 @@ public class MainActivity extends AbsHomeActivity {
     @Override
     public void onDrawerOpened(View drawerView) {
         super.onDrawerOpened(drawerView);
-        String lastSynced = DhisController.getInstance().getSyncDateWrapper().getLastSyncedString();
-        setSynchronizedMessage(lastSynced);
+        final UserAccount uslocal=MetaDataController.getUserLocalLang();
+        String user_locallang=uslocal.getUserSettings().toString();
+        String localdblang=user_locallang;
+        if(localdblang.equals(TZ_LANG)) {
+            String lastSynced = DhisController.getInstance().getSyncDateWrapper().getLastSyncedString();
+            Log.d("last_synced",lastSynced);
+            setSynchronizedMessage(lastSynced);
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_synchronized)
+                    .setTitle("Imetumwa/imezamishwa");
+
+        }
+        else if(localdblang.equals(VI_LANG)) {
+            String lastSynced = DhisController.getInstance().getSyncDateWrapper().getLastSyncedString();
+            setSynchronizedMessage(lastSynced);
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_synchronized)
+                    .setTitle("Đã đồng bộ hóa");
+        }
+else
+        {
+            String lastSynced = DhisController.getInstance().getSyncDateWrapper().getLastSyncedString();
+            setSynchronizedMessage(lastSynced);
+        }
+
     }
 
     @Override
     public boolean onNavigationItemSelected(MenuItem menuItem) {
+        final UserAccount uslocal=MetaDataController.getUserLocalLang();
+        String user_locallang=uslocal.getUserSettings().toString();
+        String localdblang=user_locallang;
         boolean isSelected = false;
         int menuItemId = menuItem.getItemId();
-
         if (menuItemId == org.hisp.dhis.client.sdk.ui.R.id.drawer_item_dashboard) {
             isSelected = openApp(APPS_DASHBOARD_PACKAGE);
         } else if (menuItemId == org.hisp.dhis.client.sdk.ui.R.id.drawer_item_data_capture) {
@@ -194,6 +272,11 @@ public class MainActivity extends AbsHomeActivity {
             attachFragmentDelayed(getProfileFragment());
             isSelected = true;
         } else if (menuItemId == org.hisp.dhis.client.sdk.ui.R.id.drawer_item_settings) {
+            if(localdblang.equals(TZ_LANG))
+
+            {
+                menuItem.setTitle("Panga/kuweka");
+            }
             HolderActivity.navigateToSettingsFragment(this);
             isSelected = true;
         } else if (menuItemId == R.id.drawer_item_information) {

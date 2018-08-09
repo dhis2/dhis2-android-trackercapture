@@ -35,6 +35,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -56,6 +57,7 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeGeneratedValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
+import org.hisp.dhis.android.sdk.persistence.models.UserAccount;
 import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.ui.adapters.SectionAdapter;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRow;
@@ -86,10 +88,13 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     public static final String INCIDENT_DATE = "extra:incidentDate";
     public static final String TRACKEDENTITYINSTANCE_ID = "extra:TrackedEntityInstanceId";
     public static final String PROGRAMRULES_FORCED_TRIGGER = "forced";
+    public static final String BEN_ID = "L2doMQ7OtUB";
+    public static final String STU_ID = "eo6xy10Traj";
     private EnrollmentDataEntryFragmentForm form;
     private SaveThread saveThread;
     private Map<String, List<ProgramRule>> programRulesForTrackedEntityAttributes;
-
+    private static final String TZ_LANG= "sw";
+    private static final String VI_LANG= "vi";
     //the enrollment before anything is changed, used to backtrack
     private Enrollment originalEnrollment;
 
@@ -188,9 +193,23 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
         if (loader.getId() == LOADER_ID && isAdded()) {
             progressBar.setVisibility(View.GONE);
             listView.setVisibility(View.VISIBLE);
+            ArrayList<String> fieldsToDisable = new ArrayList<>();
 
             if (originalEnrollment == null) {
                 originalEnrollment = new Enrollment(data.getEnrollment());
+            }
+            fieldsToDisable.add(BEN_ID);
+            int applied = 0;
+            for(Row row :data.getDataEntryRows()){
+
+                if(fieldsToDisable.contains(row.getItemId())){
+                    row.setEditable(false);
+                    row.setShouldNeverBeEdited(true);
+                    applied++;
+                }
+                if(applied==fieldsToDisable.size()){
+                    break;
+                }
             }
             form = data;
             if (data.getTrackedEntityInstance().getLocalId() >= 0) {
@@ -206,6 +225,7 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             if (data.getProgram() != null) {
                 getActionBar().setTitle(form.getProgram().getName());
             }
+
             if (form.isOutOfTrackedEntityAttributeGeneratedValues()) {
                 for (Row row : form.getDataEntryRows()) {
                     row.setEditable(false);
@@ -504,23 +524,72 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     }
 
     private void showConfirmDiscardDialog() {
-        UiUtils.showConfirmDialog(getActivity(),
-                getString(org.hisp.dhis.android.sdk.R.string.discard), getString(org.hisp.dhis.android.sdk.R.string.discard_confirm_changes),
-                getString(org.hisp.dhis.android.sdk.R.string.discard),
-                getString(org.hisp.dhis.android.sdk.R.string.cancel), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        //discard
-                        discardChanges();
-                        getActivity().finish();
-                    }
-                }, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        //cancel
-                        dialog.dismiss();
-                    }
-                });
+        final UserAccount uslocal=MetaDataController.getUserLocalLang();
+        String user_locallang=uslocal.getUserSettings().toString();
+        String localdblang=user_locallang;
+
+        if(localdblang.equals(TZ_LANG))
+        {
+            UiUtils.showConfirmDialog(getActivity(),
+                    getString(org.hisp.dhis.android.sdk.R.string.tz_discard), getString(org.hisp.dhis.android.sdk.R.string.tz_discard_confirm_changes),
+                    getString(org.hisp.dhis.android.sdk.R.string.tz_discard),
+                    getString(org.hisp.dhis.android.sdk.R.string.tz_cancel), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //discard
+                            discardChanges();
+                            getActivity().finish();
+                        }
+                    }, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //cancel
+                            dialog.dismiss();
+                        }
+                    });
+        }
+
+        else if(localdblang.equals(VI_LANG))
+        {
+            UiUtils.showConfirmDialog(getActivity(),
+                    getString(org.hisp.dhis.android.sdk.R.string.vi_discard), getString(org.hisp.dhis.android.sdk.R.string.vi_discard_confirm_changes),
+                    getString(org.hisp.dhis.android.sdk.R.string.vi_discard),
+                    getString(org.hisp.dhis.android.sdk.R.string.vi_cancel), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //discard
+                            discardChanges();
+                            getActivity().finish();
+                        }
+                    }, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //cancel
+                            dialog.dismiss();
+                        }
+                    });
+        }
+        else
+        {
+            UiUtils.showConfirmDialog(getActivity(),
+                    getString(org.hisp.dhis.android.sdk.R.string.discard), getString(org.hisp.dhis.android.sdk.R.string.discard_confirm_changes),
+                    getString(org.hisp.dhis.android.sdk.R.string.discard),
+                    getString(org.hisp.dhis.android.sdk.R.string.cancel), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //discard
+                            discardChanges();
+                            getActivity().finish();
+                        }
+                    }, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //cancel
+                            dialog.dismiss();
+                        }
+                    });
+        }
+
     }
 
     /**

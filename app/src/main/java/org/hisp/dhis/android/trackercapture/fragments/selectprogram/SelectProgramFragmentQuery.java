@@ -30,6 +30,7 @@
 package org.hisp.dhis.android.trackercapture.fragments.selectprogram;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.raizlabs.android.dbflow.sql.language.Select;
 import com.raizlabs.android.dbflow.sql.queriable.StringQuery;
@@ -51,6 +52,7 @@ import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue$Table;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance$Table;
+import org.hisp.dhis.android.sdk.persistence.models.UserAccount;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceDynamicColumnRows;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceItemRow;
@@ -68,7 +70,8 @@ import java.util.Set;
 public class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
     private final String mOrgUnitId;
     private final String mProgramId;
-
+    private static final String TZ_LANG= "sw";
+    private static final String VI_LANG= "vi";
     public SelectProgramFragmentQuery(String orgUnitId, String programId) {
         mOrgUnitId = orgUnitId;
         mProgramId = programId;
@@ -167,9 +170,36 @@ public class SelectProgramFragmentQuery implements Query<SelectProgramFragmentFo
         fragmentForm.setColumnNames(columnNames);
 
         fragmentForm.setColumnNames(attributeNames);
+
+        //ToDO @Sou trackedentity display name trackedentitytype
         if(selectedProgram.getTrackedEntity() != null) {
-            columnNames.setTrackedEntity(selectedProgram.getTrackedEntity().getName());
-            columnNames.setTitle(selectedProgram.getTrackedEntity().getName() + " (" + ( teiRows.size() - 1 ) + ")") ;
+
+            final UserAccount uslocal=MetaDataController.getUserLocalLang();
+            String user_locallang=uslocal.getUserSettings().toString();
+            String localdblang=user_locallang;
+            if(localdblang.equals(TZ_LANG))
+            {
+                columnNames.setTrackedEntity("walengwa");
+                columnNames.setTitle("walengwa" + " (" + ( teiRows.size() - 1 ) + ")") ;
+            }
+            else if(localdblang.equals(VI_LANG))
+            {
+                columnNames.setTrackedEntity("người hưởng lợi");
+                columnNames.setTitle("người hưởng lợi" + " (" + ( teiRows.size() - 1 ) + ")") ;
+            }
+            else
+            {
+                columnNames.setTrackedEntity("beneficiary");
+                columnNames.setTitle("beneficiary" + " (" + ( teiRows.size() - 1 ) + ")") ;
+            }
+//            Program mpro=MetaDataController.getProgram(mProgramId);
+//            mpro.getTrackedEntity().getName();
+//            Log.d("tracked--",mpro.getTrackedEntity().getName());
+//            Log.d("tracked--",mpro.getTrackedEntity().getId());
+////            columnNames.setTrackedEntity(selectedProgram.getTrackedEntity().getName());
+//            columnNames.setTrackedEntity(mpro.getTrackedEntity().getName());
+//            columnNames.setTitle(selectedProgram.getTrackedEntity().getName() + " (" + ( teiRows.size() - 1 ) + ")") ;
+//            columnNames.setTitle(mpro.getTrackedEntity().getName() + " (" + ( teiRows.size() - 1 ) + ")") ;
         }
 
         return fragmentForm;

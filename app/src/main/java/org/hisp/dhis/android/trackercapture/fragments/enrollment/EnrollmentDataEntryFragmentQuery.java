@@ -79,7 +79,9 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
     private String PROJECT_DONOR_PH="KLSVjftH2xS";
     private String TZ_LANG="sw";
     private String VI_LANG="vi";
+    private String IN_LANG="in";
     private String TZ_ENROLLMENT_DATE="Tarehe ya Kuandikishwa";
+    private String IN_ENROLLMENT_DATE="Tanggal pendaftaran";
     private String VI_ENROLLMENT_DATE="Ngày đăng ký";
     private String TZ_INCIDENT_DATE="Tarehe ya Tukio";
     private String BEN_ID="L2doMQ7OtUB";
@@ -87,8 +89,8 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
     List<String> fieldsToDisable = new ArrayList<String>(
             Arrays.asList(BEN_ID));
     EnrollmentDataEntryFragmentQuery(String mOrgUnitId, String mProgramId,
-            long mTrackedEntityInstanceId,
-            String enrollmentDate, String incidentDate) {
+                                     long mTrackedEntityInstanceId,
+                                     String enrollmentDate, String incidentDate) {
         this.mOrgUnitId = mOrgUnitId;
         this.mProgramId = mProgramId;
         this.mTrackedEntityInstanceId = mTrackedEntityInstanceId;
@@ -106,7 +108,6 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
         if (mProgram == null || mOrgUnit == null) {
             return mForm;
         }
-
         if (mTrackedEntityInstanceId < 0) {
             currentTrackedEntityInstance = new TrackedEntityInstance(mProgram, mOrgUnitId);
         } else {
@@ -145,6 +146,20 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
             dataEntryRows.add(
                     //ToDO @Sou userdb language based keyywords
                     new EnrollmentDatePickerRow(VI_ENROLLMENT_DATE,
+                            currentEnrollment));
+        }
+        else if(localdblang.equals(IN_LANG))
+        {
+            dataEntryRows.add(
+                    //ToDO @Sou userdb language based keyywords
+                    new EnrollmentDatePickerRow(IN_ENROLLMENT_DATE,
+                            currentEnrollment));
+        }
+        else if(localdblang.equals("my"))
+        {
+            dataEntryRows.add(
+                    //ToDO @Sou userdb language based keyywords
+                    new EnrollmentDatePickerRow("ကျောင်းအပ်နေ့စွဲ",
                             currentEnrollment));
         }
         else {
@@ -202,7 +217,7 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
         {
             int paddingForIndex = dataEntryRows.size();
             int project_dtz_RowIndex = 0;//added to manupulate or dynamicly change the row value based on user input for the other
-//        int dobRowIndex = -1;//added to manupulate or dynamicly change the row value based on user input for the other
+//          int dobRowIndex = -1;//added to manupulate or dynamicly change the row value based on user input for the other
             int benRowIndex = 1;
             int dobRowIndex = -1;
             int ageRowIndex = -1;
@@ -353,6 +368,9 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
 
             int dobRowIndex = -1;
             int ageRowIndex = -1;
+            int project_dtz_RowIndex = 0;//added to manupulate or dynamicly change the row value based on user input for the other
+//          int dobRowIndex = -1;//added to manupulate or dynamicly change the row value based on user input for the other
+            int benRowIndex = 0;
             for (int i = 0; i < programTrackedEntityAttributes.size(); i++) {
                 boolean editable = true;
                 boolean shouldNeverBeEdited = false;
@@ -388,6 +406,13 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
                         editable, shouldNeverBeEdited, isRadioButton);
 
                 if(programTrackedEntityAttributes.get(i).
+                        getTrackedEntityAttribute().getUid().equals(PROJECT_DONOR_TZ)||programTrackedEntityAttributes.get(i).
+                        getTrackedEntityAttribute().getUid().equals(PROJECT_DONOR_PH))
+                {
+                    project_dtz_RowIndex = i;
+                }
+
+                if(programTrackedEntityAttributes.get(i).
                         getTrackedEntityAttribute().getUid().equals("Zgi47Dql2Ei"))
                 {
                     dobRowIndex = i;
@@ -408,7 +433,9 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
             }
             mForm.setDataEntryRows(dataEntryRows);
             mForm.setEnrollment(currentEnrollment);
-
+            final AutoCompleteRow project_donor_tz_Row = (AutoCompleteRow) dataEntryRows.get(paddingForIndex+project_dtz_RowIndex);
+            final ShortTextEditTextRow ben_Row = (ShortTextEditTextRow) dataEntryRows.get(paddingForIndex+benRowIndex);
+            final String project_tz_UID =programTrackedEntityAttributes.get(project_dtz_RowIndex).getTrackedEntityAttribute().getUid();
             final DatePickerRow dobROw = (DatePickerRow) dataEntryRows.get(paddingForIndex+dobRowIndex);
             final NumberEditTextRow ageRow = (NumberEditTextRow) dataEntryRows.get(paddingForIndex+ageRowIndex);
             final String dob_uid =programTrackedEntityAttributes.get(dobRowIndex).getTrackedEntityAttribute().getUid();
@@ -430,6 +457,31 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
                 public void eventHandler(RowValueChangedEvent event){
                     // Log.i(" Called ",event.getBaseValue().getValue()+"");
 
+                    if(event.getId()!=null && event.getId().equals(project_tz_UID)){
+                        Row row = event.getRow();
+                        if(appliedValue==null || !appliedValue.equals(project_donor_tz_Row.getValue().getValue()) ){
+
+                            //Log.i(" Called ",row.getValue().getValue());
+                            try {
+//                            List<TrackedEntityInstance> tei_list= MetaDataController.getTrackedEntityInstancesFromLocal();
+//                            int count=tei_list.size();
+//                            String seq_count = String.format ("%05d", count+1);
+                                String val = ""+((int)(Math.random()*900)+100000);
+                                int year = Calendar.getInstance().get(Calendar.YEAR);
+                                String year_=String.valueOf(year);
+                                String nimhans_="-"+val;
+                                project_donor_tz_Row.getValue();
+                                ben_Row.getValue().setValue(AUTOIDPREFIX+project_donor_tz_Row.getmSelectedOptionName()+nimhans_);
+                                ben_Row.setEditable(false);
+                                ben_Row.isShouldNeverBeEdited();
+                                EnrollmentDataEntryFragment.refreshListView();
+                            } catch (Exception ex) {
+
+                            }
+
+                        }
+
+                    }
 
                     if(event.getId()!=null && event.getId().equals(dob_uid)){
                         Row row = event.getRow();
@@ -441,7 +493,6 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
                                 String test_2=dobROw.getValue().getValue().substring(0,4);
                                 int test6=Integer.parseInt(test_)-Integer.parseInt(test_2);
                                 ageRow.getValue().setValue(Integer.toString(test6));
-
                                 EnrollmentDataEntryFragment.refreshListView();
                             } catch (Exception ex) {
 
@@ -519,7 +570,7 @@ class EnrollmentDataEntryFragmentQuery implements Query<EnrollmentDataEntryFragm
 
 
     public TrackedEntityAttributeValue getTrackedEntityDataValue(String trackedEntityAttribute,
-            List<TrackedEntityAttributeValue> trackedEntityAttributeValues) {
+                                                                 List<TrackedEntityAttributeValue> trackedEntityAttributeValues) {
         for (TrackedEntityAttributeValue trackedEntityAttributeValue :
                 trackedEntityAttributeValues) {
             if (trackedEntityAttributeValue.getTrackedEntityAttributeId().equals(

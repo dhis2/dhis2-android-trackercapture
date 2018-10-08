@@ -95,6 +95,8 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
     private Map<String, List<ProgramRule>> programRulesForTrackedEntityAttributes;
     private static final String TZ_LANG= "sw";
     private static final String VI_LANG= "vi";
+    private static final String MY_LANG= "my";
+    private static final String IN_LANG= "in";
     //the enrollment before anything is changed, used to backtrack
     private Enrollment originalEnrollment;
 
@@ -415,18 +417,18 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
             Map<String, TrackedEntityAttributeValue> trackedEntityAttributeValueMap) {
         for (String key : trackedEntityAttributeValueMap.keySet()) {
             TrackedEntityAttributeValue value = trackedEntityAttributeValueMap.get(key);
-                TrackedEntityAttribute trackedEntityAttribute =
-                        MetaDataController.getTrackedEntityAttribute(
-                                value.getTrackedEntityAttributeId());
-                if (trackedEntityAttribute.isUnique()) {
-                    if(value.getValue()==null || value.getValue().isEmpty()){
-                        continue;
-                    }
-                    if(TrackerController.countTrackedEntityAttributeValue(value) !=0){
-                        return false;
-                    }
+            TrackedEntityAttribute trackedEntityAttribute =
+                    MetaDataController.getTrackedEntityAttribute(
+                            value.getTrackedEntityAttributeId());
+            if (trackedEntityAttribute.isUnique()) {
+                if(value.getValue()==null || value.getValue().isEmpty()){
+                    continue;
+                }
+                if(TrackerController.countTrackedEntityAttributeValue(value) !=0){
+                    return false;
                 }
             }
+        }
         return true;
     }
 
@@ -555,6 +557,47 @@ public class EnrollmentDataEntryFragment extends DataEntryFragment<EnrollmentDat
                     getString(org.hisp.dhis.android.sdk.R.string.vi_discard), getString(org.hisp.dhis.android.sdk.R.string.vi_discard_confirm_changes),
                     getString(org.hisp.dhis.android.sdk.R.string.vi_discard),
                     getString(org.hisp.dhis.android.sdk.R.string.vi_cancel), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //discard
+                            discardChanges();
+                            getActivity().finish();
+                        }
+                    }, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //cancel
+                            dialog.dismiss();
+                        }
+                    });
+        }
+
+        else if(localdblang.equals(MY_LANG))
+        {
+            UiUtils.showConfirmDialog(getActivity(),
+                    "ပယ္ရွားျခင္း", "လက္ရွိေျပာင္းလဲမႈမ်ားကိုပယ္ရွားရန္ေသခ်ာလား",
+                    "ပယ္ရွားျခင္း",
+                    "ပယ္ဖ်က္ျခင္း", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //discard
+                            discardChanges();
+                            getActivity().finish();
+                        }
+                    }, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //cancel
+                            dialog.dismiss();
+                        }
+                    });
+        }
+        else if(localdblang.equals(IN_LANG))
+        {
+            UiUtils.showConfirmDialog(getActivity(),
+                    "Membuang", "Anda yakin ingin membuang perubahan saat ini",
+                    "Membuang",
+                    "Membatalkan", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             //discard

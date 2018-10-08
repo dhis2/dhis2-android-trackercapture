@@ -61,6 +61,8 @@ public class MainActivity extends AbsHomeActivity {
     public final static String TAG = MainActivity.class.getSimpleName();
     private static final String TZ_LANG= "sw";
     private static final String VI_LANG= "vi";
+    private static final String MY_LANG= "my";
+    private static final String IN_LANG= "in";
     private static final String TZ_SETTINGS= "Panga/kuweka";
     private static final String VI_SETTINGS= "Cài đặt hệ thống";
     private static final String TZ_INFORMATION= "Taarifa";
@@ -106,12 +108,34 @@ public class MainActivity extends AbsHomeActivity {
                     .setTitle("Tình trạng");
             navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_apps)
                     .setTitle("ứng dụng");
-            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_other)
-                    .setTitle("khác");
             navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_synchronized)
                     .setTitle("Đã đồng bộ hóa");
             navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_settings).setTitle(VI_SETTINGS);
             navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_information).setTitle(VI_INFORMATION);
+        }
+        else if(localdblang.equals(MY_LANG))
+        {
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_status)
+                    .setTitle("အဆင့္အတန္း");
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_apps)
+                    .setTitle("ဖုန္းတြင္းရွိေဆာ့ဖ္ဝဲလ္မ်ား");
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_other)
+                    .setTitle("အျခား");
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_synchronized)
+                    .setTitle("အေၾကာင္းအရာတစ္ခုႏွင့္ပတ္သက္ေသာ - ယခ");
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_settings).setTitle("ျပဳလုပ္ထားေသာအရာမ်ား");
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_information).setTitle("သတင္းအခ်က္လက္");
+        }
+        else if(localdblang.equals(IN_LANG))
+        {
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_status)
+                    .setTitle("Tình trạng");
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_apps)
+                    .setTitle("aplikasi");
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_synchronized)
+                    .setTitle("Disinkronkan");
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_settings).setTitle("Pengaturan");
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_information).setTitle("Informasi");
         }
         boolean hasPermissionLocation = (ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED);
@@ -149,6 +173,11 @@ public class MainActivity extends AbsHomeActivity {
             addMenuItem(11, R.drawable.ic_add, R.string.vz_enroll);
             navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_synchronized)
                     .setTitle("Đã đồng bộ hóa");
+        }
+        else if(localdblang.equals("my")) {
+            addMenuItem(11, R.drawable.ic_add, R.string.my_enroll);
+            navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_synchronized)
+                    .setTitle("အေၾကာင္းအရာတစ္ခုခုႏွင့္ပတ္သက္ေသာ");
         }
         else
         {
@@ -243,7 +272,7 @@ public class MainActivity extends AbsHomeActivity {
             navigationView.getMenu().findItem(org.hisp.dhis.client.sdk.ui.R.id.drawer_item_synchronized)
                     .setTitle("Đã đồng bộ hóa");
         }
-else
+        else
         {
             String lastSynced = DhisController.getInstance().getSyncDateWrapper().getLastSyncedString();
             setSynchronizedMessage(lastSynced);

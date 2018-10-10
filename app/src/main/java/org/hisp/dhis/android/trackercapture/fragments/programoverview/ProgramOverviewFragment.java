@@ -216,7 +216,9 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
     private static final String TZ_TIMELINE= "Ingiza data ya wakati";
     private static final String VI_TIMELINE= "Ngày nhập dữ liệu";
     private static final String TZ_LANG= "sw";
+    private static final String IN_LANG= "in";
     private static final String VI_LANG= "vi";
+    private static final String MY_LANG= "my";
     private static final String TZ_REFRESH= "furahisha kompyuta";
     private static final String VI_REFRESH= "Làm mới";
     private static final String TZ_NEW= "Mpya";
@@ -378,7 +380,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             completeButton.setText(TZ_COMPLETE_BUTTON);
             refreshRelationshipButton.setText(TZ_REFRESH);
             newRelationshipButton.setText(TZ_NEW);
-            enrollmentDateLabel.setText(TZ_ENROLL_DATE);
+
             terminateButton.setText(TZ_CANCEL);
             reOpenButton.setText("Fungua");
         }
@@ -395,6 +397,34 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
             enrollmentDateLabel.setText(VI_ENROLL_DATE);
             terminateButton.setText(VI_CANCEL);
             reOpenButton.setText("Mở lại");
+        }
+        else if(localdblang.equals(MY_LANG))
+        {
+            data_entry.setText("သက္မွတ္ရက္အတိုင္းအခ်က္လက္ထည့္သြင္းျခင္း");
+            profile.setText("ပရိုဖိုင်းကို");
+            relationships.setText("ကိုယ္ေရးကိုယ္တာအဆက္အသြယ္မ်ား");
+            indicators.setText("ၫြန္ျပသည့္အရာ");
+            enrollment.setText("အမည္စာရင္းသြင္းျခင္း");
+            completeButton.setText("အမည္စာရင္းမသြင္းပါ");
+            refreshRelationshipButton.setText("အားသစ္ရရွိျခင္း");
+            newRelationshipButton.setText("အသစ");
+            enrollmentDateLabel.setText("ကျောင်းအပ်နေ့စွဲ");
+            terminateButton.setText("ပယ္ဖ်က္ျခင္း");
+            reOpenButton.setText("Mở lại");
+        }
+        else if(localdblang.equals(IN_LANG))
+        {
+            data_entry.setText("Entri Data Baris Waktu");
+            profile.setText("Profil");
+            relationships.setText("Hubungan");
+            indicators.setText("Indikator");
+            enrollment.setText("Pendaftaran");
+            completeButton.setText("Tidak Mendaftar");
+            refreshRelationshipButton.setText("Menyegarkan");
+            newRelationshipButton.setText("Baru");
+            enrollmentDateLabel.setText(VI_ENROLL_DATE);
+            terminateButton.setText("Membatalkan");
+            reOpenButton.setText("Buka kembali");
         }
         completeButton.setOnClickListener(this);
         reOpenButton.setOnClickListener(this);
@@ -1044,6 +1074,14 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         {
             noActiveEnrollment.setText("Chưa tham gia khóa học nào");
         }
+        else if(localdblang.equals(MY_LANG))
+        {
+            noActiveEnrollment.setText("လက္ရွိတြင္အမည္စာရင္းသြင္းမႈမရွိျခင္း");
+        }
+        else if(localdblang.equals(IN_LANG))
+        {
+            noActiveEnrollment.setText("Tidak ada pendaftaran aktif");
+        }
         else
         {
             noActiveEnrollment.setText(R.string.no_active_enrollment);
@@ -1271,6 +1309,20 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                                 }
                             });
                 }
+                else if(localdblang.equals(IN_LANG))
+                {
+                    UiUtils.showConfirmDialog(getActivity(),
+                            "Tidak mendaftar",
+                            "Anda yakin ingin membatalkan pendaftaran pendaftaran saat ini? Tidak ada lagi pengeditan yang dimungkinkan.",
+                            "Tidak mendaftar",
+                            "Membatalkan",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    completeEnrollment();
+                                }
+                            });
+                }
                 else
                 {
                     UiUtils.showConfirmDialog(getActivity(),
@@ -1326,6 +1378,21 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                             "Una uhakika unataka kufuta usajili wa sasa? Hii haiwezi kufutwa.",
                             "ndiyo",
                             "Hapana",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    terminateEnrollment();
+                                }
+                            });
+                }
+                else if(localdblang.equals(IN_LANG))
+                {
+                    UiUtils.showConfirmDialog(getActivity(),
+                            "Membatalkan",
+                            "Anda yakin ingin membatalkan arus\n" +
+                                    "        pendaftaran? Ini tidak dapat dibatalkan.",
+                            "YA",
+                            "Tidak",
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
@@ -1431,7 +1498,6 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         }
 
     }
-
     private void editTrackedEntityInstanceProfile() {
         HolderActivity.navigateToTrackedEntityInstanceProfileFragment(getActivity(),
                     getArguments().
@@ -1603,7 +1669,7 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
         return false;
     }
 
-
+//Todo TEst
     @Subscribe
     public void onShowDetailedInfo(OnDetailedInfoButtonClick eventClick)
     {

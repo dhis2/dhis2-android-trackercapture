@@ -43,6 +43,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.hisp.dhis.android.sdk.R;
+import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis.android.sdk.persistence.models.UserAccount;
 import org.hisp.dhis.android.sdk.ui.dialogs.AutoCompleteDialogFragment;
 import org.hisp.dhis.android.sdk.ui.dialogs.OrgUnitDialogFragment;
 import org.hisp.dhis.android.sdk.ui.dialogs.ProgramDialogFragment;
@@ -71,7 +73,16 @@ public class SelectProgramDialogFragment extends DialogFragment
     private FloatingActionButton searchAndDownloadButton;
     private FloatingActionButton createNewTeiButton;
     private TextView mDialogLabel;
-
+    private static final String TZ_LANG= "sw";
+    private static final String VI_LANG= "vi";
+    private static final String IN_LANG= "in";
+    private static final String TZ_CHOOSE_ORG= "Chagua vitengo vya shirika";
+    private static final String VI_CHOOSE_ORG= "Chọn đơn vị tổ chức";
+    private static final String TZ_CHOOSE_PROGRAM= "chagua programu";
+    private static final String IN_CHOOSE_PROGRAM= "Memilih program";
+    private static final String VI_CHOOSE_PROGRAM= "Chọn chương trình";
+    private static final String CHOOSE_PROGRAM= "Choose Program";
+    private static final String CHOOSE_ORGANNISATION= "Choose organisation unit";
     protected SelectProgramFragmentState mState;
     protected SelectProgramFragmentPreferences mPrefs;
     private static OnlineSearchResultFragment.CallBack mCallBack;
@@ -81,7 +92,7 @@ public class SelectProgramDialogFragment extends DialogFragment
     private static final String EXTRA_SAVED_INSTANCE_STATE = "extra:savedInstanceState";
     private static final String EXTRA_SAVED_ACTION = "extra:savedAction";
     public static SelectProgramDialogFragment newInstance(long trackedEntityInstanceId,
-            Action action, OnlineSearchResultFragment.CallBack callBack) {
+                                                          Action action, OnlineSearchResultFragment.CallBack callBack) {
         mCallBack=callBack;
         SelectProgramDialogFragment dialogFragment = new SelectProgramDialogFragment();
         Bundle args = new Bundle();
@@ -103,7 +114,37 @@ public class SelectProgramDialogFragment extends DialogFragment
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+        final UserAccount uslocal= MetaDataController.getUserLocalLang();
+        String user_locallang=uslocal.getUserSettings().toString();
+        String localdblang=user_locallang;
 
+        mOrgUnitButton = (CardTextViewButton) container.findViewById(R.id.select_organisation_unit);
+        mProgramButton = (CardTextViewButton) container.findViewById(R.id.select_program);
+        if(localdblang.equals(TZ_LANG))
+        {
+            mOrgUnitButton.setText(TZ_CHOOSE_ORG);
+            mProgramButton.setText(TZ_CHOOSE_PROGRAM);
+        }
+        else if(localdblang.equals(VI_LANG))
+        {
+            mOrgUnitButton.setText(VI_CHOOSE_ORG);
+            mProgramButton.setText(VI_CHOOSE_PROGRAM);
+        }
+        else if(localdblang.equals("my"))
+        {
+            mOrgUnitButton.setText("အဖွဲ့ကိုရွေးချယ်ပါ");
+            mProgramButton.setText("ေရြးခ်ယ္ထားေသာအစီအစဥ္");
+        }
+        else if(localdblang.equals(IN_LANG))
+        {
+            mOrgUnitButton.setText("Pilih unit organisasi");
+            mProgramButton.setText("Memilih program");
+        }
+        else
+        {
+            mOrgUnitButton.setText(CHOOSE_ORGANNISATION);
+            mProgramButton.setText(CHOOSE_PROGRAM);
+        }
         return inflater.inflate(org.hisp.dhis.android.trackercapture.R.layout.dialog_fragment_selection_program, container, false);
     }
 
@@ -172,8 +213,29 @@ public class SelectProgramDialogFragment extends DialogFragment
     }
 
     private void setOUAndProgramButtons(View view) {
+
+        final UserAccount uslocal= MetaDataController.getUserLocalLang();
+        String user_locallang=uslocal.getUserSettings().toString();
+        String localdblang=user_locallang;
+
         mOrgUnitButton = (CardTextViewButton) view.findViewById(R.id.select_organisation_unit);
         mProgramButton = (CardTextViewButton) view.findViewById(R.id.select_program);
+
+        if(localdblang.equals(TZ_LANG))
+        {
+            mOrgUnitButton.setText(TZ_CHOOSE_ORG);
+            mProgramButton.setText(TZ_CHOOSE_PROGRAM);
+        }
+        else if(localdblang.equals(VI_LANG))
+        {
+            mOrgUnitButton.setText(VI_CHOOSE_ORG);
+            mProgramButton.setText(VI_CHOOSE_PROGRAM);
+        }
+        else
+        {
+            mOrgUnitButton.setText(CHOOSE_ORGANNISATION);
+            mProgramButton.setText(CHOOSE_PROGRAM);
+        }
 
         mOrgUnitButton.setOnClickListener(new View.OnClickListener() {
             @Override

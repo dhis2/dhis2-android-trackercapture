@@ -413,13 +413,13 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
         );
         for (TrackedEntityAttributeValue value : form.getTrackedEntityInstance().getAttributes()) {
             ProgramTrackedEntityAttribute programTrackedEntityAttribute = dataElements.get(value.getTrackedEntityAttributeId());
-            if (programTrackedEntityAttribute.getMandatory() && isEmpty(value.getValue())) {
+            if (programTrackedEntityAttribute != null && programTrackedEntityAttribute.getMandatory() && isEmpty(value.getValue())) {
                 if(!errors.containsKey(ErrorType.MANDATORY)){
                     errors.put(ErrorType.MANDATORY, new ArrayList<String>());
                 }
                 errors.get(ErrorType.MANDATORY).add(programTrackedEntityAttribute.getTrackedEntityAttribute().getName());
             }
-            if(programTrackedEntityAttribute.getTrackedEntityAttribute().isUnique()){
+            if(programTrackedEntityAttribute != null && programTrackedEntityAttribute.getTrackedEntityAttribute().isUnique()){
                 if(value.getValue()==null || value.getValue().isEmpty()) {
                     continue;
                 }

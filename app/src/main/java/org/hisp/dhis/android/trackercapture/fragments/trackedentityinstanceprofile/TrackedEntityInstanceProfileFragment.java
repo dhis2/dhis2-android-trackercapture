@@ -34,7 +34,6 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -50,15 +49,14 @@ import org.hisp.dhis.android.sdk.controllers.GpsController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
-import org.hisp.dhis.android.sdk.persistence.models.Enrollment;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramRule;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramTrackedEntityAttribute;
-import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttribute;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityAttributeValue;
 import org.hisp.dhis.android.sdk.persistence.models.TrackedEntityInstance;
 import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.ui.adapters.SectionAdapter;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.DataEntryRowTypes;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.Row;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.dataentry.RunProgramRulesEvent;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.OnDetailedInfoButtonClick;
@@ -67,7 +65,6 @@ import org.hisp.dhis.android.sdk.ui.fragments.dataentry.HideLoadingDialogEvent;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.RefreshListViewEvent;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.RowValueChangedEvent;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.SaveThread;
-import org.hisp.dhis.android.sdk.utils.ScreenSizeConfigurator;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.trackercapture.R;
 
@@ -93,8 +90,7 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
 
     private boolean edit;
     private boolean editableDataEntryRows;
-    private boolean edit_icon;
-    private MenuItem editFormButton;
+
     private Map<String, List<ProgramRule>> programRulesForTrackedEntityAttributes;
     private TrackedEntityInstanceProfileFragmentForm form;
     private SaveThread saveThread;
@@ -133,10 +129,8 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
             saveThread.start();
         }
         saveThread.init(this);
-        editableDataEntryRows = false;
-        edit_icon = false;
         setHasOptionsMenu(true);
-
+        editableDataEntryRows = false;
     }
 
     @Override
@@ -148,33 +142,23 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(org.hisp.dhis.android.sdk.R.menu.menu_data_entry, menu);
-        editFormButton = menu.findItem(org.hisp.dhis.android.sdk.R.id.action_new_event);
+        final MenuItem editFormButton = menu.findItem(org.hisp.dhis.android.sdk.R.id.action_new_event);
         editFormButton.setEnabled(true);
-        editFormButton.setIcon(R.drawable.ic_save);
+        editFormButton.setIcon(R.drawable.ic_edit);
         editFormButton.getIcon().setAlpha(0xFF);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem) {
-
         if (menuItem.getItemId() == android.R.id.home) {
             doBack();
             return true;
         } else if (menuItem.getItemId() == org.hisp.dhis.android.sdk.R.id.action_new_event) {
             if (editableDataEntryRows) {
-                setEditableDataEntryRows(true);
-            } else {
                 setEditableDataEntryRows(false);
+            } else {
+                setEditableDataEntryRows(true);
             }
-            if(edit_icon)
-            {
-                editFormButton.setIcon(R.drawable.ic_save);
-            }
-            else
-            {
-                editFormButton.setIcon(R.drawable.ic_edit);
-            }
-            edit_icon=!edit_icon;
             editableDataEntryRows = !editableDataEntryRows;
             proceed();
             return true;
@@ -197,7 +181,6 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
                                 onDetach();
                                 //                            getFragmentManager().popBackStack();
                                 DhisController.hasUnSynchronizedDatavalues = true;
-                                proceed();
                                 getActivity().finish();
                             }
                         }
@@ -259,17 +242,15 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
             progressBar.setVisibility(View.GONE);
             listView.setVisibility(View.VISIBLE);
             form = data;
-            List<Row> rows = new ArrayList<>(form.getDataEntryRows());
-            List<TrackedEntityAttributeValue> tei_rows=new ArrayList<>(form.getTrackedEntityAttributeValues());
-            for (Row row : rows) {
-                if(row.getItemId().equals("Zgi47Dql2Ei") ||row.getItemId().equals("L2doMQ7OtUB")||row.getItemId().equals("Xp8fcfaGdfk"))
-                {
-                    row.setShouldNeverBeEdited(true);
-                }
-            }
             listViewAdapter.swapData(form.getDataEntryRows());
             programRuleFragmentHelper.mapFieldsToRulesAndIndicators();
-            initiateEvaluateProgramRules();
+            if (data.getDataEntryRows() != null && !data.getDataEntryRows().isEmpty()) {
+                listViewAdapter.swapData(data.getDataEntryRows());
+            }
+            if (data.getProgram().getProgramRules() != null &&
+                    !data.getProgram().getProgramRules().isEmpty()) {
+                initiateEvaluateProgramRules();
+            }
         }
     }
 
@@ -289,33 +270,12 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
     public void setEditableDataEntryRows(boolean editable) {
         listViewAdapter.swapData(null);
         List<Row> rows = new ArrayList<>(form.getDataEntryRows());
-
         //is that needed now ? :
-        if(editable)
-        {
-            for (Row row : rows) {
-
-
-                if(row.getItemId().equals("Zgi47Dql2Ei") ||row.getItemId().equals("L2doMQ7OtUB")||row.getItemId().equals("Xp8fcfaGdfk"))
-                {
-                    row.setShouldNeverBeEdited(true);
-                }
-                else
-                {
-                    row.setShouldNeverBeEdited(!editable);
-                }
-
+        for (Row row : rows) {
+            if (!row.isShouldNeverBeEdited()) {
+                row.setEditable(editable);
             }
-
         }
-        else
-        {
-            for (Row row : rows) {
-                row.setShouldNeverBeEdited(!editable);
-            }
-
-        }
-
         if (editable) {
             if (form.getTrackedEntityInstance().getLocalId() >= 0) {
                 originalTrackedEntityInstance = new TrackedEntityInstance(form.getTrackedEntityInstance());
@@ -337,8 +297,9 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
         }
         listViewAdapter.swapData(rows);
         listView.setAdapter(listViewAdapter);
-        initiateEvaluateProgramRules();
-
+        if (editable) {
+            initiateEvaluateProgramRules();
+        }
     }
 
     public void flagDataChanged(boolean changed) {
@@ -452,13 +413,13 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
         );
         for (TrackedEntityAttributeValue value : form.getTrackedEntityInstance().getAttributes()) {
             ProgramTrackedEntityAttribute programTrackedEntityAttribute = dataElements.get(value.getTrackedEntityAttributeId());
-            if (programTrackedEntityAttribute.getMandatory() && isEmpty(value.getValue())) {
+            if (programTrackedEntityAttribute != null && programTrackedEntityAttribute.getMandatory() && isEmpty(value.getValue())) {
                 if(!errors.containsKey(ErrorType.MANDATORY)){
                     errors.put(ErrorType.MANDATORY, new ArrayList<String>());
                 }
                 errors.get(ErrorType.MANDATORY).add(programTrackedEntityAttribute.getTrackedEntityAttribute().getName());
             }
-            if(programTrackedEntityAttribute.getTrackedEntityAttribute().isUnique()){
+            if(programTrackedEntityAttribute != null && programTrackedEntityAttribute.getTrackedEntityAttribute().isUnique()){
                 if(value.getValue()==null || value.getValue().isEmpty()) {
                     continue;
                 }
@@ -527,6 +488,18 @@ public class TrackedEntityInstanceProfileFragment extends DataEntryFragment<Trac
             if(dataEntryRow.getValidationError()!=null)
                 validationErrors.add(getContext().getString(dataEntryRow.getValidationError()));
         }
+
+        if(!TrackerController.validateUniqueValues(form.getTrackedEntityAttributeValueMap(), form.getTrackedEntityInstance().getOrgUnit())){
+            List<String> listOfUniqueInvalidFields = TrackerController.getNotValidatedUniqueValues(form.getTrackedEntityAttributeValueMap(), form.getTrackedEntityInstance().getOrgUnit());
+            String listOfInvalidAttributes = " ";
+            for(String value:listOfUniqueInvalidFields){
+                listOfInvalidAttributes += value + " ";
+            }
+            UiUtils.showErrorDialog(getActivity(), getContext().getString(org.hisp.dhis.android.trackercapture.R.string.error_message),
+                    String.format(getContext().getString(org.hisp.dhis.android.trackercapture.R.string.invalid_unique_value_form_empty), listOfInvalidAttributes));
+            return false;
+        }
+
         if (programRulesValidationErrors.isEmpty() && allErrors.isEmpty() && validationErrors.isEmpty()) {
             return true;
         } else {

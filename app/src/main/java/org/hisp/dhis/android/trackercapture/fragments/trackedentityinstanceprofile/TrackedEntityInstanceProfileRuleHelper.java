@@ -103,7 +103,7 @@ public class TrackedEntityInstanceProfileRuleHelper implements IProgramRuleFragm
                     parentFragment.getString(org.hisp.dhis.android.sdk.R.string.warning_hidefieldwithvalue),
                     dataElementNames);
             fragment.setValidationErrorDialog(validationErrorDialog);
-            if (parentFragment.isAdded()) {
+            if (parentFragment.isAdded() && parentFragment.isVisible()) {
                 fragment.getValidationErrorDialog().show(parentFragment.getChildFragmentManager());
             }
         }
@@ -152,7 +152,7 @@ public class TrackedEntityInstanceProfileRuleHelper implements IProgramRuleFragm
 
     @Override
     public void applyHideFieldRuleAction(ProgramRuleAction programRuleAction, List<String> affectedFieldsWithValue) {
-        fragment.getListViewAdapter().hideIndex(programRuleAction.getDataElement());
+        fragment.getListViewAdapter().hideIndex(programRuleAction.getTrackedEntityAttribute());
         if (fragment.containsValue(getDataElementValue(programRuleAction.getDataElement()))) {
             affectedFieldsWithValue.add(programRuleAction.getDataElement());
         }

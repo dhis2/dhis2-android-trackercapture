@@ -35,8 +35,8 @@ ext {
     minSdkVersion = 15
     compileSdkVersion = 23
     targetSdkVersion = 23
-    versionCode = 67
-    versionName = "0.5.8"
+    versionCode = 68
+    versionName = "0.5.9"
 
     configuration = [
             package          : "org.hisp.dhis.android.trackercapture",
@@ -45,8 +45,8 @@ ext {
             minSdkVersion    : 15,
             compileSdkVersion: 23,
             targetSdkVersion : 26,
-            versionCode      : 66,
-            versionName      : "0.5.8"
+            versionCode      : 67,
+            versionName      : "0.5.9"
     ]
 
     libraries = [

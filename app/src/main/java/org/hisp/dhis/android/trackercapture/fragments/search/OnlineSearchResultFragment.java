@@ -214,14 +214,20 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
         getAdapter().swapData(getTrackedEntityInstances());
     }
 
+    //@Sou TODo Reduce results to Max 5 do decrease download consume memory
     private Map<String, ProgramTrackedEntityAttribute> getProgramTrackedEntityAttributes(Program selectedProgram) {
         List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = selectedProgram.getProgramTrackedEntityAttributes();
         Map<String, ProgramTrackedEntityAttribute> attributeMap = new HashMap<>();
         for (ProgramTrackedEntityAttribute programTrackedEntityAttribute : programTrackedEntityAttributes) {
-            attributeMap.put(programTrackedEntityAttribute.getTrackedEntityAttributeId(), programTrackedEntityAttribute);
+            for(int i=0;i<5;i++)
+            {
+                attributeMap.put(programTrackedEntityAttributes.get(i).getTrackedEntityAttributeId(), programTrackedEntityAttributes.get(i));
+            }
+
+//            attributeMap.put(programTrackedEntityAttribute.getTrackedEntityAttributeId(), programTrackedEntityAttribute);
         }
         return attributeMap;
-    }
+}
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

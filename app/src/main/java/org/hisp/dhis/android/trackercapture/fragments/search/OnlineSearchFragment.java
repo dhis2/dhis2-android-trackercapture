@@ -372,7 +372,7 @@ public class OnlineSearchFragment extends Fragment implements View.OnClickListen
                 } else {
                     trackedEntityInstancesQueryResult = TrackerController.queryTrackedEntityInstancesDataFromServer(DhisController.getInstance().getDhisApi(), orgUnit, program, queryString, params);
                 }
-
+                Dhis2Application.trackedEntityInstancesQueryResult = trackedEntityInstancesQueryResult;
                 // showTrackedEntityInstanceQueryResultDialog(fragmentManager, trackedEntityInstancesQueryResult, orgUnit);
                 showOnlineSearchResultFragment(trackedEntityInstancesQueryResult, orgUnit, program, backNavigation);
                 return new Object();

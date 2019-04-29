@@ -104,8 +104,8 @@ public class OnlineSearchResultFragment extends Fragment implements AdapterView.
     }
 
     private List<TrackedEntityInstance> getTrackedEntityInstances() {
-        ParameterSerializible parameterSerializible = (ParameterSerializible) getArguments().getSerializable(EXTRA_TRACKEDENTITYINSTANCESSELECTED);
-        List<TrackedEntityInstance> trackedEntityInstances = parameterSerializible.getTrackedEntityInstances();
+        //ParameterSerializible parameterSerializible = (ParameterSerializible) getArguments().getSerializable(EXTRA_TRACKEDENTITYINSTANCESSELECTED);
+        List<TrackedEntityInstance> trackedEntityInstances = Dhis2Application.trackedEntityInstancesQueryResult;//parameterSerializible.getTrackedEntityInstances();
         return trackedEntityInstances;
     }
 

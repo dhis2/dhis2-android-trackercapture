@@ -349,11 +349,12 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                 savedInstanceState.getParcelable(STATE) != null) {
             mState = savedInstanceState.getParcelable(STATE);
         }
+        Program program = null;
         if (mState == null) {
             mState = new ProgramOverviewFragmentState();
             OrganisationUnit ou = MetaDataController.getOrganisationUnit(
                     fragmentArguments.getString(ORG_UNIT_ID));
-            Program program = MetaDataController.getProgram(
+            program = MetaDataController.getProgram(
                     fragmentArguments.getString(PROGRAM_ID));
             mState.setOrgUnit(ou.getId(), ou.getLabel());
             mState.setProgram(program.getUid(), program.getName());
@@ -361,10 +362,15 @@ public class ProgramOverviewFragment extends AbsProgramRuleFragment implements V
                     fragmentArguments.getLong(TRACKEDENTITYINSTANCE_ID, -1));
         }
         attachSpinner();
-        mSpinnerAdapter.swapData(MetaDataController.getProgramsForOrganisationUnit
+        List<Program> programs = MetaDataController.getProgramsForOrganisationUnit
                 (fragmentArguments.getString(ORG_UNIT_ID),
-                        ProgramType.WITH_REGISTRATION));
-
+                        ProgramType.WITH_REGISTRATION);
+        mSpinnerAdapter.swapData(programs);
+        for(int i = 0; i< programs.size();i++){
+            if(program != null && programs.get(i).getUid().equals(program.getUid())){
+                mSpinner.setSelection(i);
+            }
+        }
         onRestoreState(true);
     }
 

@@ -1,3 +1,6 @@
+# This project is now DEPRECATED
+The app is not supported anymore so there won't be new versions in the future. Moreover, any pending or future bug won't be fixed.
+
 # dhis2-android-trackercapture
 Android application for DHIS 2 for tracking of persons and things.
 
